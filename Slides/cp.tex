@@ -1,0 +1,384 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usetheme{Singapore}
+\usepackage{xcolor}
+\setbeamertemplate{footline}[frame number]
+
+%\usepackage{mathlist}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+
+\newtheorem{defi}{Définition}
+\newtheorem{theo}{Théorème}
+\newtheorem{coro}{Corollaire}
+\newtheorem{lem}{Lemme}
+
+%\usepackage{epic,eepic}
+%\usepackage{pstricks, pst-tree}
+
+\usepackage{times}
+
+\usepackage{ulem}
+%\usepackage{crayola}
+
+\usepackage{listings}
+%\topmargin=-0.6in
+\lstloadlanguages{C++}
+\lstset{language=C++}
+%%}
+
+%\usepackage{gnuplottex}
+% This variables allows to conditional generate the Gnuplot figures.
+%\def \gnuplotx {Generate the figures}
+
+\usepackage{graphicx}
+\usepackage{epstopdf}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bepsilon{\boldsymbol\epsilon}
+\def\bomega{\boldsymbol\xi}
+\def\aff{\operatorname{aff}}
+\def\cR{\mathcal{R}}
+
+\newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
+
+\title[CP]{Stochastic optimization\\Chance constrained programming}
+
+\author{Fabian Bastin\\\url{fabian.bastin@polymtl.ca}}
+
+\date{}
+
+\begin{document}
+
+%% AJOUTER DISCUSSION BIRGE ET LOUVEAUX P128
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Motivation}
+
+We consider the toy problem (taken from J. Linderoth)
+\begin{align*}
+\min_x\ & x_1 + x_2 \\
+\mbox{s.t. } & \xi_1 x_1 + x_2 \geq 7 \\
+& \xi_2 x_1 + x_2 \geq 4 \\
+& x_1, x_2 \geq 0,
+\end{align*}
+where $\xi_1 \sim U(1,4)$, $\xi_1 \sim U(1/3,1)$.
+
+\mbox{} 
+
+Instead of requiring that a constraint holds for all the scenarios, we can require a sufficiently large probability to satisfy a constraint.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Chance constraints}
+
+\begin{enumerate}
+\item 
+Separate chance constraints
+\begin{align*}
+P [ \xi_1x_1 + x_2 \geq 7 ] &\geq \alpha_1 \\
+P [ \xi_2x_1 + x_2 \geq 4 ] &\geq \alpha_2
+\end{align*}
+\item
+Joint (integrated) chance constraint
+\[
+P [ \xi_1x_1 + x_2 \geq 7 \cap \xi_2x_1 + x_2 \geq 4 ] \geq \alpha
+\]
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: joint chance constraints}
+
+\begin{align}
+P[(\xi_1, \xi_2) = (1,1)] &= 0.1 \\
+P[(\xi_1, \xi_2) = (2,5/9)] &= 0.4 \\
+P[(\xi_1, \xi_2) = (3,7/9)] &= 0.4 \\
+P[(\xi_1, \xi_2) = (4,1/3)] &= 0.1
+\end{align}
+
+\mbox{}
+
+Assume that $\alpha \in (0.8,0.9]$, and we have the joint constraint
+\[
+P [ \xi_1x_1 + x_2 \geq 7 \cap \xi_2x_1 + x_2 \geq 4 ] \geq \alpha
+\]
+
+\mbox{}
+
+We then have to satisfy constraints (2) and (3) and either (1) or (4).
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: graph}
+
+\begin{center}
+\includegraphics<1>[width=\textwidth,keepaspectratio]{graph.eps}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Properties}
+
+Feasible set
+\[
+K_1(\alpha) = \lbrace x \,|\, P[T(\xi)x \geq h(\xi)] \geq \alpha \rbrace
+\]
+$K_1(\alpha)$ is not necessarily convex.
+
+\mbox{}
+
+\begin{theorem}
+Suppose $T(\xi) = T$ is fixed, and $h(\xi)$ has a quasi-concave
+probability measure $P$. Then $K_1(\alpha)$ is convex for $0 \leq \alpha \leq 1$.
+\end{theorem}
+
+\mbox{}
+
+A function $P: D \rightarrow \mathcal{R}$ defined on a domain $D$ is quasi-concave if $\forall$ convex sets $U, V \subseteq D$, and $0 \leq \lambda \leq 1$,
+\[
+P[(1-\lambda)U+\lambda V] \geq \min \lbrace P[U], P[V] \rbrace.
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Quasi-concave probability distributions}
+
+\begin{itemize}
+\item 
+Uniform
+\[
+f(x) =
+\begin{cases}
+1/\mu(S), & x \in S \\
+0 & \mbox{otherwise},
+\end{cases}
+\]
+where $\mu(S)$ is the measure of $S$.
+\item 
+Exponential density
+\[
+f(x) = \lambda e^{-\lambda x}
+\]
+\item 
+Multivariate normal density:
+\[
+f(x) = \frac{1}{\sqrt{(2\pi)^n/2\det(\Sigma)}}e^{-\frac{1}{2}(x-\mu)'\Sigma (x-\mu)}
+\]
+\end{itemize}
+
+\mbox{}
+
+If you have such a density, you can
+\begin{itemize}
+\item
+use Lagrangian techniques
+\item
+use a reduced-gradient technique (see Kall \& Wallace, Section~4.1)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Single constraint: easy case}
+
+The situation in the single constraint case is somewhat more simple.
+
+\mbox{}
+
+Suppose again that $T_i (\xi) = T_i$ is constant. Then
+\[
+P[T_i x \geq h_i (\xi)] = F(T_i x) \geq \alpha
+\]
+so the deterministic equivalent is
+\[
+T_i x \geq F^{-1}(\alpha)
+\]
+\ldots linear constraint! The resulting problem is still linear.
+
+\mbox{}
+
+Recall that the inverse of the cdf is defined as
+\[
+F^{-1}(\alpha) = \min \lbrace x : F (x)  \geq \alpha \rbrace.
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Other ``solvable'' cases}
+
+Let $h(\xi) = h$ be fixed, $T(\xi) = (\xi_1, \xi_2,\ldots, \xi_n)$, with $\xi = (\xi_1, \xi_2,\ldots, \xi_n)$ a multivariate normal distribution with mean $\mu = (\mu_1, \mu_2,\ldots,\mu_n)$ and variance-covariance matrix $\Sigma$.
+Then
+\[
+K_1(\alpha) = \lbrace x \,|\, \mu' x \geq h + \Phi^{-1}(\alpha) \sqrt{ x' \Sigma x } \rbrace,
+\]
+where $\Phi$ is the standard normal cdf.
+
+\mbox{}
+
+$K_1(\alpha)$ is a convex set for $\alpha \geq 0.5$.
+
+\mbox{}
+
+It is possible to express it as a second order cone constraint:
+$$
+\| \Sigma^{1/2} x \|_2 \leq \frac{1}{\Phi^{-1}(\alpha)} (\mu' x - h)
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Second-order cone programming}
+
+A second-order cone program (SOCP) is a convex optimization problem of the form
+\begin{align*}
+\min_x \ & f^T x \\
+\mbox{s.t. } &
+\| A_i x + b_i \|_2 \leq c_i^T x + d_i,\ i = 1,\ldots,m \\
+& F x = g
+\end{align*}
+where $x \in \cR^n$, $f, c_i \in \cR^n$, $A_i \in \cR^{n_i \times n}$, $b_i \in \cR^{n_i}$, $d_i \in \cR$, $F \in \cR^{p \times n}$, and $g \in \cR^p$.
+
+\mbox{}
+
+SOCPs can be solved by interior point methods.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: robust portfolio optimization}
+
+(Taken from S. Boyd and J. Linderoth)
+
+Suppose we want to invest in $n$ assets, providing return rates $\beta_1, \beta_2,\ldots, \beta_n$.
+
+\mbox{}
+
+The $\beta_i$'s are random variables.
+Assume that they are following a multivariate normal distribution with means $\beta_i$ and covariance matrix $\Sigma$.
+
+\mbox{}
+
+Suppose that we want to ensure a return of at least $T$.
+We cannot guarantee it all the time, but we want it to occur most of the time.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: robust portfolio optimization (cont'd)}
+
+Let $x_i \geq 0$ the part of portfolio to invest in stock $i$.
+We have the constraints
+\begin{align*}
+& P\left[ \sum_{i = 1}^n \beta_i x_i \geq T  \right] \geq \alpha  \\
+& \sum_{i = 1}^n x_i \leq x \\
+& x_i \geq 0,\ i = 1,\ldots,n
+\end{align*}
+where $x$ is the total amount to invest.
+
+\mbox{}
+
+The chance constraint can be rewritten as
+\[
+\beta'x - \Phi^{-1}(\alpha) \sqrt{x'\Sigma x} \geq T.
+\]
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: robust portfolio optimization (cont'd)}
+
+We can also interpret $x_i$ as proportion of the portfolio (position of asset $i$), by normalizing $\| x \|_1$ to 1.
+$T$ is now the minimum return rate of the portfolio and $x$ is the portfolio allocation.
+
+\mbox{}
+
+We can add some constraints on the $x_i$ to ensure diversification. We summarize them by requiring $x \in \mathcal{C}$.
+
+\mbox{}
+
+A complete program can now be expressed as
+\begin{align*}
+\max_x \ & E[\beta'x] \\
+\mbox{s.t. } & P\left[ \beta' x \geq T \right] \geq \alpha  \\
+& \sum_{i = 1}^n x_i = 1 \\
+& x \in \mathcal{C}
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: loss constraint}
+
+Setting $T$ to 0 means that we want to ensure that we will no suffer from loss with some probability. Typicially, $\alpha$ is set to 0.9, 0.95, 0.99,\ldots
+
+\mbox{}
+
+The chanced-constraint can also be expressed as
+\[
+P\left[ \beta' x \leq 0 \right] \leq 1-\alpha = \gamma.
+\]
+
+\mbox{}
+
+We can also allow the sale of some parts of the portfolio by allowing some $x_i$ to be negative.
+\end{frame}
+
+\begin{frame}
+\frametitle{Numerical illustration}
+
+(Taken from S. Boyd -- \url{http://ee364a.stanford.edu/lectures/chance_constr.pdf})
+
+$n = 10$ assets, $\alpha = 0.95$, $\beta = 0.05$, $\mathcal{C} = \{x | x \succeq -0.1\}$
+
+\mbox{}
+
+Compare
+\begin{itemize}
+\item
+optimal portfolio
+\item
+optimal portfolio without loss risk constraint
+\item
+uniform portfolio $(1/n)\mathbf{1}$
+\end{itemize}
+
+\mbox{}
+
+\begin{center}
+\begin{tabular}{c|c|c}
+portfolio & $E[\beta'x]$ & $P[\beta' x \leq 0])$ \\
+\hline
+optimal & 7.51 & 5.0\% \\
+w/o loss constraint & 10.66 & 20.3\% \\
+uniform & 3.41 & 18.9\%
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Other situations}
+
+Usually very hard.
+
+\mbox{}
+
+Use a bounding approximation or sample average approximation (SAA).
+
+\end{frame}
+
+\end{document}

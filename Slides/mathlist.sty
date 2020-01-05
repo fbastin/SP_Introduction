@@ -1,0 +1,304 @@
+%%
+%% This is file `mathlist.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% mathlist.dtx  (with options: `style')
+%% 
+
+
+
+
+
+
+
+
+
+\def\version{0.2.0}
+\def\revision{2001/11/21}
+
+
+
+\ProvidesPackage{mathlist}[\revision, version \version]
+
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{eclbkbox}
+
+\RequirePackage{ifthen}
+
+\def\skipbefore{\vspace{3mm}}
+\def\skipafter{\vspace{1mm}}
+\def\skipafterbox{\vspace*{4mm}}
+
+
+\def\listname{List of }
+\def\defname{Definition}
+\def\defnames{Definitions}
+\def\assumptionname{Assumption}
+\def\assumptionnames{Assumptions}
+\def\lemmaname{Lemma}
+\def\lemmanames{Lemmas}
+\def\algoname{Algorithm}
+\def\algonames{Algorithms}
+\def\propname{Proposition}
+\def\propnames{Propositions}
+\def\mltheoremname{Theorem}
+\def\mltheoremnames{Theorems}
+\def\mlcorollaryname{Corollary}
+\def\mlcorollarynames{Corollaries}
+
+\DeclareOption{french}{
+\def\listname{Liste des }
+\def\defname{D\'efinition}
+\def\defnames{D\'efintions}
+\def\assumptionname{Hypoth\`ese}
+\def\assumptionnames{Hypoth\`eses}
+\def\lemmename{Lemme}
+\def\lemmenames{Lemmes}
+\def\algoname{Algorithme}
+\def\algonames{Algorithmes}
+\def\mltheoremname{Th\'eor\`eme}
+\def\mltheoremnames{Th\'eor\`emes}
+\def\mlcorollaryname{Corollaire}
+\def\mlcorollarynames{Corollaires}
+}
+
+\DeclareOption{frenchb}{\ExecuteOptions{french}}
+
+\ProcessOptions
+
+
+
+\def\ait{\mathbb{A}}
+\def\bit{\mathbb{B}}
+\def\cit{\mathbb{C}}
+\def\dit{\mathbb{D}}
+\def\eit{\mathbb{E}}
+\def\fit{\mathbb{F}}
+\def\git{\mathbb{G}}
+\def\hit{\mathbb{H}}
+\def\iit{\matbbb{I}}
+\def\jit{\mathbb{J}}
+\def\kit{\mathbb{k}}
+\def\lit{\mathbb{L}}
+\def\mit{\mathbb{M}}
+\def\nit{\mathbb{N}}
+\def\oit{\mathbb{O}}
+\def\pit{\mathbb{P}}
+\def\qit{\mathbb{Q}}
+\def\rit{\mathbb{R}}
+\def\sit{\mathbb{S}}
+\def\tit{\mathbb{T}}
+\def\uit{\mathbb{U}}
+\def\vit{\mathbb{V}}
+\def\wit{\mathbb{W}}
+\def\xit{\mathbb{X}}
+\def\yit{\mathbb{Y}}
+\def\zit{\mathbb{Z}}
+
+\newcommand{\seq}[2][n]{#2_{0},\ldots,\,#2_{#1}}
+
+%% a framed version of minipage
+\newsavebox{\fmbox}
+\newenvironment{fmpage}[1]
+  {\begin{lrbox}{\fmbox}\begin{minipage}{#1}}
+  {\end{minipage}\end{lrbox}\fbox{\usebox{\fmbox}}}
+
+
+\def\mathstyle#1{%
+\def\nameofcounter{#1}    %% counter's name
+                          %% environment
+{\@ifundefined{chapter}
+{\newcounter{\nameofcounter}}
+{\newcounter{\nameofcounter}[chapter]}
+}
+\setcounter{\nameofcounter}{0}
+}
+
+\def\numerote#1{%
+\@ifundefined{chapter}%
+{\arabic{#1}}%
+{\thechapter.\arabic{#1}}%
+}
+
+\def\mathl#1#2#3{
+ \if@twocolumn
+   \@restonecoltrue\onecolumn
+ \else
+   \@restonecolfalse
+ \fi
+ \@ifundefined{chapter}
+   {\section*{#3
+              \@mkboth{\MakeUppercase#3}%
+                      {\MakeUppercase#3}%
+   }\@starttoc{#2}}%
+   {\chapter*{#3
+              \@mkboth{\MakeUppercase#3}%
+                      {\MakeUppercase#3}%
+   }\@starttoc{#2}}
+   \if@restonecol\twocolumn\fi  % restaure le mode 2 colonnes si nécessaire
+}
+
+
+
+
+\mathstyle{assumption}
+\renewcommand{\theassumption}{\numerote{assumption}}
+
+\newenvironment{assumption}[1][]{%
+\refstepcounter{assumption}%
+\addcontentsline{loh}{assumption}{\protect\numberline{\theassumption}#1}%
+ \skipbefore%
+ \par\noindent%
+ \ifthenelse{\equal{#1}{}}{\fbox{\textbf{\assumptionname\ \theassumption}#1}}
+ {\fbox{\textbf{\assumptionname\ \theassumption} #1}}
+\skipafter
+ \par \it
+}
+{
+\par
+}
+
+\def\listofassumptions{\mathl{assumptions}{loh}{\listname \assumptionnames}}
+\newcommand*\l@assumption{\@dottedtocline{1}{1em}{2.5em}}
+
+
+\mathstyle{mllemma}
+\renewcommand{\themllemma}{\numerote{mllemma}}
+
+\newenvironment{mllemma}[1][]{%
+\refstepcounter{mllemma}%
+\addcontentsline{lol}{mllemma}{\protect\numberline{\themllemma} #1}%
+ \skipbefore%
+ \par\noindent%
+ \ifthenelse{\equal{#1}{}}{\fbox{\textbf{\mllemmaname\ \themllemma}#1}}
+ {\fbox{\textbf{\mllemmaname\ \themllemma} #1}}
+\skipafter
+ \par \it
+}
+{\par}
+
+\def\listofmllemmas{\mathl{mllemmas}{lol}{\listname \mllemmanames}}
+\newcommand*\l@mllemma{\@dottedtocline{1}{1em}{2.5em}}
+
+
+\mathstyle{algo}
+\def\thealgo{\numerote{algo}}
+
+\newenvironment{algo}[1]{
+\refstepcounter{algo}%
+\addcontentsline{lma}{algo}{\protect\numberline{\thealgo}#1}%
+ \skipbefore%
+\begin{breakbox}
+ \par\noindent%
+ \ifthenelse{\equal{#1}{}}{\textbf{\algoname\ \thealgo}}%
+ {\textbf{\algoname\ \thealgo:} #1}
+}
+{
+\end{breakbox}
+\skipafterbox
+}
+
+\def\listofalgos{\mathl{algos}{lma}{\listname \algonames}}
+\newcommand*\l@algo{\@dottedtocline{1}{1em}{2.5em}}
+
+
+\mathstyle{defn}
+\def\thedefn{\numerote{defn}}
+
+\newenvironment{defn}[1]{%
+\refstepcounter{defn}%
+\addcontentsline{lmd}{defn}{\protect\numberline{\thedefn}#1}%
+\skipbefore%
+\begin{breakbox}
+ \par\noindent%
+ \textbf{\defname\ \thedefn:} #1\\
+}
+{
+\end{breakbox}
+\skipafterbox
+}
+
+\def\listofdefns{\mathl{defns}{lmd}{\listname \defnames}}
+\newcommand*\l@defn{\@dottedtocline{1}{1em}{2.5em}}
+
+
+\mathstyle{proposition}
+\def\theproposition{\numerote{proposition}}
+
+\newenvironment{proposition}[1][]{%
+\refstepcounter{proposition}%
+\addcontentsline{lmp}{proposition}{\protect\numberline{\theproposition}#1}
+\skipbefore%
+\begin{breakbox}
+ \par\noindent%
+ \textbf{\propname\ \theproposition:} #1%
+}
+{
+\end{breakbox}
+\skipafterbox
+}
+
+\def\listofpropositions{\mathl{propositions}{lmp}{\listname \propnames}}
+\newcommand*\l@proposition{\@dottedtocline{1}{1em}{2.5em}}
+
+
+\mathstyle{mltheorem}
+\def\themltheorem{\numerote{mltheorem}}
+
+\newenvironment{mltheorem}[1][]{%
+\refstepcounter{mltheorem}%
+\addcontentsline{lmt}{mltheorem}{\protect\numberline{\themltheorem}#1}%
+\skipbefore%
+\begin{breakbox}
+\par\noindent%
+\textbf{\mltheoremname\ \themltheorem} #1%
+\par
+}
+{
+\end{breakbox}
+\skipafterbox
+}
+
+\def\listofmltheorems{\mathl{mltheorems}{lmt}{\listname \mltheoremnames}}
+\newcommand*\l@mltheorem{\@dottedtocline{1}{1em}{2.5em}}
+
+\newenvironment{mlcorollary}[1][]{%
+\refstepcounter{mltheorem}%
+\addcontentsline{lmt}{mltheorem}{\protect\numberline{\themltheorem}#1}%
+\skipbefore%
+\begin{breakbox}
+\par\noindent%
+\textbf{\mlcorollaryname\ \themltheorem} #1%
+\par
+}
+{
+\end{breakbox}
+\skipafterbox
+}
+
+%%% Old appearance
+%%\newenvironment{algo}[1]
+%%{
+%%\refstepcounter{algo}%
+%%\addcontentsline{lmd}{algo}{\protect\numberline{\thealgo}#1}
+%% \skipbefore
+%% \par\noindent
+%% \rule[0mm]{\linewidth}{0.6mm}\\
+%% \textbf{\algoname\ \thealgo:} #1
+%% \rule[0.5\baselineskip]{\linewidth}{0.1mm}
+%% \par
+%%}
+%%{
+%%\par\noindent
+%% \rule[0.1\baselineskip]{\linewidth}{0.1mm}
+%% \par
+%% \skipafter}
+
+
+\endinput
+%%
+%% End of file `mathlist.sty'.

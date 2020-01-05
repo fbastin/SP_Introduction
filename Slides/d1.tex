@@ -1,0 +1,259 @@
+\begin{frame}
+\frametitle{Clear enough?}
+
+If we consider the farmer problem example, is the recourse complete, relatively complete, simple?
+
+\end{frame}
+
+begin{frame}
+\frametitle{Exercice 2}
+
+%(Birge et Louveaux, page 102)
+Soit le programme de seconde étape défini par
+\begin{align*}
+\min_y\ & 2y_1+y_2\\
+\mbox{t.q. } & y_1 + y_2 \geq 1-x_1,\\
+& y_1 \geq \bxi - x_1-x_2,\\
+& y_1, y_2 \geq 0.
+\end{align*}
+Montrez que ce programme a un recours complet si $\bxi$ est
+d'espérance finie.
+
+\mbox{}
+
+Recours complet? Il faut que pour tout $z \in \rit^{2}$, on puisse
+trouver $y \geq 0$
+t.q. $Wy = z$. Le recours complet est une propriété de $W$, mais vaut
+$W$? De manière équivalente, on veut pos$W = \rit^2$.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 4 - suite}
+	
+	Petite difficulté: le problème n'est pas sous forme standard.
+	L'idée est en fait de montrer pour pour tout $z \in \rit^2$, il existe
+	$y \geq 0$ t.q $Wy \geq z$. L'équivalence avec pos$W$ ne fonctionne
+	plus. Sauf si nous nous ramenons à la forme standard!
+	
+	\mbox{}
+	
+	Sous forme standard, le problème devient
+	\begin{align*}
+	\min_y\ & 2y_1+y_2\\
+	\mbox{t.q. } & y_1 + y_2 - s_1 = 1-x_1,\\
+	& y_1 - s_2 = \bxi - x_1-x_2,\\
+	& y_1, y_2 \geq 0,\\
+	& s_1, s_2 \geq 0,
+	\end{align*}
+	et il y a recours complet si pour tout $z \in R^2$, il existe $y$, $s
+	\geq 0$ vérifiant
+	\[
+	Wy = z.
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 2 - suite}
+	
+	Explicitons $Wy = z$:
+	\[
+	\begin{pmatrix}
+	1 & 1 & -1 & 0 \\
+	1 & 0 & 0  & -1
+	\end{pmatrix}
+	\begin{pmatrix} y_1 \\ y_2 \\ s_1 \\ s_2 \end{pmatrix} =
+	\begin{pmatrix} z_1 \\ z_2 \end{pmatrix}.
+	\]
+	Autrement dit, nous devons trouver $y_1$, $y_2$, $s_1$, $s_2 \geq 0$
+	tel que
+	\begin{align*}
+	y_1 + y_2 - s_1 &= z_1. \\
+	y_1 - s_2 &= z_2.
+	\end{align*}
+	
+	La deuxième équation nous donne la possibilité de prendre
+	\[
+	\begin{cases}
+	y_1 = z_2,\ s_2 = 0 & \mbox{si } z_2 \geq 0,\\
+	y_1 = 0,\ s_2 = -z_2 & \mbox{sinon}.\\
+	\end{cases}
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 2 - suite}
+	
+	Nous avons aussi
+	\[
+	y_2 - s_1 = z_1 - y_1.
+	\]
+	En utilisant nos précédents choix, nous pouvons prendre pour $y_2$ ce
+	qui suit. Si $z_2 \geq 0$, $y_2 - s_1 = z_1 - z_2$, et nous prenons
+	\[
+	\begin{cases}
+	y_2 = z_1-z_2,\ s_1 = 0 & \mbox{si } z_1-z_2 \geq 0,\\
+	y_2 = 0,\ s_2 = z_2-z_1 & \mbox{sinon}.\\
+	\end{cases}
+	\]
+	De même, si $z_2 \leq 0$, $y_2 - s_1 = z_1$, et il suffit de choisir
+	\[
+	\begin{cases}
+	y_2 = z_1,\ s_1 = 0 & \mbox{si } z_1 \geq 0,\\
+	y_2 = 0,\ s_2 = -z_1 & \mbox{sinon}.\\
+	\end{cases}
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 2 - suite}
+	
+	Par conséquent, quel que soit $z$, on peut trouver une solution
+	non-négative au système
+	\[
+	W\begin{pmatrix} y \\ s \end{pmatrix} = z,
+	\]
+	i.e. le recours est complet!
+	
+	%\mbox{}
+	
+	%Pourquoi exiger $\bxi$ d'espérance finie?
+	
+	%\mbox{}
+	
+	%Oups,\ldots pas utile à ce stade (copie de l'erreur dans l'énoncé
+	%repris de Birge et Louveaux page 102), puisque le recours complet
+	%n'est une propriété que de $W$, fixe.
+	La condition d'espérance finie sert surtout à garantir que le problème
+	de seconde étape est bien défini.
+	On peut en effet montrer que $\mathcal{Q}(x)$ n'est pas fini si
+	$\bxi$ n'est pas d'espérance finie (l'expression de $\mathcal{Q}(x)$
+	fait intervenir $\bxi$).
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 3}
+	
+	Considérons le programme de deuxième défini comme suit:
+	\begin{align*}
+	\min_y\ & 2y_1+y_2\\
+	\mbox{t.q. } & y_1 - y_2 \leq 2-\bxi x_1,\\
+	& y_2 \leq x_2,\\
+	& y_1, y_2 \geq 0.
+	\end{align*}
+	Trouvez $K_2(\bxi)$ et $K_2$ pour:
+	\begin{enumerate}
+		\item
+		$\bxi \sim U[0,1]$.
+		\item
+		$\bxi \sim \mbox{Poisson}(\lambda),\ \lambda > 0$.
+	\end{enumerate}
+	Quelles propriétés attendez-vous pour $K_2$?
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 3 - suite}
+	
+	Nous devons donc déterminer des ensembles réalisables.
+	
+	\mbox{}
+	
+	Remarquons tout d'abord que comme $y_2 \geq 0$ et $y_2 \leq x_2$, nous
+	devons avoir $x_2 \geq 0$.
+	
+	\mbox{}
+	
+	Utilisons la contrainte
+	\[
+	y_1 - y_2 \leq 2-\bxi x_1.
+	\]
+	Comme $y_2 \leq x_2$, nous avons $y_1 \leq 2-\bxi x_1 + x_2$, et tout
+	$y_1$ satisfaisant cette inégalité conviendra. Le
+	problème est donc rélisable si et seulement si $2-\bxi x_1 + x_2 \geq 0$.
+	
+	Il suit que
+	\begin{align*}
+	K_2(\xi) &= \lbrace x = (x_1, x_2)^T \,|\, x_2 \geq 0, \xi x_1 \leq
+	2+x_2 \rbrace \\
+	&= \lbrace  x = (x_1, x_2)^T \,|\, x_2 \geq \max(0, \xi x_1 -2 ) \rbrace.
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 3 - Suite}
+	
+	Pour les distributions considérées, $E[\xi]$ et $E[\xi^2]$ existent et
+	sont finies. Il suit que
+	\[
+	K_2 = K_2^P = \cap_{\xi \in \Xi} K_2(\xi).
+	\]
+	
+	\mbox{}
+	
+	Si $\bxi \sim U[0,1]$, $\xi \leq 1$, et $\xi x_1 \leq 2 + x_2$ si $x_1
+	\leq 2 + x_2$. Autrement dit, $K_2(\xi) \subseteq K_2(1)$, et
+	\[
+	K_2 = \lbrace x \,|\, x_2 \geq 0, x_1 \leq 2 + x_2 \rbrace.
+	\]
+	
+	\mbox{}
+	
+	Si $\bxi \sim \mbox{Poisson}(\lambda)$, $\xi = 0, 1,\ldots,$, de sorte
+	que $\xi x_1$ n'est pas borné supérieurement, sauf si $x_1 \leq
+	0$. Dès lors,
+	\[
+	K_2 = \lbrace x \,|\, x_1 \leq 0, x_2 \geq 0 \rbrace.
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exercice 3 - Suite}
+	
+	Interprétation. Toute décision de première étape doit satisfaire
+	$x_1$, $x_2 \geq 0$, par conséquent, si $\bxi \sim U[0,1]$,
+	\[
+	K_1 \cap K_2 \subseteq \lbrace x \,|\, x_1, x_2 \geq 0, x_1 \leq 2+x_2
+	\rbrace,
+	\]
+	et si $\bxi \sim \mbox{Poisson}(\lambda)$,
+	\[
+	K_1 \cap K_2 \subseteq \lbrace x \,|\, x_1 = 0, x_2 \geq 0 \rbrace.
+	\]
+	Nous pouvons espérer un recours relativement complet dans le premier
+	cas (cela dépend de $K_1$), mais le deuxième se présente assez mal!
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Recourse function}
+	
+	\begin{itemize}
+		\item
+		The ease of resolution depends on the properties of $\mathcal{Q}(x)$, and therefore should be studied! (See also Kall and Wallace, Section~1.4).
+		\item
+		If the duality equality holds,
+		\[
+		v(z) = \min_{y \in \rit^p} \lbrace q(\omega)^Ty \ |\ Wy = z \rbrace
+		= \max_{t \in \rit^m} \lbrace z^Tt \ |\ W^Tt \leq q \rbrace.
+		\]
+		\item
+		Let $\Lambda = \lbrace \lambda_1, \lambda_2, \ldots,
+		\lambda_{|\Lambda|}\rbrace$ be the set of extremal points of $\lbrace t \in \rit^m \ |\ W^Tt \leq q\rbrace$.
+		\begin{itemize}
+			\item
+			Each extremal point $\lambda_k$ is potentially an optimal solution of the linear program.
+			\item
+			By the fundamental theorem of linear programming, if there exists an optimal solution, one of the extremal point is an optimal solution, therefore
+			\[
+			v(z) = \max_{k=1,\ldots,|\Lambda|} z^T\lambda_k,\quad z \in \rit^m.
+			\]
+		\end{itemize}
+	\end{itemize}
+\end{frame}

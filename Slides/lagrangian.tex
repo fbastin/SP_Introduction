@@ -1,0 +1,901 @@
+\documentclass[french]{beamer}
+
+\usetheme{Warsaw}
+
+\usepackage[french]{mathlist}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+
+\newtheorem{defi}{Définition}
+\newtheorem{theo}{Théorème}
+\newtheorem{coro}{Corollaire}
+\newtheorem{lem}{Lemme}
+
+\usepackage{epic,eepic}
+\usepackage{pstricks, pst-tree}
+
+\usepackage{epstopdf}
+\usepackage{auto-pst-pdf}
+
+\usepackage{times}
+
+\usepackage{ulem}
+
+\usepackage{listings}
+%\topmargin=-0.6in
+\lstloadlanguages{C++}
+\lstset{language=C++}
+%%}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bomega{\boldsymbol\omega}
+\def\aff{\operatorname{aff}}
+\def\cS{\mathcal{S}}
+\def\cX{\mathcal{X}}
+
+\title[Stochastic Lagrangian]{Stochastic programming\\Methods based of the stochastic program Lagrangian}
+
+\author[Fabian Bastin]{Fabian Bastin\\\url{fabian.bastin@cirrelt.ca}\\Université de Montréal -- CIRRELT}
+
+\date{}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Motivation}
+
+{\red Reference}: Birge and Louveaux, Sections~3.4, 5.8 and 6.4.
+
+\mbox{}
+
+We consider the general {\blue two-stage nonlinear program}
+\begin{align*}
+\inf z\ &= f^1(x) + \mathcal{Q}(x) \\
+\mbox{s.t. } & g_i^1(x) \leq 0,\ i = 1,\ldots,m_1,
+\end{align*}
+where $\mathcal{Q}(x) = E_{\bxi}[Q(x,\xi)]$, and
+\begin{align*}
+Q(x,\xi) = \inf\ & f^2(y(\xi),\xi) \\
+\mbox{t.q. } & b_i^2(x,\xi) + g_i^2(y(\xi), \xi) \leq 0,\ i = 1,\ldots,m_2.
+\end{align*}
+
+We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdot,\xi)$ are continuous in the first argument for any given $\xi$, and measurable in $\xi$ for any fixed first argument.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Properties - assumptions}
+
+We can extend the definitions of $K_1$ and $K_2$.
+\begin{align*}
+K_1 &= \lbrace x \,|\, g_i^1(x) \leq 0,\ i = 1,\ldots,m_1 \rbrace,\\
+K_2(\xi) &= \lbrace x \,|\, \exists y(\xi) \mbox{ t.q. } b_i^2(x,\xi) +
+g_i^2(y(\xi),\xi) \leq 0,\ i = 1,\ldots,m_2 \rbrace,\\
+K_2 &= \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace.
+\end{align*}
+
+{\blue Assumptions}.
+\begin{enumerate}
+\item \mbox{\red Convexity}.
+ The function $f^1$ is convex on $\rit^{n_1}$, $g_i^1$ is convex on $\rit^{n_1}$ ($i =
+  1,\ldots,m_1$), $f^2(\cdot,\xi)$ is convex on $\rit^{n_2}$ for all $\xi \in \Xi$, $g_i^2(\cdot,\xi)$ is convex on $\rit^{n_2}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$, and $b_i^2(\cdot, \xi)$ is convex on $\rit^{n_1}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$.
+\item \mbox{\red Slater condition}
+If $\mathcal{Q}(x) < \infty$, for almost every (a.e.) $\xi \in \Xi$, $\exists$ some $y(\xi)$ s.t. $b_i^2(x, \xi) + g_i^2(y(\xi), \xi) < 0$ ($i = 1,\ldots,m_2)$.
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convexity}
+
+Slater condition is a {\blue regularity} condition allowing to apply the KKT conditions.
+
+\mbox{}
+
+\begin{theorem}
+Under assumptions 1 and 2, the recourse function $Q(x,\xi)$ is a convex function in $x$ for all $\xi \in \Xi$.
+\end{theorem}
+
+\begin{theorem}
+If the recourse feasible set (i.e. in $y$, for given $\xi$) is bounded for any $x \in \rit^{n_1}$, then the function $Q(x,\xi)$ is lower semi-continuous in $x$ for all $\xi \in \Xi$.
+\end{theorem}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Lower semi-continuity}
+
+We say that a function $f$ is {\blue lower semi-continuous in $x_0$} if for every $\varepsilon > 0$, $\exists$ a neighborhood $U$ of $x_0$ such that $f(x) > f(x_0) - \varepsilon$ for all $x \in U$.
+Equivalently
+\[
+    \liminf_{x \to x_{0}} f(x) \geq f(x_{0}),
+\]
+where
+\[
+    \liminf_{x \to a} f(x) = \lim_{\varepsilon \to 0} \inf \{ f(x) : x
+    \in \mbox{dom}(f) \cap B(a;\varepsilon) \backslash \{a\} \}.
+\]
+
+\mbox{}
+
+The function $f$ is {\blue lower semi-continuous} if it is lower semi-continuous in any point in its domain.
+
+\mbox{}
+
+A function is lower semi-continuous iff $\lbrace x\in X : f(x) > \alpha \rbrace$ is an open set for every  $\alpha \in \rit$, or, in a similar way, $\lbrace x\in X : f(x) \leq \alpha \rbrace$ is a closed set for every $\alpha \in \rit$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convexity (cont'd)}
+
+\begin{corollary}
+The expected recourse function $\mathcal{Q}(x)$ is a convex function in $x$.
+\end{corollary}
+
+\begin{corollary}
+The feasible set $K_2 = \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace$ is closed and convex.
+\end{corollary}
+
+\begin{corollary}
+If the recourse feasible set if bounded for any $x \in \rit^{n_1}$, $\mathcal{Q}$ is a lower semi-continuous function.
+\end{corollary}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Solution: existence}
+
+\begin{theorem}
+If the recourse feasible set is bounded for any $x \in \rit^{n_1}$, $K_1$ is bounded, $f^1$ is continuous, $g_i^1$ and $g_i^2$ are continuous for every $i$, and $K_1 \cap K_2 \ne \emptyset$,
+then the nonlinear stochastic two-stage program has an optimal solution and the infimum is reached.
+\end{theorem}
+
+\begin{theorem}
+If it exists a $x$ such that $x \in ri(\mbox{dom}(f^1(x))$, $x \in ri(\mbox{dom}(\mathcal{Q}(x)))$ and $g_i^1(x) < 0$ ($i = 1,\ldots,m_1$), then $x^*$ is optimal iff $x^* \in K_1$ and $\exists\, \lambda_i^* \geq 0$ ($i = 1,\ldots,m$), such that $\lambda_i^*g_i^1(x^*)
+= 0$ ($i = 1,\ldots,m$), and
+\[
+0 \in \partial f^1(x^*) + \partial \mathcal{Q}(x^*) +
+\sum_{i=1}^{m_1}\lambda_i^* \partial g_i^1(x^*).
+\]
+\end{theorem}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Relative interior}
+
+The {\red relative interior} of a set $S$, denoted by $ri(S)$), is defined as its interior within the affine envelop of $S$.
+In other words
+\[
+ri(S) = \lbrace x \in S \,|\, \exists\ \varepsilon > 0, (B_{\varepsilon}(x)
+\cap \aff(S)) \subseteq S \rbrace,
+\]
+where $\aff(S)$ is the {\red affine envelop} of $S$, and $B_{\varepsilon}(x)$
+is a ball of radius ${\varepsilon}$ centered at $x$.
+Any metric can be used for the ball construction: all define the same relative interior.
+
+\mbox{}
+
+The {\red affine envelop} $\aff(S)$ of $S$ is the set of all affine combinations of elements of $S$, i.e.
+\[
+    \operatorname{aff} (S)=\left\lbrace \sum_{i=1}^k \alpha_i x_i \bigg|
+      x_i\in S, \, \alpha_i\in \rit, \, \sum_{i=1}^k \alpha_i=1,
+      k=1, 2, \dots\right\rbrace. 
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Basic principle of Lagrangian approach}
+
+\begin{itemize}
+\item
+Problem: classical nonlinear methods assume that the (sub-)gradients of $\mathcal{Q}$ are available and cheap to obtain.
+Not the case here.
+\item
+Link the first and second stages in order to avoid optimization subproblems when building search directions.
+\end{itemize}
+
+\mbox{}
+
+Consider the stochastic problem under the form
+\begin{align*}
+\inf\ & z = f^1(x) + E_{\bxi}[f^2(y(\xi),\xi)]\\
+\text{s.t. }& g_i^1(x) \leq 0,\ i=1,\ldots{},m_1,\\
+& b_i^2(x,\xi)+g_i^2(y(\xi),\xi) \leq 0, i=1,\ldots{},m_2\ a.s,
+\end{align*}
+where \textit{a.s.} means almost surely.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Basic principle of Lagrangian approach (cont'd)}
+
+Let $(\lambda, \pi)$ be a vector of (dual) multipliers associated to the constraints.
+We can form a dual problem as follows:
+\[
+\max_{\pi(\xi) \geq 0} w = \theta(\pi),
+\]
+where
+\begin{align*}
+\theta(\pi) = \inf_{x, {\bf y}}\ & f^1(x)+E_{\bxi} [f^2(y(\xi),\xi)] + \\
+& E_{\xi}\left[\sum_{i=1}^{m_2} \pi_i(\xi) \left( b_i^2(x,\xi) +
+  g_i^2(y(\xi), \xi) \right) \right] \\
+\text{s.t. } & g_i(x) \leq 0, i=1,\ldots{},m_1.
+\end{align*}
+
+We can see that we only consider the dual based on the second-stage constraints (linking first and second stages).
+We will establish some duality properties in case of finite distribution.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Duality}
+
+\begin{theorem}
+We assume that all the functions of the stochastic program are convex,
+and there exists a finite optimal value, as well as a point strictly satisfying all the constraints.
+Assume moreover that the support of $\bxi$ is finite.
+
+\mbox{}
+
+Then $z \geq w$ for all $x, y_1,\ldots{},y_S$ feasible in the primal formulation and $\pi_1,\ldots{},\pi_S$ feasible in the dual formulation.
+
+\mbox{}
+
+Moreover, their optimal values coincide: $z^* = w^*$.
+\end{theorem}
+
+\mbox{}
+
+We thus assume from now that {\red $\Xi$ is finite}, and we will describe some procedures exploiting the Lagrangian function.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Basic Lagrangian dual ascent method}
+
+Assumption: the dual problem always has a unique solution.
+
+\begin{algo}{Lagrangian dual ascent method}
+\begin{description}
+\item[Step 0.] Let $\pi^0 \geq 0$, $\nu = 0$.
+\item[Step 1.]
+Given $\pi = \pi^{\nu}$ in the dual problem, consider the solution
+$(x^{\nu}, y_1^{\nu},\ldots{},y_S^{\nu})$.
+For $s = 1, \ldots{}, S$, define $\hat{\pi}_i^s$ as
+\[
+\hat{\pi}_i^s =
+\begin{cases}
+0 \mbox{ if }\pi_i^{\nu,s} = 0\text{ and }b_i^2(x^{\nu},s) +
+g_i^2(y_s^{\nu},s) \leq 0,\\
+b_i^2(x^{\nu},s) + g_i^2(y_s^{\nu},s) \mbox{ otherwise.}
+\end{cases}
+\]
+If $\hat{\pi}^s = 0$ for all $s$, stop.
+\item[Step 2.]
+Let $\lambda^\nu$ maximizing $\theta(\pi^{\nu}+\lambda\hat{\pi})$ on $\pi^{\nu}+\lambda\hat{\pi} \geq 0,\ \lambda \geq 0$.
+Set $\pi^{\nu+1} = \pi^{\nu} + \lambda^{\nu}\hat{\pi}$, $\nu = \nu+1$.
+Return to Step 1.
+\end{description}
+\end{algo}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Properties - convergence}
+
+\begin{itemize}
+\item
+Under the assumption of unicity of dual solution, we can show that this algorithm always produces an {\blue ascent direction} in $\theta$.
+\item
+Either the algorithm converges to an optimal solution, or, assuming a bounded set of optimal solutions, it produces an infinite sequence where all limit points are optimal.
+\item
+Good performance if the number of dual iterations is small compared to the number of function evaluations that would be required by solving the original problem directly.
+\item
+Solving the dual program may be time-consuming, but should nevertheless be easier than solving the original problem directly, as the constraints linking the two stages (i.e. involving $x$ and $y(\xi)$) now appear in the objective.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Another approach: scenarios}
+
+As $\Xi$ is finite, we can consider that $S$ scenarios exist, and we can link a non-anticipative decision $\hat{x}$ and the decisions of the scenario $s$ with the terms $(\hat{x}-x_k)$ in the objective function.
+
+\mbox{}
+
+Consider the general problem
+\begin{align*}
+\inf_{x \in \mathcal{N}}\ & E \left[ \sum_{t=0}^T f_{t+1}(\xi, x^t(\xi),
+x_{t+1}(\xi)) \right], \\
+\mbox{s.t. } & x_t(\xi) \in X_t(\xi) \mbox{ a.s.},
+\end{align*}
+where $x_t$ is the decision at stage $t$, and $x^t$ is the decisions history at stage $t$, i.e. $x^t = \lbrace x_1,\ldots, x_t \rbrace$.
+$\mathcal{N}$ designs the close linear subspace of nonanticipative processes.
+Denoting $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection of events subsets, with the probability measure associated to $\bxi$).
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Scenarios tree}
+
+Conceptually, the sequence of random events can be organized in a tree.
+There are as many leaves as scenarios.
+\begin{center}
+%\begin{footnotesize}
+\scalebox{0.45}{
+\pstree[treemode=D]{\TC}{
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $1$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $2$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $3$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $4$}}}}
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $5$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $6$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $7$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $8$}}}}
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $9$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $10$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $11$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $12$}}}}
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $13$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $14$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $15$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $16$}}}}
+}
+}
+%\end{footnotesize}
+\end{center}
+
+The scenarios are not necessarily equiprobable, the variables can be correlated,\ldots
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nonanticipativity}
+
+We had to enforce nonanticipativity as we have created copies of the variables at each stage.
+
+\mbox{}
+
+Graphically:
+
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+%\begin{footnotesize}
+\hspace*{1cm} \scalebox{0.55}{
+\pstree[treemode=R]{\TC}{
+ \pstree{\TC}
+  {\TC~[tnpos=r]{\quad\bf scenario 1}
+   \TC~[tnpos=r]{\quad\bf scenario 2}
+   \TC~[tnpos=r]{\quad\bf scenario 3}}
+ \pstree{\TC}
+  {\TC~[tnpos=r]{\quad\bf scenario 4}}
+ \pstree{\TC}
+  {\TC~[tnpos=r]{\quad\bf scenario 5}
+   \TC~[tnpos=r]{\quad\bf scenario 6}}
+}
+}
+%\end{footnotesize}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+%\setlength{\unitlength}{0.69mm}
+\begin{center}
+\scalebox{0.7}{
+\begin{pspicture}(4,0)(3,5)
+\pscircle[linewidth=1pt](0,5){0.2}
+\psline(0.21,5)(1.79,5)
+\pscircle[linewidth=1pt](2,5){0.2}
+\psline(2.21,5)(3.79,5)
+\pscircle[linewidth=1pt](4,5){0.2}
+\psline(-0.04,4.76)(-0.04,4.24)
+\psline(0.04,4.76)(0.04,4.24)
+\psline(1.96,4.76)(1.96,4.24)
+\psline(2.04,4.76)(2.04,4.24)
+\pscircle[linewidth=1pt](0,4){0.2}
+\psline(0.21,4)(1.79,4)
+\pscircle[linewidth=1pt](2,4){0.2}
+\psline(2.21,4)(3.79,4)
+\pscircle[linewidth=1pt](4,4){0.2}
+\psline(-0.04,3.76)(-0.04,3.24)
+\psline(0.04,3.76)(0.04,3.24)
+\psline(1.96,3.76)(1.96,3.24)
+\psline(2.04,3.76)(2.04,3.24)
+\pscircle[linewidth=1pt](0,3){0.2}
+\psline(0.21,3)(1.79,3)
+\pscircle[linewidth=1pt](2,3){0.2}
+\psline(2.21,3)(3.79,3)
+\pscircle[linewidth=1pt](4,3){0.2}
+\psline(-0.04,2.76)(-0.04,2.24)
+\psline(0.04,2.76)(0.04,2.24)
+\pscircle[linewidth=1pt](0,2){0.2}
+\psline(0.21,2)(1.79,2)
+\pscircle[linewidth=1pt](2,2){0.2}
+\psline(2.21,2)(3.79,2)
+\pscircle[linewidth=1pt](4,2){0.2}
+\psline(-0.04,1.76)(-0.04,1.24)
+\psline(0.04,1.76)(0.04,1.24)
+\pscircle[linewidth=1pt](0,1){0.2}
+\psline(0.21,1)(1.79,1)
+\pscircle[linewidth=1pt](2,1){0.2}
+\psline(2.21,1)(3.79,1)
+\pscircle[linewidth=1pt](4,1){0.2}
+\psline(-0.04,0.76)(-0.04,0.24)
+\psline(0.04,0.76)(0.04,0.24)
+\psline(1.96,0.76)(1.96,0.24)
+\psline(2.04,0.76)(2.04,0.24)
+\pscircle[linewidth=1pt](0,0){0.2}
+\psline(0.21,0)(1.79,0)
+\pscircle[linewidth=1pt](2.0,0){0.2}
+\psline(2.21,0)(3.79,0)
+\pscircle[linewidth=1pt](4.0,0){0.2}
+\end{pspicture}}
+\end{center}
+\end{minipage}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nodal approach}
+
+\begin{itemize}
+\item
+Create a vector of variables for each node in the tree.
+\item
+This vector corresponds to the decision to take given known realizations of the random variables at this stage (i.e. at this point in the graph).
+\item
+Index the nodes by $l = 1,2,\ldots,\mathcal{L}$.
+\item
+We have to know the parent of each node.
+Let $A(l)$ be the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Nonanticipativity: 2 stages}
+
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+\hspace*{1cm} \scalebox{0.65}{
+\pstree[treemode=R]{\TC}{
+  \TC~[tnpos=r]{\quad\bf scenario 1}
+  \TC~[tnpos=r]{\quad\bf scenario 2}
+  \TC~[tnpos=r]{\quad\bf scenario 3}
+  \TC~[tnpos=r]{\quad\bf scenario 4}
+ }
+}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+%\setlength{\unitlength}{0.69mm}
+\begin{center}
+\scalebox{0.7}{
+\begin{pspicture}(3,2)(3,6.5)
+\pscircle[linewidth=1pt](0,6){0.2}
+\psline(0.21,6)(1.79,6)
+\pscircle[linewidth=1pt](2,6){0.2}
+\psline(-0.04,5.76)(-0.04,5.24)
+\psline(0.04,5.76)(0.04,5.24)
+\pscircle[linewidth=1pt](0,5){0.2}
+\psline(0.21,5)(1.79,5)
+\pscircle[linewidth=1pt](2,5){0.2}
+\psline(-0.04,4.76)(-0.04,4.24)
+\psline(0.04,4.76)(0.04,4.24)
+\pscircle[linewidth=1pt](0,4){0.2}
+\psline(0.21,4)(1.79,4)
+\pscircle[linewidth=1pt](2,4){0.2}
+\psline(-0.04,3.76)(-0.04,3.24)
+\psline(0.04,3.76)(0.04,3.24)
+\pscircle[linewidth=1pt](0,3){0.2}
+\psline(0.21,3)(1.79,3)
+\pscircle[linewidth=1pt](2,3){0.2}
+\end{pspicture}}
+\end{center}
+\end{minipage}
+
+Mathematically,
+\begin{itemize}
+\item
+the nonanticipativity aims to require that $x^t(\xi)$ has to be $\mathcal{A}^t$-measurable, where $\mathcal{A}^t$ is the $\sigma$-field of events until time $t$;
+\item
+or, in other words, $x^t(\xi) = E[x^t(\xi) \,|\, \mathcal{A}^t]$ a.s., $t = 0,\ldots$;
+\item
+using the projection operator $\Pi^t: z \rightarrow \Pi^t z := E[ z | \mathcal{A}^t]$, this is equivalent to
+\[
+(I-\Pi^t)x^T = 0,\ t = 0,\ldots
+\]
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nonanticipativity (cont'd)}
+
+More simply, and as seen in the introduction, let $S_s^t$ be the set of scenarios identical to the  scenario $s$ at time $t$.
+We have to ensure that
+\[
+x_{its} = x_{its'},\ \forall i \in N,\ \forall t \in T,\ \forall s \in
+S,\ \forall s' \in S_s^t.
+\]
+In other terms, the scenarios share identical decisions as long as they share the same history, i.e. the observed realizations until a given stage are the same.
+As soon as the scenarios diverge, the associated decisions can be different.
+
+\mbox{}
+
+{\red Idea}: explicitly include the nonanticipativity constraints, and place them in the objective function, rather than in the second stage constraints.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Dual ascent and scenarios}
+
+Consider the maximization of the dual built on the nonanticipativity constraints:
+\[
+\max_{\pi(\xi) \geq 0} w = \theta(\pi),
+\]
+where
+\begin{align*}
+\theta(\pi) = \inf_{x \in \mathcal{X}} z = & 
+E\left[\sum_{t = 0}^T f_{t+1} (\xi, x^t(\xi), x_{t+1}(\xi) \right] \\
+& + E\left[\sum_{t = 0}^T \pi^t(\xi)(I-\Pi_t)x^t(\xi) \right],
+\end{align*}
+where $\pi^t$ corresponds to the components of $\pi$ associated to the $t$ first periods.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Dual ascent and scenarios: two stages}
+
+We still have to describe the projection operator.
+For simplicity, consider two steps.
+The primal problem becomes (omitting all the constraints except the nonanticipativity ones)
+\begin{align*}
+\min z\ & = \sum_{s = 1}^S p_s \left( f^1(x_s)+f^2(x_s, y_s) \right) \\
+\mbox{s.t. } & x_k - \sum_{s=1}^S p_s x_s = 0,\ s=1,\ldots,S. 
+\end{align*}
+The dual problem can now be written as
+\begin{align*}
+\max_{\pi} \theta(\pi) = \min_{x,y} \sum_{s=1}^S p_s\Biggl(& f^1(x_s)+f^2(x_s,
+y_s))\\
+& + \pi_s\left( x_s - \sum_{s=1}^S p_sx_s \right) \Biggr).
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Dual ascent and scenarios: algorithm}
+
+\begin{algo}{Lagrandian dual ascent method}
+\begin{description}
+\item[Step 0.] Let $\pi^0 \geq 0$, $\nu = 0$.
+\item[Step 1.]
+Given $\pi = \pi^{\nu}$ in the dual problem, compute the solution
+$(x^{\nu}_1, \ldots, x^{\nu}_S, y_1^{\nu},\ldots{},y_S^{\nu})$.
+\item[Step 2.]
+If $x_s - \sum_{k = 1}^S p_kx_k = 0$, $s = 1,\ldots,S$, stop: the solution is optimal.
+
+Otherwise, define $\hat{\pi}_s = x_s - \sum_{k=1}^S p_kx_k$, and go to Step 3.
+\item[Step 3.]
+Let $\lambda^\nu$ maximize $\theta(\pi^{\nu}+\lambda\hat{\pi})$ on
+$\pi^{\nu}+\lambda\hat{\pi} \geq 0,\ \lambda \geq 0$.
+Set $\pi^{\nu+1} = \pi^{\nu} + \lambda^{\nu}\hat{\pi}$, $\nu = \nu+1$. Return to Step 1.
+\end{description}
+\end{algo}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Augmented Lagrangian}
+
+Unfortunately, this type of procedure is usually slow as there is a linearization at a single point of $\theta$ only.
+It is nevertheless easy to implement and can give good results, especially for small size problems.
+
+\mbox{}
+
+In order to improve the performances, we will turn to another technique inspired by nonlinear programming: {\blue augmented Lagrangian} approaches.
+
+\mbox{}
+
+The basic idea in an augmented Lagrangian procedure is to add a penalty of $\theta(\pi)$ and to build iterations by including this term.
+
+\mbox{}
+
+Moreover, with augmented Lagrangian techniques, we can try to exploit the problem structure in order to decompose the problem.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Augmented Lagrangien}
+
+A way to limit the difficulties associated to penalty methods is to add the penalization term to the Lagrangian rather than the objective, leading to the {\red Augmented Lagrangian} function:
+\[
+\mathcal{L}_A(x,\lambda;\mu) \overset{def}{=} f(x) + \sum_{i \in
+\mathcal{E}} \lambda_i c_i(x) + \frac{1}{2\mu} \sum_{i \in
+\mathcal{E}} c_i^2(x).
+\]
+
+\mbox{}
+
+We will then minimize $\mathcal{L}_A(x,\lambda;\mu)$ with respect to $x$, and use some rules to update the Lagrange multipliers, at each iteration.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Augmented Lagrangian and Stochastic Programming}
+
+We again develop the ideas in the two-stages contact, while the approach can be easily generalized in the multi-stage context.
+
+\mbox{}
+
+Recall that we aim to solve
+\[
+\max_{\pi(\xi) \geq 0} w = \theta(\pi),
+\]
+where
+\begin{align*}
+\theta(\pi) = \inf_{x \in \mathcal{X}} z = & 
+E\left[\sum_{t = 0}^T f_{t+1} (\xi, x^t(\xi), x_{t+1}(\xi) \right] \\
+& + E\left[\sum_{t = 0}^T \pi^t(\xi)(I-\Pi_t)x^t(\xi) \right],
+\end{align*}
+
+Penalizing the nonanticipativity constraints, we obtain the following program, where $\hat{x}$ is nonanticipative.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Augmented Lagrangian and SP (cont'd)}
+
+\vspace*{-0.5cm}
+
+\begin{align*}
+\theta(\rho) = & \inf z = f^1(\hat{x}) + \sum_{s=1}^{S} \left(
+  p_sf^2(y_s,\xi_s) + \rho_s^T(x_s-\hat{x}) + \frac{r}{2} \|
+x_s-\hat{x} \|^2\right) \\
+& \text{s.t. } g_i^1(\hat{x}) \leq 0,\ i=1,\ldots{},m_1,\\
+& \phantom{\text{s.t. }} t_i^2(x_s,\xi_s)+g_i^2(y_s,\xi_S) \leq 0,\ 
+i=1,\ldots{},m_2,\ s=1,\ldots{},S.
+\end{align*}
+$r$ if the augmented Lagrangian penalty parameter, and $\rho_s$ is the vector of dual variables associated to the nonanticipativity constraints of the scenario  $s$.
+
+\mbox{}
+
+The method that we will develop aims to contract the pair $(\hat{x}^{\nu+1}, \rho^{\nu+1})$ around a saddle point.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging}
+
+\begin{itemize}
+\item
+Main reference:
+R.~T. Rockafellar and R.~J.-B. Wets, {\sl Scenarios and policy aggregation
+in optimization under uncertainty}, Mathematics of Operations
+  Research 16(1):119--147 (1991).\\
+  The paper focussed on the multistage version.
+\item
+The method performs a complete separation of the problems, scenario by scenario, at each iteration, reducing the cost per iteration.
+\item
+The number of iterations can however increase\ldots
+\item
+But for structures problems, it is possible to exploit parallelism, and therefore solve large-scale problems.
+\item
+{\red Observation}:
+the Lagrangian function is not separable with respect to the scenarios due to the term $(\hat{x}-x_s)$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressing hedging: basic principle}
+
+Alternatively,
+\begin{enumerate}
+\item
+fix $\hat{x}$ and obtain the solutions $x_s$, $s = 1,\ldots,S$,
+\item
+fix $x_s$, $s = 1,\ldots,S$, and compute $\hat{x}$.
+\end{enumerate}
+In other words, we work scenario by scenario, and we enforce progressively the nonanticipativity constraints.
+
+\mbox{}
+
+At iteration $\nu$, we solve the subproblems
+\begin{align*}
+\inf z = & \sum_{ks=1}^S p_s\left( f^1(x_s) + f^2\left(y_s,\xi_s\right) +
+\left(\rho_s^{\nu}\right)^T\left(x_s-\hat{x}^{\nu}\right)+\frac{r}{2}\|
+x_s-\hat{x}^{\nu} \|^2\right) \\
+& \text{s.t. } g_i^1(x_s) \leq 0,\ i=1,\ldots{},m_1,\ s=1,\ldots{},S,\\
+& \phantom{\text{t.q. }}
+t_i^2\left(x_s,k\right)+g_i^2\left(y_s,\xi_s\right) \leq 0,\
+i=1,\ldots{},m_2,\ s=1,\ldots{},S.
+\end{align*}
+$\hat{x}^{\nu}$ is not necessarily a feasible solution!
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Decomposition}
+
+However, it is easy to decompose the problem!
+
+Algorithm:
+\begin{description}
+\item[Step 0.]
+Assume that we have a nonanticipative solution $x^0$, an initial vector ofmultipliers $\rho^0$, and $r > 0$.
+  $\nu \leftarrow 0$. Go to Step 1.
+\item[Step 1.]
+Let $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$ be a solution of the previous Lagrangian program, for $s=1,\ldots{},S$. Set
+\[
+\hat{x}^{\nu+1} = \left( \hat{x}_1^{\nu+1}, \ldots{}, \hat{x}_S^{\nu+1}\right)^T,
+\]
+\[
+\mbox{where } \hat{x}_s^{\nu+1} = \sum_{s=1}^S p_s x_s^{\nu+1},\ s=1,\ldots,S.
+\]
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Decomposition (cont'd)}
+
+\begin{description}
+\item[Step 2.]
+Let $\rho^{\nu+1}_s = \rho^{\nu}_s + r\left(x_s^{\nu+1}-\hat{x}_s
+^{\nu+1}\right)$, $s = 1,\ldots{}, S$.\\
+If $\hat{x}^{\nu+1} = \hat{x}^{\nu}$ and $\rho^{\nu+1} = \rho^{\nu}$,
+stop: $(\hat{x}^{\nu}, \rho^{\nu})$ is optimal.\\
+Otherwise, set $\nu = \nu+1$ and return to Step 1.
+\end{description}
+
+\mbox{}
+
+\begin{itemize}
+\item
+Step 2 simply consists to take the expected value of $x^{\nu+1}$
+as $\hat{x}^{\nu+1}$.
+\item
+The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \rho^{\nu})$ around a saddle point rather than a dual ascent strategy.
+\item
+In practice, the optimality test is replaced by a convergence test for instance if the following quantity is small enough (De Silva et Abramson):
+\[
+\sqrt{ \| \hat{x}^{\nu} - \hat{x}^{\nu+1} \|^2 + \sum_{s = 1}^S p_s \|
+  x_s^{\nu} - \hat{x}^{\nu}\|^2}.
+\]
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Generalization}
+
+$$
+\begin{aligned}
+\min_{x}\; & \sum_{s \in \cS} p_s f\left(x^{(s)}, \xi^{(s)}\right)\\
+\text{s.t. } & x^{(s)} \in \cX^{(s)},\\
+& x_t^{(s)} \mbox{ is nonanticipative},\; t = 1, \dots, T.
+\end{aligned}
+$$
+
+Nonanticipativity:
+$$
+x_t^{(s)} = E\left[ x_t^{(s')} \,\big|\, s' \in \cS_t^{(s)} \right],
+$$
+where $\cS_t^{(s)} = \left\{ s' \,\big|\, \bar{\xi}_t^{(s)} = \bar{\xi}_t^{(s') }\right\}$.
+It can be reformulated as
+\[
+x_t^{(s)} = \hat{x}_t^{(s)},
+\]
+with
+$$
+\hat{x}_t^{(s)} = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s')}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Generalization}
+
+Augmented Lagrangian:
+\begin{align*}
+L(x,\lambda,\rho) =  E \Biggl[ & f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \biggl( {\lambda_t^{(s)}}' \left(x_t^{(s)} - \hat{x}_t^{(s)}\right) \\
+& + \frac{\rho}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s)} \right\|^2 \biggr) \Biggr],
+\end{align*}
+where $\lambda$ is the Lagrange multipliers vector associated to the NA constraints, and $\rho > 0$ is a penalty parameter.
+
+\mbox{}
+
+Given $\lambda$, the augmented Lagrangian program is
+\begin{equation}
+\begin{aligned}
+\min_{x} & \; L(x,\lambda,\rho)\\
+\text{s.t.} & \; x^{(s)} \in \mathcal{X}^{(s)}, \, s \in \mathcal{S}.\\
+\end{aligned}
+\label{Gen-PHA-Form}
+\end{equation}
+In order to achieve full separability, fix $\hat{x}_t^{(s)}$ and repeatedly solve the program by updating the Lagrange multipliers vector and the value of $\hat{x}_t^{(s)}$ between consecutive resolutions.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging algorithm (PHA)}
+
+\begin{description}
+	\item[Step 0.]
+	Set $\hat{x}^{(s) ,0} = \left(\hat{x}_1^{(s),0}, \dots, \hat{x}_T^{(s),0}\right)$ and $k = 0$. Choose $\lambda^{(s),0} = \bf{0}$, $\rho^0 > 0$.
+	\item[Step 1.]
+	Compute $x^{(s),k+1} =  (x_1^{s,k+1}, \dots, x_T^{s,k+1})$, $s = 1,\ldots,S$, by solving each scenario subproblem
+	$$
+	%\begin{equation}
+	%\label{PHA-Scen-subprob}
+	\begin{aligned}
+	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \left( {\lambda_t^{(s)}}' \biggl(x_t^{(s)} - \hat{x}_t^{(s),k}\right) \\
+	& + \frac{\rho^k}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s),k} \right\|^2 \biggr)\\
+	\text{s.t.} & \; x^{(s)}  \in \mathcal{X}^{(s)}.
+	\end{aligned}
+	$$
+	%\end{equation}
+	\item[Step 2.]
+	For $s = 1,\ldots,S$, $t = 1,\ldots,T$, set
+	\[
+	\hat{x}_t^{(s),k+1} = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s'),k+1}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
+	\]
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging algorithm (PHA)}
+
+\begin{description}
+	\item[Step 3.]
+	Set $\rho^{k+1}$ and
+	\[
+	\lambda_t^{(s), k+1} =  \lambda_t^{(s),k} + \rho^k \left( x_t^{(s),k+1} -  \hat{x}_t^{(s),k+1}  \right),
+	\]
+	for $t = 1, \dots, T, \, s \in \mathcal{S}$.
+	\item[Step 4.]
+	Stop if convergence is achieved.
+	Otherwise, set $k \leftarrow k + 1$ and return to Step 1.
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convergence}
+
+\begin{theorem}
+Assume that the initial nonlinear stochastic program has only convex functions and a finite optimal value, as well as a strictly feasible point.
+Assume moreover that the support of $\bxi$ is finite.
+The progressive hedging algorithm converges to an optimal solution $x^*, \rho^*$.
+\end{theorem}
+
+\begin{itemize}
+\item
+De Silva and Abramson have tested the progressive hedging algorithm for linear problems in portfolio management, proposed by Mulvey and Vladimirou.
+\item
+The subproblems where solved by means of interior points methods.
+\item
+Good speed-up convergence, but the algorithm remains sensitive to the choice of the penality parameter.
+\end{itemize}
+
+\end{frame}
+
+\end{document}

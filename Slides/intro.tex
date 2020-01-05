@@ -1,0 +1,744 @@
+\documentclass{beamer}
+%\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usetheme{Singapore}
+\usepackage{xcolor}
+\setbeamertemplate{footline}[frame number]
+
+%\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+%\usepackage[pst]{xcolor}
+%\usepackage{xxcolor}
+\usepackage{mathlist}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{colortbl}
+%\usepackage[english]{babel}
+%\usepackage{pstricks}
+%\usepackage{pst-tree}
+%\usepackage{pictex}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{tikz-qtree}
+
+\usepackage{times}
+
+%\usepackage{pst-tree}
+
+\usepackage{ulem}
+
+\usepackage{listings}
+%\topmargin=-0.6in
+\lstloadlanguages{C++}
+\lstset{language=C++}
+%%}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bomega{\boldsymbol\omega}
+
+\def\eqdef {\buildrel \rm def \over =}    % Egal par definition.
+\def\eqas  {\buildrel \rm a.s. \over =}   % Egal a.s.
+\def\toas  {\buildrel \rm a.s. \over \to} % ---> a.s.
+\def\q     {$\kern1.4em$}    % Indentation spaces for slides, algor, programs.
+\def\?{\discretionary{}{}{}}  % Same as \- but does not print the - sign
+\def\g   {{\;\leftarrow\;}}
+
+\def\E {{\mathbb E}}
+\def\EE {{\mathbb E}}
+\def\FF {{\mathbb F}}
+\def\II {{\mathbb I}}
+\def\LL {{\mathbb L}}
+\def\P {{\mathbb P}}
+\def\PP {{\mathbb P}}
+\def\QQ {{\mathbb Q}}
+\def\RR {{\mathbb R}}
+\def\ZZ {{\mathbb Z}}
+
+\def\Var{{\rm Var}}
+\def\Cov{{\rm Cov}}
+\def\MSE{{\rm MSE}}
+\def\RE{{\rm RE}}
+\def\REff{{\rm REff}}
+\def\Eff{{\rm Eff}}
+\def\eff{{\rm Eff}}
+\def\tr{{\sf T}}
+\def\byC {{\bf \yel{C}}}
+\def\byh {{\bf \yel{h}}}
+\def\byq {{\bf \yel{q}}}
+\def\byY {{\bf \yel{Y}}}
+\def\byzero {{\bf \yel{0}}}
+\def\bySigma {{\bf \yel{\Sigma}}}
+
+\def\cF {{\mathcal{F}}}
+\def\cQ {{\mathcal{Q}}}
+\def\cR {{\mathcal{F}}}
+
+\def\blue{\color{blue}}
+\def\red{\color{red}}
+
+\title[Stochastic optimization]{Stochastic optimization}
+
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@cirrelt.ca} \\ Université de Montréal -- CIRRELT}
+
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Introduction}
+
+Consider the general deterministic program
+\[
+\begin{split}
+& \min g_0(x) \\
+& \text{s.t. }g_i(x) \leq 0, i = 1,\ldots{},m \\
+& \phantom{t.q. }x \in X \subset \cR^n.
+\end{split}
+\]
+
+\mbox{}
+
+All the parameters are assumed to be perfectly known. {\color{red} Realistic?}
+\begin{itemize}
+\item
+measurement errors;
+\item
+uncertainties on the future;
+\item
+data unavailable;
+\item
+\ldots
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Mathematical programming and stochastic programming}
+
+\begin{itemize}
+\item
+{\red Mathematical programming} (optimization): typically: decision problem (where the meaning of the term ``decision'' is broad).
+\item
+{\red Stochastic programming} concerns decision under uncertainty, the uncertainty being represented by means of random parameters.
+\end{itemize}
+\[
+\begin{split}
+& ``\min_{x \in X}" g_0(x,\bxi) \\
+& \text{s.t. }g_i(x, \bxi) \leq 0,\ i=1,\ldots{},m,\\
+\end{split}
+\]
+where $\bxi$ is a random vector. Meaning of ``$\min$''?
+
+\mbox{}
+
+{\red Assumption}: we can represent the uncertainty by means of the (joint) probability distribution.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem}
+
+Source: Birge et Louveaux, Section~1.1.
+
+\mbox{}
+
+{\blue Scenarios approach}
+\begin{itemize}
+\item
+One assumes that the random vector is finite. Each of the realization is a scenario.
+\item
+Even if the random vector is continuous, a discrete approximation is often useful.
+\end{itemize}
+
+\mbox{}
+
+A European farmer has 500 acres of land and cultivates wheat, corn and sugar beets.
+
+\mbox{}
+
+At least 200T of wheat and 240T of corn are needed to feed his livestock.
+Any additional production can be sold, but in case of underproduction, he has to buy the complement, with a purchase cost 40\% greater than the sale cost.
+The farmer can sold the sugar beets at \$36T for the first 6000 tons, and \$10T after, due to European quotas.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem II}
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Culture & Wheat & Corn & Sugar beets \\
+\hline
+Average return ($T$) & 2.5 & 3 & 20 \\
+Plantation cost (\$/acre) & 150 & 230 & 260 \\
+Selling price (\$/T) & 170 & 150 & 36 ($\leq$ 6000T), 10 \\
+Buying price (\$/T) & 238 & 210 & - \\
+Minimum required (T) & 200 & 240 & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\mbox{}
+
+Notations:
+\begin{itemize}
+\item
+$x_1$, $x_2$, $x_3$: acres for wheat, corn, sugar beets;
+\item
+$y_1$, $y_2$: tons of bought wheat and corn;
+\item
+$w_1$, $w_2$: tons of sold wheat and corn;
+\item
+$w_3$, $w_4$: tons of sold sugar beets, at high price and at low price.
+\end{itemize}
+
+\mbox{}
+
+How to decide the surface to allocate to each plant?
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem: deterministic version}
+
+Linear program:
+\begin{align*}
+\min\ & 150x_1 + 230x_2 + 260x_3 +\\
+&  238y_1 - 170w_1 + 210y_2 - 150w_2 -36w_3 - 10w_4 \\
+\text{t.q. } & x_1 + x_2 + x_3 \leq 500; \\
+& 2.5x_1 + y_1 - w_1 \geq 200; \\
+& 3x_2 + y_2 - w_2 \geq 240; \\
+& w_3 + w_4 \leq 20 x_3; \\
+& w_3 \leq 6000; \\
+& x_1, x_2, x_3, y_1, y_2, w_1, w_2, w_3, w_4 \geq 0.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem: deterministic solution}
+
+Total (expected) profit: \$118600. Details:
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Culture & Wheat & Corn & Sugar beets \\
+\hline
+Surface (acres) & 120 & 80 & 300 \\
+Production (T) & 300 & 240 & 6000 \\
+Sales (T) & 100 & - & 6000 \\
+Purchase (T) & - & - & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\mbox{}
+
+The production is however dependant on the weather, and can increase or decrease by 20\% to 25\%.
+
+\mbox{}
+
+In a very simplified setting, assume three possible cases: good year (for every plant, the production is 20\% higher), average year, and bad year (for every plant, the production is 20\% lower).
+The prices do not change.
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem: scenario solutions}
+
+{\blue New optimal solutions?}
+
+\mbox{}
+
+{\red Good year}. Total profit: \$167667.
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Culture & Wheat & Corn & Sugar beets \\
+\hline
+Surface (acres) & 183.33 & 66.67 & 250 \\
+Production (T) & 550 & 240 & 6000 \\
+Sales (T) & 350 & - & 6000 \\
+Purchases (T) & - & - & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\mbox{}
+
+\mbox{}
+
+{\red Bad year}. Total profit: \$59950.
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Culture & Wheat & Corn & Sugar beets \\
+\hline
+Surface (acres) & 100 & 25 & 375 \\
+Production (T) & 200 & 60 & 6000 \\
+Sales (T) & - & - & 6000 \\
+Purchases (T) & - & 180 & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem: scenarios}
+
+The decisions considerably change with the weather conditions, but how to know them when deciding what to plant?
+\mbox{}
+
+The decisions $(x_1, x_2, x_3)$ have to be made now, but sales and purchases $(w_i, i=1,\ldots,4, y_j, j=1,2)$ depend on yields.
+
+\mbox{}
+
+{\blue Scenarios}.\\
+Index $s = 1, 2, 3$, designing yields higher than the average, equal to the average, and lower than the average, respectively.\\
+New variables $w_{is}$ and $y_{is}$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem: extensive form}
+
+We now want to maximize the {\red expected profit}.
+Assuming that the 3 scenarios are equiprobable, we can form the new program
+\begin{small}
+\begin{align*}
+\min\ & 150x_1 + 230x_2 + 260x_3 +\\
+&  + \sum_{s = 1}^3 \frac{1}{3}(238y_{1s} - 170w_{1s} + 210y_{2s} - 150w_{2s} -
+36w_{3s} - 10w_{4s}) \\
+\text{t.q. } & x_1 + x_2 + x_3 \leq 500; \\
+& 3x_1 + y_{11} - w_{11} \geq 200; 2.5x_1 + y_{12} - w_{12} \geq 200;
+ 2x_1 + y_{13} - w_{13} \geq 200; \\
+& 3.6x_2 + y_{21} - w_{21} \geq 240; 3x_2 + y_{22} - w_{22} \geq
+240;\\
+& \quad{} 2.4x_2 + y_{23} - w_{23} \geq 240; \\
+& w_{31} + w_{41} \leq 24 x_3; w_{32} + w_{42} \leq 20 x_3; w_{33} +
+w_{43} \leq 16 x_3; \\
+& w_{31} \leq 6000; w_{32} \leq 6000; w_{33} \leq 6000; \\
+& x, y, w \geq 0.
+\end{align*}
+\end{small}
+$\rightarrow$ {\blue extensive form}.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The farmer problem: stages}
+
+The seeding decisions are called {\red first-stage decisions}, while the sale and purchase decisions are called {\red second-stage decisions}.
+
+\mbox{}
+
+Total profit: \$108390.
+\begin{center}
+\begin{tabular}{llccc}
+\hline
+& Culture & Wheat & Corn & Sugar beets \\
+\hline
+First stage & Surface (acres) & 170 & 80 & 250 \\
+\hline
+$s = 1$ & Productions (T) & 510 & 288 & 6000 \\
+& Sales (T) & 310 & 48 & 6000 \\
+& Purchases (T) & - & - & - \\
+\hline
+$s = 2$ & Productions (T) & 425 & 240 & 5000 \\
+& Sales (T) & 225 & - & 5000 \\
+& Purchases (T) & - & - & - \\
+\hline
+$s = 3$ & Productions (T) & 340 & 192 & 4000 \\
+& Sales (T) & 140 & - & 4000 \\
+& Purchases (T) & - & 48 & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Observations}
+
+The optimal decision has changed!!!
+
+\mbox{}
+
+Decision under {\red perfect information}:
+if the farmer could know the scenario in advance, or wait to observe the realization of the random variables ({\red wait-and-see} approach),
+the average annual profit would be \$115406.
+The difference with the optimal decision under uncertainty is called {\blue expected value of perfect information (EVPI)}: profit loss due to uncertainty. 
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Observations: value of the stochastic solution}
+
+\begin{itemize}
+\item 
+If the farmer only uses the average information, i.e. he replaces the random variables (r.v.) by their expectations, the average profit would be \$107240.
+\item
+Replacing the r.v. by their expectation 
+leads to the expected value (EV) problem, delivering the expected value solution. \item
+Here, the expectation of scenarios is the average year, but in general, the expectation will not necessarily correspond to a pre-existent scenario.
+\item
+The expectation of the expected value (EEV) problem is obtained by computing the expected profit over the scenarios when the expected value solution is always used.
+\item
+Here, it leads to a loss of \$1150 with respect to the solution of the stochastic problem. This difference is known as {\red value of the stochastic solution (VSS)}.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Example: the newsvendor problem}
+
+Source: Birge and Louveaux, Section~1.1.
+
+\mbox{}
+
+\begin{itemize}
+	\item
+	A newsvendor has to decide how many newspapers to buy in order to maximize his profit.
+	However he does not know in advance how many newspapers he will be able to sell during a day (the demand).
+	\item
+	Each newspaper costs $c$, and can be sold at a price $q$.
+	\item
+	The newsvendor can turn back the unsold newspapers at the end of the day, and obtain a price $r$ for each of them
+	\item
+	Knowing the probability distribution $F(t) = P(\bomega \leq t$), how many newspapers should the newsvendor buy in order to maximize his revenue?
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The newsvendor problem (cont'd)}
+
+\begin{itemize}
+\item
+With the previous definitions, the newsvendor would like to solve the following optimization problem:
+\[
+\max_{x \geq 0} -cx + \mathcal{Q}(x),
+\]
+\item
+$\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buy $x$ newspapers:
+\[
+\mathcal{Q}(x) = E_{\bomega} [ Q(x, \bomega)].
+\]
+%\item
+%Dans le cadre linéaire, nous écrirons aussi souvent
+%$Q(x, \omega) = v(h(\omega) - T (\omega)x)$.
+\item
+Here $Q(x, \omega)$ is the amount of money obtained by the newsvendor if he buys $x$ newspaper and the demand is $\omega$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The newsvendor problem (cont'd)}
+
+\begin{itemize}
+\item
+As previously, we could construct an equivalent linear problem (presented in Birge and Louveaux).
+\item
+Can we simplify? It is easy to see that
+\[
+Q(x, \omega) =
+\begin{cases} 
+qx & \mbox{if } x \leq \omega, \\
+q\omega + r(x - \omega) & \mbox{if } x \geq \omega.
+\end{cases}
+\]
+Therefore,
+\begin{align*}
+\mathcal{Q}(x) & = E_{\bomega} [ Q(x, \bomega) ] =
+\int_{-\infty}^{\infty} Q(x, \omega) dF(\omega) 
+\\ & = \int_{-\infty}^x(q\omega + r(x - \omega))dF(\omega) + \int^{\infty}_x
+qxdF(\omega).
+\end{align*}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The newsvendor problem (cont'd)}
+
+Therefore, we have
+\begin{align*}
+\mathcal{Q}(x) & = (q-r) \int_{-\infty}^x \omega dF(\omega) + rx
+\int_{-\infty}^x dF(\omega) + qx \int_x^{\infty} dF(\omega) \\
+& = (q-r) \int_{-\infty}^x \omega dF(\omega) + rx F(x) + qx (1-F(x)) \\
+& = (q-r) \left[ \int_{-\infty}^x \omega dF(\omega) - x F(x) \right] + qx. \\
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Integration by parts}
+
+Assume that $F$ satisfies $\lim_{t \rightarrow -\infty}
+tF(t) = 0$.
+
+\mbox{}
+
+We can then integrate by parts to obtain:
+\begin{align*}
+\int_{-\infty}^x \omega dF(\omega) &= \omega F(\omega) |_{-\infty}^x -
+\int_{-\infty}^x F(\omega) d\omega \\
+&=  xF(x) - \int_{-\infty}^x F(\omega) d\omega.
+\end{align*}
+
+Thus,
+\[
+\mathcal{Q}(x) = qx - (q - r)\int_{-\infty}^x F(\omega)d\omega.
+\]
+%Par conséquent, nous allons réviser ce point,\ldots lors du prochain
+%épisode de IFT6512!
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Solution of the second stage}
+
+Recall the initial problem\ldots
+\[
+\max_{x \geq 0} -cx + \mathcal{Q}(x),
+\]
+We have to solve this problem.
+We will consider the associated optimality conditions.
+
+\mbox{}
+
+Assuming $x \ne 0$, the solution of the second-stage is obtained by computing the zero of the objective gradient.
+As
+\[
+\frac{d}{dx} \mathcal{Q}(x) = q - (q - r)F(x),
+\]
+we have
+\[
+-c + q - (q - r)F(x) = 0
+\]
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{The newsvendor problem (cont'd)}
+
+The solution $x^*$ is therefore
+\[
+x^* = F^{-1} \left( \frac{q-c}{q-r} \right).
+\]
+
+\mbox{}
+
+Example: $c = 0.15$, $q = 0.25$, $r = 0.02$, $\omega \sim N(650, 80^2)$. Alors
+\[
+x^* = N^{-1}_{(650,80^2)}(0.1/0.23).
+\]
+Since $N(650, 80^2) \sim 80\Phi+650$, where $\Phi$ is the distribution function of a $N(0,1)$, it easy to show that
+\[
+x^* = 80\Phi^{-1}(0.1/0.23) + 650 \approx 636.86.
+\]
+In Julia, we can compute this value as
+\begin{verbatim}
+using Distributions
+d = Normal(650,80)
+quantile(d, 0.1/0.23)
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Marginal revenue}
+
+{\sl Other interpretation}, more intuitive: assume that the vendor has bought $t$ journaux.
+What is the expected marginal revenue if he buys an additional newspaper?
+On an economical point of view, we would like this marginal revenue to be equal to 0.
+
+\mbox{}
+
+The expected marginal revenue (MR) is
+\begin{align*}
+MR(t) &= -c + qP[\bomega \geq t] + rP[\bomega \leq t]\\
+&= -c + q(1-F(t)) + rF(t).
+\end{align*}
+If we set the marginal revenue to 0, we get
+\[
+MR(t) = 0 \mbox{ iff } F(t) = \frac{q-c}{q-r},
+\]
+and we recover the previous solution.
+
+%Pour des compléments, consultez Linderoth.
+
+\end{frame}
+
+%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Formulation with recourse}
+
+More generally, we consider the (linear) program
+\begin{align*}
+\min\ & c^Tx+E_{\bomega}[q(\bomega)^Ty(\bomega)] \\
+\mbox{t.q. } & Ax = b, \\
+& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega
+\in \Omega \\
+& x \in X, \\
+& y(\omega) \in Y,\ \forall \omega.
+\end{align*}
+
+\mbox{}
+
+Fixed recourse: $W$ does not change with the scenario.
+
+\mbox{}
+
+How to decide over $y$?
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Some definitions}
+
+\[
+\min_{x \in X | Ax = b} \left\lbrace c^Tx + E_{\bomega} \left[ \min_{y
+      \in Y} q(\bomega)^T y | W y = h(\bomega) - T(\bomega)x \right] \right\rbrace.
+\]
+\begin{itemize}
+\item
+{\red Second stage function}, or {\red recourse function} $v :
+\Omega \times \rit^m \rightarrow \rit$:
+\[
+v(\omega, z) \overset{def}{=} \min_{y \in Y} \lbrace q(\omega)^Ty | W y = z \rbrace;
+\]
+%cette fonction décrit les coûts correspondants à n'importe quel
+%vecteur $z$ de ``déviations des contraintes aléatoires $T(\omega)x =
+%f(\omega)$.''
+\item
+{\red Expected value function}, or recourse of minimum expectation
+$\mathcal{Q} : \rit^n \rightarrow \rit$:
+\[
+\cQ(x) = E_{\bomega} [ v (\bomega, h(\bomega) - T(\bomega) x)].
+\]
+It describes the expected recourse cost, for any first-stage decision $x \in \rit^n$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The two-stage (linear) stochastic program}
+
+One can reformulate our optimization problem as
+\[
+\min_{x \in X} \left\lbrace c^T x + \mathcal{Q}(x) \ |\  Ax = b \right\rbrace.
+\]
+It is a (nonlinear) optimization problem in $\rit^n$.
+
+\mbox{}
+
+In terms of $y$'s:
+\begin{align*}
+\min_{x,\ y(\bomega)}\ & E_{\bomega} [ c^T x + q(\bomega)^T y(\bomega) ] \\
+\mbox{s.t. } & Ax = b & \mbox{first-stage constraints} \\
+& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega \in \Omega &
+\mbox{second-stage constraints} \\
+& x \in X,\ y(\omega) \in Y.
+\end{align*}
+
+Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
+\omega_2,\ldots,\omega_S \rbrace \subset \rit^r$.
+\begin{align*}
+P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots . . . , S \\
+T_s & = T (\omega),\ h_s = h(\omega) 
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deterministic equivalent}
+
+\begin{align*}
+\min_{x, y_1, \ldots, y_S}\ & c^T x + p_1 q_1^T y_1 + p_2 q_2^T y_2 + \ldots
+p_S q_S^Ty_S \\
+\mbox{t.q. } & \\
+& \begin{matrix} Ax & & & & & = b\\
+T_1 x & + W y_1 & & & & = h_1 \\
+T_2 x & & + W y_2 & & & = h_2 \\
+\vdots & & & \ddots & \\
+T_S x & & & & + W y_s & = h_s
+\end{matrix} \\
+& x \in X,\ y_1 \in Y,\ y_2 \in Y,\ldots, y_s \in Y.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deterministic equivalent (II)}
+
+\begin{itemize}
+\item
+$y_s = y(\omega_s)$ is the recourse action to take if the scenario $\omega_s$ occurs.
+\item
+{\color{blue}\it Advantage}: it is a linear program.
+\item
+{\color{blue}\it Disadvantage}: it is a linear program of (very) high dimension:
+\begin{itemize}
+\item
+$n+pS$ variables;
+\item
+$m_1+mS$ constraints.
+\end{itemize}
+But the constraints matrix has a staircase structure.\\
+It is possible to exploit it (L-Shaped algorithm -- Benders decomposition).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Large scale,\ldots and?}
+
+Assume that we have $r$ random variables ($\Omega \subset
+\rit^r$).
+\begin{itemize}
+\item
+Consider the following problem (source: Linderoth).
+A Telecom company want to expand its network in order to meet an unknown (random) demand.
+\item
+There are 86 unknown demands.
+Each demand is independant and take a value in a set of 7 values.
+Consequently
+\[
+S = |\Omega| = 7^{86} \approx 4.77\times10^{72}.
+\]
+\ldots number of subatomic particles in the universe!
+\item
+It can be even worse\ldots\\
+If $\Omega$ is not finite, but holds an infinite number of elements?
+It is especially true with continuous random variables.
+Our ``deterministic equivalent'' would have an infinite number of variables and constraints!
+\item
+We can solve an approximate problem, obtained by sampling over the random vector.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decomposition methods}
+
+{\red General principle}: the nonlinear term in the objective, that is the recourse function $\cQ(x)$, requires to solve all the linear second-stage programs.
+
+\mbox{}
+
+Is it possible to avoid the repeated second-stage functions evaluations?
+
+\mbox{}
+
+{\blue Idea}: build a master problem in $x$, but compute the complete objective function (involving first- and second-stage decision) only as a subproblem.
+
+\end{frame}
+
+\end{document}

@@ -1,0 +1,154 @@
+\begin{frame}
+\frametitle{First-order optimality conditions}
+
+We denote the feasible set of a mathematical program by $\mathcal{A}$.
+We will suppose here that $\mathcal{A}$ is closed.
+
+\mbox{}
+
+{\red Necessary condition}: if $x^*$ is a local minimizer,
+\[
+-\nabla_x f(x^*) \in \mathcal{N}_{\mathcal{A}}(x^*),
+\]
+where $\mathcal{N}_{\mathcal{A}}(x^*)$ is the normal cone to $\mathcal{A}$ at $x^*$.
+
+\mbox{}
+
+{\blue Cone}
+
+\mbox
+ 
+A subset $C$ of a vectorial space $V$ is a (linear) {\red cone}
+iff $\alpha x$ belongs to $C$ for any $x \in C$ and any strictly positive scalar $\alpha$.
+It is pointed if $\alpha$ can be equal to zero.
+
+\mbox{}
+
+A {\red convex cone} is a cone closed under convex combinations, i.e. iff $\alpha x + \beta y \in C$, $\forall \alpha,\ \beta > 0$, with $\alpha + \beta = 1$.
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Tangent cone, normal cone: general framework}
+
+We first say that a vector $w \in \rit^n$ is tangent to $\mathcal{A}$ at $x \in \mathcal{A}$ if for all sequences of vectors $\lbrace x_i \rbrace$ with $x_i \rightarrow x$, and $x_i \in \mathcal{A}$, and all sequences of positive scalars $t_i \downarrow 0$, there exists a sequence $w_i \rightarrow w$ such that $x_i + t_iw_i \in \mathcal{A}$ for all $i$.
+
+\mbox{}
+
+The {\red tangent cone $T_{\mathcal{A}}(x)$} is the collection of vectors tangent to ${\mathcal{A}}$ at $x$. \\
+The {\red normal cone $N_{\mathcal{A}}(x)$} is the orthogonal complement, i.e.
+\[
+N_{\mathcal{A}}(x) = \lbrace v\ |\ v^Tw \leq 0,\ \forall w \in T_{\mathcal{A}}(x) \rbrace.
+\]
+
+\mbox{}
+
+OK, but in practice???
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Tangent cone, normal cone (cont'd)}
+
+The definition of the normal cone can be simplified if ${\mathcal{A}}$ is convex.
+We indeed have
+\[
+N_{\mathcal{A}}(x) = \left\lbrace v\ |\ v^T(x-x_0) \geq 0,\ \forall x_0 \in
+{\mathcal{A}} \right\rbrace.
+\]
+
+\mbox{}
+
+The necessary optimality condition then becomes
+$\nabla_x f(\hat{x}) (x-\hat{x}) \geq 0$, $\forall x \in {\mathcal{A}}$.
+
+\mbox{}
+
+If $f$ is convex (i.e. we are in the convex programming framework), the condition is also sufficient.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deterministic and convex constraints}
+
+Therefore, when $S$ is convex, we can rewrite the first-order criticality conditions at some point $z^*$ as the requirement that $-\nabla_z g(z^*)$ belongs to the normal cone to $S$ at $z^*$, denoted by $\mathcal{N}_{S}(z^*)$.
+
+\mbox{}
+
+If moreover $S$ is deterministic, the feasible sets are the same for the true and SAA problems.
+
+\mbox{}
+
+The previous theorem allows us to easily establish the first-order convergence.
+Consider the choice $\Gamma(\cdot) = \mathcal{N}_S(\cdot)$; $\phi(z^*)$ belongs to $\Gamma(z^*)$ iff
+\[
+\langle \phi(z^*), u-z^*\rangle \leq 0,\ \forall u \in S.
+\]
+
+We design such variational inequalities as stochastic variational inequalities.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{On the LICQ}
+	
+	This constraints qualification will be especially useful for our discusssion.
+	
+	\mbox{}
+	
+	Consider the original program.
+	Recall that the active set $\mathcal{A}(z)$ at any feasible point $z$ is the union of the index set of equality constraints and active inequality constraints:
+	\[
+	\mathcal{A}(z) = \lbrace i \in \lbrace 1,\ldots,k \rbrace \, | \,
+	c_i(z) = 0 \rbrace \cup \lbrace k+1,\ldots,M \rbrace.
+	\]
+	
+	\begin{defi}
+		Given the point $z^*$ and the active set $\mathcal{A}(z^*)$, we say that the LICQ holds at $z^*$ if the set of active constraints gradients $\lbrace \nabla c_j(z^*),\ j \in \mathcal{A}(z^*) \rbrace$ is linearly independent.
+	\end{defi}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Strict complementarity}
+	
+	Another useful concept for our needs is the strict complementarity condition.
+	
+	\begin{defi}
+		Given $z^*$ and a vector $\lambda^*$ satisfying the KKT conditions, we say that the strict complementarity condition holds if exactly one of $[\lambda]_j^*$ and $c_j(z^*)$ is null for every index $j=1,\ldots,k$, i.e. we have that $[\lambda]_j^* > 0$ for each $j \in \lbrace 1,\ldots,k \rbrace \cap \mathcal{A}(z^*)$.
+	\end{defi}
+	
+	\mbox{}
+	
+	Consider again a particular sampling process $\overline{\xi}$ dans $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, such that $\epsilon_N (z, \overline{\xi} ) \rightarrow 0$ as $N \rightarrow \infty$. 
+	If the assumptions of the above lemma hold for some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \rightarrow z^*$, the gradient of the Lagrangian $\nabla L\left( z^*_{\ell} ( \overline{\xi} ), \lambda_{\ell}^* ( \overline{\xi} ) \right)$ converges to $\nabla \mathcal{L} ( z^*, \lambda^* )$, as $\ell$ tends to infinity, with $\lambda_{\ell}^*(\overline{\xi}) \rightarrow \lambda^*$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Strict complementarity (cont'd)}
+	
+	Assume that the strict complementarity condition holds at $z^*$ for the approximate problem.
+	We obtain that for $\ell$ large enough,
+	$[\lambda^*_{\ell}]_j(\overline{\xi})$, $j \in \lbrace 1,\ldots,k
+	\rbrace \cap \mathcal{A} ( z^* ) $, are strictly positive and thus the corresponding constraints are active at $z^*_{\ell}(\overline{\xi})$.
+	
+	\mbox{}
+	
+	Moreover, as $\epsilon_N (z, \overline{\xi} ) \rightarrow 0$,
+	$\hat{c}_j \left( z^*_{\ell}(\overline{\xi}),
+	\epsilon_{\ell}(z^*_{\ell}(\overline{\xi}),\overline{\xi}) \right) \rightarrow
+	c_j ( z^* )$ and, for $\ell$ large enough,
+	%(which is true for almost every  $\overline{\xi}$)
+	$\mathcal{A} \left( z^*_{\ell}(\overline{\xi}) \right) = \mathcal{A} (
+	z^* )$, so the strict complementarity condition holds at $\left(
+	z^*_{\ell}(\overline{\xi}), \lambda_{\ell}^*(\overline{\xi})
+	\right)$ for the approximate problem.
+	
+	\mbox{}
+	
+	This allows us to state a second-order convergence result.
+	
+\end{frame}
+

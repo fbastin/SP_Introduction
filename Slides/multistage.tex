@@ -1,0 +1,502 @@
+\documentclass{beamer}
+%\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
+
+  \usetheme{Warsaw}
+
+%\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+%\usepackage[pst]{xcolor}
+%\usepackage{xxcolor}
+\usepackage{mathlist}
+
+\usepackage[frenchb]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath,amssymb}
+%\usepackage{colortbl}
+%\usepackage[english]{babel}
+\usepackage{pstricks, pst-tree}
+
+\usepackage{times}
+
+%\usepackage{pst-tree}
+
+\usepackage{ulem}
+
+\usepackage{listings}
+%\topmargin=-0.6in
+\lstloadlanguages{C++}
+\lstset{language=C++}
+%%}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bx{\boldsymbol{x}}
+\def\bu{\boldsymbol{u}}
+\def\bz{\boldsymbol{z}}
+\def\bomega{\boldsymbol\omega}
+
+\title[Multi-stage problems]{Stochastic programming\\Multi-stage problems}
+
+\author[Fabian Bastin]{Fabian Bastin\\\url{fabian.bastin@cirrelt.ca}\\Université de Montréal -- CIRRELT}
+
+\date{}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Motivation: example}
+
+\begin{itemize}
+\item
+Assume that we invest in the market.
+We would to reach a nominal goal $G$ after $Y$ years.
+\item
+The portfolio is rebalanced each $v$ years, so there are $T = Y/v$ times where we have to decide what are the investments to do.\\
+There are $T$ stages in our problem.
+\item
+We face a space of $N$ investment decisions (i.e. we have $N$ possible actions); we have a set $\mathcal{T} = \lbrace 1, 2,\ldots, T \rbrace$ of investment periods.
+\item
+If we go over the target $G$, we will have an interest rate $q$ on the surplus.
+\item
+If we do not meet the target, we have to borrow the difference at an interest $r$.
+\item
+The initial wealth is $b$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Variables}
+
+\begin{itemize}
+\item
+$x_{it}$, $i \in N$, $t \in \mathcal{T}$: amount of money to invest in action $i$ during the period $t$;
+\item
+$y$: excess amount at the end of the horizon;
+\item
+$w$: lack of money at the end of the horizon;
+\item
+In the current framework, we aim to take the corrective actions in order to reach the target of $G$ dollars.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Deterministic formulation}
+
+\begin{align*}
+\max\ qy & - rw\\
+\mbox{s.t. } \sum_{i \in N} x_{i1} & = b,\\
+\sum_{i \in N} \omega_{it}x_{i,t-1} & = \sum_{i \in N} x_{it}, \quad
+\forall t \in \mathcal{T} \backslash 1, \\
+\sum_{i \in N} \omega_{iT}x_{iT} - y + w & = G,\\
+x_{it} & \geq 0, \quad \forall i \in N,\ t \in \mathcal{T}, \\
+y, w & \geq 0.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Random returns}
+
+\begin{itemize}
+\item
+The investment returns can be viewed as random variables, as we do not know their realizations in advance.
+\item
+Imagine that for each action, at each time $t$, the are $R$ possible realizations.
+\item
+The scenarios are made of all the possible sequences of realizations.
+\end{itemize}
+
+Example: assume $R = 4$ and $T = 3$. Scenarios:
+\begin{small}
+\begin{center}
+\begin{tabular}{ccc}
+\hline
+$t = 1$ & $t = 2$ & $t = 3$ \\
+\hline
+1 & 1 & 1 \\
+1 & 1 & 2 \\
+1 & 1 & 3 \\
+1 & 1 & 4 \\
+1 & 2 & 1 \\
+\vdots & \vdots & \vdots \\
+4 & 4 & 4 \\
+\end{tabular}
+\end{center}
+\end{small}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Stochastic program formulation}
+
+\begin{itemize}
+\item
+Let $x_{its}$, $t \in \mathcal{T}$, $s \in S$ be the amount to invest in action $i$ during the period $t$ in scenario $s$;
+\item
+$y_s$: excess amount at the end of the horizon for scenario $s$;
+\item
+$w_s$: lack of money at the end of the horizon for scenario $s$.
+\item
+Let $\omega_{it}$ be the random return; it can be seen as function of the scenario $s$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Stochastic version}
+
+\begin{align*}
+\max\ \sum_{s=1}^S p_s(qy_{\red s} & - rw_{\red s})\\
+\mbox{s.t. } \sum_{i \in N} x_{i1} & = b,\\
+\sum_{i \in N} \omega_{it{\red s}}x_{i,t-1,{\red s}} & = \sum_{i \in
+  N} x_{it{\red s}}, \quad \forall t \in \mathcal{T} \backslash 1,
+{\red \forall s \in S} \\
+\sum_{i \in N} \omega_{iT{\red s}}x_{iT} - y_{\red s} + w_{\red s} & = G,
+\quad {\red \forall s \in S}, \\
+x_{it{\red s}} & \geq 0, \quad \forall i \in N,\ t \in \mathcal{T},
+{\red \forall s \in S},\\
+y_{\red s}, w_{\red s} & \geq 0 \quad {\red \forall s \in S}.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Scenario tree}
+
+Conceptually, the sequence of events can be arranged in a tree.
+There is one leaf per scenario.
+\begin{center}
+%\begin{footnotesize}
+\scalebox{0.45}{
+\pstree[treemode=D]{\TC}{
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $1$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $2$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $3$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $4$}}}}
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $5$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $6$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $7$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $8$}}}}
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $9$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $10$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $11$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $12$}}}}
+ \pstree{\TC}
+  {\TC~[tnpos=b]{\quad\bf{\large {\blue $13$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $14$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $15$}}}
+   \TC~[tnpos=b]{\quad\bf{\large {\blue $16$}}}}
+}
+}
+%\end{footnotesize}
+\end{center}
+
+The scenarios can have different probabilities, the variables can be correlated,\ldots
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Non-anticipativity}
+
+\begin{itemize}
+\item
+The conversion between the deterministic model and the stochastic version is easy\ldots
+\item
+but the built model is wrong!!!
+\item
+We have to enforce the {\red non-anticipativity}:
+\end{itemize}
+
+Let $S_s^t$ be the set of scenarios that are identical to scenario $s$ at time $t$.
+We have to guarantee that
+\[
+x_{its} = x_{its'},\ \forall i \in N,\ \forall t \in T,\ \forall s \in
+S,\ \forall s' \in S_s^t.
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Non-anticipativity (cont'd)}
+
+Equivalently,
+\[
+\left( \sum_{s' \in S_s^t} p'_s \right) x_{its} = \sum_{s' \in S_s^t} p'_s x_{its'} \quad \forall\ i,t,s,
+\]
+or
+\begin{align*}
+ x_{its}
+&= \frac{\sum_{s' \in S_s^t} p'_s x_{its'}}{\sum_{s' \in S_s^t} p'_s} \quad \forall\ i,t,s \\
+&= E[ x_{its'} | s' \in S_s^t ] \quad \forall\ i,t,s.
+\end{align*}
+
+The amount invested in scenario $s$, multiplied by the probability to reach a scenario equivalent to $s$, has to be equal to the expected amount that would be invested in any scenario equivalent to $s$.
+
+There are many formulations of these conditions!
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Back to the scenario tree}
+
+\begin{itemize}
+\item
+We have to enforce nonanticipativity as we have created copies of the variables for each scenario, at each period.
+Graphically:
+\end{itemize}
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+%\begin{footnotesize}
+\hspace*{1cm} \scalebox{0.55}{
+\pstree[treemode=R]{\TC}{
+ \pstree{\TC}
+  {\TC~[tnpos=r]{\quad\bf scenario 1}
+   \TC~[tnpos=r]{\quad\bf scenario 2}
+   \TC~[tnpos=r]{\quad\bf scenario 3}}
+ \pstree{\TC}
+  {\TC~[tnpos=r]{\quad\bf scenario 4}}
+ \pstree{\TC}
+  {\TC~[tnpos=r]{\quad\bf scenario 5}
+   \TC~[tnpos=r]{\quad\bf scenario 6}}
+}
+}
+%\end{footnotesize}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+%\setlength{\unitlength}{0.69mm}
+\begin{center}
+\scalebox{0.7}{
+\begin{pspicture}(4,0)(3,5)
+\pscircle[linewidth=1pt](0,5){0.2}
+\psline(0.21,5)(1.79,5)
+\pscircle[linewidth=1pt](2,5){0.2}
+\psline(2.21,5)(3.79,5)
+\pscircle[linewidth=1pt](4,5){0.2}
+\psline(-0.04,4.76)(-0.04,4.24)
+\psline(0.04,4.76)(0.04,4.24)
+\psline(1.96,4.76)(1.96,4.24)
+\psline(2.04,4.76)(2.04,4.24)
+\pscircle[linewidth=1pt](0,4){0.2}
+\psline(0.21,4)(1.79,4)
+\pscircle[linewidth=1pt](2,4){0.2}
+\psline(2.21,4)(3.79,4)
+\pscircle[linewidth=1pt](4,4){0.2}
+\psline(-0.04,3.76)(-0.04,3.24)
+\psline(0.04,3.76)(0.04,3.24)
+\psline(1.96,3.76)(1.96,3.24)
+\psline(2.04,3.76)(2.04,3.24)
+\pscircle[linewidth=1pt](0,3){0.2}
+\psline(0.21,3)(1.79,3)
+\pscircle[linewidth=1pt](2,3){0.2}
+\psline(2.21,3)(3.79,3)
+\pscircle[linewidth=1pt](4,3){0.2}
+\psline(-0.04,2.76)(-0.04,2.24)
+\psline(0.04,2.76)(0.04,2.24)
+\pscircle[linewidth=1pt](0,2){0.2}
+\psline(0.21,2)(1.79,2)
+\pscircle[linewidth=1pt](2,2){0.2}
+\psline(2.21,2)(3.79,2)
+\pscircle[linewidth=1pt](4,2){0.2}
+\psline(-0.04,1.76)(-0.04,1.24)
+\psline(0.04,1.76)(0.04,1.24)
+\pscircle[linewidth=1pt](0,1){0.2}
+\psline(0.21,1)(1.79,1)
+\pscircle[linewidth=1pt](2,1){0.2}
+\psline(2.21,1)(3.79,1)
+\pscircle[linewidth=1pt](4,1){0.2}
+\psline(-0.04,0.76)(-0.04,0.24)
+\psline(0.04,0.76)(0.04,0.24)
+\psline(1.96,0.76)(1.96,0.24)
+\psline(2.04,0.76)(2.04,0.24)
+\pscircle[linewidth=1pt](0,0){0.2}
+\psline(0.21,0)(1.79,0)
+\pscircle[linewidth=1pt](2.0,0){0.2}
+\psline(2.21,0)(3.79,0)
+\pscircle[linewidth=1pt](4.0,0){0.2}
+\end{pspicture}}
+\end{center}
+\end{minipage}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nodal approach}
+
+\begin{itemize}
+\item
+We can also create a vector of variables for each node in the tree.
+\item
+This vector corresponds to what should be our decision given the known realizations of the random variables upon this stage (i.e. at this node).
+\item
+Index the nodes by $l = 1,2,\ldots,\mathcal{L}$.
+\item
+We have to know the ancestor of each node.
+Let $A(l)$ the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Reformulation}
+
+\begin{align*}
+\max\ \sum_{s \in S} p_s (qy_{s} & - rw_{s})\\
+\mbox{s.t. } \sum_{i \in N} x_{i1} & = b,\\
+\sum_{i \in N} \omega_{il}x_{i,A(l)} & = \sum_{i \in N} x_{il}, \quad \forall l \in \mathcal{L} \backslash 1, \\
+\sum_{i \in N} w_{iA(s)}x_{iA(s)} - y_{s} + w_{s} & = G,
+\quad {\forall s \in S}, \\
+x_{il} & \geq 0, \quad \forall i \in N,\ \forall l \in \mathcal{L},\\
+y_{s}, w_{s} & \geq 0 \quad {\forall s \in S}.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Multi-period production planification}
+
+\begin{itemize}
+\item
+A firm produces various different goods.
+\item
+Ressources (for instances manual and machine work hours) are required.
+We assume that these requirements are known for each product.
+\item
+The demand must be met at the end of each period, but this demand is not perfectly known.
+\item
+A too large or too small inventory induces costs (storage, additional purchases to satisfy the demand,\ldots).
+\item
+It is possible to add machine and work hours, within predefined limits.
+\item
+There is a hiring and firing cost related to changes in the workforce.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Decision problem}
+
+\begin{itemize}
+\item
+We have to decide now on
+\begin{itemize}
+\item
+the quantity of each product to manufacture during each period;
+\item
+the additional capacity to use during each period;
+\item
+to hire or to fire staff during each period;
+\end{itemize}
+\item
+A random demand occurs. Conceptually, this happens at each period.
+\item
+After having observed the random demands, we can decide on how to stock the products in the inventory, or to buy from an external source.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Definitions}
+
+\begin{enumerate}
+\item
+{\red Sets}:
+\begin{itemize}
+\item
+$T$: number of periods, also seen as a set;
+\item
+$N$: products;
+\item
+$M$: ressources.
+\end{itemize}
+\item
+{\red Variables}:
+\begin{itemize}
+\item
+$x_{jt}$: production of product $j \in N$ during the period $t \in T$;
+\item
+$u_{it}$: additional amount of ressource $i \in M$ to buy during the period  $t \in T$;
+\item
+$z_{t-1,t}^+$, $z_{t-1,t}^-$: planned augmentation or reduction of the labor force;
+\item
+$y_{j,t}^+$, $y_{j,t}^-$: surplus, deficit of product $j \in N$ at the end of the period $t \in T$.
+\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Parameters}
+
+\begin{itemize}
+\item
+All the above variables have associated costs $(\alpha,\,\beta,\,\gamma,\,\delta)$.
+\item
+$\omega_{jt}$: demand of product $j \in N$ during the period $t
+\in T$.
+\item
+$U_{it}$: upper bound on $u_{it}$.
+\item
+$a_{ij}$: amount of ressource $i \in M$ required to produce one unit of the good $j \in N$.
+\item
+$b_{it}$: amount of ressource $i \in M$ available at time $t \in T$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Model}
+
+\begin{multline*}
+\min \sum_{j \in N} \sum_{t \in T} \alpha_{jt} x_{jt} + \sum_{i \in M}
+\sum_{t \in T} \beta_{it} u_{it} + \sum_{t \in T\backslash 1} \left(
+  \gamma^+_{t-1,t} z^+_{t-1,t} + \gamma^-_{t-1,t} z^-_{t-1,t} \right) \\
++ E_{\bomega} \left[ \min \left( \sum_{j \in N} \sum_{t \in T}
+    ( \delta_{jt}^+y_{jt}^+ + \delta_{jt}^-y_{jt}^- ) \right) \right],
+\end{multline*}
+such that
+\begin{align*}
+\sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it} \quad \forall i \in
+M,\ \forall t \in T,\\
+u_{it} & \leq U_{it} \qquad \forall i \in M,\ \forall t \in T,\\
+z^+_{t-1,t} - z^-_{t-1,t} &= \sum_{j \in N} a_{jt}(x_{jt} - x_{j,
+  t-1}) \quad \forall t \in T\backslash 1, \\
+x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt} \qquad
+\forall j \in N,\ \forall t \in T\ \mbox{(demand satisfaction)},\\
+\end{align*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Extended form of the recourse model}
+
+\begin{multline*}
+\min \sum_{j \in N} \sum_{t \in T} \alpha_{jt} \bx_{jt} + \sum_{i \in M}
+\sum_{t \in T} \beta_{it} \bu_{it} + \sum_{t \in T\backslash 1} \left(
+  \gamma^+_{t-1,t} \bz^+_{t-1,t} + \gamma^-_{t-1,t} \bz^-_{t-1,t} \right) \\
++ {\red \sum_{s \in S}}\sum_{j \in N} \sum_{t \in T} p_s
+    ( \delta_{jt}^+y_{jt{\red s}}^+ + \delta_{jt}^-y_{jt{\red s}}^- ),
+\end{multline*}
+such that
+\begin{align*}
+\sum_{j \in N} a_{ij} \bx_{jt} & \leq b_{it}+\bu_{it} \quad \forall i \in
+M,\ \forall t \in T,\\
+\bu_{it} & \leq U_{it} \qquad \forall i \in M,\ \forall t \in T,\\
+\bz^+_{t-1,t} - \bz^-_{t-1,t} &= \sum_{j \in N} a_{jt}(\bx_{jt} - \bx_{j,
+  t-1}) \quad \forall t \in T\backslash 1, \\
+\bx_{jt} + y_{j,t-1,{\red s}}^+ - y_{jt{\red s}}^+ + y_{jt{\red s}}^- &= \omega_{jt{\red s}} \qquad
+\forall j \in N,\ \forall t \in T,\\
+\mbox{nonanticipativity }& \mbox{constraints}.
+\end{align*}
+\end{frame}
+
+\end{document}
