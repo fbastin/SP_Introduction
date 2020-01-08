@@ -39,7 +39,12 @@
 \def\bomega{\boldsymbol\omega}
 \def\bxi{\boldsymbol\xi}
 
-\title[Properties of recourse models]{Stochastic optimization\\Properties of recourse models}
+\def\rit{\mathcal{R}}
+
+\def\cF{\mathcal{F}}
+\def\cQ{\mathcal{Q}}
+
+\title[Recourse models]{Stochastic optimization\\Two-stage stochastic programming with recourse}
 
 \author{Fabian Bastin}
 
@@ -52,9 +57,387 @@
 \frame{\titlepage}
 
 \begin{frame}
+	\frametitle{Formalization}
+	
+	Uncertainty: representation by means of {\red random elements}.
+	The realizations are denoted by $\omega$, and they are drawn form the sample space $\Omega$.
+	
+	\mbox{}
+	
+	A {\red event} $A$ is a subset of $\Omega$; the collection of random of random events is denoted by $\mathcal{A}$.
+	The event $A \in \mathcal{A}$ occurs if the output of the experiment is an element from $A$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{A random linear program}
+	
+	Consider the (toy)	problem
+	\begin{align*}
+	\min_x\ & x_1+x_2\\
+	\mbox{s.t. } & \omega_1x_1 + x_2 \geq 7 \\
+	& \omega_2x_1 + x_2 \geq 4 \\
+	& x_1, x_2 \geq 0,
+	\end{align*}
+	where $\omega_1 \sim U[1,4]$, $\omega_2\sim U[1/3,1]$.
+\end{frame}
+
+\begin{frame}
+	\frametitle{What to do?}
+	
+	\begin{itemize}
+		\item
+		How to solve this problem?
+		\item
+		What is the {\sl meaning} of solving this problem?
+		\item
+		Is it possible to decide on $x$ {\sl after} having observed the realization of the random vector $\bomega$?\\
+		We then talk of an {\red wait-and-see} approach.
+		The problem is then easier to solve (we have here a simple linear program).
+		\item
+		But this approach is rarely appropriate!!! We usually have to decide on $x$ {\red before} we know the realizations of $\bomega$!
+		\item
+		Usually, the ``wait-and-see'' approach is not appropriate to model the reality behavior: we have to decide on $x$ before we know the realizations from $\omega$.
+		%		\item
+		%It the example, we have to decide what to do before we know the realizations $\omega_1$, $\omega_2$.
+		\item
+		Three suggestions:
+		\begin{enumerate}
+			\item
+			try to estimate, predict, the uncertainty;
+			\item
+			chance-constraints;
+			\item
+			penalties on deviations.
+		\end{enumerate}
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{A random linear program}
+	
+	Consider the following linear program, parametrized by the random vector $\bomega$:
+	\begin{align*}
+	\min_x\ & c^T x \\
+	\mbox{s.t. } & Ax = b \\
+	& T(\bomega)x = h(\bomega) \\
+	& x \in X,
+	\end{align*}
+	with $X = \lbrace x \in \rit^n | l \leq x \leq u \rbrace$. Example:
+	\begin{align*}
+	\min_x\ & x_1+x_2\\
+	\mbox{s.t. } & \omega_1x_1 + x_2 \geq 7 \\
+	& \omega_2x_1 + x_2 \geq 4 \\
+	& x_1, x_2 \geq 0.
+	\end{align*}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Remove the randomness?}
+	
+	A popular approach consists to look for reasonable values for $\omega_1$ and $\omega_2$.
+	How?
+	
+	\mbox{}
+	
+	Propositions:
+	\begin{itemize}
+		\item unbiased: choose the mean values for each random variable;
+		\item pessimistic: choose the worst-case values for $\omega$;
+		\item optimistic: choose the best-case values for $\omega$.
+	\end{itemize}
+	
+	Each approach will deliver a different optimal solution!
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Penalization of violations}
+	
+	Again, we have to deal with decision problems where the decision $x$ has to be taken before we know the realization of $\bomega$
+	\begin{itemize}
+		\item
+		We nevertheless have to know the distribution of $\bomega$ over $\Omega$.
+		We assume for now that $\Omega$ is finite.
+		\item
+		In models with recourse, the random constraints are ``soft''. They can be violated, but the violation cost will influence the choice of $x$. 
+		\item
+		In fact, a second stage linear program is introduced; it describes how the violated random constraints are handled.
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{The new problem\ldots}
+	
+	In the simplest case, we can simply penalize the constraints deviations by vectors of penalty coefficients $q_+$ and $q_-$.
+	\begin{align*}
+	\min\ & c^Tx+q^T_+s(\bomega)+q^T_-t(\bomega) \\
+	\mbox{s.t. } & Ax = b, \\
+	& T(\bomega)x + s(\bomega)-t(\bomega) = h(\bomega), \\
+	& x \in X.
+	\end{align*}
+	
+	\mbox{}
+	
+	But it is still not possible to solve the problem!
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{The new optimization problem}
+	
+	A reasonable, and solvable, problem is then
+	\begin{align*}
+	\min\ & c^Tx+E_{\bomega}[q^T_+s(\bomega)+q^T_-t(\bomega)] \\
+	\mbox{s.t. } & Ax = b, \\
+	& T(\omega)x + s(\omega)-t(\omega) = h(\omega),\ \forall \omega
+	\in \Omega \\
+	& x \in X.
+	\end{align*}
+	\begin{itemize}
+		\item
+		In general, we can react in a correct (and maybe optimal) way: we have a recourse to ``correct'' the first decision once the uncertainty is removed.
+		\item
+		A recourse structure in linear progamming is provided by 3 elements:
+		\begin{itemize}
+			\item
+			a set $Y \subset \rit^p$ that describes the feasible set of recourse actions, for instance $Y = \lbrace y \in \rit^p | y \geq 0 \rbrace$;
+			\item
+			$q$: a vector of recourse costs;
+			\item
+			$W$: a matrix $m \times p$, called the recourse matrix.
+		\end{itemize}
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Recourse formulation}
+	
+	The previous considerations lead us to formulate the following program:
+	\begin{align*}
+	\min\ & c^Tx+E_{\bomega}[q^Ty] \\
+	\mbox{s.t. } & Ax = b, \\
+	& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega
+	\in \Omega \\
+	& x \in X, \\
+	& y \in Y,\ \forall \omega.
+	\end{align*}
+	
+	We could have $W$ varying with the realization $\omega$.
+	If $W$ is unique, as in the previous formulation, we speak of {\red fixed recourse}: the recourse does not change with the scenario.\\
+	But how to decide on $y$?
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Some definitions}
+	
+	\[
+	\min_{x \in X | Ax = b} \left\lbrace c^Tx + E_{\bomega} \left[ \min_{y
+		\in Y} q^T y | W y = h(\bomega) - T(\bomega)x \right] \right\rbrace.
+	\]
+	\begin{itemize}
+		\item
+		{\red Second stage function}, or {\red recourse function} (penalty) $v :
+		\rit^m \rightarrow \rit$:
+		\[
+		v(z) \overset{def}{=} \min_{y \in Y} \lbrace q^Ty | W y = z \rbrace;
+		\]
+		this function describes the costs related to any vector $z$ representing the ``deviations from the random constraints $T(\omega)x = f(\omega)$''.
+		\item
+		{\red Expected value function}, or recourse of minimum expectation
+		$\mathcal{Q} : \rit^n \rightarrow \rit$:
+		\[
+		\cQ(x) = E_{\bomega} [ v (h(\bomega) - T(\bomega) x)].
+		\]
+		It describes the expected recourse cost, for any policy $x \in \rit^n$.
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{The two-stage linear stochastic problem (SP)}
+	
+	Using the previous definitions, we can rewrite the stochastic programming problem with recourse in terms of $x$ only:
+	\[
+	\min_{x \in X} \lbrace c^T x + \mathcal{Q}(x) \ |\  Ax = b \rbrace.
+	\]
+	It is a (nonlinear) mathematical programming problem in $\rit^n$.
+	
+	The properties of $\mathcal{Q}(x)$ influence the solution techniques.
+	
+	\mbox{}
+	
+	Is $\mathcal{Q}(x)$
+	\begin{itemize}
+		\item
+		linear?
+		\item
+		convex?
+		\item
+		continuous?
+		\item
+		differentiable?
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Expression in terms of $y$'s}
+	
+	\begin{align*}
+	\min_{x,\ y(\bomega)}\ & E_{\bomega} [ c^T x +
+	q^T y(\bomega) ] \\
+	\mbox{s.t. } & Ax = b & \mbox{first-stage constraints} \\
+	& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega \in \Omega &
+	\mbox{second-stage contraints} \\
+	& x \in X,\ y(\omega) \in Y.
+	\end{align*}
+	
+	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
+	\omega_2,\ldots,\omega_S \rbrace \subset \rit^r$.
+	\begin{align*}
+	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots . . . , S \\
+	T_s & = T (\omega),\ h_s = h(\omega) 
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Deterministic equivalent}
+	
+	Develop along the $S$ scenarios.
+	\begin{align*}
+	\min_{x, y_1, \ldots, y_S}\ & c^T x + p_1 q^T y_1 + p_2 q^T y_2 + \ldots
+	p_S q^Ty_S \\
+	\mbox{s.t. } & \\
+	& \begin{matrix} Ax & & & & & = b\\
+	T_1 x & + W y_1 & & & & = h_1 \\
+	T_2 x & & + W y_2 & & & = h_2 \\
+	\vdots & & & \ddots & \\
+	T_S x & & & & + W y_s & = h_s
+	\end{matrix} \\
+	& x \in X,\ y_1 \in Y,\ y_2 \in Y,\ldots, y_s \in Y.
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Deterministic equivalent (cont'd)}
+	
+	\begin{itemize}
+		\item
+		$y_s = y(\omega_s)$ is the recourse action to take if the scenario
+		$\omega_s$ occurs.
+		\item
+		Advantage: it is a linear program.
+		\item
+		Drawback: it is a linear program of (very) large dimension:
+		\begin{itemize}
+			\item
+			$n+pS$ variables;
+			\item
+			$m_1+mS$ constraints.
+		\end{itemize}
+		\item
+		Advantage: the linear program matrix has a special structure (stairway shape).\\
+		Can we exploit it?
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Large scale,\ldots and?}
+	
+	Assume that we have $r$ random variables ($\Omega \subset
+	\rit^r$).
+	\begin{itemize}
+		\item
+		Consider the following problem (source: Linderoth).
+		A Telecom company want to expand its network in order to meet an unknown (random) demand.
+		\item
+		There are 86 unknown demands.
+		Each demand is independant and take a value in a set of 7 values.
+		Consequently
+		\[
+		S = |\Omega| = 7^{86} \approx 4.77\times10^{72}.
+		\]
+		\ldots number of subatomic particles in the universe!
+		\item
+		It can be even worse\ldots\\
+		If $\Omega$ is not finite, but holds an infinite number of elements?
+		It is especially true with continuous random variables.
+		Our ``deterministic equivalent'' would have an infinite number of variables and constraints!
+		\item
+		We can solve an approximate problem, obtained by sampling over the random vector.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{An example (cont'd)}
+	
+	Consider again our toy problem
+	\begin{align*}
+	\min_x\ & x_1+x_2\\
+	\mbox{s.t. } & \omega_1x_1 + x_2 \geq 7 \\
+	& \omega_2x_1 + x_2 \geq 4 \\
+	& x_1, x_2 \geq 0,
+	\end{align*}
+	where $\omega_1 \sim U[1,4]$, $\omega_2[1/3,1]$.
+	
+	\mbox{}
+	
+	How to build the deterministic equivalent?
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example: recourse formulation}
+	
+	Assume for now that $\Omega$ is finite, with $S$ scenarios.
+	\begin{align*}
+	\min_x\ & x_1+x_2 + \sum_{s \in S} p_s \lambda (y_{1s} + y_{2s})\\
+	\mbox{s.t. } & \omega_{1s}x_1 + x_2 + y_{1s} \geq 7 \\
+	& \omega_{2s}x_1 + x_2 + y_{1s} \geq 4 \\
+	& x_1, x_2 \geq 0,\\
+	& y_{1s}, y_{2s} \geq 0.
+	\end{align*}
+	
+	A difficulty is therefore to decide how to construct the deterministic equivalent.
+	How to choose $\lambda$?
+	
+	\mbox{}
+	
+	How to construct the scenarios?
+	We can proceed with Monte Carlo sampling, with $p_s = 1/N$, $\forall s$.
+	We will explore this approach in more details later.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example: recourse formulation (cont'd)}
+	
+	More generally, we can build the program
+	\begin{align*}
+	\min_x\ & x_1+x_2 + E_{\omega}[Q(x)] \\
+	\mbox{s.t. } & x_1, x_2 \geq 0,
+	\end{align*}
+	and
+	\begin{align*}
+	Q(x) &= \min_y q_1y_1 + q_2y_2 \\
+	\mbox{s.t. } & \omega_1 x_1 + x_2 + y_1 \geq 7, \\
+	& \omega_2 x_1 + x_2 + y_2 \geq 4.
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
 \frametitle{Two-stage linear programming problem, fixed recourse}
 
-Consider again the problem
+More generally, consider the problem
 \[
 \min c^Tx + E_{\bxi}[q(\xi)^Ty(\xi)]
 \]
