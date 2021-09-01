@@ -18,9 +18,9 @@
 %\usepackage{pstricks}
 %\usepackage{pst-tree}
 %\usepackage{pictex}
-\usepackage{tikz}
-\usetikzlibrary{trees}
-\usepackage{tikz-qtree}
+%\usepackage{tikz}
+%\usetikzlibrary{trees}
+%\usepackage{tikz-qtree}
 
 \usepackage{times}
 
@@ -81,12 +81,17 @@
 
 \title[Stochastic optimization]{Stochastic optimization}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@cirrelt.ca} \\ Université de Montréal -- CIRRELT}
-
+\author{Fabian Bastin}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 \date{}
 
 \begin{document}
 
+\titlegraphic{\vspace{-0.5cm}
+	\includegraphics[scale=0.2]{imgs/udem.png}
+	\hspace{2cm}
+	\includegraphics[scale=0.07]{imgs/Fin-MLLogo.png}
+}
 \frame{\titlepage}
 
 \begin{frame}
@@ -569,175 +574,12 @@ MR(t) &= -c + qP[\bomega \geq t] + rP[\bomega \leq t]\\
 &= -c + q(1-F(t)) + rF(t).
 \end{align*}
 If we set the marginal revenue to 0, we get
-\[
+$$
 MR(t) = 0 \mbox{ iff } F(t) = \frac{q-c}{q-r},
-\]
+$$
 and we recover the previous solution.
 
 %Pour des compléments, consultez Linderoth.
-
-\end{frame}
-
-%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{Formulation with recourse}
-
-More generally, we consider the (linear) program
-\begin{align*}
-\min\ & c^Tx+E_{\bomega}[q(\bomega)^Ty(\bomega)] \\
-\mbox{t.q. } & Ax = b, \\
-& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega
-\in \Omega \\
-& x \in X, \\
-& y(\omega) \in Y,\ \forall \omega.
-\end{align*}
-
-\mbox{}
-
-Fixed recourse: $W$ does not change with the scenario.
-
-\mbox{}
-
-How to decide over $y$?
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Some definitions}
-
-\[
-\min_{x \in X | Ax = b} \left\lbrace c^Tx + E_{\bomega} \left[ \min_{y
-      \in Y} q(\bomega)^T y | W y = h(\bomega) - T(\bomega)x \right] \right\rbrace.
-\]
-\begin{itemize}
-\item
-{\red Second stage function}, or {\red recourse function} $v :
-\Omega \times \rit^m \rightarrow \rit$:
-\[
-v(\omega, z) \overset{def}{=} \min_{y \in Y} \lbrace q(\omega)^Ty | W y = z \rbrace;
-\]
-%cette fonction décrit les coûts correspondants à n'importe quel
-%vecteur $z$ de ``déviations des contraintes aléatoires $T(\omega)x =
-%f(\omega)$.''
-\item
-{\red Expected value function}, or recourse of minimum expectation
-$\mathcal{Q} : \rit^n \rightarrow \rit$:
-\[
-\cQ(x) = E_{\bomega} [ v (\bomega, h(\bomega) - T(\bomega) x)].
-\]
-It describes the expected recourse cost, for any first-stage decision $x \in \rit^n$.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{The two-stage (linear) stochastic program}
-
-One can reformulate our optimization problem as
-\[
-\min_{x \in X} \left\lbrace c^T x + \mathcal{Q}(x) \ |\  Ax = b \right\rbrace.
-\]
-It is a (nonlinear) optimization problem in $\rit^n$.
-
-\mbox{}
-
-In terms of $y$'s:
-\begin{align*}
-\min_{x,\ y(\bomega)}\ & E_{\bomega} [ c^T x + q(\bomega)^T y(\bomega) ] \\
-\mbox{s.t. } & Ax = b & \mbox{first-stage constraints} \\
-& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega \in \Omega &
-\mbox{second-stage constraints} \\
-& x \in X,\ y(\omega) \in Y.
-\end{align*}
-
-Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
-\omega_2,\ldots,\omega_S \rbrace \subset \rit^r$.
-\begin{align*}
-P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots . . . , S \\
-T_s & = T (\omega),\ h_s = h(\omega) 
-\end{align*}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Deterministic equivalent}
-
-\begin{align*}
-\min_{x, y_1, \ldots, y_S}\ & c^T x + p_1 q_1^T y_1 + p_2 q_2^T y_2 + \ldots
-p_S q_S^Ty_S \\
-\mbox{t.q. } & \\
-& \begin{matrix} Ax & & & & & = b\\
-T_1 x & + W y_1 & & & & = h_1 \\
-T_2 x & & + W y_2 & & & = h_2 \\
-\vdots & & & \ddots & \\
-T_S x & & & & + W y_s & = h_s
-\end{matrix} \\
-& x \in X,\ y_1 \in Y,\ y_2 \in Y,\ldots, y_s \in Y.
-\end{align*}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Deterministic equivalent (II)}
-
-\begin{itemize}
-\item
-$y_s = y(\omega_s)$ is the recourse action to take if the scenario $\omega_s$ occurs.
-\item
-{\color{blue}\it Advantage}: it is a linear program.
-\item
-{\color{blue}\it Disadvantage}: it is a linear program of (very) high dimension:
-\begin{itemize}
-\item
-$n+pS$ variables;
-\item
-$m_1+mS$ constraints.
-\end{itemize}
-But the constraints matrix has a staircase structure.\\
-It is possible to exploit it (L-Shaped algorithm -- Benders decomposition).
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Large scale,\ldots and?}
-
-Assume that we have $r$ random variables ($\Omega \subset
-\rit^r$).
-\begin{itemize}
-\item
-Consider the following problem (source: Linderoth).
-A Telecom company want to expand its network in order to meet an unknown (random) demand.
-\item
-There are 86 unknown demands.
-Each demand is independant and take a value in a set of 7 values.
-Consequently
-\[
-S = |\Omega| = 7^{86} \approx 4.77\times10^{72}.
-\]
-\ldots number of subatomic particles in the universe!
-\item
-It can be even worse\ldots\\
-If $\Omega$ is not finite, but holds an infinite number of elements?
-It is especially true with continuous random variables.
-Our ``deterministic equivalent'' would have an infinite number of variables and constraints!
-\item
-We can solve an approximate problem, obtained by sampling over the random vector.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Decomposition methods}
-
-{\red General principle}: the nonlinear term in the objective, that is the recourse function $\cQ(x)$, requires to solve all the linear second-stage programs.
-
-\mbox{}
-
-Is it possible to avoid the repeated second-stage functions evaluations?
-
-\mbox{}
-
-{\blue Idea}: build a master problem in $x$, but compute the complete objective function (involving first- and second-stage decision) only as a subproblem.
 
 \end{frame}
 
