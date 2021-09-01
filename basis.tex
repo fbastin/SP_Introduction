@@ -1,0 +1,179 @@
+
+\begin{frame}
+\frametitle{Probability space}
+
+A probability space is a triplet $(\Omega,\; \mathcal{F},\; P)$, where
+\begin{enumerate}
+\item
+$\Omega$ is the sampling space (an arbitrary, non-empty, set);
+\item
+$\mathcal{F} \subseteq 2^{\cQ}$ is a $\sigma$-algebra (also called $\sigma$-field) -- a collection of subsets of $\Omega$, called events, such that:
+\begin{itemize}
+	\item
+	$\Omega \in \cF$,
+	\item
+	if $A \in \cF$, then $\Omega \backslash A \in \cF$,
+	\item
+	if $A_i \in \cF$ for $i=1,2,\ldots,$ then $(\cup_i A_i) \in \cF$;
+\end{itemize}
+\item
+$P$: $\cF \rightarrow [0,1]$ is a probability measure, such that
+\begin{itemize}
+	\item
+	if $\{A_i\} \subseteq \cF$ is a countable collection of set ensembles, with an empty intersection for any two sets, then $P[ \cup A_i ] = \sum P[A_i]$,
+	\item
+	$P(\Omega) = 1$.
+\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Random variable}
+
+A {\red random variable} $\bxi$ on a random space $(\Omega,	\mathcal{A}, P)$ is a real-valued function $\xi(\omega)$ $(\omega \in \Omega)$ such that $\lbrace \omega | \xi(\omega) \leq x \rbrace$ is an event for all finite $x$.\\
+We can thus associate a probability to $(\xi(\omega) \leq x)$.
+
+\mbox{}
+
+$\bxi$ has a {\red cumulative function} $F_{\bxi}(x) = P[\bxi \leq x]$.
+
+\mbox{}
+
+$\Xi \in \rit^n$ is the {\red support} of $\bxi$ if it is the smallest closed subset in $\rit^N$ such that $P[\bxi \in \Xi] = 1$.
+
+\mbox{}
+
+{\red Discrete random variables} can only take a finite or countable number of values $\xi_k$, $k = 1,\ldots, K$, with a {\red probability mass} $p_k = P[\bxi = \xi_k]$, and $\sum_{k=1}^K p_k = 1$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Continuous random variable}
+
+{\red Continuous random variables} have a density $f(\bxi)$.
+\begin{itemize}
+\item
+$P[\bxi = x] = 0$.
+\item
+The probability that $\bxi$ belongs to the interval $[a,b]$ is
+\begin{align*}
+P[a \leq \bxi \leq b] & = \int_a^b f(\xi) d\xi\\
+& = \int_a^b dF(\xi) \\
+& = F(b)-F(a).
+\end{align*}
+\item
+The {\blue expectation} of $\bxi$ is
+\begin{align*}
+E[\bxi] & = \sum_{k=1}^K p_k\xi_k; \\
+E[\bxi] & = \int_{-\infty}^{\infty} x f(\xi)d\xi =
+\int_{-\infty}^{\infty} x dF(\xi).
+\end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{(Cumulative) distribution function}
+
+Recall that
+\[
+F_{\bxi}(x) = P[\xi \leq x]
+\]
+
+Form its definition, it is easy to that $F_{\bxi}(x)$ has the following properties
+\begin{enumerate}
+\item
+$0 \leq F_{\bxi}(x) \leq 1 \mbox{ for all } x$.
+\item
+$F_{\bxi}(x)$ is nondecreasing.
+\item
+$\lim_{x\rightarrow\infty} F_{\bxi}(x) = 1$ and $\lim_{x \rightarrow -\infty}
+= 0$.
+\end{enumerate}
+
+\mbox{}
+
+If $\bxi$ is a continuous random variable, then $F_{\bxi}(\bxi) \sim U[0,1]$.
+Indeed, if $\bxi$ is continuous, $F_{\bxi}(\cdot)$ is continuous and invertible on $\Xi$, and, for any $u \in [0,1]$,
+\[
+P[F_{\bxi}(\bxi) \leq u] = P\left[\bxi \leq F^{-1}_{\bxi}(u)\right] = F_{\bxi}\left(F^{-1}_{\bxi}(u)\right) = u.
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Inverse distribution function}
+
+The inverse of the distribution function is called the quantile function.
+However, how to define it for discrete random variables?
+
+\mbox{}
+
+We can introduce the {\red generalized inverse distribution function}
+\[
+F_{\bxi}^{-1}(p) = \inf\{x \in \rit \,|\, F_{\bxi(x)} \geq p\}.
+\]
+
+\mbox{}
+
+In other words, the generalized inverse corresponds to the quantile.
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Formalization}
+
+Uncertainty: representation by means of {\red random elements}.
+The realizations are denoted by $\omega$, and they are drawn form the sample space $\Omega$.
+
+\mbox{}
+
+A {\red event} $A$ is a subset of $\Omega$; the collection of random of random events is denoted by $\mathcal{A}$.
+The event $A \in \mathcal{A}$ occurs if the output of the experiment is an element from $A$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{KKT conditions}
+
+Consider the general problem
+\begin{align*}
+\min_x \ & f(x) \\
+\mbox{s.t. } & g_i(x) = 0, \ i \in \mathcal{E}, \\
+& g_i(x) \geq 0, \ i \in \mathcal{I}.
+\end{align*}
+
+\mbox{}
+
+The Lagrangian of the problem is defined as
+\[
+\mathcal{L}(x,\lambda) = f(x) - \sum_{i \in \mathcal{E} \cup \mathcal{I}} \lambda_i g_i(x).
+\]
+
+\mbox{}
+
+We denote by $\mathcal{A}(x)$ the active set, defined as the set of active constraints:
+\[
+\mathcal{A}(x) \overset{def}{=} \mathcal{E} \cup \lbrace i \in \mathcal{I} \,|\, g_i(x) = 0 \rbrace.
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{KKT conditions (cont'd)}
+
+Karush-Kuhn-Tucker conditions are
+\begin{align*}
+\nabla_x \mathcal{L}(x^*, \lambda^*) & = 0 \\
+g_i(x^*) & = 0, \ \forall\, i \in \mathcal{E}, \\
+g_i(x^*) & \geq 0, \ \forall\, i \in \mathcal{I}, \\
+\lambda_i^* & \geq 0, \ \forall\, i \in \mathcal{I}, \\
+\lambda_i^* g_i(x^*) & = 0, \ \forall\, i \in \mathcal{E} \cup \mathcal{I},
+\end{align*}
+where $\mathcal{L}(x, \lambda)$ is the Lagrangian at $(x, \lambda)$.
+
+\[
+\nabla_x \mathcal{L}(x^*, \lambda^*) = \nabla f(x^*) - \sum_{i \in \mathcal{A}(x^*)} \lambda_i^* \nabla g_i(x^*).
+\]
+
+\end{frame}

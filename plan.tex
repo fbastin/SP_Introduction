@@ -1,0 +1,182 @@
+\documentclass{beamer}
+%\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usetheme{Singapore}
+\usepackage{xcolor}
+\setbeamertemplate{footline}[frame number]
+
+%\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+%\usepackage[pst]{xcolor}
+%\usepackage{xxcolor}
+\usepackage{mathlist}
+
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{amsmath,amssymb}
+%\usepackage{colortbl}
+%\usepackage[english]{babel}
+\usepackage{pstricks}
+%\usepackage{pictex}
+
+\usepackage{times}
+
+%\usepackage{pst-tree}
+
+\usepackage{ulem}
+
+\usepackage{listings}
+%\topmargin=-0.6in
+\lstloadlanguages{C++}
+\lstset{language=C++}
+%%}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bomega{\boldsymbol\omega}
+
+\title[Plan]{Introduction to Stochastic optimization}
+
+\author{Fabian Bastin}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\date{}
+
+\begin{document}
+
+\titlegraphic{\vspace{-0.5cm}
+	\includegraphics[scale=0.2]{imgs/udem.png}
+\hspace{2cm}
+	\includegraphics[scale=0.07]{imgs/Fin-MLLogo.png}
+}
+\frame{\titlepage}
+
+\begin{frame}
+%\frametitle{Objectives}
+
+%\section{Objectifs}
+
+{\bf Main goal}: introduction to stochastic optimization, that aims to optimize (in the mathematical way) while taking the uncertainty into account.
+
+\mbox{}
+
+{\bf Plan}
+\begin{itemize}
+\item
+uncertainty and optimization;
+\item
+stochastic programming with recourse;
+\item
+two-stage linear stochastic programming, compact and extended formulations, L-Shaped method;
+\item
+multistage problems;
+\item
+convex and non convex problems
+\item
+sampling methods and consistency analysis;
+\item
+stochastic gradient descent -- stochastic approximation;
+\item
+optimization by simulation.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Organization}
+
+{\bf Prerequise}
+\begin{itemize}
+\item
+good mathematical and statistical background;
+\item
+it is advised to have some background in optimization;
+\item
+basic knowledge in programming.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{References}
+
+{\bf Main references}
+\begin{itemize}
+\item
+John R. Birge et François Louveaux, {\sl Introduction to Stochastic
+  Programming}, Springer-Verlag, 1997.
+\item
+Warren B. Powell, {\sl Stochastic Optimization and Learning},  \url{https://castlelab.princeton.edu/}
+\end{itemize}
+
+{\bf Suggested books}
+\begin{itemize}
+\item
+Peter Kall et Stein W. Wallace, {\sl Stochastic Programming}, John
+  Wiley \& Sons, 1994.
+\item
+Andrzej Ruszczynski et Alexander Shapiro, {\sl Stochastic
+  Programming}, Elsevier, 2003.
+\end{itemize}
+
+Additional references will be occasionnally used.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Numerical references}
+
+{\bf Software}
+\begin{itemize}
+\item
+Julia (\url{https://www.julialang.org})
+\item
+Gurobi (\url{https://www.gurobi.com})
+\end{itemize}
+
+\mbox{}
+
+{\bf Class material}
+\begin{itemize}
+	\item
+	\url{https://github.com/fbastin/SP_Introduction}
+	\item
+\url{https://github.com/fbastin/optim}
+\end{itemize}
+
+\mbox{}
+
+{\bf Discord channel}: \url{https://discord.gg/ycmSAcnC}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Evaluation}
+
+\begin{itemize}
+\item
+3 homeworks (20\% each);
+\item
+1 project (40\%)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Objectives}
+ 
+\underline{Introduction} to stochastic optimization, i.e.
+\begin{itemize}
+\item
+get familiar with the terminology, the possibilities and main limitations of stochastic programming models;
+\item
+learn how to formulate analytical models incorporating uncertainty as stochastic programs, and how to represent this uncertainty;
+\item
+learn the basic theory;
+\item
+learn the main algorithms used to solved the associated problems.
+\end{itemize}
+\end{frame}
+
+
+\end{document}
