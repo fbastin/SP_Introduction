@@ -44,11 +44,9 @@
 \def\cF{\mathcal{F}}
 \def\cQ{\mathcal{Q}}
 
-\title[Recourse models]{Stochastic optimization\\Two-stage stochastic programming with recourse}
-
-\author{Fabian Bastin}
-
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 \date{}
+\title[Two-stage SP]{Stochastic optimization\\Two-stage stochastic programming with recourse}
 
 % manque la caractérisation de K_2 comme polyèdre. Voir Birge & Louveaux, chapitre 2
 
@@ -653,7 +651,7 @@ y_i^+(\xi(\omega)) = h_i(\xi(\omega)) - T_i(\xi(\omega))x + u,\  y_i^-(\xi(\omeg
 $$
 Therefore, 
 $$
-y_i^+ - y_i^-(\xi(\omega)) = h_i(\xi(\omega)) - T_i(\xi(\omega))x,\ y_i^+ \geq 0,\ y_i^- \geq 0.
+y_i^+(\xi(\omega)) - y_i^-(\xi(\omega)) = h_i(\xi(\omega)) - T_i(\xi(\omega))x,\ y_i^+ \geq 0,\ y_i^- \geq 0.
 $$
 %Therefore, $y_i^+ - y_i^-$ are feasible.
 Moreover, since $\mathcal{Q}$ is finite, $Q(x, \xi(\omega))$ is feasible almost surely,
@@ -694,13 +692,13 @@ By componing these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 Assume $\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0$ with probability one, $\forall i$.
 Any feasible solution satisfies
 $$
-y^+(\omega)-y^-(\omega)=h(\xi(\omega))-T(\xi(\omega))x, \ y^+(\omega) \geq 0,\ y^-(\omega) \geq 0.
+y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x, \ y^+(\xi(\omega)) \geq 0,\ y^-(\xi(\omega)) \geq 0.
 $$
 Therefore for almost every $\omega$, $Q(x,\xi(\omega))$ is bounded below by 0, and
 from the fundamental theorem of linear programming, we can choose as optimal solution
 \begin{align*}
-y^+(\omega) &= \left(h(\xi(\omega))-T(\xi(\omega))x\right)^+,\\
-y^-(\omega) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
+y^+(\xi(\omega)) &= \left(h(\xi(\omega))-T(\xi(\omega))x\right)^+,\\
+y^-(\xi(\omega)) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
 \end{align*}
 where $a^+ = \max\{0, a\}$.
 \end{proof}

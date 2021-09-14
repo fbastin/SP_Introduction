@@ -507,7 +507,7 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 		
 		A good reference: Luc Devroye, \textsl{Non-Uniform
 			Random Variate Generation},
-		\url{http://cg.scs.carleton.ca/~luc/rnbookindex.html}.
+		\url{http://luc.devroye.org/rnbookindex.html}.
 		
 		\mbox{}
 		
@@ -742,8 +742,30 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 		R^2 = X^2 + Y^2 ; Y = R \sin \Theta.
 		\]
 		
-		It gives an elegant approach, but incompatible with variance reduction techniques and slower than inversion.
+		It gives an elegant approach, but incompatible with variance reduction techniques and can be slower than inversion.
 		
-	\end{frame}
+\end{frame}
+
+\begin{frame}
+\frametitle{Box-Muller Algorithm}
+
+\begin{enumerate}
+\item
+Independently draw $U_1$, $U_2$ from a $U(0,1)$ distribution.
+\item
+Set
+\begin{align*}
+R &= \sqrt{-2 \log (U_1)} \\
+\theta &= 2 \pi U_2
+\end{align*}
+\item
+Set
+\begin{align*}
+X &= R \cos(\theta) \\
+Y &= R \sin(\theta)
+\end{align*}
+\end{enumerate}
+		
+\end{frame}
 	
 \end{document}
