@@ -818,7 +818,7 @@ The difference comes from the fact that a point is not in $K_2^P$ as soon as it 
 \frametitle{Recourse function}
 
 Let $y^*_1$ and $y^*_2$ be two optimal solutions of $v(\xi, z)$, associated to $z = z_1$ and $z = z_2$, respectively.
-Then, the convex combination $y^*_{\alpha} = \alpha y_1^*+(1-\alpha)y_2^*$, $\alpha \in [0,1]$, is feasible with respect to $z_{\alpha} = \alpha z_1 + (1-\alpha) z_2$, as $\alpha y_1^*+(1-\alpha)y_2^* \geq 0$, and
+Then, the convex combination $y_{\alpha} \overset{def}{=} \alpha y_1^*+(1-\alpha)y_2^*$, $\alpha \in [0,1]$, is feasible with respect to $z_{\alpha} = \alpha z_1 + (1-\alpha) z_2$, as $\alpha y_1^*+(1-\alpha)y_2^* \geq 0$, and
 $$
 W(\alpha y_1^*+(1-\alpha)y_2^*)
 = \alpha W y_1^* + (1-\alpha) W y_2^*
@@ -947,6 +947,33 @@ y = \begin{pmatrix} y^+ \\ y^- \end{pmatrix} \quad q = \begin{pmatrix}
 
 \mbox{}
 
+Relying on the fundamental theorem of linear programming, we are looking from an optimal basis solution, implying that $y^+ = 0$ or $y^- = 0$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{An example\ldots}
+
+We immediately see that
+$$
+y^+ = \begin{cases}
+	\xi - x & \text{ if } \xi - x \geq 0, \\
+	0 & \text{otherwise,}
+\end{cases}
+$$
+and
+$$
+y^- = \begin{cases}
+	-\xi + x & \text{ if } \xi - x < 0, \\
+	0 & \text{otherwise,}
+\end{cases}
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Alternative approach}
+
 Dual:
 \begin{align*}
 \max\ & (\xi-x)\pi \\
@@ -959,6 +986,12 @@ or
 & -\pi + s_2 = 1 \\
 & s_1 \geq 0,\ s_2 \geq 0
 \end{align*}
+
+Consequently,
+\[
+Q(x,\xi) = \begin{cases} \xi-x & \mbox{ si } x \leq \xi, \\
+	x - \xi & \mbox{ si } x \geq \xi. \end{cases}
+\]
 
 \end{frame}
 
@@ -1001,12 +1034,6 @@ $x \geq \xi$: then,
 y^- = x-\xi,\quad y^+ = 0.
 \]
 \end{itemize}
-\item
-Consequently,
-\[
-Q(x,\xi) = \begin{cases} \xi-x & \mbox{ si } x \leq \xi, \\
-x - \xi & \mbox{ si } x \geq \xi. \end{cases}
-\]
 \end{itemize}
 
 \end{frame}
@@ -1280,7 +1307,7 @@ Goal: extend the previous results.
 \mbox{}
 
 Questions: convexity, differentiability, optimality.
-We will also consider the concept of lower semi-continuity.
+We should also consider the concept of lower semi-continuity.
 
 \end{frame}
 

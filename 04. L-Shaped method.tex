@@ -1,20 +1,31 @@
 \documentclass{beamer}
+%\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
 \usepackage{xcolor}
 \setbeamertemplate{footline}[frame number]
 
+%\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+%\usepackage[pst]{xcolor}
+%\usepackage{xxcolor}
 \usepackage{mathlist}
 
-\usepackage[francais]{babel}
-\usepackage{amsmath,amssymb}
+%\usepackage[frenchb]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
 
-\newtheorem{theo}{Théorème}
+\newtheorem{theo}{Theorem}
+
+\usepackage{pstricks}
+
+%\usepackage{eepic}
 
 \usepackage{times}
 
-\usepackage{ulem, pstricks}
+%\usepackage{pst-tree}
+
+\usepackage{ulem}
 
 \usepackage{listings}
 %\topmargin=-0.6in
@@ -26,17 +37,18 @@
 
 \def\bxi{\boldsymbol\xi}
 \def\bomega{\boldsymbol\omega}
+\def\bxi{\boldsymbol\xi}
 
+\def\rit{\mathcal{R}}
+
+\def\cF{\mathcal{F}}
 \def\cK{\mathcal{K}}
 \def\cB{\mathcal{B}}
 \def\cQ{\mathcal{Q}}
 
-
-\title[$L$-shaped method]{Stochastic optimization\\$L$-shaped method}
-
-\author[Fabian Bastin]{Fabian Bastin\\\url{fabian.bastin@polymtl.ca}\\Université de Montréal -- CIRRELT}
-
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 \date{}
+\title[$L$-shaped method]{Stochastic optimization\\$L$-shaped method}
 
 \begin{document}
 
@@ -780,32 +792,6 @@ Is it possible to limit the expansion?
 	
 \end{frame}
 
-
-\begin{frame}
-\frametitle{Note: primal-dual conversion}
-
-\begin{center}
-	\begin{tabular}{|c|c|}
-		\hline
-		\hline
-		{\bf Minimisation} & {\bf Maximisation} \\
-		\hline
-		\hline
-		Constraints & Variables \\
-		$\geq$ & $\geq 0$ \\
-		$\leq$ & $\leq 0$ \\
-		$=$ & unconstrained \\
-		\hline
-		Variables & Constraints \\
-		\hline
-		$\geq 0$ & $\leq$ \\
-		$\leq 0$ & $\geq$ \\
-		unconstrained & $=$ \\
-		\hline
-	\end{tabular}
-\end{center}
-
-\end{frame}
 
 %\begin{frame}
 %\frametitle{Dual (cont'd)}	
