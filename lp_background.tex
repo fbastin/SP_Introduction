@@ -45,7 +45,7 @@
 \def\cK{\mathcal{K}}
 \def\cB{\mathcal{B}}
 \def\cQ{\mathcal{Q}}
-\def\cR{\mathcal{R}}
+\def\RR{\mathcal{R}}
 
 \def\bb{\boldsymbol{b}}
 \def\bc{\boldsymbol{c}}
@@ -53,6 +53,8 @@
 \def\bA{\boldsymbol{A}}
 \def\bB{\boldsymbol{B}}
 \def\bD{\boldsymbol{D}}
+
+\def\RR{\mathbb{R}}
 
 \author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 \date{}
@@ -71,7 +73,7 @@ Linear program, standard form:
 \mbox{s.t. } Ax &= b,\\
 x &\geq 0,
 \end{align*}
-with $x, c \in \rit^n$, $b \in \rit^m$, $A \in \rit^{m \times n}$.
+with $x, c \in \RR^n$, $b \in \RR^m$, $A \in \RR^{m \times n}$.
 
 \mbox{}
 
@@ -152,9 +154,9 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 \end{frame}
 
 \begin{frame}
-	\frametitle{Théorème fondamental de la programmation linéaire}
-	
-	Soit un PL sous forme standard, avec $\bA$ de dimension $m \times n$ et de rang plein (i.e. rang($\bA$) = m).
+	\frametitle{Fundamental theorem of linear programming}
+
+Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\bA$) = m.
 	\begin{itemize}
 		\item
 		S'il y a une solution réalisable, alors il y a une solution de base réalisable.
@@ -181,7 +183,7 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 		\mbox{t.q. } & A^T \lambda \leq c \\
 		& \lambda \geq 0
 	\end{align*}
-	$A \in \cR^{m \times n}$, $c, x, \in \cR^n$, $\lambda, b \in \cR^m$.
+	$A \in \RR^{m \times n}$, $c, x, \in \RR^n$, $\lambda, b \in \RR^m$.
 	
 	Note: les contraintes duales peuvent aussi s'écrire $\lambda^T A \leq c^T$ (en appliquant l'opérateur de transposition de part et d'autre de l'inégalité).
 	
@@ -243,7 +245,7 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 		\mbox{t.q. } & \lambda^T A \leq c^T \\
 	\end{align*}
 	
-	Forme asymétrique: $\lambda \in \cR$.
+	Forme asymétrique: $\lambda \in \RR$.
 	
 \end{frame}
 

@@ -314,11 +314,11 @@ $\exists\, u \in \rit^m$ such that $u^T A \geq 0$ and $u^T b < 0$;
 	
 \mbox{}
 
-Therefore, if $y$ is not feasible, $\exists$ $\tilde{u}$ such that
+Therefore, if $y$ is not feasible, $\exists\, u$ such that
 \[
--W^T\tilde{u} \geq 0 \mbox{ et } (h - T\hat{x})^T \tilde{u} < 0.
+W^Tu \geq 0 \mbox{ et } (h - T\hat{x})^T u < 0.
 \]
-or
+or, by setting $\tilde{u} = -u$,
 \[
 W^T\tilde{u} \leq 0 \mbox{ et } (h - T\hat{x})^T \tilde{u} > 0.
 \]
@@ -1407,7 +1407,7 @@ Set $\nu = 0$.
 Increment $\nu$.
 Solve the master problem
 \[
-\min \left\lbrace c^Tx+\sum_{s \in S} p_s\theta_s \,|\,
+\min \left\lbrace c^Tx+\sum_{s \in S} \theta_s \,|\,
 (x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \in \mathcal{B}_0 \cap \mathcal{B}_1 \right\rbrace.
 \]
 Record the solution $( x^{\nu}, \theta_1^{\nu}, \theta_2^{\nu},\ldots,
@@ -1434,10 +1434,10 @@ T(\xi_k)x) \geq 0\rbrace.
 Note: this inequality is the same than in the simple-cut version.\\
 Return to Step 1.
 \item
-If $\mathcal{Q}(x^{\nu}) < \infty$, we are able to solve all the second-stage problems, for all the scenarios, and obtain the corresponding dual solutions $\lambda_s^*$.
+If $\mathcal{Q}(x^{\nu}) < \infty$, we are able to solve all the second-stage problems, for all the scenarios, and obtain the corresponding dual solutions $\hat{\pi}_s$.
 We get the subgradients
 \[
-u = -T_s^T\lambda_s^* \in \partial Q(x^{\nu}, \xi_s).
+u = -T_s^T\hat{\pi}_s \in \partial Q(x^{\nu}, \xi_s).
 \]
 \end{itemize}
 	
@@ -1453,7 +1453,7 @@ If $Q(x^{\nu}, \xi_s) \leq \theta_s$, $\forall\, s \in S$, stop: $x^{\nu}$ is op
 If $Q(x^{\nu}, \xi_s) > \theta_s$,
 \[
 \mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \,|\,
-\theta_s \geq Q(x^{\nu}, \xi_s) + u^T(x-x^{\nu})\rbrace.
+\theta_s \geq p_s Q(x^{\nu}, \xi_s) + p_s u^T(x-x^{\nu})\rbrace.
 \]
 		
 Return to Step 1.
