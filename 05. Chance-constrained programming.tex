@@ -44,11 +44,13 @@
 \def\aff{\operatorname{aff}}
 \def\cR{\mathcal{R}}
 
+\def\EE{\mathbb{E}}
+
 \newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
 
 \title[CP]{Stochastic optimization\\Chance constrained programming}
 
-\author{Fabian Bastin\\\url{fabian.bastin@polymtl.ca}}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 
 \date{}
 
@@ -59,9 +61,33 @@
 \frame{\titlepage}
 
 \begin{frame}
+\frametitle{A long story}
+
+Introduced in 1959 by Charnes and Cooper \url{https://dl.acm.org/doi/10.1287/mnsc.6.1.73}
+
+\mbox{}
+
+And also a bit improbable. Cooper dropped high-school to support his family, and became a professional boxer. He became an accountant for Eric Louis Kohler, met while hitchhiking. Kohler financed his bachelor at University of Chicago. At 26, he enrolled at Columbia University and finished his coursework and dissertation. Due to its clam that decision making was not a centralized process, he never received his PhD. The collaboration with Charnes was however successful, with more than 200 publications, and led a successful academic carrer. Source: \url{https://www.informs.org/Explore/History-of-O.R.-Excellence/Biographical-Profiles/Cooper-William-W}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Cooper and Charnes}
+
+\begin{center}
+\includegraphics[width=0.4\textwidth]{imgs/coopercharnes.png}
+
+INFORMS John Von Neumann prize (with Richard J. Duffin)
+\end{center}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Motivation}
 
-We consider the toy problem (taken from J. Linderoth)
+Source: J. Linderoth \url{https://homepages.cae.wisc.edu/~linderot/classes/ie495/lecture22.pdf}
+
+We consider the toy problem
 \begin{align*}
 \min_x\ & x_1 + x_2 \\
 \mbox{s.t. } & \xi_1 x_1 + x_2 \geq 7 \\
@@ -342,7 +368,7 @@ We can also allow the sale of some parts of the portfolio by allowing some $x_i$
 
 (Taken from S. Boyd -- \url{http://ee364a.stanford.edu/lectures/chance_constr.pdf})
 
-$n = 10$ assets, $\alpha = 0.95$, $\beta = 0.05$, $\mathcal{C} = \{x | x \succeq -0.1\}$
+$n = 10$ assets, $\alpha = 0.95$, $\gamma = 0.05$, $\mathcal{C} = \{x | x \succeq -0.1\}$
 
 \mbox{}
 
@@ -378,6 +404,73 @@ Usually very hard.
 \mbox{}
 
 Use a bounding approximation or sample average approximation (SAA).
+
+\mbox{}
+
+We will discuss about it in more details when introducing Monte Carlo techniques.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Value at Risk}
+
+Source: \url{https://web.stanford.edu/class/ee364a/lectures/chance_constr.pdf}
+
+\mbox{}
+
+Value-at-risk of random variable $Z$, at level $\eta$:
+$$
+\text{VaR}(Z;\eta) = \inf \{ \gamma \,|\, P[Z \leq \gamma] \geq \eta \}
+$$
+
+\mbox{}
+
+Therefore, the value-at-risk is simply the inverse of the cdf evaluated at $\eta$!
+$$
+\text{VaR}(Z;\eta) = F_Z^{-1}(\eta).
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditional Value at Risk}
+
+$$
+\text{CVaR}(Z; \eta) = \inf_{\beta} \left( \beta + \frac{1}{1 - \eta} \EE \left[ (Z - \beta)_+ \right] \right).
+$$
+
+\mbox{}
+
+Assume that the distribution of $Z$ is continuous.
+
+\mbox{}
+
+The solution $\beta^*$ in the CVaR definition can be obtained by searching for the root ot the derivative w.r.t. $\beta$:
+$$
+0 = \frac{d}{d \beta} \left( \beta + \frac{1}{1 - \eta} \EE \left[ (Z - \beta)_+ \right] \right)
+= 1 - \frac{1}{1 - \eta} P[ Z \geq \beta ],
+$$
+leading to
+$$
+P[ Z \geq \beta ] = 1 - \eta.
+$$
+As $Z$ is continuous, this last equation can be rewritten as
+$$
+P[ Z \leq \beta ] = \eta = \text{VaR}(Z; \eta).
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Expected shortfall}
+
+Conditional tail expectation (or expected shortfall)
+\begin{align*}
+\EE[z \,|\, z \geq \beta^* ]
+&= \EE[\beta^* + (z - \beta^*) \,|\, z \geq \beta^*] \\
+&= \beta^* + \frac{\EE\left[(z - \beta^*)_+\right]}{P[z \geq \beta^*]} \\
+&= \text{CVaR}(z; \eta)
+\end{align*}
 
 \end{frame}
 
