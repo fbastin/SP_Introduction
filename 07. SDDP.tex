@@ -1,0 +1,835 @@
+% Compile with xelatex --shell-escape
+
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usetheme{Singapore}
+\usepackage{xcolor}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+%\usepackage{mathlist}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{defi}{Définition}
+\newtheorem{theo}{Theorem}
+\newtheorem{coro}{Corollaire}
+\newtheorem{lem}{Lemme}
+
+%\usepackage{epic,eepic}
+%\usepackage{pstricks, pst-tree}
+
+\usepackage{times}
+
+\usepackage{ulem}
+%\usepackage{crayola}
+
+\usepackage{pstricks, pst-tree}
+\usepackage{auto-pst-pdf}
+
+%\usepackage{gnuplottex}
+% This variables allows to conditional generate the Gnuplot figures.
+%\def \gnuplotx {Generate the figures}
+
+\usepackage{graphicx}
+\usepackage{epstopdf}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bepsilon{\boldsymbol\epsilon}
+\def\bomega{\boldsymbol\xi}
+\def\aff{\operatorname{aff}}
+\def\DD{\mathcal{D}}
+\def\KK{\mathcal{K}}
+\def\RR{\mathcal{R}}
+\def\KK{\mathcal{S}}
+
+\newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
+
+\title[SA vs SAA]{Stochastic optimization\\Stochastic dual dynamic programming}
+
+\author[Fabian Bastin]{Fabian Bastin \\ \url{bastin@iro.umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Context}
+
+Based on Anthony Papavisiliou's slides:
+\url{https://perso.uclouvain.be/anthony.papavasiliou/public_html/SDDP.pdf}
+
+\mbox{}
+
+Introduced by Perreia and Pinto, 1991.
+First designed to solve hydro-scheduling problems.
+
+\mbox{}
+
+\begin{itemize}
+\item
+Stochastic dynamic problem with finite horizon.
+\item
+Continuous, finite dimensional state and control.
+\item
+Convex cost, additive over stages -- we focus here on linear costs.
+\item
+Discrete, independent noises
+\end{itemize}
+
+\mbox{}
+
+Julia implementation: SDDP.jl
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The Nested L-Shaped Decomposition Subproblem}
+
+For each stage $t = 1,\ldots, H-1$, scenario $k = 1,\ldots,\KK_t$, we consider the problem $NLSD(t,k)$
+\begin{align}
+\min_{x_{t,k}, \theta_{t,k}}\ & c_{t,k}^T x_{t,k} + \theta_{t,k} \notag \\
+\mbox{s.t. } &
+W_t x_{t,k} = h_{t,k} - T_{t-1,k} x_{t-1,a(k)}, (\pi_{t,k})  \notag \\
+& D_{t,k,j}x_{t,k} \geq d_{t,k,j},\ j = 1,\ldots,r_{t,k}, (\rho_{t,k}) \\
+& E_{t,k,j}x_{t,k} + \theta_{t,k} \geq e_{t,k,j},\ j = 1,\ldots, s_{t,k}, (\sigma_{t,k}) \\
+&
+\begin{aligned}
+ x_{t,k} \geq 0.  \notag
+\end{aligned}
+\end{align}
+\begin{itemize}
+\item
+$\KK_t$: number of distinct scenarios at stage $t$,
+\item
+$a(k)$: ancestor of scenario $k$ at stage $t - 1$,
+\item
+$x_{t-1,a(k)}$: current solution from $a(k)$,
+\item
+Constraints (1): feasibility cuts,
+\item
+Constraints (2): optimality cuts
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nested L-Shaped Method}
+
+Building block: $NLSD(t, k)$: problem at stage $t$, scenario $k$.
+\begin{itemize}
+	\item 
+Repeated application of the L-shaped method.
+	\item 
+	Parent nodes send proposals for solutions to their children
+nodes
+\item
+Child nodes send cuts to their parents
+\item
+There are different sequence procedures that tell in which
+order the problems corresponding to different nodes in the
+scenario tree are solved.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nested L-Shaped Method}
+
+\begin{center}
+	\begin{pspicture}(-0.5,0.5)(4.5,2.5)
+		\psframe(0,0)(3,2)
+		\psline[arrows=->](3,1)(5,1)
+		\pcline[arrows=->](0,1)(-2,1)
+		 \uput[l](-2,1){Cut}
+		 \uput[d](-1,1){$t-1$, $a(k)$}
+		 \uput[u](-1.3,1){$\pi_{t,k}$, $\rho_{t,k}$, $\sigma_{t,k}$}
+		 \uput[r](5,1){Trial solution}
+		 \uput[u](4.5,1){$x_{t,k}$}
+		 \uput[d](4.2,1){$t+1$, $\DD_{t+1}(k)$}
+       \rput(1.5,1){$NLSD(t, k)$}
+	\end{pspicture}
+\end{center}
+
+\mbox{}
+
+\begin{itemize}
+	\item 
+$a(k)$: ancestor of scenario $k$.
+	\item 
+$\DD_{t+1}(k)$: descendants of scenario $k$ in period $t + 1$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Illustration}
+	
+	\begin{small}
+	\begin{center}
+		\psset{treemode=R, levelsep=3cm}
+		\pstree[thislevelsep=0,edge=\ncline,linecolor=red]
+		{\Tn} % root
+		{\pstree[linecolor=black]{\TC~[tnpos=b, name=s0]{$x_1$}}{
+				\pstree{\TC[name=s1a]}{
+					\pstree[linestyle=dashed]{\TC[name=s2a]}
+					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[name=s2b]}
+					{\Tdot[name=s4c] \Tdot[name=s4d]}
+				}
+				\pstree{\TC[name=s1b]}{
+					\pstree[linestyle=dashed]{\TC[name=s2c]}
+					{\Tdot[name=s4e] \Tdot[name=s4f]}            
+					\pstree[linestyle=dashed]{\TC[name=s2d]}
+					{\Tdot[name=s4g] \Tdot[name=s4h]}
+				}
+			}
+			% We add the stage identifiers.
+			\pstree[edge = none, linecolor=black]{\Tr{First stage}}{
+				\pstree{\Tr{Second stage}}{
+					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
+				}
+			}
+		}
+		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
+		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
+		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
+		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
+		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
+		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
+		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
+		
+	\end{center}
+\end{small}
+
+\begin{itemize}
+	\item 
+Node: $(t = 1, k = 1)$.
+	\item 
+Direction: forward.
+	\item 
+Output: $x_1$.
+\end{itemize}	
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Illustration}
+	
+	\begin{small}
+		\begin{center}
+			\psset{treemode=R, levelsep=3cm}
+			\pstree[thislevelsep=0,edge=\ncline]
+			{\Tn} % root
+			{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
+					\pstree[linecolor=black]{\TC[linecolor=red, name=s1a]}{
+						\pstree[linestyle=dashed]{\TC[name=s2a]}
+						{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[name=s2b]}
+						{\Tdot[name=s4c] \Tdot[name=s4d]}
+					}
+					\pstree[linecolor=black]{\TC[linecolor=red, name=s1b]}{
+						\pstree[linestyle=dashed]{\TC[name=s2c]}
+						{\Tdot[name=s4e] \Tdot[name=s4f]}            
+						\pstree[linestyle=dashed]{\TC[name=s2d]}
+						{\Tdot[name=s4g] \Tdot[name=s4h]}
+					}
+				}
+				% We add the stage identifiers.
+				\pstree[edge = none, linecolor=black]{\Tr{First stage}}{
+					\pstree{\Tr{Second stage}}{
+						\pstree{\Tr{Third stage}}{\Tr{\ldots}}
+					}
+				}
+			}
+			\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
+			
+		\end{center}
+	\end{small}
+	
+	\begin{itemize}
+		\item 
+		Node: $(t = 2, k)$, $k \in \{ 1,\ldots,k_2 \}$.
+		\item 
+		Direction: forward.
+		\item 
+		Output: $x_{2,k}$, $k \in \{ 1,\ldots,k_2 \}$.
+	\end{itemize}	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Illustration}
+	
+	\begin{small}
+		\begin{center}
+			\psset{treemode=R, levelsep=3cm}
+			\pstree[thislevelsep=0,edge=\ncline]
+			{\Tn} % root
+			{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
+					\pstree[linecolor=black]{\TC[name=s1a]}{
+						\pstree[linestyle=dashed]{\TC[linecolor=red, name=s2a]}
+						{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[linecolor=red, name=s2b]}
+						{\Tdot[name=s4c] \Tdot[name=s4d]}
+					}
+					\pstree[linecolor=black]{\TC[name=s1b]}{
+						\pstree[linestyle=dashed]{\TC[linecolor=red, name=s2c]}
+						{\Tdot[name=s4e] \Tdot[name=s4f]}            
+						\pstree[linestyle=dashed]{\TC[linecolor=red, name=s2d]}
+						{\Tdot[name=s4g] \Tdot[name=s4h]}
+					}
+				}
+				% We add the stage identifiers.
+				\pstree[edge = none]{\Tr{First stage}}{
+					\pstree{\Tr{Second stage}}{
+						\pstree{\Tr{Third stage}}{\Tr{\ldots}}
+					}
+				}
+			}
+			\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
+			
+		\end{center}
+	\end{small}
+	
+	\begin{itemize}
+		\item 
+		Node: $(t = 3, k)$, $k \in \{ 1,\ldots,k_3 \}$.
+		\item 
+		Direction: forward.
+		\item 
+		Output: $x_{3,k}$, $k \in \{ 1,\ldots,k_3 \}$.
+	\end{itemize}	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Illustration}
+	
+	\begin{small}
+		\begin{center}
+			\psset{treemode=R, levelsep=3cm}
+			\pstree[thislevelsep=0,edge=\ncline]
+			{\Tn} % root
+			{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
+					\pstree[linecolor=black]{\Tcircle[name=s1a]{$/$}}{
+						\pstree[linestyle=dashed]{\TC[linecolor=red, name=s2a]}
+						{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[linecolor=red, name=s2b]}
+						{\Tdot[name=s4c] \Tdot[name=s4d]}
+					}
+					\pstree[linecolor=black]{\Tcircle[name=s1b]{$/$}}{
+						\pstree[linestyle=dashed]{\TC[linecolor=red, name=s2c]}
+						{\Tdot[name=s4e] \Tdot[name=s4f]}            
+						\pstree[linestyle=dashed]{\TC[linecolor=red, name=s2d]}
+						{\Tdot[name=s4g] \Tdot[name=s4h]}
+					}
+				}
+			}
+			\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
+			
+		\end{center}
+	\end{small}
+	
+	\begin{itemize}
+		\item 
+		Node: $(t = 3, k)$, $k \in \{ 1,\ldots,k_3 \}$.
+		\item 
+		Direction: backward.
+		\item 
+		Output: $(\pi_{3,k}, \rho_{3,k}, \sigma_{3,k})$, $k \in \{ 1,\ldots,k_3 \}$.
+	\end{itemize}	
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Illustration}
+	
+	\begin{small}
+		\begin{center}
+			\psset{treemode=R, levelsep=3cm}
+			\pstree[thislevelsep=0,edge=\ncline]
+			{\Tn} % root
+			{\pstree{\Tcircle[name=s0]{$/$}}{
+					\pstree[linecolor=black]{\TC[linecolor=red, name=s1a]}{
+						\pstree[linestyle=dashed]{\TC[name=s2a]}
+						{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[name=s2b]}
+						{\Tdot[name=s4c] \Tdot[name=s4d]}
+					}
+					\pstree[linecolor=black]{\TC[linecolor=red, name=s1b]}{
+						\pstree[linestyle=dashed]{\TC[name=s2c]}
+						{\Tdot[name=s4e] \Tdot[name=s4f]}            
+						\pstree[linestyle=dashed]{\TC[name=s2d]}
+						{\Tdot[name=s4g] \Tdot[name=s4h]}
+					}
+				}
+			}
+			\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
+			\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
+			
+		\end{center}
+	\end{small}
+	
+	\begin{itemize}
+		\item 
+		Node: $(t = 2, k)$, $k \in \{ 1,\ldots,k_2 \}$.
+		\item 
+		Direction: backward.
+		\item 
+		Output: $(\pi_{2,k}, \rho_{2,k}, \sigma_{2,k})$, $k \in \{ 1,\ldots,k_2 \}$.
+	\end{itemize}	
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Feasibility cuts}
+
+If $NLSD(t, k)$ is infeasible, we compute $\pi_{t,k}$ and $\rho_{t,k} \leq 0$ such that
+\begin{align*}
+\pi_{t,k}^T \left(h_{t,k} - T_{t-1,k} x_{t-1,a(k)}\right) + \rho_{t,k}^Td_{t,k} &> 0, \\
+\pi_{t,k}^T W_t + \rho_{t,k}^TD_{t,k} &\leq 0.
+\end{align*}
+The following is a valid feasibility cut for $NLSD(t - 1, a(k))$:
+$$
+D_{t-1, a(k)} x_{t-1,a(k)} \geq d_{t-1, a(k)},
+$$
+where
+\begin{align*}
+D_{t-1, a(k)} = \pi_{t,k}^TT_{t-1,k},\\
+d_{t-1, a(k)} = \pi_{t,k}^Th_{t,k} + \rho_{t,k,i}^Td_{t,k}.
+\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Optimality cuts}
+	
+Solve $NLSD(t, k)$ for $j = 1,\ldots, \KK_{t-1}$, and compute
+\begin{align*}
+E &= \sum_{k \in \DD_t(j)} p(k, t\,|\,j, t - 1) \pi_{t,k}^T T_{t-1,k}, \\
+e &= \sum_{k \in \DD_t(j)} p(k, t\,|\,j, t - 1) \left( \pi_{t,k}^T h_{t,k}
++ \sum_{i=1}^{r_{t,k}} \rho_{t,k,i} d_{t,k,i} + \sum_{i=1}^{s_{t,k}} \sigma_{t,k,i} e_{t,k,i} \right).
+\end{align*}
+
+$\DD_t(j)$: descendants at stage $t$ of a scenario $j$ at period $t - 1$.
+
+\mbox{}
+
+Note:
+$$
+p(k, t\,|\,j, t - 1) = \frac{p_{k,t}}{p_{j,t-1}}.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Recombined scenario tree}
+	
+\begin{center}
+
+\begin{minipage}{0.44\textwidth}
+\begin{small}
+\psset{treemode=R}
+\pstree[thislevelsep=0,edge=\ncline]{\Tn}{
+\pstree{\Tcircle[name=s0]{$1$}}{
+	\pstree{\TCircle[name=s1a]{$1$}}{
+		\TCircle[name=s2a]{$1$}
+		\TCircle[name=s2b]{$2$}
+	}
+	\pstree{\Tcircle[name=s1b]{$2$}}{
+		\TCircle[name=s2c]{$3$}
+		\TCircle[name=s2d]{$4$}
+	}
+}}
+\end{small}
+\end{minipage}
+$\longrightarrow \qquad$
+\begin{minipage}{0.44\textwidth}
+\begin{small}
+\psset{treemode=R}
+\pstree[thislevelsep=0,edge=\ncline]{\Tn}{
+	\pstree{\Tcircle[name=s0]{$1$}}{
+		\pstree{\TCircle[name=s1a]{$1$}}{
+			\TCircle[name=s2a]{$1$}
+		}
+		\pstree{\Tcircle[name=s1b]{$2$}}{
+			\TCircle[name=s2c]{$2$}
+		}
+}}
+\ncline{s1b}{s2a}
+\ncline{s1a}{s2c}
+\end{small}
+\end{minipage}
+\begin{itemize}
+	\item 
+When can we recombine nodes?
+	\item 
+When can we assign the same value function $V_{t+1}(x)$ to
+each node $k$ of stage $t$?
+\end{itemize}
+
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nested decomposition is non-scalable}
+
+Assume
+\begin{itemize}
+\item
+$H$ time steps, $M_t$ discrete outcomes in each stage.
+\item
+No infeasibility cuts.
+\end{itemize}
+
+\begin{center}
+\begin{footnotesize}
+\psset{treemode=R}
+\pstree[thislevelsep=0,edge=\ncline]{\Tn}{
+	\pstree{\Tcircle[name=s0]{$1$}}{
+		\pstree{\TCircle[name=s1a]{$1$}}{
+			\TCircle[name=s2a]{$1$}
+			\TCircle[name=s2b]{$2$}
+		}
+		\pstree{\Tcircle[name=s1b]{$2$}}{
+			\TCircle[name=s2c]{$3$}
+			\TCircle[name=s2d]{$4$}
+		}
+}
+\pstree[edge = none]{\Tr{$M_1$}}{
+	\pstree{\Tr{$M_2$}}{\Tr{$M_3$}}
+}
+}
+\ncline{s1a}{s2c}
+\ncline{s1a}{s2d}
+\ncline{s1b}{s2a}
+\ncline{s1b}{s2b}
+\end{footnotesize}
+\end{center}
+
+\begin{itemize}
+	\item 
+Forward pass: $M_1 + M_1 \times M_2 + \ldots = \sum_{t = 1}^H \prod_{j = 1}^t M_j$;
+	\item 
+Backward pass:  $\sum_{t = 2}^{H-1} \prod_{j = 1}^t M_j$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Nested decomposition vs extended form}
+	
+	Alternative to nested decomposition is extended form.
+	\begin{itemize}
+		\item 
+		Extended form will not even load in memory
+		\item 
+		Nested decomposition will load in memory, but will not
+		terminate (for large problems)
+	\end{itemize}
+	
+	Nested Decomposition lays the foundations for SDDP.
+	
+	\mbox{}
+	
+	As the method name suggests, we are in the context of dynamic programming.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Enumerating Versus Simulating}
+
+\begin{center}
+\psset{treemode=R}
+\pstree[thislevelsep=0,edge=\ncline]{\Tn}{
+	\pstree{\TC}{
+		\pstree{\TCircle[name=s1a]{$1$}}{
+			\TCircle[name=s2a]{$1$}
+			\TCircle[name=s2b]{$2$}
+		}
+		\pstree{\Tcircle[name=s1b]{$2$}}{
+			\TCircle[name=s2c]{$3$}
+			\TCircle[name=s2d]{$4$}
+		}
+	}
+}
+\ncline{s1a}{s2c}
+\ncline{s1a}{s2d}
+\ncline{s1b}{s2a}
+\ncline{s1b}{s2b}
+\end{center}
+
+\begin{itemize}
+	\item 
+	Enumeration: $\{(1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2,
+		3), (2, 4))\}$
+	\item 
+	Simulation (with 3 samples): $\{(1, 3), (2, 1), (1, 4)\}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Making Nested Decomposition Scalable}
+
+Solution for forward pass:
+\begin{itemize}
+	\item 
+in the forward pass, we simulate instead of enumerating;
+	\item 
+this results in a probabilistic upper bound / termination
+criterion;
+\end{itemize}
+
+\mbox{}
+
+Solutions for backward pass
+\begin{itemize}
+	\item 
+In the backward pass, we share cuts among nodes of the
+same time period
+\item
+This requires an assumption of \textcolor{red}{stagewise independence}.
+\end{itemize}
+
+\mbox{}
+
+\textcolor{red}{Stagewise independence}: the random vector $\xi_{t+1}$ is independent of $\xi_{[t]} = (\xi_1,\ldots, \xi_t)$ for $t = 1,\ldots, H-1$ (see for instance A. Shapiro, ``Analysis of stochastic dual dynamic programming'', European Journal of Operational Research, 209(1), 2011, pp. 63--72). Here, $\xi_1$ has a unique realization.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Implications for forward pass}
+
+At each forward pass we solve $T$ NLSD problems
+
+\begin{center}
+	\psset{treemode=R}
+	\pstree[thislevelsep=0,edge=\ncline]{\Tn}{
+		\pstree{\TC[name=s0]}{
+			\pstree{\TC[name=s1a]}{
+				\TC[name=s2a]
+				\TC[name=s2b]
+			}
+			\pstree{\TC[name=s1b]}{
+				\TC[name=s2c]
+				\TC[name=s2d]
+			}
+		}
+	}
+	\ncline{s1a}{s2c}
+	\ncline{s1a}{s2d}
+	\ncline{s1b}{s2a}
+	\ncline{s1b}{s2b}
+	\ncline[linewidth=3pt,linecolor=red]{s0}{s1b}
+	\ncline[linewidth=3pt,linecolor=red]{s1b}{s2c}
+\end{center}
+ 
+For $K$ Monte Carlo simulations, we solve $1 + K\times (H-1)$ linear
+programs.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Implications for backward pass}
+
+Serial independence implies same value function for all nodes
+of stage $t$ $\Longrightarrow$ cut sharing
+.
+
+\begin{center}
+	\psset{treemode=R}
+	\pstree[thislevelsep=0,edge=\ncline]{\Tn}{
+		\pstree{\TC[name=s0]}{
+			\pstree{\Tcircle[name=s1a]{$/$}}{
+				\TC[linecolor=red, name=s2a]
+				\TC[linecolor=red, name=s2b]
+			}
+			\pstree{\Tcircle[name=s1b]{$/$}}{
+				\TC[linecolor=red, name=s2c]
+				\TC[linecolor=red, name=s2d]
+			}
+		}
+	}
+	\ncline{s1a}{s2c}
+	\ncline{s1a}{s2d}
+	\ncline{s1b}{s2a}
+	\ncline{s1b}{s2b}
+	\ncline{s0}{s1b}
+	\ncline{s1b}{s2c}
+\end{center}
+
+For a given trial sequence $x_{t,k}$, we solve $\sum_{t=2}^{H} M_t$ linear programs.
+
+For $K$ trial sequences, we solve $K\sum_{t=2}^{H} M_t$ linear programs.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Stagewise independence is not necessary}
+
+We can use dual multipliers in stage $t + 1$ for cuts in stage $t$
+even without stagewise independence.
+
+\mbox{}
+
+However, each node in stage $t$ has a different value function, so
+\begin{itemize}
+	\item 
+more memory consumption;
+	\item 
+more optimality cuts needed because we are
+approximating more value functions.
+\end{itemize}
+With stagewise independence, we can
+\begin{itemize}
+	\item 
+get rid of the scenario tree;
+	\item 
+work with continuous distribution of $\xi_t$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{SDDP forward pass}
+
+\begin{itemize}
+	\item 
+Solve $NLSD(1, 1)$. Let $x_{1,1}$ be the optimal solution.
+Initialize $\hat{x}_{1,i} = x_{1,1}$ for $i = 1,\ldots,K$.
+\item
+For $t = 2,\ldots, H$, $i = 1,\ldots, K$,
+\begin{itemize}
+	\item 
+sample a vector $h_{t,i}$ from the set $h_{t,k}$, $k = 1,\ldots,M_t$;
+\item
+solve the $NLSD(t, i)$ with trial decision $\hat{x}_{t-1,i}$;
+\item
+store the optimal solution as $\hat{x}_{t,i}$.
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{SDDP backward pass}
+
+\begin{itemize}
+	\item 
+For $t = H, H - 1,\ldots, 2$
+\begin{itemize}
+	\item 
+For $i = 1,\ldots, K$,
+\begin{itemize}
+	\item 
+Repeat for $k = 1,\ldots, M_t$, solve $NLSD(t, k)$ with trial decision $\hat{x}_{t-1,i}$.
+\item
+Compute
+\begin{align*}
+E_{t-1} &= \sum_{k = 1}^{M_t} p_{t,k} \pi_{t,k,i}^T T_{t-1,k}, \\
+e_{t-1} &= \sum_{k = 1}^{M_t} p_{t,k} \left( \pi_{t,k,i}^T h_{t,k} + \sigma_{t,k,i} e_{t,k} \right).
+\end{align*}
+Add the optimality cut
+$$
+E_{t-1}x_{t-1} + \theta_{t-1} \geq e_{t-1}
+$$
+to every $NLSD(t - 1, k)$, $k = 1,\ldots, M_{t-1}$.
+\end{itemize}	
+\end{itemize}	
+\end{itemize}	
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Probabilistic upper bound}
+
+Suppose we draw a sample $k$ of $(\xi_{t,k})$, $t = 1,\ldots,H$, and solve $NLSD(t, k)$ for $t = 1,\ldots,T$ (noting that for $t = 0$, the problem is deterministic).
+\begin{itemize}
+\item
+This gives $x_{t,k}$, $t = 1,\ldots,H$ with a  cost $z_k = \sum_{t=1}^H c_k^Tx_k$.
+\item
+Consider $K$ independant samples, and the mean cost
+$$
+\overline{z}_K = \frac{1}{K} \sum_{k=1}^K z_k.
+$$
+By the Central Limit Theorem,
+$$
+\overline{z}_K \overset{\mathcal{D}}{\rightarrow} N(\mu, \sigma^2)
+$$
+\item
+Each $(x_{t,k}, t = 1,\ldots,H)$ is feasible but not necessarily
+optimal, so $\overline{z}_K$ is an estimate of an upper bound.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Bounds and termination criterion}
+
+After solving $NLSD(1, 1)$ in a forward pass we can compute a lower bound $z_{LB}$
+as the objective function value of $NLDS(1, 1)$.
+
+\mbox{}
+
+Terminates if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \sigma, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \sigma)$, where $\Phi(\cdot)$ is the cumulative distribution of a Normal(0,1), and $\alpha$ is a confidence level set but the user. Typically, $\alpha = 0.05$.
+
+\mbox{}
+
+How to ensure $1\%$ optimality gap with $95\%$ confidence?
+Choose $K$ such that $\Phi^{-1}(1-\alpha/2) \approx 0.01 \overline{z}_K$. Using the empirical standard deviation
+$$
+\hat{s} = \frac{1}{K-1} \sqrt{\sum_{k=1}^K (\overline{z}_K-z_k)^2},
+$$
+this leads to
+$$
+K = \left( \frac{\Phi^{-1}(1-\alpha/2)\hat{s}}{0.01 \overline{z}_K}\right)^2.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{SDDP algorithm}
+
+\begin{itemize}
+\item
+Set $K$, $\overline{z}_K = \infty$, $\hat{s} = 0$.
+\item 
+Forward pass, store $z_{LB}$ and $\overline{z}_K$.
+Check termination.
+\item
+If the termination criterion is not met, do a backward pass.
+\item 
+Go to forward pass.
+\end{itemize}
+
+\end{frame}
+
+\end{document}
