@@ -1,0 +1,417 @@
+\documentclass[usepdftitle=false]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usetheme{Singapore}
+\usepackage{xcolor}
+\setbeamertemplate{footline}[frame number]
+
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\date{}
+\title[Linear programming]{KKT conditions\\Background material}
+
+\usepackage{enumerate}
+%\usepackage[francais]{babel}
+
+\usepackage{easybmat}
+\usepackage{graphicx}
+
+\newtheorem{defn}{Definition}
+\newtheorem{lem}{Lemma}
+\newtheorem{thm}{Theorem}
+\newtheorem{coro}{Corollary}
+
+\def\red{\color{red}}
+\def\blue{\color{blue}}
+
+\def\co{\mathcal{o}}
+
+\def\cA{\mathcal{A}}
+\def\cB{\mathcal{B}}
+\def\cE{\mathcal{E}}
+\def\cI{\mathcal{I}}
+\def\cL{\mathcal{L}}
+\def\cN{\mathcal{N}}
+\def\cR{\mathcal{R}}
+\def\cX{\mathcal{X}}
+\def\cV{\mathcal{V}}
+
+\def\bu{\boldsymbol{u}}
+
+\def\RR{\mathbb{R}}
+
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+\frame{\titlepage}
+
+% ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Lagrangian and Lagrangian dual function}
+	
+Consider the problem
+	\begin{align*}
+		\min_{x \in \mathbb{R}^n} \ & f(x) \\
+		\mbox{subject to } & g_i(x) \leq 0,\ i = 1,\ldots,m, \\
+		& h_j(x) = 0,\ j = 1,\ldots,r.
+	\end{align*}
+
+We define the Lagrangian as
+	$$
+	L(x, \lambda, \mu) = f(x) + \sum_{i = 1}^m \lambda_i g_i(x)
+	+ \sum_{j = 1}^r \mu_j h_j(x),
+	$$
+and the dual Lagrangian function
+	$$
+	\cL(\lambda, \mu) = \min_{x \in \mathbb{R}^n} L(x, \lambda, \mu).
+	$$
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Lagrange multipliers: equality constraints}
+
+Consider the mathematical program
+\begin{align*}
+\min_{x \in \cX} \ & f(x) \\
+\mbox{subject to } & g_i(x) = 0,\ i = 1,\ldots,m,
+\end{align*}
+where $\cX \subset \RR^n$, $f: \RR^n \rightarrow \RR$, $g_i: \RR^n \rightarrow \RR$, $i = 1,\ldots,m$.
+
+\mbox{}
+
+The {\red Lagrangian} of this problem is obtained by associating a Lagrange multiplier  $\lambda_i$ to each constraint function $g_i$:
+$$
+L(x, \lambda) = f(x) + \sum_{i = 1}^{m} \lambda_i g_i(x).
+$$
+
+We can obtain very general conditions under which $x^*$ is an optimial solution to the optimization problem, while only basic assumptions are made over $\cX$ and the functions $f$ and $g_i$, $i = 1,\ldots,m$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Optimality}
+
+\begin{thm}
+Assume that the Lagrangian
+\begin{align*}
+\min_{x \in \cX} \ & f(x) \\
+\mbox{s.t. } & g_i(x) = 0,\ i = 1,\ldots,m,
+\end{align*}
+possède un minimum local $x^* \in \cX$ lorsque le vecteur de multiplicateurs $\lambda$ vaut $\lambda^*$.
+Si $g_i(x^*) = 0$, $i = 1,\ldots,m$, alors $x^*$ est un minimum local de $f(x)$.
+\end{thm}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Optimality}
+
+\begin{proof}
+	La preuve se fait par contradiction en supposant que $x^*$ n'est pas un minimum local de $f(x)$.
+	Alors $\forall \epsilon > 0$, $\exists\, \overline{x} \in \cB(x^*, \epsilon)$ tel que $g_i(\overline{x}) = 0$, $i = 1,\ldots,m$ et $f(\overline{x}) < f(x^*)$.
+	
+Par conséquent, pour tout $\lambda$,
+	$$
+	\sum_{i = 1}^{m} \lambda_i g_i(x^*) = \sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) = 0.
+	$$
+	Dès lors,
+$$
+f(\overline{x}) + \sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) < f(x^*) + \sum_{i = 1}^{m} \lambda_i g_i(x^*).
+$$
+En prenant $\lambda = \lambda^*$, la relation précédente contredit le fait que est un
+minimum local du Lagrangien lorsque $\lambda = \lambda^*$.
+\end{proof}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Lagrange multipliers: inequality constraints}
+
+Consider the mathematical program
+\begin{align*}
+\min_{x \in \cX} \ & f(x) \\
+\mbox{subject to } & g_i(x) \leq 0,\ i = 1,\ldots,m.
+\end{align*}
+where $\cX \subset \RR^n$, $f: \RR^n \rightarrow \RR$, $g_i: \RR^n \rightarrow \RR$, $i = 1,\ldots,m$.
+
+\mbox{}
+
+\begin{thm}
+Assume that the Lagrangian associated to the problem
+\begin{align*}
+\min_{x \in \cX} \ & f(x) \\
+\mbox{s.t. } & g_i(x) \leq 0,\ i = 1,\ldots,m,
+\end{align*}
+has a local minimum $x^* \in \cX$ when the multipliers vector $\lambda$ is equal to $\lambda^*$.
+If $g_i(x^*) \leq 0$, $\lambda^*_i \geq 0$, and $\lambda^*_i g_i(x^*) = 0$, $i = 1,\ldots,m$, then $x^*$ is a local minimum of $f(x)$.
+\end{thm}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Lagrange multipliers: inequality constraints}
+	
+\begin{proof}
+Comme précédemment, la preuve se fait par contradiction en supposant que $x^*$ n'est pas un minimum local de $f(x)$.
+Alors $\forall \epsilon > 0$, $\exists\, \overline{x} \in \cB(x^*, \epsilon)$ tel que $g_i(\overline{x}) \leq 0$, $i = 1,\ldots,m$ et $f(\overline{x}) < f(x^*)$.
+Par conséquent, pour $\lambda = \lambda^* \geq 0$,
+$$
+\sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) \leq 0 \mbox{ et }
+\sum_{i = 1}^{m} \lambda_i g_i(x^*) = 0.
+$$
+Dès lors,
+$$
+f(\overline{x}) + \sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) < f(x^*) + \sum_{i = 1}^{m} \lambda_i g_i(x^*).
+$$
+La relation précédente contredit le fait que $x^*$ est un
+minimum local du Lagrangien lorsque $\lambda = \lambda^*$.
+\end{proof}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Problème dual}
+
+Le problème dual est
+\begin{align*}
+\max_{\lambda \in \RR^m, \mu \in \RR^r}\ & \cL(\lambda, \mu) \\
+\mbox{tel que } & \lambda \geq 0.
+\end{align*}
+
+Propriétés importantes:
+\begin{itemize}
+\item
+Le problème dual est toujours convexe, i.e. $\cL$ est toujours concave (même si la problème primal n'est pas convexe).
+\item
+Les valeurs optimales (globales) primale et duale, $f^*$ et $\cL^*$, satisfont toujours la dualité faible: $f^* \geq \cL^*$.
+\item {\blue Dualité forte}: sous certaines conditions (qualifications de contraintes), $f^* = \cL^*$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Duality gap}
+
+Étant donné une solution primale réalisable $x$ et une solution duale réalisable $(\lambda, \mu)$, la quantité $f(x) - \cL(\lambda, \mu)$ est appelé le saut de dualité entre $x$ et $(\lambda, \mu)$.
+Notons que
+$$
+f(x) - f^* \leq f(x) - \cL(\lambda, \mu)
+$$
+de sorte que si le saut de dualité est nul, alors $x$ est optimal primal (et similairement, $\lambda$ et $\mu$ sont optimaux duaux).
+
+\mbox{}
+
+D'un point de vue algorithmique, si la dualité forte tient, ceci fournit un critère d'arrêt: si $f(x) - \cL(\lambda, \mu) \leq \epsilon$, nous avons alors la garantie que $f(x) - f^* \leq \epsilon$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Saut de dualité: cas local}
+
+Désignons l'ensemble réalisable par
+$$
+\cX = \{ x \,|\, g_i(x), i = 1,\ldots,m, h_j(x), j = 1,\ldots,r \}.
+$$
+Considérons $x^*$ un minimum local de $f(\cdot)$, i.e.
+$$
+\exists \epsilon > 0  \text{ t.q. } \forall x \in \cB(x^*, \epsilon) \cap \cX, f(x^*) \leq f(x).
+$$
+Nous pouvons également définir la fonction duale lagrangienne restreinte à la boule $\cB(x^*, \epsilon)$:
+$$
+\cL_{\cB(x^*, \epsilon)}(\lambda, \mu) = \min_{x \in \cB(x^*, \epsilon)} L(x,\lambda, \mu).
+$$
+Dans ce cas, la dualité faible tient toujours localement:
+$$
+\cL^*_{\cB(x^*, \epsilon)} \leq f(x^*).
+$$
+Sous certaines conditions, la dualité forte tient également:
+$$
+\cL^*_{\cB(x^*, \epsilon)} = f(x^*).
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Saut de dualité: cas local}
+
+Remarquons cependant que
+$$
+\min_{x \in \mathbb{R}^n} L(x, \lambda, \mu) 
+\leq \min_{x \in \cB(x^*, \epsilon)} L(x, \lambda, \mu) 
+$$
+et donc
+$$
+\cL^* \leq \cL^*_{\cB(x^*, \epsilon)}.
+$$
+
+\mbox{}
+
+Dès lors, si $x^*$ est un minimum local et si la dualité forte tient localement,
+$$
+\cL^* \leq f(x^*),
+$$
+l'inégalité pouvant être stricte.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Karush-Kuhn-Tucker (KKT) conditions}
+	
+	Soient $f, g_i, h_j \in C^1$, $i = 1,\ldots,m$, $j = 1,\ldots,r$, et le problème
+	\begin{align*}
+		\min_{x \in \mathbb{R}^n} \ & f(x) \\
+		\mbox{t.q. } & g_i(x) \leq 0,\ i = 1,\ldots,m, \\
+		& h_j(x) = 0,\ j = 1,\ldots,r.
+	\end{align*}
+	
+	Conditions de Karush-Kuhn-Tucker (KKT):
+	\begin{align*}
+		\nabla_x L(x,\lambda,\mu) &= 0 & \mbox{(stationarité)}\\
+		\lambda_i g_i(x) &= 0 & \mbox{(écarts de complémentarités)} \\
+		g_i(x) \leq 0, &\ h_j(x) = 0\ \forall i,j & \mbox{(faisabilité primale)} \\
+		\lambda_i &\geq 0\ \forall i & \mbox{(faisabilité duale)}
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Nécessité}
+	
+	Soient $x^*$ minimum pour $x \in \cB(x^*,\epsilon)$, $\epsilon > 0$, et $(\lambda^*, \mu^*)$ solution du dual si $x$ est restreint à $\cB(x^*,\epsilon)$, avec un saut de dualité nul (la dualité forte tient).
+	Alors
+	\begin{align*}
+		f(x^*) &= \cL(\lambda^*, \mu^*) \\
+		&= \min_{x \in \cB(x^*,\epsilon)} \left( f(x) + \sum_{i = 1}^m \lambda_i^* g_i(x) + \sum_{i = 1}^r \mu_i^* h_i(x) \right) \\
+		& \leq f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{i = 1}^r \mu_i^* h_i(x^*) \\
+		& \leq f(x^*)
+	\end{align*}
+	Dès lors, $x^*$ est un minimum de $L(x, \lambda^*, \mu^*)$ sur $\cB(x^*,\epsilon)$.
+	
+	\mbox{}
+	
+	Par conséquent, $\nabla_x L(x^*, \lambda^*, \mu^*) = 0$.
+	
+	\mbox{}
+	
+	Nous retrouvons les conditions de stationarité.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Nécessité}
+	
+	Nous devons aussi avoir $\sum_{i = 1}^m \lambda_i^* g_i(x^*) = 0$ puisque $\sum_{i = 1}^m \lambda_i^* g_i(x^*) \leq 0$.
+	Ceci implique que pour tout $i$, $\lambda_i^* g_i(x^*) = 0$.
+	
+	\mbox{}
+	
+	Nous retrouvons les conditions de complémentarité.
+	
+	\mbox{}
+	
+	Si $x^*$ est un minimum global, nous pouvons remplacer $\cB(x^*,\epsilon)$ par $\RR^n$.
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Nécessité}
+
+\begin{thm}[Nécessité des conditions KKT]
+Si $x^*$, $(\lambda^*, \mu^*)$ sont des solutions primale et duale avec un saut de dualité nul (i.e. la dualité forte tient),
+alors $x^*$, $(\lambda^*, \mu^*)$ satisfont les conditions KKT.
+\end{thm}
+
+\mbox{}
+
+Dès lors, l'hypothèse de dualité forte apparaît importante. Elle sera garantie sous certaines conditions.
+\begin{itemize}
+\item
+Programme linéaire. La dualité forte tient toujours.
+\item
+Programme convexe. Condition de Slater: $\exists x$ tel que $g_i(x) < 0$, $i = 1,\ldots,m$ et $h_i(x) = 0$, $i = 1,\ldots,r$.
+\item
+Programme non-convexe.
+Hypothèse de qualification de contraintes.
+La plus courante, mais aussi la plus forte, est la condition d'indépendance linéaire des gradients à la solution.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nécessité (cas non convexe)}
+
+\begin{thm}[Nécessité des conditions KKT]
+Si $x^*$ est une solution locale de
+\begin{align*}
+\min_{x \in \cX} \ & f(x) \\
+\mbox{t.q. } & g_i(x) \leq 0,\ i = 1,\ldots,m \\
+& h_i(x) = 0,\ i = 1,\ldots,r,
+\end{align*}
+où les fonctions $f$, $g_i$ et $h_i$, $i = 1,\ldots,m$, sont continûment différentiables, et qu'une condition de qualification de contrainte tient en $x^*$.
+Alors, il existe un vecteur de multiplicateurs de Lagrange  $(\lambda^*, \mu^*)$ tel que les conditions KKT sont satisfaites en $(x^*,\lambda^*, \mu^*)$.
+\end{thm}
+
+\begin{proof}
+Preuve: technique!
+Voir par exemple Nocedal \& Wright, ``Numerical Optimization'', Section 12.4.
+\end{proof}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Suffisance des conditions KKT}
+	
+	S'il existent $x^*$, $(\lambda^*, \mu^*)$ satisfaisant les conditions KKT, alors
+	\begin{align*}
+	L(\lambda^*, \mu^*) &= f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{i = 1}^r \mu_i^* h_i(x^*) \\
+	&= f(x^*)
+	\end{align*}
+	
+	Dès lors, le saut de dualité est nul ({\red dualité forte}).
+	% si $L(\lambda^*, \mu^*) = \cL(\lambda^*, \mu^*)$, ce qui est le cas si $x^*$ est un minimum global de $\cL(\lambda^*, \mu^*)$.
+	
+	\mbox{}
+	
+	Dans le cas convexe, cela implique que 	$x^*$ et $(\lambda^*, \mu^*)$ sont des solutions globales primale et duale, respectivement.
+
+	\mbox{}
+
+	Dans la cas non-convexe, $x^*$ est un minimum local, pas nécessairement global, voire un point-selle.
+	% donner un exemple du dernier cas
+	
+	%Si $x^*$ n'est pas un minimum global, la fonction dual lagrangienne n'est pas non plus minimisée globalement. Si on considère le minimum global de la fonction duale lagrangienne, le saut de dualité n'est pas nul.
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Active set}
+
+\begin{defn}[Active set]
+L'ensemble actif $\cA(x)$ du problème d'optimisation
+\begin{align*}
+\min_{x \in \cX} \ & f(x) \\
+\mbox{t.q. } & g_i(x) \leq 0,\ i \in \cI \\
+& h_i(x) = 0,\ i \in \cE,
+\end{align*}
+en un point réalisable $x$ est l'ensemble des indices des contraintes d'égalité et l'ensemble des indices $i$ des contraintes d'inégalité telles que $g_i(x) = 0$, c'est-à-dire
+$$
+\cA(x) = \cE U \{ i \,|\, g_i(x) = 0 \}
+$$
+\end{defn}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{LICQ}
+
+The most popular constraint qualification is the LICQ.
+
+\begin{defn}[LICQ]
+Étant donné le point $x$ et l'ensemble actif $\cA(x)$, nous disons que la qualification de contraintes d'indépendance linéaire (linear
+independence constraint qualification -- LICQ) tient si l'ensemble des contraintes actives $\nabla_x c_i(x), i \in \cA(x)$ est linéairement indépendant.
+\end{defn}
+
+\end{frame}
+
+\end{document}
