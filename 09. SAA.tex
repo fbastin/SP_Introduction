@@ -81,7 +81,7 @@ If the cumulative distribution function of $\bxi$ is continuous or discrete with
 
 \mbox{}
 
-Solving the previous problem is therefore very difficults and we have to use some approximations as the Monte Carlo methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_N$.
+We have to use some approximations as the Monte Carlo methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_N$.
 The approximation for a sample of size $N$ is
 \[
 {\red \min_{z \in S} \hat{g}_N(z) = \frac{1}{N} \sum_{i = 1}^N
@@ -110,12 +110,19 @@ where $S = \{ x \,|\, Ax = b, x \geq 0 \}$
 \begin{frame}
 \frametitle{First-order convergence}
 
-Investigate the convergence of solutions and optimal values of the sequence of SAA problems towards a solution and optimal value of the expected value program for $N \rightarrow \infty$.
+What happens when $N \rightarrow \infty$?
 
 \mbox{}
 
 Let {\red $z_N^*$ be a first-order critical point} for the approximate problem, i.e. the KKT conditions are satisfied at $z_N^*$.
-In order to underline the dependency of $z_N^*$ with respect to the successive draws  $\xi_1,\ldots,$ $\xi_N$, we will use the notation $z_N^*(\xi_1,\ldots,\xi_N)$, or $z_N^*\left(\overline{\xi}\right)$, as $(\xi_1,\ldots,\xi_N)$ can be seen as the finite truncature of an infinite sequence $\overline{\xi} := \lbrace \xi_k \rbrace_{k =   1}^{\infty}$.
+
+\mbox{}
+
+$(\xi_1,\ldots,\xi_N)$ can be seen as the finite truncature of an infinite sequence $\overline{\xi} := \lbrace \xi_k \rbrace_{k =   1}^{\infty}$.
+
+\mbox{}
+
+Solution for a sample size $N$: $z_N^*(\xi_1,\ldots,\xi_N)$, or $z_N^*\left(\overline{\xi}\right)$.
 
 \mbox{}
 
@@ -130,9 +137,9 @@ As $S$ is a compact set, the sequence of SAA solutions has a non-empty set of (f
 \begin{frame}
 \frametitle{Formalization}
 
-As the set of limit points depends on the realizations sequence $\overline{\xi}$, we introduce an adapted probability space over which we can define random variables whose realization are such (infinite) sequences
+%As the set of limit points depends on the realizations sequence $\overline{\xi}$, we introduce an adapted probability space over which we can define random variables whose realization are such (infinite) sequences
 
-\mbox{}
+%\mbox{}
 
 Consider the stochastic process
 \[
@@ -235,7 +242,7 @@ If both $\bxi$ and $\boldsymbol{\zeta}$ follow the distribution specified by $F$
 \begin{frame}
 \frametitle{Notations}
 
-We will assume that the expressions  \textsl{\blue almost everywhere} and \textsl{\blue almost surely} refer to the infinite dimension space  $\left( \Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi} \right)$, allowing to %explicitly
+We will assume that the expressions  \textsl{\blue almost everywhere} (a.e.) and \textsl{\blue almost surely} (a.s.) refer to the infinite dimension space  $\left( \Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi} \right)$, allowing to %explicitly
 consider sets of realizations %whose elements have
 of the form $\{\xi_n\}_{n=1}^{\infty}$.
 
@@ -254,7 +261,7 @@ of the form $\{\xi_n\}_{n=1}^{\infty}$.
 
 \noindent
 \textbf{A.0}
-The random draws $\lbrace \xi_k \rbrace_{k= 1}^{\infty}$ are independent and identically distributed.
+The random draws $\lbrace \xi_k \rbrace_{k= 1}^{\infty}$ are i.i.d.
 
 \mbox{}
 
@@ -320,14 +327,14 @@ Each gradient component $\frac{\partial}{\partial [z]_l} G(z, \xi)$ ($l = 1,\ldo
 \begin{frame}
 \frametitle{Consequences}
 
-\textbf{A.3} implies that the expected value function $g(z)$ is continuously differentiable on $S$, and that the gradient and expectation operators can be interchanged, leading to
+\textbf{A.3} implies that the expected value function $g(z)$ is continuously differentiable on $S$, and
 \[
 \nabla_z g(z) = E_P\left[ \nabla_z G(z, \bxi) \right].
 \]
 
 \mbox{}
 
-This also implies that $\nabla \hat{g}_n(z^*)$ is an unbiased estimator of $\nabla g( z^*)$.
+Thus, $\nabla \hat{g}_n(z^*)$ is an unbiased estimator of $\nabla g( z^*)$.
 
 \mbox{}
 
@@ -1109,6 +1116,234 @@ More developments if the context of stochastic programming can be found in  Rubi
   inference of stochastic optimization problems}, pages
 282--304. Kluwer Academic Publishers, 2000.
 
+\end{frame}
+
+\begin{frame}
+	\frametitle{SAA - Chance constraints}
+	
+	We consider the problem
+	\begin{align*}
+		\min_{x \in \mathcal{X}}\ & f(x) \\
+		\mbox{s.t. } & P[G(x,\xi) \leq 0] \geq 1 - \alpha,
+	\end{align*}
+	where $G: \mathcal{R}^n \times \Xi \rightarrow \mathcal{R}^m$.
+	
+	This allows to consider separate and joint chanced constrained.
+	
+	We can reformulate this problem as
+	\begin{align*}
+		\min_{x \in \mathcal{X}}\ & f(x) \\
+		\mbox{s.t. } & P[G(x,\xi) > 0] \leq \alpha,
+	\end{align*}
+	
+	
+	\mbox{}
+	
+	If $P[G(x,\xi) \leq 0]$ has no closed form, we can always approximate it by sample average approximation.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{SAA}
+	
+	With the indicator function of $(0,\infty)$
+	\[
+	\mathcal{I}_{(0,\infty)} =
+	\begin{cases}
+		1 & \mbox{if } t > 0,\\
+		0 & \mbox{if } t \leq 0,
+	\end{cases}
+	\]
+	we can rewrite the chance constraint as
+	\[
+	p(x) = E\left[ \mathcal{I}_{(0,\infty)} \left( G(x, \xi) \right) \right] \leq \alpha.
+	\]
+	
+	Let $\xi_1,\ldots,\xi_N$ be an i.i.d. sample of $N$ realizations of $\xi$.
+	We approximate the chance constraint by
+	\[
+	\hat{p}_N = \frac{1}{N} \sum_{j = 1}^N \mathcal{I}_{(0,\infty)} \left( G(x, \xi_j) \right) \leq \gamma
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{SAA (cont'd)}
+	
+	$\hat{p}_N(x)$ is equal to the proportion of times that $G(x,\xi_j) > 0$.
+	$\gamma$ is not necessarily equal to $\alpha$, especially when we want to enlarge the feasible of the approximate problem.
+	
+	\mbox{}
+	
+	The approximate problem is
+	\begin{align*}
+		\min_{x \in \mathcal{X}}\ & f(x) \\
+		\mbox{s.t. } & \hat{p}_N(x) \leq \gamma.
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Theory}
+	
+	For theoretical justifications, see
+	\begin{quote}
+		B.K. Pagnoncelli, S. Ahmed, and A. Shapiro, ``Sample Average Approximation Method for Chance
+		Constrained Programming: Theory and Applications'', Journal of Optimization Theory and Applications 142 (2), pp. 399--416, 2009.
+	\end{quote}
+	
+	\mbox{}
+	
+	Especially, under some regularity conditions, we have
+	\[
+	sup_{x \in C} |\hat{p}_N(x) - p(x)| \rightarrow 0,
+	\]
+	w.p.1, as $N \rightarrow \infty$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Convergence}
+	
+	Assume that  there is an optimal solution $\overline{x}$ of the true problem such that for any $\epsilon > 0$ there is $x \in \mathcal{X}$ with $\| x - \overline{x} \| \leq \epsilon$ and $p(x) < \alpha$.
+	
+	\mbox{}
+	
+	\begin{theorem}
+		Suppose $\gamma = \alpha$, $\mathcal{X}$ compact, and $f(x)$ continuous.
+		Then $\hat{v}_N \rightarrow v^*$, where $\hat{v}_N$ and $v^*$ are the optimal values of the approximate and true problems, respectively, and $D(\hat{S}_N,S) \rightarrow 0$ almost surely as $N \rightarrow \infty$.
+	\end{theorem}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Application: call centers}
+	
+	Joint work with Thuy Anh Ta, Tien Mai, Wyean Chan, and Pierre L'Ecuyer.
+	The next slides are due Thuy Anh Ta.
+	
+	\mbox{}
+	
+	{\color{red}A call center}: an  office used for receiving or transmitting customers requests by {\color{red}telephone}.
+	
+	
+	\begin{itemize}
+		\item A {\color{blue}call} represents a customer and it is classified by {\color{blue}type} ($K$ types). 
+		\item Customers are served by {\color{blue}agents}.
+		\item Agents sharing a common set of tasks form a {\color{blue}group} of agents ($I$ groups).
+		\item A day is divided into {\color{blue}periods} ($P$ periods).
+		\item The work schedule of an agent is determined by her {\color{blue}shift} ($Q$ shift configurations).
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}{Performance measure}
+	\begin{itemize}
+		\item{} {\color{blue}{Performance measures} (PM)} allow to assess the quality of service (QoS) and
+		efficiency of a call center, e.g., Service level (SL) and average waiting time (AWT), abandonment ratio, occupancy ratio, etc.
+		\item {\color{blue}Service level (SL)}: the percentage of calls that are answered in a defined waiting threshold.
+		\item {\color{blue}Average waiting time (AWT)}: the average (or mean) time a customer waited to have a service.
+		\item{} QoS can be defined in the long run (expectations), or over a given time period (random variable).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Staffing, Scheduling and Routing}
+	\begin{itemize}
+		\item{} The objective is to minimize the operating cost of a call center under a set of constraints on certain PMs (SL or AWT).
+		\item{} Staffing: deciding the number of agents $y_{i,p}$ of each group for each period in a day.
+		\item{} Scheduling:  determining how many agents $x_{i,q}$ to assign to a set of predefined shifts.
+		\item{} Routing: determining which agents are allowed to handle the call, and how agents are chosen when several agents are free.
+		
+	\end{itemize}
+	%		\begin{figure}
+	%			\includegraphics[width=0.4\linewidth]{figures/planning.pdf}%
+	%		\end{figure} 
+\end{frame}
+
+\begin{frame}{Modeling a call center}
+	\begin{itemize}
+		%		\item{} Different types of calls arrive at random and different groups of agents answer these calls
+		\item{} The calls arrive according	to arbitrary stochastic processes that could be non-stationary (e.g. homogeneous Poisson process), and perhaps doubly stochastic (e.g. Poisson gamma process, the arrival rate is a random	variable of gamma distribution).
+		\item{} Service times: exponential, log-normal distributions.
+		%of calls are traditionally assumed as independent and identically distributed exponential random variables with a constant mean.
+		\item{} Delay time,  patience time, etc.
+		\item{} When number of skills is low: Arrivals are served in a first come first serve (FCFS) order and/or a longest idle server first rules. 
+		\item{} Otherwise, {\color{blue}skills based routing} may be used to route calls to appropriate agents.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Staffing and scheduling with predictable arrival rates}
+	\[
+	g(y) = \frac{\mathbb{E}[\# \text{of served call that waited at most } \tau]}{\mathbb{E}[\# \text{ Total } \# \text{ of calls}]}
+	\]
+	\textbf{Scheduling problem}	
+	\[
+	\min {c}^T{x} = \sum_{i=1}^I\sum_{q=1}^Q c_{i,q}x_{i,q}
+	\]
+	subject to:
+	\begin{equation} \tag{P1}
+		\begin{aligned}
+			{Ax} &\geq {y} \\
+			g_{k,p}({y}) &\geq l_{k,p} ~\forall k,p, \\
+			g_{p}({y}) &\geq l_{p} ~\forall p, \\
+			g_{k}({y}) &\geq l_{k} ~\forall k, \\
+			g(y) &\geq l,\\
+			{x},{y}&\geq 0 \text{ and integer}  \text{.}\\
+		\end{aligned}
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Staffing and scheduling with predictable arrival rates}
+	\textbf{Staffing problem}	
+	\[
+	\min_y {c'}^T y = \sum_{i=1}^I\sum_{p=1}^P c'_{i,p}y_{i,p}
+	\]
+	subject to:
+	\begin{equation} \tag{P2}
+		\begin{aligned}
+			g_{k,p}({y}) &\geq l_{k,p} ~\forall k,p, \\
+			g_{p}({y}) &\geq l_{p} ~\forall p, \\
+			g_{k}({y}) &\geq l_{k} ~\forall k, \\
+			g(y) &\geq l,\\
+			{y}&\geq 0 \text{ and integer}  \text{.}\\
+		\end{aligned}
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Staffing and scheduling}
+	
+	SL $S(\tau, y)$ and AWT $W(y)$ are considered as r.v. in a given period.
+	
+	The chance-constrained scheduling problem for multiskill call centers is formulated as:
+	\[
+	\min {c}^T{x} = \sum_{i=1}^I \sum_{q=1}^Q c_{i,q}x_{i,q}
+	\]
+	subject to:
+	\begin{equation} \tag{P3}
+		\begin{aligned}
+			{Ax} &\geq {y} \\
+			\mathbb{P}[S_{k,p}(\tau_{k,p}, {y}) \geq s_{k,p}] &\geq r_{k,p} \text{\qquad{}}  \forall k,p \\
+			\mathbb{P}[W_{k,p}(y) \leq w_{k,p}] &\geq  v_{k,p} \text{\qquad{}} \forall k,p\\
+			{x}, {y} &\geq 0 \text{ and integer}. \\
+		\end{aligned}
+	\end{equation}
+\end{frame}
+
+
+\begin{frame}{Sample average approximate problem}
+	\[
+	\min {c}^T{x} = \sum_{i=1}^I \sum_{q=1}^Q c_{i,q}x_{i,q}
+	\]
+	subject to:
+	\begin{equation} \tag{SAA} \label{s1}
+		\begin{array}{ll}
+			{Ax} &\geq {y} \\
+			\displaystyle \frac{1}{N} \sum_{d=1}^N\mathbb{I}[\hat{S}_{N, k,p}^d(\tau_{k,p}, {y}) \geq s_{k,p}] &\geq r_{k,p} \text{\qquad{}}\forall k,p\\
+			\displaystyle \frac{1}{N}\sum_{d=1}^N\mathbb{I}[\hat{W}_{N,k,p}^d({y}) \leq w_{k,p}]&\geq v_{k,p} \text{\qquad{}}\forall k,p\\
+			{x}, {y} &\geq 0 \text{ and integer}  \text{ .}\\
+		\end{array}
+	\end{equation}
+	Under some specific conditions, the optimal value and the set of optimal solutions of the SAA problem converge to those of the true problem  with probability one as $N$ approaches infinity. 
 \end{frame}
 
 \end{document}
