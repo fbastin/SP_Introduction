@@ -1119,6 +1119,66 @@ More developments if the context of stochastic programming can be found in  Rubi
 \end{frame}
 
 \begin{frame}
+\frametitle{Overfitting}
+
+Consider again a deterministic feasible set.
+
+\mbox{}
+
+Let $z^* \in \arg\min g(z)$ and $z^*_N  \in \arg\min \hat{g}_N (z)$  for a given sample $\lbrace \xi_1, \xi_2, \ldots, \xi_N \rbrace$. We have $\forall y \in S$
+$$
+\hat{g}_N(y) \geq \hat{g}_N(z^*_N) = \min_{z \in S} \hat{g}_N(z)
+$$
+Taking the expectation on both sides, we obtain
+$$
+g(y) = E[\hat{g}_N(y)] \geq  E\left[ \min_{z \in S} \hat{g}_N(z) \right]
+$$
+Since this is true for any $y$, we have in particular
+$$
+g(z^*) \geq E\left[ \min_{z \in S} \hat{g}_N(z) \right]
+$$
+or, equivalently,
+$$
+E\left[ \min_{z \in S} \hat{g}_N(z) \right] \leq \min_{z \in S} g(z).
+$$
+
+\mbox{}
+
+In other terms, for $N$ finite, the optimal value estimator is biased, but asymptotically unbiased.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Out-of-sample validation}
+
+Choose $M >> N$, and compute $\hat{g}_M(z_n^*)$. We hope $\hat{g}_M(z_n^*) \approxeq g(z_N^*)$.
+
+\mbox{}
+
+Given $N$, we can estimate $E[\min_{z \in S} \hat{g}_N(z)]$ by averaging over $J$ réplications:
+$$
+E\left[\min_{z \in S} \hat{g}_N(z)\right] \approxeq \frac{1}{J} \sum_{j = 1}^J \min_{z \in S} \hat{g}_N\left(z, \xi_N^{(j)}\right).
+$$
+We expect
+$$
+\frac{1}{J} \sum_{j = 1}^J \min_{z \in S} \hat{g}_N\left(z, \xi_N^{(j)}\right) \leq 
+\frac{1}{J} \sum_{j = 1}^J \hat{g}_M\left(z_N^{*,(j)}\right),
+$$
+with a decreasing difference as $N$ grows.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Out-of-sample validation: example}
+
+\begin{center}
+\includegraphics[width=\textwidth]{imgs/instance_landing.pdf}
+\end{center}
+Source: Ahmed Khassiba, Ph.D. thesis.
+
+\end{frame}
+
+\begin{frame}
 	\frametitle{SAA - Chance constraints}
 	
 	We consider the problem
