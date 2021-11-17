@@ -1,0 +1,619 @@
+\documentclass{beamer}
+
+
+\usepackage[utf8]{inputenc}
+\usetheme{Singapore}
+\usepackage{xcolor}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+%\usepackage{mathlist}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{defi}{Définition}
+\newtheorem{theo}{Theorem}
+\newtheorem{coro}{Corollaire}
+\newtheorem{lem}{Lemme}
+
+%\usepackage{epic,eepic}
+%\usepackage{pstricks, pst-tree}
+
+\usepackage{times}
+
+\usepackage{ulem}
+%\usepackage{crayola}
+
+\usepackage{listings}
+%\topmargin=-0.6in
+\lstloadlanguages{C++}
+\lstset{language=C++}
+%%}
+
+%\usepackage{gnuplottex}
+% This variables allows to conditional generate the Gnuplot figures.
+%\def \gnuplotx {Generate the figures}
+
+\usepackage{graphicx}
+\usepackage{epstopdf}
+
+\setbeamercovered{dynamic}
+
+\def\bxi{\boldsymbol\xi}
+\def\bepsilon{\boldsymbol\epsilon}
+\def\bomega{\boldsymbol\xi}
+\def\aff{\operatorname{aff}}
+
+\def\EE{\mathbb{E}}
+\def\RR{\mathbb{R}}
+
+\newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
+
+\title[SA vs SAA]{Stochastic optimization\\Stochastic gradient descent}
+
+\author[Fabian Bastin]{Fabian Bastin (\url{bastin@iro.umontreal.ca}) \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+
+\date{}
+
+\begin{document}
+
+%% AJOUTER DISCUSSION BIRGE ET LOUVEAUX P128
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Motivation}
+
+The recent years have seen a huge success of machine learning, and a renew interest in the stochastic gradient algorithm, and the development of various variants.
+
+\mbox{}
+
+The stochastic gradient algorithm is a special case of the stochastic approximation method, which was first introduced in 1951, and can be seen as an alternative to the sample-path approach.
+
+\mbox{}
+
+The first part of these slides is based on
+S. Bhatnagar, H.L. Prasad, L.A. Prashanth, ``Stochastic Recursive Algorithms for Optimization
+Simultaneous Perturbation Methods'', Springer-Verlag, 2013.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Robbins–Monro algorithm}
+
+Introduced in 1951, initially as a root-finding problem.
+
+\mbox{}
+
+It can be easily extended to unconstrained optimization using first-order condition as a necessary condition to the problem
+$$
+\min_{x \in \RR^d} \ f(x)
+$$
+is
+$$
+\nabla_x f(x) = 0.
+$$
+
+\mbox{}
+
+We therefore search for a zero of the gradient of $f(x)$.
+
+\mbox{}
+
+We can also restrain the feasible domain to $\Theta \subseteq \RR^d$:
+$$
+\min_{x \in \Theta} f(x) = E[Y(x,\xi)]
+$$
+In this case, we have to assume that $f$ reaches its minimum in the interior of $\Theta$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Problem in expectation}
+
+We consider here
+$$
+f(x) = E[Y(x,\xi)]
+$$
+where the support of $\xi$ is $\Xi$.
+
+\mbox{}
+
+The problem to solve is
+$$
+\nabla_x E[Y(x,\xi)] = 0
+$$
+We assume here that we can exchange the expectation and derivation operators, i.e.
+$$
+\nabla_x E[Y(x,\xi)] = E[\nabla_x Y(x,\xi)]
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Stochastic approximation}
+
+Also know as as the \textcolor{red}{stochastic gradient (SG) method}.
+
+\mbox{}
+
+\begin{algorithmic}
+\State Choose a starting point $x_1$.
+\State $k \leftarrow 1$
+\While{Stopping criteria not satisfied}
+\State Draw $\xi_k$ from $\bxi$.
+\State Select a step length $\alpha_k$.
+\State Compute
+$$
+x_{k+1} = x_k - \alpha_k \nabla_x Y(x_k, \xi_k).
+$$
+\State $k \leftarrow k+1$
+\EndWhile
+\end{algorithmic}
+
+\mbox{}
+
+$\alpha_k$ is also called the \textcolor{red}{learning rate}.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Assumptions}
+
+% Robbins and Monro proved[3], Theorem 2 that {\displaystyle \theta _{n}}\theta_n converges in {\displaystyle L^{2}}L^{2} (and hence also in probability) to {\displaystyle \theta }\theta , and Blum[4] later proved the convergence is actually with probability one, provided that:
+
+Assume a unique minimizer $x^*$, and
+\begin{enumerate}
+\item[A.1]
+$f(x)$ is continuously differentiable and its gradient is Lipschitz continuous with Lipschitz constant $L > 0$, i.e. $\forall\, x, y \in \RR^d$,
+$$
+\| \nabla_x f(x) - \nabla_x f(y) \|_2 \leq L \| x - y \|_2
+$$
+\item[A.2]
+The iterates remain a.s. bounded, i.e.
+$$
+\sup_k \| x_k \| < \infty\ \text{almost surely}.
+$$
+\item[A.3]
+There exist scalars $M \geq 0$ and $M_V \geq 0$ s.t. $\forall\, k$,
+$$
+Var[\nabla_x Y(x, \xi_k)] \leq M + M_V\| \nabla_x f(x_k)\|_2^2
+$$
+\item[A.4]
+The sequence $\alpha_k$, $k=1,2,\ldots$, satisfies
+$$
+\sum_{k=0}^{\infty}\alpha_k=\infty \quad \mbox{ and } \quad \sum_{k=0}^{\infty}\alpha_k^{2} < \infty.
+$$
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Lipschitz continuity}
+
+A well-known consequence of the Lipschitz-continous gradients assumption is
+$$
+f(x) \leq f(y) + \nabla f(y)^T ( x - y ) + \frac{L}{2} \| x - y \|^2_2,
+$$
+$\forall\, x, y \in \RR^d$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Step lengths}
+
+Consider the sequence of step lengths, also called \textcolor{blue}{positive gains sequence} $\{ \alpha_k \,|\, k \geq 1 \}$.
+
+\mbox{}
+
+This sequence satisfies the previous assumption in particular with
+\begin{itemize}
+\item 
+$\alpha_k = \alpha/k$, given $\alpha > 0$.
+\item 
+$\alpha_k = \alpha/k^{\beta}$, $\forall\, k \geq 1$, given $\alpha > 0$ and $\beta \in (0.5, 1)$.
+\item
+$\alpha_k = \alpha(\ln k)/k$, $\forall\, k \geq 2$, given $\alpha_1 = \alpha > 0$.
+\item
+$\alpha_k = \alpha/(k \ln k)$, $\forall\, k \geq 2$, given $\alpha_1 = \alpha > 0$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Properties}
+
+\begin{itemize}
+\item 
+Very cheap iteration: gradient w.r.t. just one observation. No function evaluation.
+\item
+Not a descent method as we can have $-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)] \geq 0$ with $\nabla_x f(x) \ne 0$.
+\item
+Descent in expectation: if $\nabla_x f(x) \ne 0$,
+\begin{align*}
+& E[-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)]] \\
+&= - \nabla_x E[Y(x,\xi_i)]^T \nabla_x E[Y(x,\xi)]] \\
+&= - \nabla_x f(x)^T\nabla_x f(x) < 0
+\end{align*}
+\end{itemize}
+
+%{\textstyle N(\theta )}{\textstyle N(\theta )} is uniformly bounded,
+%{\textstyle M(\theta )}{\textstyle M(\theta )} is nondecreasing,
+%{\textstyle M'(\theta ^{*})}{\textstyle M'(\theta ^{*})} exists and is positive, and
+
+%Complexity results
+%If {\textstyle f(\theta )}{\textstyle f(\theta )} is twice continuously differentiable, and strongly convex, and the minimizer of {\textstyle f(\theta )}{\textstyle f(\theta )} belongs to the interior of {\textstyle \Theta }{\textstyle \Theta }, then the Robbins–Monro algorithm will achieve the asymptotically optimal convergence rate, with respect to the objective function, being {\textstyle \operatorname {E} [f(\theta _{n})-f^{*}]=O(1/n)}{\textstyle \operatorname {E} [f(\theta _{n})-f^{*}]=O(1/n)}, where {\textstyle f^{*}}{\textstyle f^{*}} is the minimal value of {\textstyle f(\theta )}{\textstyle f(\theta )} over {\textstyle \theta \in \Theta }{\textstyle \theta \in \Theta }.[5][6]
+%Conversely, in the general convex case, where we lack both the assumption of smoothness and strong convexity, Nemirovski and Yudin[7] have shown that the asymptotically optimal convergence rate, with respect to the objective function values, is {\textstyle O(1/{\sqrt {n}})}{\textstyle O(1/{\sqrt {n}})}. They have also proven that this rate cannot be improved.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Mini-batch method}
+
+Replace $\nabla_x Y(x,\xi_i)$ by
+$$
+\frac{1}{n_k} \sum_{i = 1}^{n_k} \nabla_x Y(x,\xi_i).
+$$
+
+\mbox{}
+
+At each iteration, we take $n_k$ new draws.
+
+\mbox{}
+
+The cost per iteration is $n_k$ times bigger, but
+\begin{itemize}
+	\item it is a better estimate of the gradient
+	\item the computation of the mini-batch can exploit parallelism
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Batch method}
+
+Assume for now that the support $\Xi$ is finite, of cardinality $n$. Then
+$$
+E[Y(x,\xi)] = \frac{1}{n} \sum_{i = 1}^n Y(x,\xi_i), \quad E[\nabla_x Y(x,\xi)] = \frac{1}{n} \sum_{i = 1}^n \nabla_x Y(x,\xi_i)
+$$
+
+\mbox{}
+
+Batch method:
+$$
+x_{k+1} = x_k - \alpha_k \frac{1}{n} \sum_{i = 1}^{n} \nabla_x Y(x,\xi_i).
+$$
+In other words, we use all the observations to compute the true gradient.
+
+\mbox{}
+
+Often, $n$ is very large, and we prefer to work with $n_k << n$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Stochastic approximation}
+
+We can generalize the expression of the stochastic approximation iteration using an estimator of the gradient of $f$ at $x_k$:
+$$
+x_{k+1} = x_k - \alpha_k\nabla\hat{f}(x_k).
+$$
+As before, the gradient estimator can usually be taken as $\nabla Y ( x_k, \xi_k )$,
+where $(\xi_k,\ k \geq 1)$ are i.i.d.
+
+\mbox{}
+
+In that case, if $f(\cdot)$ is smooth, has a unique global minimizer $x^*$, and $\alpha_k = \alpha / k$ with $\alpha > 0$ sufficiently large, then under additional nonrestrictive conditions,
+$$
+\sqrt{n} \left(x_n - x^*\right) \Rightarrow N(0, \Lambda), 
+$$
+as $n \rightarrow \infty$, for a certain $d \times d$ matrix $\Lambda$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convergence speed: stochastic boundedness}
+
+Source: \url{https://en.wikipedia.org/wiki/Big_O_in_probability_notation}
+
+\mbox{}
+
+We would like to measure how fast we converge to the solution, knowning that we generate a sequence of realizations of random variables.
+
+\mbox{}
+
+\textcolor{red}{Stochastic boundedness}
+
+The notation
+$$
+X_{n}=O_{p}(a_{n}),
+$$
+means that the set of values $X_n/a_n$ is stochastically bounded:
+$$
+\forall\, \epsilon > 0,\ \exists\, M > 0, N > 0 \text{ such that } P[|X_{n}/a_{n}|>M ] < \epsilon \ \forall\, n > N.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$O_p(\cdot)$ vs $o_p(\cdot)$}
+
+Thus, $X_n = O_p(1)$ iff
+$$
+\forall\, \epsilon > 0,\ \exists N_{\epsilon}, \delta_{\epsilon} \text{ such that } P[|X_{n} | \geq \delta_{\epsilon }] \leq \epsilon \ \forall\, n > N_{\epsilon}.
+$$
+
+\mbox{}
+
+\textcolor{blue}{Convergence in probability}
+
+$X_n = o_p(1)$ iff
+$$
+\forall\, \epsilon > 0, \delta > 0 \ \exists N_{\epsilon ,\delta } \text{ such that } P[|X_{n}|\geq \delta] \leq \epsilon \ \forall n > N_{\epsilon, \delta}.
+$$
+
+\mbox{}
+
+Therefore
+$$
+X_n = o_p(1) \Rightarrow X_n = O_p(1).
+$$
+The reverse does not hold.
+
+\mbox{}
+
+More generally, $X_n = o_p(a_n)$ iff $X_n/{a_n} = o_p(1)$, i.e.
+$$
+\forall\, \epsilon > 0\ \lim_{n \rightarrow \infty} P[ |X_{n}/{a_n}| \geq \epsilon ] = 0.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Complexity}
+
+Source: Kim, Pasupathy, and Henderson, ``A Guide to Sample Average Approximation'', in ``Handbook of Simulation Optimization'', edited by Michael C. Fu, Springer, 2015.
+
+\mbox{}
+
+If the number of iterations of completed in $c$ units of computer time, $n(c)$ grows roughly linearly in $c$
+(as would be the case if, e.g., sample gradients are computed in constant time).
+
+\mbox{}
+
+A time-changed version of the CLT establishes that the resulting SA estimator has
+an error
+$$
+x_{n(c)} - x^* = O_p(c^{-1/2}).
+$$
+Equivalently, the computational effort required to obtain an error of order $\epsilon$ with SA is $O_p(\epsilon^{-2})$.
+
+\mbox{}
+
+The performance of the recursion is highly dependent on the gain sequence $\{ \alpha_n \}$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Polyak–Ruppert averaging}
+
+Within the context of the SA iterative scheme, the fastest achievable convergence rate is $O_p(c^{-1/2})$.
+
+\mbox{}
+
+This rate can be achieved under the ``Polyak–Ruppert averaging''.
+\begin{itemize}
+	\item 
+step-size sequence: $a_n = a/{n^{\gamma}}$ for some $\gamma \in (0,1)$
+\item
+estimator of ${x}^*$:
+$$
+\overline{x}_n = \frac{1}{n} \sum_{i = 1}^n x_i.
+$$
+\end{itemize}
+
+Under mild conditions, the Polyak–Ruppert averaging scheme enjoys a CLT, although with a different covariance matrix $\Lambda$.
+
+\mbox{}
+
+This happens irrespective of the value of the constant $a > 0$ (but the choice of $a$ affects the small-sample performance).
+The Polyak–Ruppert averaging scheme also has other optimality properties related to
+the matrix $\Lambda$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Order of Convergence}
+
+Denote the numerical procedure acting on the sample function $f_n(x)$ by the mapping
+$A(x) : \Theta \rightarrow \Theta$.
+
+\mbox{}
+
+Let $A_k(x)$ represent the iterate obtained after $k$ successive applications
+of the $A(\cdot)$ on the initial iterate $x$.
+
+\mbox{}
+
+Assume that the function $f_n(x)$ attains its infimum $v_n^{*} := \inf\{ f_n(x) : x \in \Theta\}$ and
+that $f_n (A_k (x)) \rightarrow v_n^{*}$ as $k \rightarrow \infty$ for all $x \in \Theta$.
+Also, to avoid trivialities, assume that
+$f_n (A_{k+1} (x))$ is different from $v_n^*$ for all $k$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Sublinear convergence}
+
+Denote
+$$
+Q_t = \lim \sup_{k \rightarrow \infty} \frac{ | f_n(A_{k+1} (x)) - v_n^* |}
+{| f_n (A_k (x)) - v_n^* |^t}.
+$$
+
+\mbox{}
+
+\begin{definition}
+$A(x) : \Theta \rightarrow \Theta$ is said to exhibit $p^{th}$-order
+sublinear convergence if $Q_1 \geq 1$, and
+$$
+\exists\,p, s > 0 \text{ such that } p = sup \{r : f_n(A_k (x)) - v^*_n \leq s/k^r,\ \forall\, x \in \Theta\}.
+$$
+\end{definition}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Linear convergence}
+
+\begin{definition}
+The numerical procedure $A(x) : \Theta \rightarrow \Theta$ is said to exhibit linear convergence if $Q_1 \in (0, 1)$ for all $x \in \Theta$.
+\end{definition}
+
+\mbox{}
+
+The definition of linear convergence implies that there exists a constant $\beta$ satisfying $f_n ( A (x)) - v_n^* \leq \beta (f_n(x) - v_n^*)$ for all $x \in \Theta$.
+The projected gradient method with Armijo steps when executed on certain smooth problems exhibits a linear convergence rate.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Superlinear convergence}
+
+\begin{definition}
+The numerical procedure $A(x) : \Theta \rightarrow \Theta$ is said to exhibit superlinear convergence if $Q_1 = 0$ for all $x \in \Theta$.
+The convergence is said to be $p^{th}$-order superlinear if $Q_1 = 0$ and $\sup \{ t : Q_t = 0 \} = p < \infty$ for all $x \in \Theta$.
+\end{definition}
+
+\mbox{}
+
+When $f_n(x)$ is strongly convex and twice Lipschitz continuously differentiable with observable derivatives, Newton method is second-order superlinear.
+For settings where the derivative is unobservable, there is a slight degradation in the convergence rate, but Newton method remains superlinear.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convergence rate for the SAA method}
+
+\begin{theo}
+	Assumptions:
+	\begin{description}
+		\item[A1]
+$E[ Y^2 ( x , \xi)] < \infty$ for all $x \in \Theta$.
+		\item[A2]
+The function $Y(x, \xi)$ is Lipschitz w.p.1, with Lipschitz constant $K(\xi)$ having finite expectation.
+		\item[A3]
+The function $f_n(x)$ attains its infimum on $\Theta$ for each $n$ w.p.1.
+	\end{description}
+Let $c = n \times k$ and $n/c^{1 /( 2p + 1 )} \rightarrow a$ as $c \rightarrow \infty$, with $a \in (0, \infty)$.
+Then, if the numerical procedure exhibits $p^{th}$-order sublinear convergence,
+$$
+c^{p /( 2p + 1 )} \left( f_n ( A^k ( x )) - v^* \right) = O_p(1)
+$$
+as $c \rightarrow \infty$.
+\end{theo}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convergence rate for the SAA method}
+
+\textcolor{red}{Main insight}: the maximum achievable convergence rate with the SAA method, is $O_p ( c^{- p /( 2p + 1 )})$ when the numerical
+procedure in use exhibits $p^{th}$-order sublinear convergence.
+
+\mbox{}
+
+It is also possible to show that the corresponding rates when using linearly convergent and $p^{th}$-order superlinearly convergent procedures are $O_p (( c / \log c )^{-1/2} )$ and $O_p (( c / \log\log c )^{-1/2} )$, respectively.
+
+\mbox{}
+
+None of the families of numerical procedures considered are capable
+of attaining the canonical convergence rate $O_p ( c^{-1/2} )$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The generic SG method}
+
+Source: Léon Bottou, Frank E. Curtis, and Jorge Nocedal, Optimization Methods for Large-Scale Machine Learning, SIAM Review 60(2), 2018, pp. 223--311, \url{https://doi.org/10.1137/16M1080173}
+
+\mbox{}
+
+We generalize the stochastic gradient method with the update
+$$
+x_{k+1} = x_k - \alpha_k g(x_k, \xi_k).
+$$
+instead of
+$$
+x_{k+1} = x_k - \alpha_k \nabla_x Y(x_k, \xi_k).
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The generic SG method}
+
+The function $f: \RR^d \rightarrow \RR$ could be
+$$
+f(x) =
+\begin{cases}
+R(x) = \EE [ f(x; \bxi) ] & \text{ the expected risk,} \\
+R_n(x) = \frac{1}{n} \sum_{\xi = 1}^n f(x; \xi) & \text{ the empirical risk.}
+\end{cases}
+$$
+
+\mbox{}
+
+The stochastic vector could be
+$$
+g(x; \xi_k) =
+\begin{cases}
+\nabla_x Y(x_k, \xi_k) & \text{(one realization)} \\
+\frac{1}{n_k} \sum_{i = 1}^{n_k} \nabla_x Y(x_k, \xi_k) & \text{(minibatch)} \\
+B_k \frac{1}{n_k} \sum_{i = 1}^{n_k} \nabla_x Y(x_k, \xi_k)
+& \text{(rescaled minibatch)}
+\end{cases}
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Stochastic processes}
+
+While we assumme the draws $\xi_i$, $i = 1,2,\ldots$ are i.i.d., it is possible to extend the results to the situation where $\lbrace \xi_i, i = 1,2,\ldots \rbrace$ form an adapted stochastic process, where each $\xi_i$ can depend on the previous ones.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Active learning}
+
+\begin{itemize}
+\item 
+In active learning, $g(x_k; \xi_k)$ produces a multinomial
+distribution on the training examples in a manner that depends on the current solution $x_k$.
+\item
+$\xi_k$ is then transformed to draw from this distribution.
+\end{itemize}
+
+Active learning is not covered here, but again, the results can be extended to this situation.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Analysis}
+
+More details at:
+\begin{itemize}
+\item 
+\url{https://icml.cc/2016/tutorials/part-2.pdf}
+\item 
+\url{https://icml.cc/2016/tutorials/part-3.pdf}
+\end{itemize}
+
+We will refer to this material.
+
+\end{frame}
+
+\end{document}

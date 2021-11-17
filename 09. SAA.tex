@@ -1151,11 +1151,11 @@ In other terms, for $N$ finite, the optimal value estimator is biased, but asymp
 \begin{frame}
 \frametitle{Out-of-sample validation}
 
-Choose $M >> N$, and compute $\hat{g}_M(z_n^*)$. We hope $\hat{g}_M(z_n^*) \approxeq g(z_N^*)$.
+Choose $M >> N$, and compute $\hat{g}_M(z_N^*)$. We hope $\hat{g}_M(z_N^*) \approxeq g(z_N^*)$.
 
 \mbox{}
 
-Given $N$, we can estimate $E[\min_{z \in S} \hat{g}_N(z)]$ by averaging over $J$ réplications:
+Given $N$, we can estimate $E[\min_{z \in S} \hat{g}_N(z)]$ by averaging over $J$ replications:
 $$
 E\left[\min_{z \in S} \hat{g}_N(z)\right] \approxeq \frac{1}{J} \sum_{j = 1}^J \min_{z \in S} \hat{g}_N\left(z, \xi_N^{(j)}\right).
 $$
@@ -1174,7 +1174,9 @@ with a decreasing difference as $N$ grows.
 \begin{center}
 \includegraphics[width=\textwidth]{imgs/instance_landing.pdf}
 \end{center}
-Source: Ahmed Khassiba, Ph.D. thesis.
+\begin{small}
+\textit{Ahmed Khassiba (2020), ``Two-stage stochastic programming for aircraft arrival scheduling under uncertainty'', Ph.D. thesis.}
+\end{small}
 
 \end{frame}
 
