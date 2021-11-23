@@ -15,8 +15,9 @@
 \newtheorem{coro}{Corollaire}
 \newtheorem{lem}{Lemme}
 
-%\usepackage{epic,eepic}
-%\usepackage{pstricks, pst-tree}
+%\usepackage{doublespace}
+\usepackage{epic,eepic}
+\usepackage{pstricks, pst-tree}
 
 \usepackage{times}
 
@@ -674,19 +675,234 @@ for all $k$ large enough, then, almost surely, the algorithm converges in a fini
 
 \end{frame}
 
+\begin{frame}{Application to discrete choice theory}
+		
+			Discrete {\blue set of alternatives} available for individual $i$:
+			$\mathcal{A}(i)$.
+			
+			\textcolor{orange}Example: Which mode of transport have you chosen to come?
+			
+			\vspace*{0.3cm}
+			
+			\begin{minipage}[c]{0.3\linewidth}
+				\begin{center}
+					\scalebox{0.8}{
+						\psset{nodesep=0.5cm, treesep=0.4cm}
+						\pstree[treemode=R, nodesep=3pt]{\Tr{\bf{i}}}{
+							\TC~[tnpos=r]{\quad\bf{car}}
+							\TC~[tnpos=r]{\quad\bf{train}}
+							\TC~[tnpos=r]{\quad\bf{bus}}
+							\TC~[tnpos=r]{\quad\bf{bike}}
+							\TC~[tnpos=r]{\quad\bf{walk}}
+						}
+					}%
+				\end{center}%
+			\end{minipage}
+			\begin{minipage}{0.68\linewidth}
+				
+				Each alternative has some utility.\\
+				{\red Utility $U_{ij}$} of $A_j \in \mathcal{A}(i)$:
+				$U_{i j} = V(\beta) + \boldsymbol{\epsilon}_{ij}.$\\
+				$\beta$: parameters to be estimated.
+				
+				{\red rational individuals}: a person chooses
+				the alternative of {\blue maximum utility}\\
+				{\red $\rightarrow$} choice of $A_j$ if $U_{ij} \geq U_{in}, \forall A_n \in
+				\mathcal{A}(i)$.
+				
+			\end{minipage}
+			
+				Important case: Gumbel distributed residuals $\epsilon_{ij}$ (mean 0,
+				scale factor $\mu$):
+				{\red $\rightarrow$ multinomial logit} (MNL).
+				
+				{\blue Probability} that individual $i$ choose $A_j$:
+					\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					$P_{ij} = \frac{e^{\mu V_{ij}(\beta)}}{\sum_{n= 1}^N e^{\mu
+							V_{in}(\beta)}}$
+					}
+		
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	\begin{frame}{Mixed Logit models}
+		
+		\begin{footnotesize}
+			Allow {\red heterogeneity} in parameters inside the population.
+			\begin{center}
+				$\boldsymbol{\beta} = \beta(\boldsymbol{\gamma}, \theta)$,
+			\end{center}
+			$\boldsymbol{\gamma}$: {\blue random vector}, e.g. vector of independant
+			$N(0,1)$);\\
+			$\theta$: {\blue vector of parameters}, e.g. vector of means and std dev.
+			
+				Probability choice of $A_j$ by individual $i$:
+				\begin{center}
+					\psframebox[fillstyle=solid, fillcolor=lightgray]{
+						$P_{ij} (\theta) = E_{\bxi} \left[ L_{ij} (\gamma, \theta)\ \right] =
+						\int { L_{ij} (\gamma, \theta)} f(\gamma) d\gamma$
+					}
+				\end{center}
+				
+				This integral is approximated by
+				\begin{center}
+					\psframebox[fillstyle=solid, fillcolor=lightgray]{
+						$SP_{ij_i}^{R} = \frac{1}{R} \sum_{r= 1}^R L_{ij_i} (\gamma_r, \theta)$
+					}
+				\end{center}
+
+				{\red SAA} problem:
+				\begin{center}
+					\psshadowbox[fillstyle=solid, fillcolor=orange]{
+						$\max_{\theta} \hat{g}_R(\theta) = \max_{\theta} SLL(\theta) =
+						\max_{\theta} \frac{1}{N} \sum_{n = 1}^{N} \ln SP_{ij_i}^{R}$
+					}
+				\end{center}
+			
+				$\rightarrow$ suggests to consider {\blue stochastic programming}
+				techniques.
+			
+		\end{footnotesize}
+		
+\end{frame}
+
+\begin{frame}{Properties of Mixed Logit}
+		
+		\begin{footnotesize}
+			{\blue Stochastic programming}:
+			\begin{center}
+				\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					$\min_z g(z) = \min_z E_{\bxi} \left[G(z,\boldsymbol{\xi})\right]$
+				}
+			\end{center}
+			
+			{\blue Mixed logit}:
+			\begin{center}
+				\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					$\max_{\theta} g\left(\theta\right) = \max_{\theta} LL(\theta) \notag
+					= \frac{1}{n} \sum_n \ln E_{\bxi} \left[ L_{in} \left(
+					\boldsymbol{\gamma}, \theta \right) \right]$
+				}
+			\end{center}
+			
+			\vspace*{0.5cm}
+				Consistency properties can be adapted. Assume {\red $I$ fixed} and {\red
+					$R$ grows toward $\infty$}.
+				
+				\begin{center}
+					\psshadowbox[fillstyle=solid, fillcolor=gray]{
+						\begin{minipage}[fillstyle=solid, fillcolor=orange]{0.9\textwidth}
+							If $\theta^*_R$, $R=1,\ldots$, are first (second)-order critical for
+							the corresponding SAA problem, under some regularity conditions, for
+							almost every sequence of random draws, there exists some limit point
+							$\theta^*$ of $\left( \theta_R^* \right)_{R=1}^{\infty}$ that is first
+							(second)-order critical.
+						\end{minipage}
+					}
+				\end{center}
+			
+		\end{footnotesize}
+		
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%
+% Error estimation
+%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Error estimation}
+		
+		%\vspace*{-0.5cm}
+		
+		\begin{footnotesize}
+			
+			With an i.i.d. sample for each individual, we have, from the delta
+			method (see for instance Shapiro and Rubinstein):
+			\begin{center}
+				\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					$LL(\theta) - SLL^R(\theta) \Rightarrow N \left(0, \frac{1}{I}
+					\sqrt{ \sum_{i = 1}^I \frac{ \sigma^2_{ij_i} (\theta)}
+						{R \left( P_{ij_i} (\theta) \right)^2 }} \right)$
+				}
+			\end{center}
+			
+			Asymptotic value of the confidence interval radius:
+			\begin{center}
+				\psframebox[fillstyle=solid, fillcolor=orange]{
+					$\epsilon_{\delta} = \alpha_{\delta} \frac{1}{I} \sqrt{ \sum_{i=1}^I
+						\frac{ \sigma^2_{ij_i}\left(\theta \right) }
+						{R \left( P_{ij_i} (\theta) \right)^2} }$
+				}
+			\end{center}
+			$\delta$: signification level; $\alpha_{0.9} \approx 1.65$.
+			
+				Bias of simulation (Taylor expansion):
+				\begin{center}
+					\psframebox[fillstyle=solid, fillcolor=orange]{
+						$B := E[SLL^R(\theta)] - LL(\theta) =
+						-\frac{I\epsilon_{\delta}^2}{2\alpha_{\delta}^2}$
+					}
+				\end{center}
+				
+				In practice, use of SAA estimators $\sigma^R_{ij_i}(\theta)$ and $P^R_{ij_i}(\theta)$.
+			
+		\end{footnotesize}
+		
+\end{frame}
+
+\begin{frame}{Algorithms comparison}
+		
+		\begin{footnotesize}
+			
+			5000 individuals, 5 alternatives, coefficients~$\sim N(0.5,1)$
+			
+			\begin{center}
+				\hspace*{\stretch{1}}
+				\includegraphics[width=0.30\linewidth]{2dims.eps}
+				\includegraphics[width=0.30\linewidth]{5dims.eps}
+				\includegraphics[width=0.30\linewidth]{10dims.eps}
+				\hspace*{\stretch{1}}
+				
+				\vspace*{-0.2cm}
+				\includegraphics[width=0.3\linewidth]{legend.eps}
+			\end{center}
+			
+				\begin{center}
+					\vspace*{0.2cm}
+%					\begin{spacing}{0.8}
+						\begin{tabular}{|c|c|c|c|}
+							\cline{2-4}
+							\multicolumn{1}{c|}{} & 2 dimensions & 5 dimensions & 10 dimensions \\
+							\hline
+							\texttt{BTRDA} & $167s$ & $319s$ & $709s$ \\
+							\texttt{BTR}   & $310s$ & $706s$ & $1235s$ \\
+							\texttt{BFGS}  & $357s$ & $894s$ & $1736s$ \\
+							\hline
+						\end{tabular}
+%					\end{spacing}
+					
+					\vspace*{0.4cm}
+					
+				\end{center}
+				
+				Results obtained with a Pentium IV, 2 Ghz. BFGS method has been implemented
+				using the More-Thuente linesearch.
+			
+		\end{footnotesize}
+		
+\end{frame}
+
+
 \begin{frame}[fragile]
 \frametitle{Example}
 
-Mixed logit model: stochastic maximum likelihood
-\begin{tcolorbox}
-	\begin{center}
-		$\max_{\theta} LL(\theta) =
-		\max_{\theta} \frac{1}{N} \sum_{n = 1}^{N} \ln E[P_{ij_i}(x,\theta,\xi)].$
-	\end{center}
-\end{tcolorbox}
-
-Mode choice model: \textcolor{blue}{Mobidrive} data (Axhausen et al., 2002)\\
-$N = 5799$ observations, $R_{\max} = 2000$ draws per individual, 14 parameters (integration dimension: 3 normal variables).
+%Mode choice model: \textcolor{blue}{Mobidrive} data (Axhausen et al., 2002)\\
+%$N = 5799$ observations, $R_{\max} = 2000$ draws per individual, 14 parameters (integration dimension: 3 normal variables).
+Mode choice model: {\blue Mobidrive} data (Axhausen
+and al.)\\
+{\red $\rightarrow$} 5799 observations;\\
+{\red $\rightarrow$} 5 alternatives;\\
+{\red $\rightarrow$} 14 parameters (3 random, normally distributed).
 
 \begin{center}
 \begin{minipage}{0.49\linewidth}
