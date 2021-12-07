@@ -162,17 +162,17 @@ Evénement: action, schedule, cancel.
 
 \begin{footnotesize}
 \begin{center}
-\begin{tikzpicture}[scale=0.1, node distance = 1cm, auto]
+\begin{tikzpicture}[scale=0.09, node distance = 0.8cm, auto]
     % Place nodes
-    \node [block] (init) {Initialisation};
-    \node [text width=2.2cm, cloud, left of=init, node distance=4.0cm] (clock) {Horloge de simulation mise à 0};
-    \node [text width=2.5cm, cloud, right of=init, node distance=4.0cm] (system) {Planification du ou des premiers(s) événement(s)};
-    \node [text width=2.1cm, cloud, below of=init, node distance=3.0cm] (premier) {Dépilement du premier événement};
-    \node [text width=2.1cm, block, below of=premier, node distance=3.0cm] (event) {Gestion de l'événement actuel};
-    \node [text width=2.1cm, block, below of=event, node distance=3.0cm] (schedule) {Planification du ou des événements en découlant.};
-    \node [block, left of=schedule, node distance=5.0cm] (update) {Dépilement du prochain événement et avancement de l'horloge de simulation};
+    \node [block] (init) {Initialization};
+    \node [text width=2.2cm, cloud, left of=init, node distance=3.7cm] (clock) {Set simulation clock to 0};
+    \node [text width=2.5cm, cloud, right of=init, node distance=3.7cm] (system) {Plan first event(s)};
+    \node [text width=2.1cm, cloud, below of=init, node distance=2.0cm] (premier) {Pull the first event};
+    \node [text width=2.1cm, block, below of=premier, node distance=2.0cm] (event) {Handle current event};
+    \node [text width=2.1cm, block, below of=event, node distance=2.0cm] (schedule) {Plan resulting events};
+    \node [block, left of=schedule, node distance=4.0cm] (update) {Pull next event and advance clock};
     \node [text width=2.1cm, decision, below of=schedule, node distance=4.0cm] (decide) {Liste d'événements vide ou événement de fin?};
-    \node [block, below of=decide, node distance=4.5cm] (stop) {Arrêt};
+    \node [block, below of=decide, node distance=4.5cm] (stop) {Stop};
     % Draw edges
     \path [line] (init) -- (premier);
     \path [line] (premier) -- (event);
@@ -201,19 +201,19 @@ Evénement: action, schedule, cancel.
 
 \begin{footnotesize}
 \begin{center}
-\begin{tikzpicture}[scale=0.1, node distance = 1cm, auto]
+\begin{tikzpicture}[scale=0.09, node distance = 1cm, auto]
     % Place nodes
-    \node [text width=3cm, block, below of=premier, node distance=2cm] (event) {Gestion événement actuel};
-    \node [text width=3cm, block, below of=event, node distance=2cm] (schedule) {Planification des événements en découlant.};
-    \node [block, left of=schedule, node distance=4.5cm] (update) {Dépilement événement et avancement horloge};
-    \node [text width=2.cm, decision, below of=schedule, node distance=2.5cm] (decide) {Liste d'év. vide ou év. de fin?};
-    \node [block, below of=decide, node distance=2.5cm] (stop) {Arrêt. Impression rapport.};
+    \node [text width=3cm, block, below of=premier, node distance=2cm] (event) {Handle current event};
+    \node [text width=3cm, block, below of=event, node distance=2cm] (schedule) {Plan resulting events};
+    \node [block, left of=schedule, node distance=4.5cm] (update) {Pull next event and advance clock};
+    \node [text width=1.9cm, decision, below of=schedule, node distance=2.5cm] (decide) {End event or empty event list?};
+    \node [block, below of=decide, node distance=2.5cm] (stop) {Stop and print report};
     % Draw edges
     \path [line] (event) -- (schedule);
     \path [line] (schedule) -- (decide);
-    \path [line] (decide) -| node [near start, color=black] {non} (update);
+    \path [line] (decide) -| node [near start, color=black] {no} (update);
     \path [line] (update) |- (event);
-    \path [line] (decide) -- node [, color=black] {oui}(stop);
+    \path [line] (decide) -- node [, color=black] {yes}(stop);
 \end{tikzpicture}
 \end{center}
 \end{footnotesize}
