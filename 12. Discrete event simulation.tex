@@ -21,6 +21,7 @@
 \date{}
 
 \def\bu{\boldsymbol{u}}
+\def\bU{\boldsymbol{U}}
 \def\cS{\mathcal{S}}
 
 \begin{document}
@@ -65,23 +66,23 @@ A. M. Law, Simulation Modeling and Analysis, fifth edition, McGraw-Hill, USA, 20
 \begin{frame}
 \frametitle{Event approach}
 
-Hypothèse: système dans lequel les variables d'état ne peuvent changer qu'en un nombre dénombrable de points dans le temps.
+Assumption: system in which state variables can only change by a countable number of points in time.
 
 \mbox{}
 
-Suite d'événements $e_0, e_1, e_2\ldots$, survenant aux instants $0 \leq t_0 \leq t_1 \leq t_2 \leq \ldots$. 
+Sequence of events $e_0, e_1, e_2\ldots$, occurring at times $0 \leq t_0 \leq t_1 \leq t_2 \leq \ldots$. 
 
 \mbox{}
 
-${\cS_i}$: état du système immédiatement après ${e_i}$.
+${\cS_i}$: system state immediately after ${e_i}$.
 
 \mbox{}
 
-temps de la simulation: valeur courante de ${t_i}$.
+simulation time: current value of ${t_i}$.
 
 \mbox{}
 
-$(t_i,\cS_i)$ doit contenir assez d'information pour poursuivre la simulation (sauf les valeurs des variables aléatoires générées lors des événements $e_j$ pour $j > i$).
+$(t_i,\cS_i)$ must contain enough information to continue the simulation (except the realizations of the random variables for events $e_j$, $j > i$).
 
 \end{frame}
 
@@ -133,20 +134,20 @@ $(t_i,\cS_i)$ doit contenir assez d'information pour poursuivre la simulation (s
 
 \begin{itemize}
 \item
-Programme principal.
+Main program.
 \item
-Horloge de simulation.
+Simulation clock.
 \item
-Liste d'événements.
+Event list.
 \item
-Routines de génération de nombres aléatoires.
+Random numbers generation functions.
 \item
-Compteurs statistiques.
+Statistical collectors.
 \item
-Génération de rapport.
+Report generation.
 \end{itemize}
 
-Evénement: action, schedule, cancel.
+Event: action, schedule, cancel.
 
 \end{frame}
 
@@ -532,6 +533,713 @@ différent, et puisse parfois (mais pas toujours) être plus naturel pour l'appr
 %temps d'exécution, puisque le simulateur doit au final traiter des
 %événements, et gérer des processus pouvant être concurrents.
 
+\end{frame}
+
+\begin{frame}
+	\frametitle{Amélioration de l'Efficacité}
+
+The following material is adapted from Pierre L'Ecuyer's class ``Simulation: stochastic aspects''..
+
+\mbox{}
+	
+	L'efficacité d'un estimateur $X$ se
+	définit comme suit:
+	$$
+	eff[X] = {1\over MSE[X] C(X)},
+	$$
+	where MSE stands for mean square error and $C(X)$ represents the cost to compute $X$.
+	
+	\mbox{}
+	
+	Est-il possible, étant donné $X$, de construire un nouvel estimateur $Y$ plus efficace que $X$?
+	
+	\mbox{}
+	
+	Nous allons introduire les principaux concepts d'amélioration de l'efficacité au moyen d'un exemple introductif sur les centres d'appels téléphoniques.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exemple introductif}
+	
+	Posons ${B}$, le \emph{facteur d'achalandage} pour la journée, et
+	supposons que $P[B = b_t] = q_t$, o\`u
+	\begin{center}
+		\begin{tabular}{c|cccc}
+			${t}$   &   1  &  2   &   3  &  4  \\  
+			\hline
+			${b_t}$ &  0.8 &  1.0 &  1.2 &  1.4 \\
+			${q_t}$ & 0.25 & 0.55 & 0.15 & 0.05 \\
+		\end{tabular}
+	\end{center}
+	
+	\mbox{}
+	
+	Il est facile de vérifier que $E[B] = 1$. %% et $\Var[B] = 0.024$.
+	
+	\mbox{}
+	
+	Les \emph{arrivées} des appels suivent processus de Poisson de taux
+	$B{\lambda_j}$ durant l'heure $j$.
+	
+	\mbox{}
+	
+	Notons ${G_i(s)}=$ nombre d'appels dont le service a débuté
+	après moins de ${s}$ secondes d'attente, le jour $i$.
+	
+	\mbox{}
+	
+	On veut estimer ${\mu} = E[G_i(s)]$, disons pour ${s=20}$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example}
+	
+	Nous supposons de plus que les durées de service des appels suivent la loi
+	$\Gamma(\alpha,\gamma)$, dont la moyenne est $\alpha\gamma$.
+	
+	\mbox{}
+	
+	Dans notre exemple, on a $\alpha = 1$ et $\gamma = {\gamma_1} = 100$.
+	
+	\mbox{}
+	
+	Nombre d'agents $n_j$ et taux d'arrivée $\lambda_j$ (par heure) pour 13 périodes d'une heure dans le centre d'appel:
+	
+	\begin{footnotesize}
+		\hspace*{-1cm}
+		\begin{tabular}{l|rrrrrrrrrrrrr}
+			\hline
+			$j$   & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+			$n_j$ & 4 & 6 & 8 & 8 & 8 & 7 & 8 & 8 & 6 &  6 &  4 &  4 &  4 \\
+			$\lambda_j$ & 100 & 150 & 150 & 180 & 200 & 150 & 150 & 150 & 
+			120 & 100 & 80 & 70 & 60 \\
+			\hline
+		\end{tabular}
+	\end{footnotesize}
+	
+	\mbox{}
+	
+	We simulate ${n}$ independent days.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example}
+	
+	Soit ${X_i} = G_i(s)$ pour le jour $i$, et 
+	\[
+	{\bar X_n} = {1\over n} \sum_{i=1}^n X_i.
+	\]
+	On a $E[\bar X_n] = \mu$ et $Var[\bar X_n] = Var[X_i]/n$.
+	
+	\mbox{}
+	
+	Une expérience avec ${n = 1000}$ donne $\bar X_n = 1518.3$ et $S_n^2
+	= {21615}$.
+	La variance estimée de $\bar X_n$ est alors $\widehat{Var}[\bar X_n] = 21.6$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exemple introductif}
+	
+	Nous souhaitons construire un intervalle de confiance pour $\sigma^2 = n Var[\bar X_n]$, sous
+	l'hypothèse que $(n-1)S_n^2/\sigma^2$ suit approximativement une $\chi^2$ à ${n-1}$ degrés de
+	liberté. Ceci permet de construire l'intervalle à $90\%$: $[0.930S_n^2, 1.077S_n^2]$.
+	
+	\mbox{}
+	
+	En d'autres termes, l'erreur relative de cet estimateur est inférieure \`a $8\%$ avec une
+	``confiance'' d'environ 90\%.
+	
+	\mbox{}
+	
+	Voyons comment \emph{améliorer} cet estimateur $\bar X_n$,
+	en réduisant sa variance. Pour chaque méthode proposée, 
+	nous donnerons des résultats numériques pour {$n = 1000$}.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Estimation indirecte.}
+	
+	Soit ${A_i}$ le nombre total d'arrivées au jour $i$; posons ${D_i} = A_i - X_i$.
+	
+	\mbox{}
+	
+	On sait que ${a} = E[A_i] = \sum_{j=1}^m \lambda_j = 1660$.
+	
+	\mbox{}
+	
+	Nous pouvons dès lors écrire $\mu = E[X_i] = E[A_i - D_i] = a - E[D_i]$, que 
+	l'on peut estimer par
+	$$ {\bar X_{\rm{i},n}} = E[A_i] - \bar D_n = a - {1\over n} \sum_{i=1}^n D_i.$$
+	
+	\mbox{}
+	
+	Cet estimateur a moins de variance que $\bar X_n$ ssi $Var[D_i] < Var[X_i]$. 
+	Variance estimée: $\widehat{Var}[X_{\rm{i},i}] = {18389}$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Control variate (CV)}
+	
+	Idée: exploiter l'information auxiliaire.
+	
+	\mbox{}
+	
+	Par exemple, si ${A_i}$ est plus grand que d'habitude ($A_i > E[A_i] = 1660$),
+	on s'attend \`a ce que ce jour l\`a, $X_i$ et $D_i$
+	\emph{surestiment} $E[X_i]$ et $E[D_i]$.
+	
+	\mbox{}
+	
+	On pourrait faire une ``\emph{correction}'' \`a ces estimateurs:
+	remplacer $X_i$ par
+	$$ X_{\rm{c},i} = X_i - {\beta} (A_i - 1660) $$
+	o\`u $\beta$ est une constante appropriée.  \ Alors
+	\[
+	{\bar X_{\rm{c},n}} = \bar X_n - \beta (\bar A_n - 1660).
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Control variate (CV)}
+	
+	On a $E[\bar X_{\rm{c},n}] = E[X_i]$ et 
+	$$ Var[\bar X_{\rm{c},n}] 
+	= \frac{Var[X_i] + \beta^2Var[A_i] - 2 \beta Cov[A_i,X_i]}{n}. $$ 
+	Cette variance est une fonction quadratique en $\beta$, que l'on minimise
+	en prenant
+	\[
+	\beta = {\beta^*} = Cov[A_i, X_i] / Var[A_i].
+	\]
+	
+	\mbox{}
+	
+	La \emph{variance minimale} est
+	$$ Var[\bar X_{\rm{c},n}] = \frac{Var[X_i] - (\beta^*)^2 Var[A_i]}{n}
+	= Var[\bar X_n] (1- \rho^2[A_i,X_i]) $$
+	o\`u ${\rho[A_i, X_i]}$ est le coeff.\ de corrélation entre 
+	$A_i$ et $X_i$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Control variate (CV)}
+	
+	On ne connaît pas $Cov[A_i, X_i]$, mais:
+	\begin{enumerate}[(a)]
+		\item
+		On peut l'estimer par des \emph{expériences pilotes}.
+		\item
+		On peut l'estimer par les \emph{m\^emes $n$ simulations} que $\bar X_n$.
+	\end{enumerate}
+	
+	\mbox{}
+	
+	Avec (b) on obtient l'estimateur (légèrement biaisé):
+	\[
+	\bar X_{\rm{c}e,n} = \bar X_n - {1\over n-1} \left[\sum_{i=1}^n
+	(A_i-\bar A_n)(X_i-\bar X_n)\right] {\bar A_n - a\over Var[A_i]}.
+	\]
+	
+	\mbox{}
+	
+	Conditionnellement \`a $B_i$, $A_i\sim\mbox{Poisson}(1660 B_i)$.  On a donc
+	\begin{align*}
+		{Var[A_i]} &= Var[E[A_i|B_i]] + E[Var[A_i|B_i]] \\
+		&= Var[1660 B_i] + E[1660 B_i] \\
+		&= 1660^2 Var[B_i] + 1660 E[B_i] \\
+		&= 67794.4.
+	\end{align*}
+	Variance empirique obtenue ici: {3310}.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Variable de contrôle (VC)}
+	
+	En prenant $\beta=1$, on retrouve l'estimateur indirect:
+	\[
+	\bar X_{\rm{i},n} = \bar X_n - (\bar A_n - 1660) = 1660 - \bar D_n.
+	\]
+	Si on combine \emph{VC + indirect}, on obtient:
+	\begin{eqnarray*}
+		{\bar X_{\rm{i},\rm{c},n}} &=& a - \bar D_n - \beta_2 (\bar A_n - a) \\
+		&=& \bar A_n - \bar D_n -(1+\beta_2)(\bar A_n - a) \\
+		&=& \bar X_n -(1+\beta_2)(\bar A_n - a),
+	\end{eqnarray*}
+	i.e., $\bar X_{\rm{i},\rm{c},n}$ est équivalent \`a $\bar X_{\rm{c},n}$ 
+	avec $\beta = 1+\beta_2$.
+	Par conséquence, en présence de la variable de contrôle, l'estimation indirecte n'apporte rien.
+	
+	\mbox{}
+	
+	Nous pourrions aussi considérer d'autres variables de contrôle, comme $B_i$, la moyenne des durées de service, etc.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratification.}
+	
+	Le facteur d'achalandage ${B_i}$ est une source importante de variabilité 
+	importante dans le cas présent. Essayons de la contr\^oler.
+	
+	\mbox{}
+	
+	En posant $\mu_t = E[X_i\mid B_i=b_t]$, on a
+	\begin{eqnarray*}
+		\mu &=& E[X_i]  = \sum_{t=1}^4 P[B_i = b_t]\cdot E[X_i\mid B_i=b_t] \\
+		&=&  .25\, E[X_i\mid B_i=0.8] + .55\, E[X_i\mid B_i=1.0]  \\
+		&& + .15\, E[X_i\mid B_i=1.2] + .05\, E[X_i\mid B_i=1.4]  \\
+		&=&  .25\,\mu_1 + .55\, \mu_2 + .15\, \mu_3 + .05\, \mu_4.
+	\end{eqnarray*}
+	
+	\mbox{}
+	
+	\emph{Idée}: estimer ${\mu_t}$ \emph{séparément} 
+	pour chaque $t$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratification}
+	
+	Supposons qu'il y a ${N_t}$ jours o\`u $B_i = b_t$ et soient
+	${X_{t,1}},\dots, {X_{t,N_t}}$ les valeurs de $X_i$ pour ces jours. 
+	
+	\mbox{}
+	
+	On peut estimer $\mu_t = E[X_i\mid B_i=b_t]$ par
+	$$ {\hat\mu_t} = {1\over N_t} \sum_{i=1}^{N_t} X_{t,i} $$
+	et $\mu$ par
+	\[
+	{\bar X_{\rm{s},n}} = \sum_{t=1}^4 q_t \hat\mu_t.
+	= .25 \hat\mu_1 + .55 \hat\mu_2 + .15 \hat\mu_3 + .05 \hat\mu_4.
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratification}
+	
+	On a 
+	\begin{align*}
+		&  Var[\bar X_{\rm{s},n} \mid N_1, N_2, N_3, N_4] \\
+		&= \sum_{t=1}^4 q_t^2 Var[\hat\mu_t | N_t]  
+		= \sum_{t=1}^4 q_t^2 \sigma^2_t/N_t \\
+		&= .25^2 \sigma^2_1/N_1 + .55^2 \sigma^2_2/N_2 + 
+		.15^2 \sigma^2_3/N_3 + .05^2 \sigma^2_4/N_4.
+	\end{align*}
+	o\`u ${\sigma^2_t} = Var[X_i\mid B_i=b_t]$.
+	
+	\mbox{}
+	
+	La variance est réduite si les $\sigma_t^2$ sont inférieurs \`a $Var[X_i]$.
+	
+	\mbox{}
+	
+	Si les $B_i$ sont générés normalement: \emph{post-stratification}.
+	
+	\mbox{}
+	
+	Pour estimer $\mu$ par stratification, on peut aussi 
+	\emph{fixer les $N_t = n_t$ \`a l'avance}, c'est-\`a-dire choisir \`a
+	l'avance combien de jours on aura $B_i = b_t$ pour chaque valeur de
+	$t$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratification}
+	
+	\begin{itemize}
+		\item
+		\emph{Allocation proportionnelle}: prendre ${n_t} = n q_t$.\\
+		Avec $n=1000$, cela donne $n_1 = 250$, $n_2 = 550$, $n_3 = 150$, $n_4
+		= 50$.
+		\item
+		\emph{Allocation optimale}: 
+		choisir les $n_t$ pour minimiser $Var[\bar X_{\rm{s},n}]$ sous la contrainte
+		$n_1+n_2+n_3+n_4=n$.  On obtient:
+		\[
+		\frac{{n_t}}{n} 
+		= {\sigma_t P[B_i=t] \over\sum_{k=1}^4 \sigma_k P[B_i=k]}
+		= {\sigma_k q_k \over\sum_{k=1}^4 \sigma_k q_k}.
+		\]
+		On ne connait pas ces $\sigma_k$, mais on peut les estimer par des 
+		essais pilotes.
+		Avec ${n_0=800}$ essais pilotes, 200 par valeur de $t$, on obtient par
+		exemple $(n_1, n_2, n_3, n_4) = (219, 512, 182, 87)$ (après arrondi). 
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratégies combinées.}
+	
+	\emph{Stratification combinée avec VC:}\\
+	$$ 
+	{\hat\mu_t} = {1\over n_t} \sum_{i=1}^{n_t} X_{\rm{c},t,i} 
+	= {1\over n_t} \sum_{i=1}^{n_t} 
+	[X_{t,i} - \beta_t (A_{t,i} - a\,b_t)].
+	$$
+	
+	\mbox{}
+	
+	On minimise ${\sigma_t^2} = Var[X_{\rm{c},t,i}]$ en prenant 
+	\[
+	\beta_t = {\beta_t^*} = Cov[A_{t,i},\, X_{t,i}] / Var[A_{t,i}]
+	= Cov[A_i, X_i | B_i=b_t] / (a b_t).
+	\]
+	
+	\mbox{}
+	
+	L'ajout d'une VC change les $\sigma_t^2$: l'allocation 
+	optimale n'est plus la m\^eme.
+	
+	\mbox{}
+	
+	Avec $n_0=800$ essais pilotes, on obtient
+	$(\beta_1,\beta_2, \beta_3, \beta_4) = (1.020, 0.648, 0.224, -0.202)$ 
+	et $(n_1, n_2, n_3, n_4) = (131, 503, 247, 119)$ 
+	comme estimation des valeurs optimales.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratégies combinées.}
+	
+	En répétant l'expérience avec ${n = 100000}$, on peut trouver les
+	estimations suivantes pour la variance ($\pm 1\%$):\\
+	$Var[X_{n}] = 21998$; \
+	$Var[X_{\rm{i},n}] = 17996$; \
+	$Var[X_{\rm{c},n}] = 3043$; \
+	$Var[X_{\rm{s}o,\rm{c},n}] = 885$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Résultats numériques pour $n = 1000$}
+	
+	\begin{small}
+		\begin{tabular}{llrrr}
+			\hline
+			\ Méthode                & Estimateur
+			& Mean   & $S_n^2 (\pm 9\%)$ & Ratio \\
+			\hline
+			&&&&\\
+			Crude estimator             & $\bar X_n$
+			& 1518.2 & 21615  &  1.000 \\
+			Indirect                    & $\bar X_{\rm{i},n}$
+			& 1502.5 & 18389  &  0.851 \\
+			CV $A_i$, with pilot runs   & $\bar X_{\rm{c},n}$
+			& 1510.1 &  3305  &  0.153 \\
+			CV $A_i$, no pilot runs     & $\bar X_{\rm{c}e,n}$
+			& 1510.2 &  3310  &  0.153 \\
+			Indirect + CV, no pilot runs & $\bar X_{\rm{i},\rm{c},n}$
+			& 1510.1 &  3309  &  0.153 \\
+			Stratification (propor.)   & $\bar X_{\rm{s}p,n}$
+			& 1509.5 &  1778  &  0.082 \\
+			Stratification (optimal)    & $\bar X_{\rm{s}o,n}$
+			& 1509.4 &  1568  &  0.073 \\
+			&&&& \\
+			Strat.\ (propor.) + CV & $\bar X_{\rm{s}p,\rm{c},n}$
+			& 1509.2 &  1140  &  0.053 \\
+			Strat.\ (optimal) + CV & $\bar X_{\rm{s}o,\rm{c},n}$
+			& 1508.3 &   900  &  0.042 \\
+			\hline
+		\end{tabular}
+	\end{small}
+	
+	%comparaison de deux systèmes
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparaison de deux systèmes similaires}
+	
+	Supposons à présent qu'il est possible de diminuer légèrement le paramètre $\gamma$ à de la loi gouvernant les durées de service, en prenant
+	\[
+	\gamma = {\gamma_2} = \gamma_1(1-\delta),
+	\]
+	pour ${\delta} > 0$ très petit.
+	
+	\mbox{}
+	
+	Si on utilise les m\^emes nombres aléatoires, cela équivaut \`a multiplier
+	les durées de service par $(1-\delta)$.
+	
+	\mbox{}
+	
+	Nous voulons estimer $\mu(\gamma_2) - \mu(\gamma_1) = E_\gamma[X_2] - E_\gamma[X_1]$,
+	afin de mesurer l'effet d'augmenter un peu la vitesse des serveurs.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparaison de deux systèmes similaires}
+	
+	On simule $n$ jours pour chaque valeur de $\gamma$.
+	\begin{itemize}
+		\item
+		${X_{1,i}}=$ valeur de $G_i(s)$ avec $\gamma_1$;
+		\item
+		${X_{2,i}}=$ valeur de $G_i(s)$ avec $\gamma_2$;
+		\item
+		${\Delta_i} = X_{2,i}-X_{1,i}$,
+		\[
+		{\bar\Delta_n} = {1\over n} \sum_{i=1}^n \Delta_i
+		\]
+	\end{itemize}
+	
+	\mbox{}
+	
+	On peut simuler $X_{1,i}$ et $X_{2,i}$
+	\begin{enumerate}[(i)]
+		\item
+		avec des v.a.{} indépendantes (\emph{VAI}),
+		\item
+		avec des v.a.{} communes (\emph{VAC}).
+	\end{enumerate}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparaison de deux systèmes similaires}
+	
+	Comme
+	\[
+	Var[\Delta_i] = Var[X_{1,i}] + Var[X_{2,i}] - 2Cov[X_{1,i},\,X_{2,i}],
+	\]
+	le but des variables aléatoires communes est de rendre la covariance positive.
+	
+	\mbox{}
+	
+	Comment implanter les VAC?
+	
+	\mbox{}
+	
+	Utiliser des suites aléatoires différentes pour générer:
+	\begin{enumerate}
+		\item
+		le facteur d'achalandage $B_i$;
+		\item
+		les temps inter-arrivées;
+		\item
+		les durées des appels;
+		\item
+		les durées de patience.
+	\end{enumerate}
+	Tout est généré par inversion:  on utilise une uniforme par v.a.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Synchronisation}
+	
+	Lorsqu'on change les durées de service, les durées d'attente changent
+	et les décisions d'abandon peuvent ainsi changer.
+	
+	\mbox{}
+	
+	Si on ne génère les durées de service que pour les clients qui 
+	n'abandonnent pas, alors on peut perdre la synchronisation:
+	on peut avoir une durée de service de moins \`a générer dans 
+	un système que dans l'autre.
+	
+	\mbox{}
+	
+	On peut générer les durées de service:
+	%
+	\begin{itemize}
+		\item[(a)] 
+		pour tous les appels, m\^eme les abandons,
+		\item[(b)] 
+		seulement pour les appels servis.
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Synchronisation}
+	
+	De m\^eme, la durée de patience n'a pas besoin d'\^etre générée pour 
+	les clients qui n'attendent pas.  On peut la générer:
+	\begin{itemize}
+		\item[(c)] 
+		pour tous les appels,
+		\item[(d)] 
+		seulement si nécessaire.
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Synchronization: résultats (avec ${n=10^4}$)}
+	
+	\begin{footnotesize}
+		\begin{center}
+			\begin{tabular}{|l|rr|rr|rr|}
+				\hline
+				% &&&&&&\\
+				\ Method
+				& \multicolumn{2}{|c}{$\delta = 0.1$}
+				& \multicolumn{2}{|c}{$\delta = 0.01$}
+				& \multicolumn{2}{|c|}{$\delta = 0.001$} \\
+				& $\bar \Delta_n$ & $\widehat{Var}[\Delta_i]$
+				& $\bar \Delta_n$ & $\widehat{Var}[\Delta_i]$
+				& $\bar \Delta_n$ & $\widehat{Var}[\Delta_i]$\\
+				\hline
+				IRN (a + c)                      &  55.2 & 56913 &  4.98 & 45164 &  0.66 & 44046 \\
+				IRN (a + d)                      &  52.2 & 54696 &  7.22 & 45192 & -1.82 & 45022 \\
+				IRN (b + c)                      &  50.3 & 56919 &  9.98 & 44241 &  1.50 & 45383 \\
+				IRN (b + d)                      &  53.7 & 55222 &  5.82 & 44659 &  1.36 & 44493 \\
+				CRN, no sync. (b + d)            &  56.0 &  3187 &  5.90 &  1204 &  0.19 &   726 \\
+				CRN (a + c)                      &  56.4 &  2154 &  6.29 &    37 &  0.62 &   1.8 \\
+				CRN (a + d)                      &  55.9 &  2161 &  6.08 &   158 &  0.74 &  53.8 \\
+				CRN (b + c)                      &  55.8 &  2333 &  6.25 &   104 &  0.63 &   7.9 \\
+				CRN (b + d)                      &  55.5 &  2323 &  6.44 &   143 &  0.59 &  35.3 \\
+				% CRN (a + c), str.\ (opt.) & &&&&& \\ 
+				% CRN (a + d), str.\ (opt.) & &&&&& \\
+				% CRN (b + c), str.\ (opt.) & &&&&& \\
+				% CRN (b + d), str.\ (opt.) & &&&&& \\
+				\hline
+			\end{tabular}
+		\end{center}
+	\end{footnotesize}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Induction de corrélation}
+	
+	Conditions suffisantes pour que $Cov[X,Y]$ 
+	soit positive, ou soit négative?
+	
+	\mbox{}
+	
+	Comment maximiser ou minimiser la corrélation pour des lois 
+	marginales données?
+	
+	\mbox{}
+	
+	\begin{theorem}[Fréchet bounds]
+		Parmi les paires de v.a.{} $(X,Y)$ dont les f.r.{} marginales sont 
+		${F}$ et ${G}$, la paire $(X,Y) = (F^{-1}(U), G^{-1}(U))$ 
+		o\`u ${U} \sim U(0,1)$, 
+		\emph{maximise} $\rho[X, Y]$, \
+		et la paire $(X,Y) = (F^{-1}(U), G^{-1}(1-U))$
+		\emph{minimise} $\rho[X, Y]$.
+	\end{theorem}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Correlation induction}
+	
+	Par exemple, si la fonction de répartition d'une durée de service est 
+	${F}$ dans le premier système et ${G}$ dans le second,
+	et si on génère les durées de service par
+	$X = F^{-1}(U)$ et $Y = G^{-1}(U)$, alors $Cov[X, Y] \ge 0$.
+	
+	\begin{theorem}
+		Soient \ ${X} = {f}(U)$ o\`u ${U} \sim U(0,1)$ et \
+		${Y} = {g}(V)$ o\`u ${V} \sim U(0,1)$. Alors,
+		\begin{itemize}
+			\item
+			si $f$ et $g$ sont monotones dans le m\^eme sens et $V=U$,
+			alors $Cov[X, Y] \ge 0$;
+			\item
+			si $f$ et $g$ sont monotones dans le m\^eme sens et $V=1-U$,
+			alors $Cov[X, Y] \le 0$.
+		\end{itemize}
+	\end{theorem}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Common random numbers (CRN)}
+	
+	We use ${\Delta} = {X_2}-{X_1}$ to estimae ${\mu_2}-{\mu_1} = E[X_2] - E[X_1]$.
+	Then
+	\[
+	Var[\Delta] = Var[X_1] + Var[X_2] - 2 \, Cov[X_1,X_2].
+	\]
+	\emph{Goal}: induire une corrélation positive entre $X_1$ et $X_2$
+	sans changer leurs lois individuelles.
+	
+	\mbox{}
+	
+	Technique: utiliser les m\^emes nombres aléatoires pour simuler
+	les deux systèmes, en essayant de maintenir la \emph{synchronisation}
+	le mieux possible.
+	
+	\mbox{}
+	
+	Si $X_k = {f_k}(\bU_k) = f_k({U_{k,1}},{U_{k,2}},\dots)$ 
+	pour $k=1,2$, utiliser des VAC partout veut dire prendre $\bU_1=\bU_2$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Common random numbers (CRN)}
+	
+	\begin{theorem}
+		Si $f_1$ et $f_2$ sont monotones dans le m\^eme sens par rapport \`a
+		tous leurs arguments, alors  $Cov[X_1, X_2] \ge 0$.
+	\end{theorem}
+	
+	\mbox{}
+	
+	Pour \emph{maximiser} la corrélation, il faudrait générer
+	$X_1$ et $X_2$ directement par inversion!
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example: Lindley process}
+	
+	${W_{i+1}} = \max(0,\, W_i + S_i - A_i)$, o\`u $S_i-A_i$ est
+	indépendant de $W_i$.
+	
+	\mbox{}
+	
+	Si ${X_1}$ et ${X_2}$ sont des fonctions non-décroissantes des $W_i$
+	pour deux processus de Lindley simulés avec des VAC, 
+	alors $Cov[X_1, X_2] \ge 0$.
+	
+	\mbox{}
+	
+	Parfois il est très difficile de vérifier les conditions du
+	théorème.
+	
+	\mbox{}
+	
+	Par exemple, pour la banque ou un centre d'appels, la monotonicité
+	est difficile \`a vérifier \`a cause des possibilités d'abandon.
+	De plus, les conditions du théorème sont \emph{suffisantes}, mais 
+	\emph{pas nécessaires}.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Common random numbers (CRN)}
+	
+	Pour \emph{tester} si c'est efficace en pratique:
+	faire une \emph{expérience pilote avec les VAC} et estimer 
+	$Cov(X_1, X_2)$.
+	
+	\mbox{}
+	
+	Il n'est pas nécessaire de faire de simulations sans les VAC:
+	pour estimer la variance qu'on aurait sans les VAC,
+	il suffit de prendre la version empirique de $Var[X_1] + Var[X_2]$.
+	
 \end{frame}
 
 \end{document}
