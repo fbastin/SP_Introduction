@@ -27,6 +27,8 @@
 
 \setbeamercovered{dynamic}
 
+\include{macros.tex}
+
 \def\bxi{\boldsymbol\xi}
 \def\bomega{\boldsymbol\omega}
 \def\bC{\boldsymbol{C}}
@@ -75,14 +77,15 @@
 		s_n = f(s_{n-1}).
 		\]
 		We will furthermore assume that $f$ is periodic for all $n$ greater of
-		equal to some known $\tau$ (often equal to 0), with the period denoted
-		by $\rho$.
-		In other terms, we have $s_{n+\rho} = s_n$ for all $n\ge\tau$.
+		equal to some known $\tau$ (often equal to 0), with period $\rho$:
+		$$
+		s_{n+\rho} = s_n,\ \forall\, n\ge\tau.
+		$$
 		
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{U[0,1]-distributed random numbers (2)}
+		\frametitle{U[0,1]-distributed random numbers (cont'd)}
 		
 		\begin{itemize}
 			\item
@@ -121,36 +124,36 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Linear congruential generators}
+		\frametitle{Linear congruential generators (LCGs)}
 		
-		{\red Linear congruential generators} (LCGs) have been introduced by
-		Lehmer in 1951.
-		We use the recursive formula
-		\[
-		Z_i = f(Z_{i-1}) = (aZ_{i-1}+c) \mod m.
-		\]
+\begin{itemize}
+\item
+Introduced by Lehmer (1951).
+\item
+State $s = x \in \RR_{\geq 0}$.
+\item
+Recursive formula:
+$$
+x_i = f(x_{i-1}) = (ax_{i-1}+c) \mod m,
+$$
+where $\mod$ is the modulo operator.\\
+Given two numbers, a (the dividend) and n (the divisor),
+$$
+a \mod n = a - n\left\lfloor \frac{a}{n} \right\rfloor.
+$$
+\end{itemize}
 		
-		Given two numbers, a (the dividend) and n (the divisor),
-		\[
-		a \mbox{ modulo }n
-		\]
-		(abbreviated as a mod n) is the remainder, on division of a by n. For
-		instance, the expression "7 mod 3" gives 1, while ``9 mod 3'' leads to 0.
-		In other terms,
-		\[
-		a \mbox{ mod } n = a - n\left\lfloor \frac{a}{n} \right\rfloor.
-		\]
-		
-	\end{frame}
+\end{frame}
 	
 	\begin{frame}
 		\frametitle{Linear congruential generators: full period?}
 		
 		Full period: $m$ is $c \ne 0$, $m-1$ otherwise (if $c = 0$, 0 is a
-		fixed point for the recurrence).à Considere the case $c \ne 0$.
+		fixed point for the recurrence).
+		Consider the case $c \ne 0$.
 		
 		\begin{theorem}[Period]
-			The LCG has full period if and only if the
+			The LCG has full period iff the
 			following three conditions hold:
 			\begin{enumerate}
 				\item
@@ -162,8 +165,7 @@
 				if 4 divides $m$, then 4 divides a-1.
 			\end{enumerate}
 		\end{theorem}
-		A popular LCG is the "{\red standard minimal}", as known from the
-		terminology introduced by Park and Miller in 1988:
+		''{\red Standard minimal}" (Park and Miller, 1988):
 		\[
 		x_{n+1} = 16807x_n \mbox{ mod } 2147483647.
 		\]
@@ -359,17 +361,6 @@ end
 			
 		\end{frame}
 		
-		\begin{frame}[containsverbatim]
-			\frametitle{RDST library}
-			
-\url{https://github.com/JLChartrand/RDST.jl}		
-
-\mbox{}
-
-To update!
-		
-	\end{frame}
-	
 	\begin{frame}
 		\frametitle{Random numbers generators on $\mathcal{F}_2$}
 		
@@ -480,7 +471,7 @@ Most popular:
 	xoshiro: \url{https://prng.di.unimi.it/}
 \end{itemize}
 
-The generators are slightly less efficient on a statistical point of view, but are faster.
+%The generators are slightly less efficient on a statistical point of view, but are faster.
 		
 	\end{frame}
 
@@ -498,6 +489,16 @@ Useful in simulation when relying on common random random numbers.
 
 The MRG32k3a implementation proposes functions to generate independent streams and substreams.
 
+\end{frame}
+
+		\begin{frame}[containsverbatim]
+	\frametitle{RDST library}
+	
+	\url{https://github.com/JLChartrand/RDST.jl}		
+	
+	\mbox{}
+	
+	This package proposes an implementation of MRG32k3a with streams and substreams.
 	
 \end{frame}
 
