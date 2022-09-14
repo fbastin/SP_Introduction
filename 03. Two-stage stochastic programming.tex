@@ -154,20 +154,22 @@
 	\frametitle{Penalization of violations}
 	
 	Again, we have to deal with decision problems where the decision $x$ has to be taken before we know the realization of $\bomega$
-	\begin{itemize}
-		\item
-		We nevertheless have to know the distribution of $\bomega$ over $\Omega$.
-		We assume for now that $\Omega$ is finite.
-		\item
-		In models with recourse, the random constraints are ``soft''. They can be violated, but the violation cost will influence the choice of $x$. 
-		\item
-		In fact, a second stage linear program is introduced; it describes how the violated random constraints are handled.
-	\end{itemize}
+%	\begin{itemize}
+%		\item
+%		We nevertheless have to know the distribution of $\bomega$ over $\Omega$.
+%		We assume for now that $\Omega$ is finite.
+%		\item
+%		In models with recourse, the random constraints are ``soft''. They can be violated, but the violation cost will influence the choice of $x$. 
+%		\item
+%		In fact, a second stage linear program is introduced; it describes how the violated random constraints are handled.
+%	\end{itemize}
 	
-\end{frame}
+%\end{frame}
 
-\begin{frame}
-	\frametitle{The new problem\ldots}
+%\begin{frame}
+%	\frametitle{The new problem\ldots}
+
+\mbox{}
 	
 	In the simplest case, we can simply penalize the constraints deviations by vectors of penalty coefficients $q_+$ and $q_-$.
 	\begin{align*}
@@ -214,45 +216,19 @@
 \begin{frame}
 	\frametitle{Recourse formulation}
 	
-	The previous considerations lead us to formulate the following program:
+	The previous considerations lead us to formulate the more general following program:
 	\begin{align*}
-	\min\ & c^Tx+E_{\bomega}[q^Ty] \\
+	\min\ & c^Tx+E_{\bomega}[q^T(\omega)y(\omega)] \\
 	\mbox{s.t. } & Ax = b, \\
 	& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega
 	\in \Omega \\
 	& x \in X, \\
-	& y \in Y,\ \forall \omega.
+	& y(\omega) \in Y,\ \forall \omega.
 	\end{align*}
 	
 	We could have $W$ varying with the realization $\omega$.
 	If $W$ is unique, as in the previous formulation, we speak of {\red fixed recourse}: the recourse does not change with the scenario.\\
 	But how to decide on $y$?
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Some definitions}
-	
-	\[
-	\min_{x \in X | Ax = b} \left\lbrace c^Tx + E_{\bomega} \left[ \min_{y
-		\in Y} q^T y | W y = h(\bomega) - T(\bomega)x \right] \right\rbrace.
-	\]
-	\begin{itemize}
-		\item
-		{\red Second stage function}, or {\red recourse function} (penalty) $v :
-		\rit^m \rightarrow \rit$:
-		\[
-		v(z) \overset{def}{=} \min_{y \in Y} \lbrace q^Ty | W y = z \rbrace;
-		\]
-		this function describes the costs related to any vector $z$ representing the ``deviations from the random constraints $T(\omega)x = f(\omega)$''.
-		\item
-		{\red Expected value function}, or recourse of minimum expectation
-		$\mathcal{Q} : \rit^n \rightarrow \rit$:
-		\[
-		\cQ(x) = E_{\bomega} [ v (h(\bomega) - T(\bomega) x)].
-		\]
-		It describes the expected recourse cost, for any policy $x \in \rit^n$.
-	\end{itemize}
 	
 \end{frame}
 
@@ -466,7 +442,7 @@ Q(x, \xi(\omega)) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x
 
 \mbox{}
 
-Second-stage function, or recourse function, $v: \Xi \times \rit^m \rightarrow \rit$:
+{\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \rit^m \rightarrow \rit$:
 \[
 v(\xi, z) \overset{def}{=} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
 \]
@@ -478,7 +454,7 @@ Given a ``policy'' $x$ and a realization of the random vector $\bxi$, $z$ measur
 \begin{frame}
 \frametitle{Recourse function}
 
-The expected recourse function, or the function of minimum expected recourse, $\mathcal{Q}: \rit^n \rightarrow \rit$, for any policy $x \in \rit^n$:
+The {\red expected recourse function}, or the function of minimum expected recourse, $\mathcal{Q}: \rit^n \rightarrow \rit$, for any policy $x \in \rit^n$:
 \[
 \mathcal{Q} \overset{def}{=} E_{\bxi}[Q(x,\bxi)],
 \]

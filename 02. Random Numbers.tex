@@ -208,7 +208,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\begin{frame}
 		\frametitle{Multiple Recursive Generator (MRG)}
 		
-		But we want better! Generalize the linear congruential generator:
+		But we want better! Generalize the LCG:
 		\[
 		x_n = (a_1 x_{n-1} + \cdots + a_k x_{n-k}) \mod {m}, \quad  
 		u_n = x_n / m.
@@ -666,7 +666,7 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 		
 		\mbox{}
 		
-		Exemples: Erlang (sum of exponentials with same mean), binomial.
+		Examples: Erlang (sum of exponentials with same mean), binomial.
 		
 		\mbox{}
 		
