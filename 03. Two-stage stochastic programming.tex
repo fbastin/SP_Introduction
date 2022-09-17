@@ -9,7 +9,7 @@
 %\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
 %\usepackage[pst]{xcolor}
 %\usepackage{xxcolor}
-\usepackage{mathlist}
+\input{macros}
 
 %\usepackage[frenchb]{babel}
 \usepackage[utf8]{inputenc}
@@ -19,11 +19,7 @@
 
 \usepackage{pstricks}
 
-%\usepackage{eepic}
-
 \usepackage{times}
-
-%\usepackage{pst-tree}
 
 \usepackage{ulem}
 
@@ -39,9 +35,6 @@
 \def\bomega{\boldsymbol\omega}
 \def\bxi{\boldsymbol\xi}
 
-\def\rit{\mathcal{R}}
-
-\def\cF{\mathcal{F}}
 \def\cQ{\mathcal{Q}}
 
 \author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
@@ -70,14 +63,21 @@
 \begin{frame}
 	\frametitle{A random linear program}
 	
-	Consider the (toy)	problem
+	Consider the linear program (LP), parametrized by the random (r.v.) $\bxi: \Omega \rightarrow \RR^2$:
 	\begin{align*}
-	\min_x\ & x_1+x_2\\
-	\mbox{s.t. } & \omega_1x_1 + x_2 \geq 7 \\
-	& \omega_2x_1 + x_2 \geq 4 \\
-	& x_1, x_2 \geq 0,
+		\min_x\ & c^T x \\
+		\mbox{s.t. } & Ax = b \\
+		& T(\bxi)x = h(\bxi) \\
+		& x \in X,
 	\end{align*}
-	where $\omega_1 \sim U[1,4]$, $\omega_2\sim U[1/3,1]$.
+	with $X = \lbrace x \in \RR^n | l \leq x \leq u \rbrace$. Example:
+	\begin{align*}
+		\min_x\ & x_1+x_2\\
+		\mbox{s.t. } & \bxi_1x_1 + x_2 \geq 7 \\
+		& \bxi_2x_1 + x_2 \geq 4 \\
+		& x_1, x_2 \geq 0,
+	\end{align*}
+	where $\xi_1 \sim U[1,4]$, $\xi_2\sim U[1/3,1]$.
 \end{frame}
 
 \begin{frame}
@@ -89,13 +89,13 @@
 		\item
 		What is the {\sl meaning} of solving this problem?
 		\item
-		Is it possible to decide on $x$ {\sl after} having observed the realization of the random vector $\bomega$?\\
+		Can we decide on $x$ {\sl after} having observed the realization of the r.v. $\bxi$?\\
 		We then talk of an {\red wait-and-see} approach.
 		The problem is then easier to solve (we have here a simple linear program).
 		\item
-		But this approach is rarely appropriate!!! We usually have to decide on $x$ {\red before} we know the realizations of $\bomega$!
+		But this approach is rarely appropriate!!! We usually have to decide on $x$ {\red before} we know the realizations of $\bxi$!
 		\item
-		Usually, the ``wait-and-see'' approach is not appropriate to model the reality behavior: we have to decide on $x$ before we know the realizations from $\omega$.
+		Usually, the ``wait-and-see'' approach is not appropriate to model the reality behavior: we have to decide on $x$ before we know the realizations from $\bxi$.
 		%		\item
 		%It the example, we have to decide what to do before we know the realizations $\omega_1$, $\omega_2$.
 		\item
@@ -113,28 +113,9 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{A random linear program}
-	
-	Consider the following linear program, parametrized by the random vector $\bomega$:
-	\begin{align*}
-	\min_x\ & c^T x \\
-	\mbox{s.t. } & Ax = b \\
-	& T(\bomega)x = h(\bomega) \\
-	& x \in X,
-	\end{align*}
-	with $X = \lbrace x \in \rit^n | l \leq x \leq u \rbrace$. Example:
-	\begin{align*}
-	\min_x\ & x_1+x_2\\
-	\mbox{s.t. } & \omega_1x_1 + x_2 \geq 7 \\
-	& \omega_2x_1 + x_2 \geq 4 \\
-	& x_1, x_2 \geq 0.
-	\end{align*}
-\end{frame}
-
-\begin{frame}
 	\frametitle{Remove the randomness?}
 	
-	A popular approach consists to look for reasonable values for $\omega_1$ and $\omega_2$.
+	A popular approach consists to look for reasonable values for $\bxi_1$ and $\bxi_2$.
 	How?
 	
 	\mbox{}
@@ -142,8 +123,8 @@
 	Propositions:
 	\begin{itemize}
 		\item unbiased: choose the mean values for each random variable;
-		\item pessimistic: choose the worst-case values for $\omega$;
-		\item optimistic: choose the best-case values for $\omega$.
+		\item pessimistic: choose the worst-case values for $\bxi$;
+		\item optimistic: choose the best-case values for $\bxi$.
 	\end{itemize}
 	
 	Each approach will deliver a different optimal solution!
@@ -153,29 +134,13 @@
 \begin{frame}
 	\frametitle{Penalization of violations}
 	
-	Again, we have to deal with decision problems where the decision $x$ has to be taken before we know the realization of $\bomega$
-%	\begin{itemize}
-%		\item
-%		We nevertheless have to know the distribution of $\bomega$ over $\Omega$.
-%		We assume for now that $\Omega$ is finite.
-%		\item
-%		In models with recourse, the random constraints are ``soft''. They can be violated, but the violation cost will influence the choice of $x$. 
-%		\item
-%		In fact, a second stage linear program is introduced; it describes how the violated random constraints are handled.
-%	\end{itemize}
-	
-%\end{frame}
-
-%\begin{frame}
-%	\frametitle{The new problem\ldots}
-
-\mbox{}
+	Again, we have to deal with decision problems where the decision $x$ has to be taken before we know the realization of $\bxi$
 	
 	In the simplest case, we can simply penalize the constraints deviations by vectors of penalty coefficients $q_+$ and $q_-$.
 	\begin{align*}
-	\min\ & c^Tx+q^T_+s(\bomega)+q^T_-t(\bomega) \\
+	\min\ & c^Tx+q^T_+s(\bxi)+q^T_-t(\bxi) \\
 	\mbox{s.t. } & Ax = b, \\
-	& T(\bomega)x + s(\bomega)-t(\bomega) = h(\bomega), \\
+	& T(\bxi)x + s(\bxi)-t(\bxi) = h(\bxi), \\
 	& x \in X.
 	\end{align*}
 	
@@ -190,24 +155,24 @@
 	
 	A reasonable, and solvable, problem is then
 	\begin{align*}
-	\min\ & c^Tx+E_{\bomega}[q^T_+s(\bomega)+q^T_-t(\bomega)] \\
+	\min\ & c^Tx+E_{\bxi}[q^T_+s(\bxi)+q^T_-t(\bxi)] \\
 	\mbox{s.t. } & Ax = b, \\
-	& T(\omega)x + s(\omega)-t(\omega) = h(\omega),\ \forall \omega
-	\in \Omega \\
-	& x \in X.
+	& T(\xi)x + s(\xi)-t(\xi) = h(\xi),\ \text{ for a.e. } \xi \\
+	& x \in X,
 	\end{align*}
+where {\it a.e.} stands for ``almost every''.
 	\begin{itemize}
 		\item
 		In general, we can react in a correct (and maybe optimal) way: we have a recourse to ``correct'' the first decision once the uncertainty is removed.
 		\item
-		A recourse structure in linear progamming is provided by 3 elements:
+		A LP recourse structure is provided by 3 elements:
 		\begin{itemize}
 			\item
-			a set $Y \subset \rit^p$ that describes the feasible set of recourse actions, for instance $Y = \lbrace y \in \rit^p | y \geq 0 \rbrace$;
+			a set $Y \subset \RR^p$ that describes the feasible set of recourse actions, for instance $Y = \lbrace y \in \RR^p \,|\, y \geq 0 \rbrace$;
 			\item
 			$q$: a vector of recourse costs;
 			\item
-			$W$: a matrix $m \times p$, called the recourse matrix.
+			$W \in \RR^{m \times p}$: {\blue recourse matrix}.
 		\end{itemize}
 	\end{itemize}
 	
@@ -218,15 +183,14 @@
 	
 	The previous considerations lead us to formulate the more general following program:
 	\begin{align*}
-	\min\ & c^Tx+E_{\bomega}[q^T(\omega)y(\omega)] \\
+	\min\ & c^Tx+E_{\bxi}[q^T(\bxi)y(\bxi)] \\
 	\mbox{s.t. } & Ax = b, \\
-	& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega
-	\in \Omega \\
+	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \\
 	& x \in X, \\
-	& y(\omega) \in Y,\ \forall \omega.
+	& y(\xi) \in Y,\ \text{ for a.e. } \xi.
 	\end{align*}
 	
-	We could have $W$ varying with the realization $\omega$.
+	We could have $W$ varying with the realization $\xi$.
 	If $W$ is unique, as in the previous formulation, we speak of {\red fixed recourse}: the recourse does not change with the scenario.\\
 	But how to decide on $y$?
 	
@@ -239,7 +203,7 @@
 	\[
 	\min_{x \in X} \lbrace c^T x + \mathcal{Q}(x) \ |\  Ax = b \rbrace.
 	\]
-	It is a (nonlinear) mathematical programming problem in $\rit^n$.
+	It is a (nonlinear) mathematical programming problem in $\RR^n$.
 	
 	The properties of $\mathcal{Q}(x)$ influence the solution techniques.
 	
@@ -263,19 +227,18 @@
 	\frametitle{Expression in terms of $y$'s}
 	
 	\begin{align*}
-	\min_{x,\ y(\bomega)}\ & E_{\bomega} [ c^T x +
-	q^T y(\bomega) ] \\
+	\min_{x,\ y(\bxi)}\ & E_{\bxi} [ c^T x + q^T y(\bxi) ] \\
 	\mbox{s.t. } & Ax = b & \mbox{first-stage constraints} \\
-	& T(\omega)x + Wy(\omega) = h(\omega),\ \forall \omega \in \Omega &
+	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi &
 	\mbox{second-stage contraints} \\
-	& x \in X,\ y(\omega) \in Y.
+	& x \in X,\ y(\xi) \in Y\ \text{ for a.e. } \xi.
 	\end{align*}
 	
 	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
-	\omega_2,\ldots,\omega_S \rbrace \subset \rit^r$.
+	\omega_2,\ldots,\omega_S \rbrace \subset \RR^r$.
 	\begin{align*}
 	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots . . . , S \\
-	T_s & = T (\omega),\ h_s = h(\omega) 
+	T_s & = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s)) 
 	\end{align*}
 	
 \end{frame}
@@ -304,8 +267,8 @@
 	
 	\begin{itemize}
 		\item
-		$y_s = y(\omega_s)$ is the recourse action to take if the scenario
-		$\omega_s$ occurs.
+		$y_s = y(\xi(\omega_s))$ is the recourse action to take if the scenario
+		$s$ occurs.
 		\item
 		Advantage: it is a linear program.
 		\item
@@ -327,7 +290,7 @@
 	\frametitle{Large scale,\ldots and?}
 	
 	Assume that we have $r$ random variables ($\Omega \subset
-	\rit^r$).
+	\RR^r$).
 	\begin{itemize}
 		\item
 		Consider the following problem (source: Linderoth).
@@ -356,11 +319,11 @@
 	Consider again our toy problem
 	\begin{align*}
 	\min_x\ & x_1+x_2\\
-	\mbox{s.t. } & \omega_1x_1 + x_2 \geq 7 \\
-	& \omega_2x_1 + x_2 \geq 4 \\
+	\mbox{s.t. } & \bxi_1x_1 + x_2 \geq 7 \\
+	& \bxi_2x_1 + x_2 \geq 4 \\
 	& x_1, x_2 \geq 0,
 	\end{align*}
-	where $\omega_1 \sim U[1,4]$, $\omega_2[1/3,1]$.
+	where $\bxi_1 \sim U[1,4]$, $\bxi_2[1/3,1]$.
 	
 	\mbox{}
 	
@@ -374,8 +337,8 @@
 	Assume for now that $\Omega$ is finite, with $S$ scenarios.
 	\begin{align*}
 	\min_x\ & x_1+x_2 + \sum_{s \in S} p_s \lambda (y_{1s} + y_{2s})\\
-	\mbox{s.t. } & \omega_{1s}x_1 + x_2 + y_{1s} \geq 7 \\
-	& \omega_{2s}x_1 + x_2 + y_{1s} \geq 4 \\
+	\mbox{s.t. } & \xi_{1s}x_1 + x_2 + y_{1s} \geq 7 \\
+	& \xi_{2s}x_1 + x_2 + y_{1s} \geq 4 \\
 	& x_1, x_2 \geq 0,\\
 	& y_{1s}, y_{2s} \geq 0.
 	\end{align*}
@@ -396,14 +359,14 @@
 	
 	More generally, we can build the program
 	\begin{align*}
-	\min_x\ & x_1+x_2 + E_{\omega}[Q(x)] \\
+	\min_x\ & x_1+x_2 + E_{\bxi}[Q(x,\bxi)] \\
 	\mbox{s.t. } & x_1, x_2 \geq 0,
 	\end{align*}
 	and
 	\begin{align*}
-	Q(x) &= \min_y q_1y_1 + q_2y_2 \\
-	\mbox{s.t. } & \omega_1 x_1 + x_2 + y_1 \geq 7, \\
-	& \omega_2 x_1 + x_2 + y_2 \geq 4.
+	Q(x,xi) &= \min_y q_1y_1 + q_2y_2 \\
+	\mbox{s.t. } & \xi_1 x_1 + x_2 + y_1 \geq 7, \\
+	& \xi_2 x_1 + x_2 + y_2 \geq 4.
 	\end{align*}
 	
 \end{frame}
@@ -413,12 +376,12 @@
 
 More generally, consider the problem
 \[
-\min c^Tx + E_{\bxi}[q(\xi)^Ty(\xi)]
+\min c^Tx + E_{\bxi}[q(\bxi)^Ty(\bxi)]
 \]
 subject to the constraints
 \begin{align*}
 Ax &= b, \\
-T(\xi)x + Wy(\xi) &= h(\xi) \qquad \forall \xi \in \Xi, \\
+T(\xi)x + Wy(\xi) &= h(\xi) \qquad \text{for a.e. } \xi \in \Xi, \\
 x & \in X, \\
 y(\xi) & \in Y,
 \end{align*}
@@ -429,7 +392,7 @@ $(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bxi$.
 
 Let
 \[
-Q(x, \xi(\omega)) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\rbrace.
+Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\rbrace.
 \]
 \end{frame}
 
@@ -442,7 +405,7 @@ Q(x, \xi(\omega)) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x
 
 \mbox{}
 
-{\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \rit^m \rightarrow \rit$:
+{\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \RR^m \rightarrow \RR$:
 \[
 v(\xi, z) \overset{def}{=} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
 \]
@@ -454,7 +417,7 @@ Given a ``policy'' $x$ and a realization of the random vector $\bxi$, $z$ measur
 \begin{frame}
 \frametitle{Recourse function}
 
-The {\red expected recourse function}, or the function of minimum expected recourse, $\mathcal{Q}: \rit^n \rightarrow \rit$, for any policy $x \in \rit^n$:
+The {\red expected recourse function}, or the function of minimum expected recourse, $\mathcal{Q}: \RR^n \rightarrow \RR$, for any policy $x \in \RR^n$:
 \[
 \mathcal{Q} \overset{def}{=} E_{\bxi}[Q(x,\bxi)],
 \]
@@ -469,7 +432,7 @@ With these definitions, the problem can be rewritten as:
 \[
 \min_{x \in X} c^Tx + \mathcal{Q}(x) \mbox{ such that } Ax = b.
 \]
-It is a nonlinear program over $\rit^n$. Properties?
+It is a nonlinear program over $\RR^n$. Properties?
 \end{frame}
 
 \begin{frame}
@@ -477,17 +440,17 @@ It is a nonlinear program over $\rit^n$. Properties?
 
 Summarize our formulations.
 \[
-\min_{x \in \rit^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ \min_{y \in \rit^p_+} \lbrace q(\xi)^Ty \ |\ Wy = h(\bxi) - T(\bxi)x \rbrace \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\xi)^Ty \ |\ Wy = h(\bxi) - T(\bxi)x \rbrace \right] \right\rbrace 
 \]
 \[
-\min_{x \in \rit^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi}
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi}
   \left[  v(\bxi, h(\bxi)-T(\bxi)x) \right] \right\rbrace 
 \]
 \[
-\min_{x \in \rit^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ Q(x,\bxi) \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ Q(x,\bxi) \right] \right\rbrace 
 \]
 \[
-\min_{x \in \rit^n_+} \left\lbrace c^Tx + \mathcal{Q}(x)
+\min_{x \in \RR^n_+} \left\lbrace c^Tx + \mathcal{Q}(x)
   \ |\ Ax = b \right\rbrace 
 \]
 
@@ -498,14 +461,14 @@ Summarize our formulations.
 
 \begin{itemize}
 \item
-First-stage feasible set:
+{\red First-stage feasible set}:
 \[
-K_1 = \lbrace x \in \rit^n_+ \ |\ Ax = b \rbrace.
+K_1 = \lbrace x \in \RR^n_+ \ |\ Ax = b \rbrace.
 \]
 \item
-Second-stage feasible set:
+{\red Second-stage strong feasible set}:
 \[
-K_2 = \lbrace x \ |\ \mathcal{Q}(x) < \infty \rbrace.
+K_2^s = \lbrace x \ |\ \mathcal{Q}(x) < \infty \rbrace.
 \]
 \end{itemize}
 
@@ -513,8 +476,30 @@ K_2 = \lbrace x \ |\ \mathcal{Q}(x) < \infty \rbrace.
 
 Therefore we can rewrite the problem as
 \[
-\min_x \lbrace c^Tx + \mathcal{Q}(x) \ |\ x \in K_1 \cap K_2 \rbrace.
+\min_x \lbrace c^Tx + \mathcal{Q}(x) \ |\ x \in K_1 \cap K_2^s \rbrace.
 \]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Weak feasible set}
+
+See Walkup, D. W. and Wets, R. J.-B., {\it Stochastic programs with recourse}, SIAM Journal on Applied Mathematics, 15(5):1299--1314, 1967.
+
+\mbox{}
+
+{\red Positive hull} (or conical hull)
+$$
+\text{pos}W = \lbrace z \,|\, z = Wy,\ y \in \RR^m_+ \rbrace
+$$
+
+\mbox{}
+
+{\red Weak second-stage feasible set}
+\begin{align*}
+K_2 &= \lbrace x \in \RR^n \,|\, Q(x,\xi) < +\infty \text{ a.s.} \rbrace \\
+&= \lbrace x \in \RR^n \,|\, (h(\xi) - T(\xi)x) \in \text{pos} W \text{ a.s.} \rbrace
+\end{align*}
 
 \end{frame}
 
@@ -523,63 +508,207 @@ Therefore we can rewrite the problem as
 
 A problem is said to have a {\red relatively complete recourse} if $K_1
 \subseteq K_2$.
-Advantage: $\forall x$ feasible in the first stage, we have $\mathcal{Q}(x) < \infty$, so we do not have to consider the case $Q(x, \xi) = \infty$.
 
 \mbox{}
 
-We can also define the set of second-stage feasible points, given a realization $\xi$:
-\[
-K_2(\xi) = \lbrace x \ |\ Q(x,\xi) < \infty \rbrace.
-\]
-Define
-\[
-K_2^P = \cap_{\xi \in \Xi} K_2(\xi).
-\]
-Clearly $K_2 = K_2^P$ if $\bxi$ has a finite support.
-Is it still the case when $\bxi$ follows a continuous distribution?
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Relatively complete recourse (cont'd)}
-
-We have the following results.
-
-\begin{theo}
-If $\bxi$ has finite second order moments, $P[ \xi \ |\ Q(x,\xi) < \infty] = 1$ implies $\mathcal{Q}(x) < \infty$.
-\end{theo}
-
-In other words, we must have that $Q(x,\bxi)$ is upper bounded almost surely. Proof: technical!
+{\blue Advantage}: the second-stage problem is feasible $\forall x$ feasible in the first stage, almost surely.
 
 \mbox{}
 
-Reminder: almost surely, or with probability one. An event $A$ is said to occur almost surely if $P[A] = 1$.
-
-\mbox{}
-
-More interestingly, we have
-\begin{theo}
-For a stochastic program with fixed recourse, where $\bxi$ has finite second order moments, the sets $K_2$ and $K_2^p$ are the same.
-\end{theo}
+{\blue Issue}: $K_2^s \subseteq K_2$. We would like $K_2^s = K_2$.
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Complete recourse}
+	
+\begin{itemize}
+	\item 
+	The relatively complete recourse is very useful in practice and on a theoretical point of view, but it can be difficult to identify.
+	\item 
+	A particular case of relatively complete recourse can however often be identified from the structure of $W$.
+\item
+	{\red Complete recourse}: $\text{pos}W = \RR^m_+$.
+\item
+	The complete recourse property implies that $\forall x$, $T(\xi)$, $h(\xi)$, $Q(x,\xi) < \infty$, as $z = h(\xi)-T(\xi)x$.
+	\item
+	Complete recourse $\Rightarrow$ relatively complete recourse.
+\end{itemize}
 
-The relatively complete recourse is very useful in practice and on a theoretical point of view, but it can be difficult to identify.
-A particular case of relatively complete recourse can however often be identified from the structure of $W$.
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 \ne K_2^s$}
+
+Consider the second-stage problem
+\begin{align*}
+	\min_y\ & 2y_1+y_2\\
+	\mbox{s.t. } & y_1 + y_2 \geq 1 - x_1,\\
+	& y_1 \geq \xi - x_1 - x_2,\\
+	& y_1, y_2 \geq 0,
+\end{align*}
+with
+$$
+P\left[ \bxi = 2^n \right] = \frac{1}{2^{n+1}},\ n = 0,1,2,\ldots
+$$
+Note that $P\left[ \bxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n \in \NN_+ \rbrace$, and
+$$
+\sum_{n=0}^{+\infty} P\left[ \bxi = 2^n \right] = \sum_{n=0}^{+\infty} 2^{-n-1} = \frac{1}{2} \frac{1}{1-\frac{1}{2}} = 1.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 \ne K_2^s$ (cont'd)}
+
+Given $x \in \RR^2$, we have
+\begin{align*}
+\calQ(x) &= \EE_{\bxi} \left[ \min_{y \geq 0} 2y_1+y_2 \,\bigg|\, y_1 + y_2 \geq 1 - x_1,\ y_1 \geq \xi - x_1 - x_2 \right] \\
+&\geq \EE_{\bxi} \left[ \min_{y_1 \geq 0} 2y_1 \,\bigg|\, y_1 \geq \xi - x_1 - x_2 \right] \\
+& = 2 \EE_{\bxi} \left[ \max \{ 0, \bxi - x_1 - x_2 \}\right] \\
+& = 2 \sum_{\xi \in \Xi} P[\bxi = \xi] \max \{ 0, \xi - x_1 - x_2 \} \\
+& = 2 \sum_{n = 0}^{+\infty} 2^{-n-1} \max \{ 0, 2^n - x_1 - x_2 \} \\
+& = \sum_{n = 0}^{+\infty} 2^{-n} \max \{ 0, 2^n - x_1 - x_2 \} = +\infty
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 \ne K_2^s$ (cont'd)}
+
+Thus, $K_2^s = \emptyset$.
 
 \mbox{}
 
-We say that a problem has a {\red complete recourse} if $\forall\, z \in \rit^m$, $\forall \xi$, $v(\xi, z) < +\infty$. In other terms, $\forall\, z \in \rit^m$, $\exists\, y \in \rit_+^m$ such that $Wy = z$, i.e. if the matrix $W$ satisfies
+The problem, set under standard form, can be rewritten as
+\begin{align*}
+	\min_{y,u}\ & 2y_1+y_2\\
+	\mbox{s.t. } & y_1 + y_2 - u_1 = 1 - x_1,\\
+	& y_1 -u_2 = \xi - x_1 - x_2,\\
+	& y_1, y_2, u_1, u_2 \geq 0,
+\end{align*}
+and
+$$
+W = \begin{pmatrix}
+ 1 & 1 & -1 & 0 \\ 1 & 0 & 0 & -1
+\end{pmatrix}.
+$$
+$\text{pos} W = ?$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 \ne K_2^s$ (cont'd)}
+
+Complete recourse if pos$W = \RR^2$, i.e.
+$$
+\forall z \in \RR^2, \exists y \geq 0, u \geq 0 \text{ s.t. } W\begin{pmatrix} y \\ u \end{pmatrix} = z.
+$$
+We have that
+\begin{align*}
+& W\begin{pmatrix} y \\ u \end{pmatrix} = \begin{pmatrix} y_1 + y_2 - u_1 \\ y_1 - u_2 \end{pmatrix} = z \\
+\Leftrightarrow &
+\begin{cases}
+	y_1 + y_2 - u_1 &= z_1, \\ y_1 - u_2 &= z_2.
+\end{cases}
+\end{align*}
+Thus, we can take
+$$
+\begin{cases}
+ y_1 = z_2,\ u_2 = 0, & \text{ if } z_2 \geq 0,\\
+ y_1 = 0,\ u_2 = z_2, & \text{ otherwise}.
+\end{cases}
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 \ne K_2^s$ (cont'd)}
+
+Then, writing $y_2 - u_1 = z_1 - y_1$, we take
+$$
+\begin{cases}
+	y_2 = z_1 - y_1,\ u_1 = 0, & \text{ if } z_1 - y_1 \geq 0,\\
+	y_2 = 0,\ u_1 = z_1 - y_1, & \text{ otherwise}.
+\end{cases}
+$$
+Thus,
+\begin{itemize}
+	\item 
+	pos$W = \RR^4_+$, and the recourse is complete,
+	\item
+	$K_2 = \RR^2$, and the recourse is relatively complete,
+	\item
+	{\red $K_2 \ne K_2^s$}.
+\end{itemize}
+
+\mbox{}
+
+Note that
+$$
+\EE[\bxi] = \sum_{n=0}^{+\infty} P\left[ \bxi = 2^n \right] 2^n = \sum_{n=0}^{+\infty} \frac{2^n}{2^{n+1}} = \sum_{n=0}^{+\infty} \frac{1}{2} = +\infty.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 \ne K_2^s$ (cont'd)}
+
+$\EE[\bxi]$ not finite does not necessarily imply that $\calQ(x) = +\infty$. Consider
+\begin{align*}
+\min_y \ & y_1 - y_2 \\
+\text{s.t. } & y_1 \geq \xi \\
+& y_2 \leq \xi.
+\end{align*}
+We have that $\forall \xi, Q(x, \xi) = 0$, and therefore $\calQ(x) = 0$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2 = K_2^s$}
+
+\begin{theo}
+If $\bxi$ has finite second order moments, then
+$$
+P[ \xi \ |\ Q(x,\xi) < \infty] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
+$$
+and consequently
+$$
+K_2 = K_2^s.
+$$
+\end{theo}
+
+%In other words, we must have that $Q(x,\bxi)$ is upper bounded almost surely. Proof: technical!
+
+\mbox{}
+
+Reminder: almost surely, or with probability one. An event $A$ is said to occur almost surely if $P[A] = 1$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Elementary feasible set}
+
+\begin{itemize}
+	\item 
+Given a realization $\xi$, the {\red elementary second-stage feasible set} is defined as:
 \[
-\lbrace z \ |\ z=Wy,\ y \geq 0 \rbrace = \rit^m.
+K_2(\xi) = \lbrace x \ |\ Q(x,\xi) < \infty \rbrace.
 \]
+\item
+Define {\red possibility interpretation} of the second-stage feasibility as
+\[
+K_2^P = \cap_{\xi \in \Xi} K_2(\xi).
+\]
+\item
+Clearly $K_2 = K_2^P$ if $\bxi$ has a finite support.
+Is it still the case when $\bxi$ follows a continuous distribution?
+\end{itemize}
 
-\mbox{}
-
-This also implies that $\forall\, x$, $T(\xi)$, $h(\xi)$, $Q(x,\xi) < \infty$, as $z = h-Tx$.
+\begin{theo}
+For a stochastic program with fixed recourse, where $\bxi$ has finite second order moments,
+$$K_2 = K_2^s = K_2^p.$$
+\end{theo}
 
 \end{frame}
 
@@ -807,7 +936,7 @@ q(\xi)^T(\alpha y_1^*+(1-\alpha)y_2^*) \\
 & = \alpha q(\xi)^T y_1^*+(1-\alpha)q(\xi)^Ty_2^* \\
 & = \alpha v(\xi, z_1) + (1-\alpha) v(\xi, z_2).
 \end{align*}
-In other words, $v$ is a convex function w.r.t. $z \in \rit^m$.
+In other words, $v$ is a convex function w.r.t. $z \in \RR^m$.
 
 %\mbox{}
 
@@ -834,7 +963,7 @@ Q(x,\xi) = v(\xi, h(\xi)-T(\xi)x).
 Therefore {\red $Q(x, \xi)$ if convex} w.r.t. $x$, given $\xi$.
 More generally
 \begin{theo}
-If $A$ if a linear transformation from $\rit^n$ to $\rit^n$, and $f(x)$ is a convex function on $\rit^m$, the composite function $(fA)(x) \overset{def}{=} f(Ax)$ is a convex function on $\rit^n$.
+If $A$ if a linear transformation from $\RR^n$ to $\RR^n$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{def}{=} f(Ax)$ is a convex function on $\RR^n$.
 \end{theo}
 \end{frame}
 
