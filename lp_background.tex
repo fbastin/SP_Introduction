@@ -135,7 +135,7 @@ Ax \leq b \Leftrightarrow Ax + y = b,\ y \geq 0. \\
 \end{frame}
 
 \begin{frame}
-	\frametitle{Basis solutions}
+	\frametitle{Basic solutions}
 
 Without loss of generality, suppose that the first $m$ columns are independent, and form
 	\[
@@ -147,9 +147,9 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 	
 	\mbox{}
 	
-	{\it Basis solution}: $\bx = (\bx_b \ 0)$, with $\bB\bx_b = \bb$.\\
-	{\it Degenerated basis solution}: if some components of $\bx_b$ are equal to zero. \\
-	{\it Feasible basis solution}: basis solution such that $\bA\bx = \bb$ and $\bx \geq 0$.
+	{\it Basic solution}: $\bx = (\bx_b \ 0)$, with $\bB\bx_b = \bb$.\\
+	{\it Degenerated basic solution}: if some components of $\bx_b$ are equal to zero. \\
+	{\it Feasible basic solution}: basic solution such that $\bA\bx = \bb$ and $\bx \geq 0$.
 
 \end{frame}
 
@@ -159,70 +159,65 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\bA$) = m.
 	\begin{itemize}
 		\item
-		S'il y a une solution réalisable, alors il y a une solution de base réalisable.
+		If there exists a feasible solution, then there exists a feasible basic solution.
 		\item
-		S'il y a une solution réalisable optimale, alors il y a une solution de base réalisable optimale.
+		If there exists a feasible optimal solution, then there exists a feasible optimal basic solution.
 	\end{itemize}
 
 \end{frame}
 \begin{frame}
-	\frametitle{Dualité}
-	
-	Nous considérons le problème, dit {\bf primal}:
+	\frametitle{Duality}
+
+\begin{itemize}
+	\item 
+{\red Primal} program
+\begin{align*}
+	\min_{x \geq 0} \ & c^T x \\
+	\mbox{s.t. } & Ax \geq b
+\end{align*}
+\item
+{\red Dual} program
+\begin{align*}
+	\max_{\lambda \geq 0} \ & \lambda^T b \\
+	\mbox{s.t. } & A^T \lambda \leq c
+\end{align*}
+\item
+$A \in \RR^{m \times n}$, $c, x, \in \RR^n$, $\lambda, b \in \RR^m$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Duality}
+
+\begin{itemize}
+	\item 
+	$x$: primal variables
+	\item
+	$\lambda$: dual variables
+\item 	
+	Dual of the dual:
 	\begin{align*}
 		\min_x \ & c^T x \\
-		\mbox{t.q. } & Ax \geq b \\
+		\mbox{s.t. } & Ax \geq b \\
 		& x \geq 0
 	\end{align*}
-	
-	\mbox{}
-	
-	Le programme suivant est appelé {\bf dual}:
-	\begin{align*}
-		\max_{\lambda} \ & \lambda^T b \\
-		\mbox{t.q. } & A^T \lambda \leq c \\
-		& \lambda \geq 0
-	\end{align*}
-	$A \in \RR^{m \times n}$, $c, x, \in \RR^n$, $\lambda, b \in \RR^m$.
-	
-	Note: les contraintes duales peuvent aussi s'écrire $\lambda^T A \leq c^T$ (en appliquant l'opérateur de transposition de part et d'autre de l'inégalité).
+\end{itemize}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Dualité}
+	\frametitle{Duality: standard form}
 	
-	$x$: variables du problème primal\\
-	$\lambda$: variables du problèmes dual
-	
-	\mbox{}
-	
-	Dual du dual?
-	
-	\mbox{}
-	
+	The program
 	\begin{align*}
 		\min_x \ & c^T x \\
-		\mbox{t.q. } & Ax \geq b \\
+		\mbox{s.t. } & Ax = b \\
 		& x \geq 0
 	\end{align*}
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Dualité: forme standard}
-	
+	is equivalent to
 	\begin{align*}
 		\min_x \ & c^T x \\
-		\mbox{t.q. } & Ax = b \\
-		& x \geq 0
-	\end{align*}
-	
-	revient à
-	
-	\begin{align*}
-		\min_x \ & c^T x \\
-		\mbox{t.q. } & Ax \geq b \\
+		\mbox{s.t. } & Ax \geq b \\
 		& -Ax \geq -b \\
 		& x \geq 0
 	\end{align*}
@@ -230,22 +225,22 @@ Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\
 \end{frame}
 
 \begin{frame}
-	\frametitle{Dualité: forme standard}
+	\frametitle{Duality: standard form}
 	
-	Le dual peut alors s'écrire
+The dual problem can then be written as
 	\begin{align*}
 		\max_{u, v} \ & u^T b - v^T b \\
-		\mbox{t.q. } & u^T A - v^T A \leq c^T \\
+		\mbox{s.t. } & u^T A - v^T A \leq c^T \\
 		& u \geq 0 \\
 		& v \geq 0
 	\end{align*}
-	ou, avec $\lambda = u - v$,
+	or, with $\lambda = u - v$,
 	\begin{align*}
 		\max_{\lambda} \ & \lambda^T b \\
-		\mbox{t.q. } & \lambda^T A \leq c^T \\
+		\mbox{s.t. } & \lambda^T A \leq c^T \\
 	\end{align*}
 	
-	Forme asymétrique: $\lambda \in \RR$.
+Asymmetric from $\lambda \in \RR^m$.
 	
 \end{frame}
 
@@ -257,7 +252,7 @@ Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\
 		\begin{tabular}{|c|c|}
 			\hline
 			\hline
-			{\bf Minimisation} & {\bf Maximisation} \\
+			{\bf Minimization} & {\bf Maximization} \\
 			\hline
 			\hline
 			Constraints & Variables \\
@@ -277,67 +272,64 @@ Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\
 \end{frame}
 
 \begin{frame}
-	\frametitle{Dualité faible}
+	\frametitle{Weak duality}
 	
-	(Forme symétrique ou forme asymétrique -- forme standard)
+	(Asymmetric or symmetric form)
 	
 	\mbox{}
 	
-	Si $x$ and $\lambda$ sont réalisables pour le primal et le dual, respectivement, alors
+	If $x$ and $\lambda$ are feasible for the primal and the dual, respectively, then
 	\[
 	c^T x \geq \lambda^T b
 	\]
 	
 	\begin{proof}
+		For any primal feasible x and dual feasible $\lambda$, we have
 		\[
-		\lambda^T b \leq \lambda^TAx \leq c^Tx,
+		\lambda^T b \leq \lambda^TAx \leq c^Tx.
 		\]
-		pour $x \geq 0$, vu que $x$ est supposé realisable, et que du dual, $\lambda^T A \leq c^T$.
 	\end{proof}
-	
-	Dès lors, l'objectif primal est une borne supérieure pour le dual, et vice-versa.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Corollaire}
+	\frametitle{Corollary}
 	
-	Si $x_0$ et $\lambda_0$ sont réalisables pour le primal et le dual, respectivement, et si
+	If $x_0$ and $\lambda_0$ are feasible for the primal and the dual, respectively, and if
 	\[
 	c^T x_0 = \lambda_0^T b,
 	\]
-	alors $x_0$ et $\lambda_0$ sont optimaux pour leur problème respectif.
+	then $x_0$ and $\lambda_0$ are optimal for their respective problem.
 	
 	\mbox{}
 	
-	Mais on n'a encore dit sur la réalisabilité d'un problème par rapport à l'autre!
+	But we have said nothing about the feasibility of one problem with respect to the other one!
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Dualité forte}
+	\frametitle{Strong duality}
 	
-	Si un des problèmes, primal ou dual, a une solution optimale finie, l'autre problème a aussi une solution optimale finie, et les valeurs correspondantes des fonctions objectifs sont égales. Si l'un des problèmes a un objectif non borné, l'autre problème n'a pas de solution réalisable.
+	If one of the problems, primal or dual, has a finite optimal solution, the other problem also has a finite optimal solution, and the corresponding values of the objective functions are equal.
+	If one of the problems has an unbounded objective, the other problem has no feasible solution.
 
 \mbox{}
 
-Si un programme est non réalisable, cela n'implique cependant pas que son dual soit non borné. Celui-ci peut être non réalisable.
+If a program is feasible, this does not imply that its dual is unbounded. It can also be unfeasible.
 
 \mbox{}
-
-Le tableau ci-dessous synthétise les différents cas de figure possibles.
 
 \begin{center}
 	\begin{tabular}{|c||c|c|c|}
 		\hline
-		Primal / Dual & Borné & Non borné & Non réalisable \\
+		Primal / Dual & Bounded & Unbounded & Unfeasible \\
 		\hline
 		\hline
-		Borné & possible & impossible & impossible \\
+		Bounded & possible & impossible & impossible \\
 		\hline
-		Non borné & impossible & impossible & possible \\
+		Unbounded & impossible & impossible & possible \\
 		\hline
-		Non réalisable & impossible & possible & possible \\
+		Unfeasible & impossible & possible & possible \\
 		\hline
 	\end{tabular}
 \end{center}
@@ -345,23 +337,22 @@ Le tableau ci-dessous synthétise les différents cas de figure possibles.
 \end{frame}
 
 \begin{frame}
-\frametitle{Optimalité et dualité}
+\frametitle{Optimality et duality}
 
-L'optimalité peut se déduire des conditions KKT.
-
-\mbox{}
-
-En LP, nous n'avons pas besoin d'exiger une qualification de
-contraintes pour appliquer les conditions KKT.
+The optimality can be deduced from KKT conditions.
 
 \mbox{}
 
-Lagrangien:
+In LP, we do not need a constraint qualification to apply KKT conditions.
+
+\mbox{}
+
+Lagrangian:
 \[
 \mathcal{L} = c^Tx - \pi^T(Ax-b) - s^Tx.
 \]
 
-Conditions KKT: vecteurs de Lagrange $\pi$ et $s$ t.q.
+KKT conditions: Lagrangian vectors $\pi$ and $s$ s.t.
 \begin{align*}
 A^T\pi + s &= c,\\
 Ax &= b,\\
@@ -373,26 +364,24 @@ x_is_i &= 0,\ i=1,2,\ldots,n.
 \end{frame}
 
 \begin{frame}
-\frametitle{Problème dual}
+\frametitle{Dual problem}
 
-Soit $(x^*, \pi^*, s^*)$ un vecteur satisfaisant les conditions
-KKT. On a
+Let $(x^*, \pi^*, s^*)$ be a vector satisfying the KKT contions. We have that
 \[
 c^Tx^* = (A^T\pi^*+s^*)^Tx^* = (Ax^*)^T\pi^* = b^T\pi^*.
 \]
 
-Il est de plus facile de montrer que les conditions (nécessaires) KKT
-sont suffisantes.
+It is furthermore easy to show that the (necessary) KKT conditions are sufficient.
 
 \mbox{}
 
-{\red Problème dual}:
+{\red Dual problem}:
 \[
-\max_\pi b^T\pi, \mbox{ t.q. } A^T\pi \leq c,
+\max_\pi b^T\pi, \mbox{ s.t. } A^T\pi \leq c,
 \]
 or, equivalently,
 \[
-\max_\pi b^T\pi, \mbox{ t.q. } A^T\pi +s = c,\ s \geq 0.
+\max_\pi b^T\pi, \mbox{ s.t. } A^T\pi +s = c,\ s \geq 0.
 \]
 
 \end{frame}
