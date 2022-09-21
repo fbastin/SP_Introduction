@@ -490,7 +490,7 @@ See Walkup, D. W. and Wets, R. J.-B., {\it Stochastic programs with recourse}, S
 
 {\red Positive hull} (or conical hull)
 $$
-\text{pos}W = \lbrace z \,|\, z = Wy,\ y \in \RR^m_+ \rbrace
+\text{pos}W = \lbrace z \,|\, z = Wy,\ y \in \RR^p_+ \rbrace
 $$
 
 \mbox{}
@@ -528,7 +528,7 @@ A problem is said to have a {\red relatively complete recourse} if $K_1
 	\item 
 	A particular case of relatively complete recourse can however often be identified from the structure of $W$.
 \item
-	{\red Complete recourse}: $\text{pos}W = \RR^m_+$.
+	{\red Complete recourse}: $\text{pos}W = \RR^m$.
 \item
 	The complete recourse property implies that $\forall x$, $T(\xi)$, $h(\xi)$, $Q(x,\xi) < \infty$, as $z = h(\xi)-T(\xi)x$.
 	\item
@@ -616,7 +616,7 @@ Thus, we can take
 $$
 \begin{cases}
  y_1 = z_2,\ u_2 = 0, & \text{ if } z_2 \geq 0,\\
- y_1 = 0,\ u_2 = z_2, & \text{ otherwise}.
+ y_1 = 0,\ u_2 = -z_2, & \text{ otherwise}.
 \end{cases}
 $$
 
@@ -629,13 +629,13 @@ Then, writing $y_2 - u_1 = z_1 - y_1$, we take
 $$
 \begin{cases}
 	y_2 = z_1 - y_1,\ u_1 = 0, & \text{ if } z_1 - y_1 \geq 0,\\
-	y_2 = 0,\ u_1 = z_1 - y_1, & \text{ otherwise}.
+	y_2 = 0,\ u_1 = y_1 - z_1, & \text{ otherwise}.
 \end{cases}
 $$
 Thus,
 \begin{itemize}
 	\item 
-	pos$W = \RR^4_+$, and the recourse is complete,
+	pos$W = \RR^2$, and the recourse is complete,
 	\item
 	$K_2 = \RR^2$, and the recourse is relatively complete,
 	\item
@@ -723,7 +723,24 @@ with $I$ the identiy matrix, of order $m$.
 
 \mbox{}
 
-In this case, the second stage program can be read as
+It is easy to see that pos$W = \RR^m$ as, writing
+$$
+y = \begin{pmatrix}
+	y^+ \\ y^-
+\end{pmatrix},
+$$
+where $y \in \RR^{2m}$, $y^+, y^- \in \RR^m$, for $z \in \RR^m$, we can solve the system
+$$
+Wy = z,\ y \geq 0,
+$$
+by chosing $y^+ = \max\{z,0\}$,  $y^- = \max\{-z,0\}$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Simple recourse (cont'd)}
+
+The second stage program can be read as
 \begin{align*}
 Q(x,\xi) & = \min_y q^+(\xi)^Ty^+ + q^-(\xi)^Ty^- \\
 \mbox{s.t. } & y^+ - y^- = h(\xi)-T(\xi)x,\\
@@ -736,6 +753,13 @@ measure the absolute violations in the stochastic constraints.
 
 \begin{frame}
 \frametitle{Simple recourse (cont'd)}
+
+\begin{itemize}
+	\item 
+Since the recourse is complete, it is feasible for any first-stage decision $x$.
+\item
+The following results establishes conditions to have a finite recourse (i.e. $\calQ > -\infty$).
+\end{itemize}
 
 \begin{theo}
 Assume that the two-stage (linear) stochastic program is feasible and has a simple recourse, and that $\bxi$ has finite second-order moments.
