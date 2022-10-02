@@ -277,7 +277,7 @@ Let $\theta_0$ be a lower bound for
 \]
 and let $(\hat{x}, \hat{\theta})$ be a solution of
 \[
-\min_x \lbrace c^Tx + \theta \,|\, Ax = b,\ \theta \geq \theta_0,\ x
+\min_{x, \theta} \lbrace c^Tx + \theta \,|\, Ax = b,\ \theta \geq \theta_0,\ x
 \geq 0 \rbrace.
 \]
 Set also $\mathcal{B}_1 := \lbrace \rit^n \times \lbrace \theta \rbrace
@@ -318,9 +318,9 @@ Therefore, if $y$ is not feasible, $\exists\, u$ such that
 \[
 W^Tu \geq 0 \mbox{ et } (h - T\hat{x})^T u < 0.
 \]
-or, by setting $\tilde{u} = -u$,
+or, by setting $\sigma = -u$,
 \[
-W^T\tilde{u} \leq 0 \mbox{ et } (h - T\hat{x})^T \tilde{u} > 0.
+W^T\sigma \leq 0 \mbox{ et } (h - T\hat{x})^T \sigma > 0.
 \]
 
 \end{frame}
@@ -330,20 +330,20 @@ W^T\tilde{u} \leq 0 \mbox{ et } (h - T\hat{x})^T \tilde{u} > 0.
 
 Now, given $x$ feasible (for the first and second stage), there exists $y \geq 0$ s.t. $Wy = h-Tx$.
 For such a $y$, we have
-\[
-\tilde{u}^T(h-Tx) = \tilde{u}^T W y \leq 0.
-\]
-as $W^T\tilde{u} \leq 0$ and $y \geq 0$.
+$$
+\sigma^T(h-Tx) = \sigma^T W y \leq 0.
+$$
+as $W^T\sigma \leq 0$ and $y \geq 0$.
 Therefore
 \[
-\tilde{u}^Th \leq \tilde{u}^TTx.
+\sigma^Th \leq \sigma^TTx.
 \]
 This inequality should be valid for any feasible $x$ (therefore excluding $\hat{x}$), and we will enforce it by adding it to the first-stage linear program: {\red feasibility cut}
 \[
-\tilde{u}^T(h-Tx) \leq 0.
+\sigma^T(h-Tx) \leq 0.
 \]
 Redefine $\mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x^T,
-\theta) \,|\, \tilde{u}^T(h-Tx) \leq 0 \rbrace$.
+\theta) \,|\, \sigma^T(h-Tx) \leq 0 \rbrace$.
 
 \end{frame}
 %	\mbox{}
@@ -359,9 +359,9 @@ Redefine $\mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x^T,
 \frametitle{Dual decomposition method (cont'd)}
 
 {\red Step 2 (b)}
-If $f(\hat{x})$ is finite, given $\hat{x}$, we have a primal optimal solution $\hat{y}$ and a dual optimal solution $\hat{u}$ with
+If $f(\hat{x})$ is finite, given $\hat{x}$, we have a primal optimal solution $\hat{y}$ and a dual optimal solution $\hat{\pi}$ with
 \[
-f(\hat{x}) = (h-T\hat{x})^T \hat{u}
+f(\hat{x}) = (h-T\hat{x})^T \hat{\pi}
 \]
 by the strong duality property.
 
@@ -369,34 +369,30 @@ by the strong duality property.
 
 Moreover, for any $x$, we can write
 \begin{align*}
-f(x) &= \sup_u \left\lbrace (h-Tx)^Tu \,|\, W^Tu \leq q \right\rbrace \ \mbox{(second stage dual)}\\
-&\geq (h-Tx)^T \hat{u} \\
-&= \hat{u}^T(h-Tx).
+f(x) &= \sup_{\pi} \left\lbrace (h-Tx)^T\pi \,|\, W^T\pi \leq q \right\rbrace \ \mbox{(second stage dual)}\\
+&\geq (h-Tx)^T \hat{\pi} \\
+&= \hat{\pi}^T(h-Tx).
 \end{align*}
 
 Since we want $\theta$ to represent $f(x)$, we would like
 \[
-\theta \geq \hat{u}^T(h-Tx).
+\theta \geq \hat{\pi}^T(h-Tx).
 \]
 
 \end{frame}
 
-% nous avons une solution optimale primale de base $\hat{y}$ et une solution optimale
-% duale basique $\hat{u}$, avec
-
 \begin{frame}
 \frametitle{Dual decomposition method (cont'd)}
 
-$\theta \geq \hat{u}^T(h-Tx)$ is violated at $(\hat{x}, \hat{\theta})^T$
-iff $\hat{u}^T(h-T\hat{x}) > \hat{\theta}$.
+$\theta \geq \hat{\pi}^T(h-Tx)$ is violated at $(\hat{x}, \hat{\theta})^T$
+iff $\hat{\pi}^T(h-T\hat{x}) > \hat{\theta}$.
 
 In this case we introduce the optimality cut, rejecting the suboptimal solution $(\hat{x}^T, \hat{\theta})^T$:
 \[
-\theta \geq \hat{u}^T (h-Tx),
+\theta \geq \hat{\pi}^T (h-Tx),
 \]
 and we redefine $\mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x^T,
-\theta) \,|\, \theta \geq \hat{u}^T (h-Tx) %\leq 0 ???
-\rbrace$.
+\theta) \,|\, \theta \geq \hat{\pi}^T (h-Tx) \rbrace$.
 
 \mbox{}
 
@@ -422,8 +418,8 @@ Return to Step 2 with the new solution $(\hat{x}, \hat{\theta})$.
 
 Since
 \begin{align*}
-\hat{\theta} &= \max_{1 \leq i \leq k} (h-T\hat{x})^Tu^i
-\leq \max_{1 \leq i \leq r} (h-T\hat{x})^Tu^i \\
+\hat{\theta} &= \max_{1 \leq i \leq k} (h-T\hat{x})^T\pi^i
+\leq \max_{1 \leq i \leq r} (h-T\hat{x})^T\pi^i \\
 &= f(\hat{x}) \leq \hat{\theta},
 \end{align*}
 the algorithm stops for $\hat{\theta}$ optimal.
@@ -579,9 +575,9 @@ $w_* > 0$.
 As $v^+, v^- \geq 0$, $w_* \geq 0$;
 \begin{itemize}
 \item 
-if $w_* = 0$, $v^+_* = v^-_* = 0$ and $Wy^* = h_s - T_sx^{\nu}$; in other terms the second-stage problem is feasible for $x^{\nu}$;
+if $w^* = 0$, $v^+_* = v^-_* = 0$ and $Wy^* = h_s - T_sx^{\nu}$; in other terms the second-stage problem is feasible for $x^{\nu}$;
 \item
-if $w_* \ne 0$, $v^+_* \ne 0$ or $v^-_* \ne 0$, so $Wy^* \ne h_s - T_sx^{\nu}$, and we cannot find some $y$ such that $Wy = h_s - T_sx^{\nu}$.
+if $w^* \ne 0$, $v^+_* \ne 0$ or $v^-_* \ne 0$, so $Wy^* \ne h_s - T_sx^{\nu}$, and we cannot find some $y$ such that $Wy = h_s - T_sx^{\nu}$.
 \end{itemize}
 	
 \end{frame}
@@ -1063,7 +1059,7 @@ The graph of the (linear) function $h(y) = f(x) + \eta^T(y-x)$ is a support hype
 Recall that, by duality,
 \[
 Q(\hat{x}, \xi_s) =
-\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)x) \,|\, \pi^TW \leq q(\xi_s)^T) \right\rbrace.
+\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)x) \,|\, \pi^TW \leq q(\xi_s)^T \right\rbrace.
 \]
 Therefore, if $x \in \cK_1 \cap \cK_2$, $\exists\ \hat{\pi}$ such that
 \[
@@ -1084,7 +1080,7 @@ In other words, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
 	
 \mbox{}
 	
-Similarly, by taking the expectation, $- \sum_j p_j T(\xi_j)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
+Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
 	
 \end{frame}
 
@@ -1113,7 +1109,7 @@ If no optimality cut is present, $\theta^{\nu}$ is set to $-\infty$ and is not c
 	
 \begin{description}
 \item[Step 0.]  {\red Initialization}:
-$K := 0$, $L:= 0$, $\theta^{0} := -\infty$.
+$\nu := 0$, $K := 0$, $L:= 0$, $\theta^{0} := -\infty$.
 \item[Step 1.] {\red Solve the master problem} in order to get $x^0$.
 Stop if the program is not feasible ($K_1 = \emptyset$).
 \item[Step 2.]
@@ -1385,7 +1381,7 @@ In other terms, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
 
 \mbox{}
 
-Similarly, by taking the expectation, $- \sum_j p_j T(\xi_j)^T\hat{\pi}_s \in \mathcal{Q}(x)$.
+Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \mathcal{Q}(x)$.
 
 \end{frame}
 
