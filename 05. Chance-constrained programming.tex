@@ -38,13 +38,13 @@
 
 \setbeamercovered{dynamic}
 
+\include{macros}
+
 \def\bxi{\boldsymbol\xi}
 \def\bepsilon{\boldsymbol\epsilon}
 \def\bomega{\boldsymbol\xi}
 \def\aff{\operatorname{aff}}
 \def\cR{\mathcal{R}}
-
-\def\EE{\mathbb{E}}
 
 \newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
 
@@ -63,11 +63,32 @@
 \begin{frame}
 \frametitle{A long story}
 
+\begin{itemize}
+	\item 
 Introduced in 1959 by Charnes and Cooper \url{https://dl.acm.org/doi/10.1287/mnsc.6.1.73}
+	\item 
+And also a bit improbable.
+	\item 
+Cooper dropped high-school to support his family, and became a professional boxer.
+	\item 
+Became an accountant for Eric Louis Kohler, met while hitchhiking.
+	\item 
+Kohler financed his bachelor at University of Chicago.
+\item
+At 26, he enrolled at Columbia University and finished his coursework and dissertation, but never received his PhD due to its clam that decision making was not a centralized process.
+\end{itemize}
 
-\mbox{}
+\end{frame}
 
-And also a bit improbable. Cooper dropped high-school to support his family, and became a professional boxer. He became an accountant for Eric Louis Kohler, met while hitchhiking. Kohler financed his bachelor at University of Chicago. At 26, he enrolled at Columbia University and finished his coursework and dissertation. Due to its clam that decision making was not a centralized process, he never received his PhD. The collaboration with Charnes was however successful, with more than 200 publications, and led a successful academic carrer. Source: \url{https://www.informs.org/Explore/History-of-O.R.-Excellence/Biographical-Profiles/Cooper-William-W}
+\begin{frame}
+\frametitle{A long story (cont'd)}
+	
+\begin{itemize}
+\item
+The collaboration with Charnes was however successful, with more than 200 publications, and led a successful academic carrer.
+\item 
+Source: \url{https://www.informs.org/Explore/History-of-O.R.-Excellence/Biographical-Profiles/Cooper-William-W}
+\end{itemize}
 
 \end{frame}
 
@@ -397,17 +418,78 @@ uniform & 3.41 & 18.9\%
 \end{frame}
 
 \begin{frame}
-\frametitle{Other situations}
+\frametitle{Generalization}
 
+A more general form is
+\begin{align*}
+	\min_x \ & h(x) \\
+	\text{s.t. } & P[ g_1(x, \bxi) \leq 0,\ldots, g_r(x, \bxi) \leq 0] \geq \alpha \\
+	& h_1(x) \leq 0,\ldots, h_m(x) \leq 0.
+\end{align*}
+or
+\begin{align*}
+	\min_x \ & h(x) \\
+	\text{s.t. } & \EE\left[ \mathcal{I}_{(0,\infty)} \left( g_1(x, \bxi) \leq 0,\ldots, g_r(x, \bxi) \leq 0 \right) \right] \geq \alpha \\
+	& h_1(x) \leq 0,\ldots, h_m(x) \leq 0,
+\end{align*}
+where
+$$
+\mathcal{I}_{(0,\infty)} =
+\begin{cases}
+	1 & \mbox{if } t \leq 0,\\
+	0 & \mbox{if } t > 0,
+\end{cases}
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Solution methods for the general case}
+
+\begin{itemize}
+\item	
 Usually very hard.
-
-\mbox{}
-
+\item
 Use a bounding approximation or sample average approximation (SAA).
+\item
+We will discuss about it in more details when introducing Monte Carlo techniques.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Probabilistic programming}
+
+Source: András Prékopa (2003), ``Probabilistic Programming'', Chapter 5 in ``Stochastic Programming'', A. Ruszczy\'nski and A. Shapiro (editors), Elsevier.
 
 \mbox{}
 
-We will discuss about it in more details when introducing Monte Carlo techniques.
+\begin{itemize}
+	\item 
+Sometimes we only want to maximize a probability.
+\item
+General form:
+\begin{align*}
+\max_x \ & P[ g_1(x, \bxi) \leq 0,\ldots, g_r(x, \bxi) \leq 0] \\
+\text{subject to } & h_1(x) \leq 0,\ldots, h_m(x) \leq 0.
+\end{align*}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Measures of violation}
+
+\begin{itemize}
+\item 
+A chance constraint also constraint violation with some probability.
+\item
+The violation can be large.
+\item
+It is often desirable to avoid too large violations.
+\item
+Can we penalize the violation?
+\end{itemize}
 
 \end{frame}
 
@@ -445,7 +527,7 @@ Assume that the distribution of $Z$ is continuous.
 
 \mbox{}
 
-The solution $\beta^*$ in the CVaR definition can be obtained by searching for the root ot the derivative w.r.t. $\beta$:
+Solution $\beta^*$ obtained by solving
 $$
 0 = \frac{d}{d \beta} \left( \beta + \frac{1}{1 - \eta} \EE \left[ (Z - \beta)_+ \right] \right)
 = 1 - \frac{1}{1 - \eta} P[ Z \geq \beta ],
@@ -472,6 +554,37 @@ Conditional tail expectation (or expected shortfall)
 &= \text{CVaR}(z; \eta)
 \end{align*}
 
+\begin{itemize}
+	\item Can be added to the objective.
+	\item Can be used as a constraint: \textit{conditional expectation constraint}
+	$$
+	\EE[z \,|\, z \geq \beta^*] \leq d.
+	$$
+\end{itemize}
+
 \end{frame}
+
+\begin{frame}
+\frametitle{Integrated chance constraints}
+
+\begin{itemize}
+\item 
+Consider the stochastic constraints
+$$
+g_i(x, \xi) \leq 0,\ 1,\ldots, r.
+$$
+\item
+Integrated chance constraint:
+$$
+\EE \left[ \max_i (g_i(x,\bxi))_+ \right] \leq d.
+$$
+\end{itemize}
+
+\mbox{}
+
+For more details, see Chapter 6, Willem K. Klein Haneveld, Maarten H. van der Vlerk, Ward Romeijnders (2020), ``Stochastic Programming - Modeling Decision Problems Under Uncertainty'', Springer.
+\end{frame}
+
+%% More to read in Prékopa, starting from Section 2.
 
 \end{document}

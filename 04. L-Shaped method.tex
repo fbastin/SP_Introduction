@@ -35,11 +35,7 @@
 
 \setbeamercovered{dynamic}
 
-\def\bxi{\boldsymbol\xi}
-\def\bomega{\boldsymbol\omega}
-\def\bxi{\boldsymbol\xi}
-
-\def\rit{\mathcal{R}}
+\include{macros}
 
 \def\cF{\mathcal{F}}
 \def\cK{\mathcal{K}}
@@ -63,17 +59,17 @@
 
 Summarize our formulations.
 \[
-\min_{x \in \rit^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ \min_{y \in \rit^p_+} \lbrace q(\bxi)^Ty \ |\ Wy = h(\bxi) - T(\bxi)x \rbrace \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bsxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\bsxi)^Ty \ |\ Wy = h(\bsxi) - T(\bsxi)x \rbrace \right] \right\rbrace 
 \]
 \[
-\min_{x \in \rit^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi}
-  \left[  v(\bxi, h(\bxi)-T(\bxi)x) \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bsxi}
+  \left[  v(\bsxi, h(\bsxi)-T(\bsxi)x) \right] \right\rbrace 
 \]
 \[
-\min_{x \in \rit^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ Q(x,\bxi) \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bsxi} \left[ Q(x,\bsxi) \right] \right\rbrace 
 \]
 \[
-\min_{x \in \rit^n_+} \left\lbrace c^Tx + \mathcal{Q}(x)
+\min_{x \in \RR^n_+} \left\lbrace c^Tx + \mathcal{Q}(x)
   \ |\ Ax = b \right\rbrace 
 \]
 
@@ -88,7 +84,7 @@ We have studied its properties. But how to solve it?
 \item
 First-stage feasible set:
 \[
-K_1 = \lbrace x \in \rit^n_+ \ |\ Ax = b \rbrace.
+K_1 = \lbrace x \in \RR^n_+ \ |\ Ax = b \rbrace.
 \]
 \item
 Second-stage feasible set:
@@ -110,7 +106,7 @@ We can therefore rewrite the problem as
 \begin{frame}
 \frametitle{Deterministic equivalent}
 
-Assume now that the support of $\bxi$ is finite, and that we have $S$ scenarios.
+Assume now that the support of $\bsxi$ is finite, and that we have $S$ scenarios.
 The probability of scenario $s$ is $p_s$.
 
 \mbox{}
@@ -253,10 +249,10 @@ If we explicitly know $f(x)$, we can write
 \begin{frame}
 \frametitle{First ideas}
 
-Try to construct a {\blue sequence of new (additional) linear constraints} in order to define a feasible $\mathcal{B}_1$ of vectors $(x_1,\ldots,x_n,\theta)^T$ in $\rit^{n+1}$, such that, with
+Try to construct a {\blue sequence of new (additional) linear constraints} in order to define a feasible $\mathcal{B}_1$ of vectors $(x_1,\ldots,x_n,\theta)^T$ in $\RR^{n+1}$, such that, with
 \[
 \mathcal{B}_0 = \lbrace (x^T, \theta^T) \,|\, Ax = b,\ x \geq 0,\
-\theta \in \rit \rbrace,
+\theta \in \RR \rbrace,
 \]
 the problem
 \[
@@ -280,7 +276,7 @@ and let $(\hat{x}, \hat{\theta})$ be a solution of
 \min_{x, \theta} \lbrace c^Tx + \theta \,|\, Ax = b,\ \theta \geq \theta_0,\ x
 \geq 0 \rbrace.
 \]
-Set also $\mathcal{B}_1 := \lbrace \rit^n \times \lbrace \theta \rbrace
+Set also $\mathcal{B}_1 := \lbrace \RR^n \times \lbrace \theta \rbrace
 \,|\, \theta \geq \theta_0 \rbrace$.
 \item[\red Step 2]
 Evaluate
@@ -302,13 +298,13 @@ If $f(\hat{x}) = +\infty$, $\hat{x}$ is not feasible with all the second-stage c
 \mbox{}
 
 \begin{block}{Farkas' lemma}
-Let $A \in \rit^{m \times n}$ and $b \in \rit^m$.
+Let $A \in \RR^{m \times n}$ and $b \in \RR^m$.
 Then, exactly one of the following two statements is true:
 \begin{itemize}
 \item
-$\exists\, x \in \rit^n$ such that $Ax = b$ and $x \geq 0$;
+$\exists\, x \in \RR^n$ such that $Ax = b$ and $x \geq 0$;
 \item
-$\exists\, u \in \rit^m$ such that $u^T A \geq 0$ and $u^T b < 0$;
+$\exists\, u \in \RR^m$ such that $u^T A \geq 0$ and $u^T b < 0$;
 \end{itemize}
 \end{block}
 	
@@ -461,7 +457,7 @@ This leads to the {\red master program}
 	\min c^Tx & + \theta \\
 	\mbox{t.q. } Ax & = b, \\
 	\theta &\geq \mathcal{Q}(x),\\
-	x & \geq 0,\ \theta \in \rit.
+	x & \geq 0,\ \theta \in \RR.
 \end{align*}
 This program has $n+1$ variables only!
 
@@ -513,8 +509,8 @@ The {\blue feasibility cuts} aim to keep the solutions of the master program in 
 
 Recall that from Farkas lemma, we have
 \begin{multline*}
-\lbrace y \in \rit^p_+ \,|\, Wy = h-T\hat{x} \rbrace = \emptyset \\
-\Rightarrow \exists\, \sigma \in \rit^m \mbox{ t.q. } W^T\sigma \leq 0
+\lbrace y \in \RR^p_+ \,|\, Wy = h-T\hat{x} \rbrace = \emptyset \\
+\Rightarrow \exists\, \sigma \in \RR^m \mbox{ t.q. } W^T\sigma \leq 0
 \mbox{ et } (h-T\hat{x})^T\sigma > 0.
 \end{multline*}
 
@@ -608,7 +604,7 @@ Moreover, as $W^T \sigma_* \leq 0$, $\sigma_*$ satisfies the conditions we were 
 
 Consider the problem
 \begin{align*}
-	\min_x\ & 3x_1 + 2x_2 + E_{\bxi}[\min_y -15y_1-12y_2] \\
+	\min_x\ & 3x_1 + 2x_2 + E_{\bsxi}[\min_y -15y_1-12y_2] \\
 	\mbox{s.t. } & 3y_1 + 2y_2 \leq x_1 \\
 	& 2y_1 + 5y_2 \leq x_2 \\
 	& 0.8 \xi_1 \leq y_1 \leq \xi_1 \\
@@ -877,7 +873,7 @@ The first-stage solution becomes $x^1 = (33.6, 22.4)^T$.
 \begin{frame}
 \frametitle{Optimality cut}
 	
-Initially, the only constraint on $\theta$ is $\theta \in \rit$.
+Initially, the only constraint on $\theta$ is $\theta \in \RR$.
 	
 \mbox{}
 	
@@ -886,7 +882,7 @@ Rewrite the master program
 \min c^Tx & + \theta \\
 \mbox{s.t. } Ax & = b, \\
 \theta &\geq \mathcal{Q}(x),\\
-x & \geq 0,\ \theta \in \rit.
+x & \geq 0,\ \theta \in \RR.
 \end{align*}
 	
 The constraint $\theta \geq \mathcal{Q}(x)$ will be expressed by means of optimality cuts.
@@ -1047,8 +1043,8 @@ We can however show that the optimality cuts are support hyperplans of $\mathcal
 
 \mbox{}
 	
-A vector $\eta \in \rit^n$ is a {\red subgradient} of a convex function $f$ at $x$ iff
-\[ f(y) \geq f(x) + \eta^T(y-x),\ \forall y \in \rit^n.\]
+A vector $\eta \in \RR^n$ is a {\red subgradient} of a convex function $f$ at $x$ iff
+\[ f(y) \geq f(x) + \eta^T(y-x),\ \forall y \in \RR^n.\]
 The graph of the (linear) function $h(y) = f(x) + \eta^T(y-x)$ is a support hyperplan for the convex set $epi(f) = \{ (x, \mu) \, : \, x \in \mathbb{R}^n,\, \mu \in \mathbb{R},\, \mu \ge f(x) \} \subseteq \mathbb{R}^{n+1}$, at $(x, f(x))$.
 	
 \end{frame}
@@ -1093,7 +1089,7 @@ Taking account of feasibility and optimality cuts, the master problem can be for
 \mbox{s.t. } & Ax = b, \\
 & D_{\ell}^Tx \geq d_{\ell},\ \ell = 1,\ldots,K, & \mbox{(feasibility cuts)} \\
 & -\beta_{\ell}^Tx + \theta \geq \alpha_{\ell},\ \ell = 1,\ldots,L, & \mbox{(optimality cuts)}\\
-& x \geq 0,\ \theta \in \rit.
+& x \geq 0,\ \theta \in \RR.
 \end{align*}
 %where $K$ and $L$ represent the number of feasibility and optimality cuts, respectively, generated during the previous iterations.
 	
@@ -1218,7 +1214,7 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 %\begin{frame}
 %\frametitle{Optimality cuts (cont'd)}
 	
-%A (feasibility or optimality) cut is obtained by handling a subproblem related to one (and only one) realization of $\bxi$.
+%A (feasibility or optimality) cut is obtained by handling a subproblem related to one (and only one) realization of $\bsxi$.
 	
 %\mbox{}
 
@@ -1237,7 +1233,7 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 	
 We consider the problem
 \begin{align*}
-\min_x\ & c^Tx + E_{\bxi} [ Q(x,\xi) ],\\
+\min_x\ & c^Tx + E_{\bsxi} [ Q(x,\xi) ],\\
 \mbox{s.t. } & 0 \leq x \leq 10.
 \end{align*}
 Assume that $c = 0$, so that the program can be reduced to the second stage, with a second-stage problem defined as
@@ -1381,7 +1377,7 @@ In other terms, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
 
 \mbox{}
 
-Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \mathcal{Q}(x)$.
+Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
 
 \end{frame}
 
@@ -1392,9 +1388,9 @@ Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \m
 \item[Step 0]
 With $\theta_s^0$ a lower bound for $Q(x, \xi_s)$, define
 \begin{align*}
-\mathcal{B}_0 &= \lbrace \rit_n^+ \times \lbrace \theta_1,
+\mathcal{B}_0 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_{|S|}\rbrace \,|\, Ax = b \rbrace, \\
-\mathcal{B}_1 &= \lbrace \rit_n^+ \times \lbrace \theta_1,
+\mathcal{B}_1 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_{|S|}\rbrace \,|\, \theta_s \geq \theta_s^0,\
 \forall s \in S \rbrace.
 \end{align*}
@@ -1489,9 +1485,9 @@ Return to Step 1.
 Let $\theta_k^0$ be a lower bound for $\mathcal{Q}_{[\mathcal{S}_k]}(x)$.
 Set
 \begin{align*}
-\mathcal{B}_0 &= \lbrace \rit_n^+ \times \lbrace \theta_1,
+\mathcal{B}_0 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_C \rbrace \,|\, Ax = b \rbrace, \\
-\mathcal{B}_1 &= \lbrace \rit_n^+ \times \lbrace \theta_1,
+\mathcal{B}_1 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_C \rbrace \,|\, \theta_k \geq \theta_k^0 \rbrace.
 \end{align*}
 Set $\nu = 0$.
@@ -1554,7 +1550,7 @@ For each $k$ such that  $\mathcal{Q}_{[\mathcal{S}_k]}(x) >
 \begin{frame}
 \frametitle{Example}
 
-{\red Birge and Louveaux, Section~5.1, Exercice 5., page 200}
+{\red Birge and Louveaux, Section~5.1, Exercice 5, page 200}
 
 \mbox{}
 
@@ -1566,7 +1562,7 @@ W = \begin{pmatrix}
 0 & 0 & 1 & 0 & 0 & 1
 \end{pmatrix}.
 \]
-Assume moreover $S = 2$, and that the two realizations of $\bxi$ have the same probability.
+Assume moreover $S = 2$, and that the two realizations of $\bsxi$ have the same probability.
 These realizations are
 \begin{align*}
 \xi^1 &= (q^1, h^1, T^1)^T, \\
@@ -1887,8 +1883,10 @@ An efficient implementation is proposed in Ruszczy\'nski (1986).
 \begin{frame}
 \frametitle{Example: regularized $L$-shaped}
 
+Consider again {\red Birge and Louveaux, Section~5.1, Exercice 5, page 200}.
+
 Take $a^1 = -0.5$ as starting point.
-This point corresponds to the solution of the expected value problem. i.e the problem obtained by replacing $\bxi$ by $E[\xi]$.
+This point corresponds to the solution of the expected value problem. i.e the problem obtained by replacing $\bsxi$ by $E[\xi]$.
 The second stage program becomes
 \begin{align*}
 \min\ & \frac{5}{4}y_1 + \frac{1}{7}y_3 + \frac{1}{2}y_4\\
@@ -1897,8 +1895,6 @@ The second stage program becomes
 & y_3+y_6 = 7, \\
 & y \geq 0.
 \end{align*}
-
-\mbox{}
 
 \mbox{}
 
@@ -1953,67 +1949,111 @@ See Birge and Louveaux, Section~5.2.
 \begin{frame}
 \frametitle{Regularization using trust-region methods}
 
-The basic philosophy of trust-region methods is to replace the original problem with some locally valid approximation easier to handle.
+{\blue Basic philosophy} of trust-region methods: replace the original problem with some locally valid approximation easier to handle.
 
 \mbox{}
 
-Here, our original problem is
+\begin{center}
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\textcolor{red}{Original problem}
 \begin{align*}
-\min_x \ & c^T x + \cQ(x) \\
-\mbox{s.t. } & Ax = b \\
-& x \geq 0.
+	\min_x \ & c^T x + \cQ(x) \\
+	\mbox{s.t. } & Ax = b \\
+	& x \geq 0.
 \end{align*}
-The model is
+\end{minipage}
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\textcolor{red}{Model}
 \begin{align*}
-\min_x \ & m(x) := c^T x + \theta \\
-\mbox{s.t. } & Ax = b \\
-& {\rm feasibility\ cuts} \\
-& {\rm optimality\ cuts} \\
-& x \geq 0.
+	\min_{x, \theta} \ & m(x, \theta) := c^T x + \theta \\
+	\mbox{s.t. } & Ax = b \\
+	& {\rm feasibility\ cuts} \\
+	& {\rm optimality\ cuts} \\
+	& x \geq 0.
 \end{align*}
+\end{minipage}
+\end{center}
+
 \end{frame}
 
 \begin{frame}
 \frametitle{Regularization using trust-region methods (cont'd)}
 
-Since the model is only valid locally, we constraint the next iterate to remain in a trust region centered at the current solution $x_k$, where $k$ is the iteration index.
-The trust region is defined by
+\begin{itemize}
+	\item The model $m(\cdot)$ is valid locally only.
+	\item Constrain the candidate iterate to stay in a trust region $\calB_k$ centered at the current solution $x_k$:
 $$
 \cB_k = \{ x \,|\, \| x-x_k \|_k \leq \Delta_k \},
 $$
 where $\Delta_k$ is the trust-region radius, and $\|\cdot\|_k$ is the norm used at iteration $k$.
-In the context a linear programming, it is common to use $\infty$-norm as they correspond to bound constraints.
-The trust-region subproblem at iteration $k$ is now
-\begin{align*}
-\min_{x,\theta} \ & m(x) := c^T x + \theta \\
-\mbox{s.t. } & Ax = b \\
-& {\rm feasibility\ cuts} \\
-& {\rm optimality\ cuts} \\
-& \|x-x_k\|_{\infty} \leq \Delta_k,\ x \geq 0.
-\end{align*}
+\item
+In the context a linear programming, it is common to use $\infty$-norm as
+$$
+\| x-x_k \|_{\infty} \leq \Delta_k \text{ iff } -\Delta_k \bse \leq x-x_k \leq \Delta_k \bse.
+$$
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Regularization using trust-region methods (cont'd)}
 
-Let $x^*$ be the first-stage solution.
-We can compare the model reduction with the original problem reduction, by computing the ratio
+\begin{itemize}
+	\item 
+The trust-region subproblem at iteration $k$ is now
 \begin{align*}
-\rho = \frac{c^T(x_k-x^*)+\cQ(x_k)-\cQ(x^*)}{m(x_k)-m(x^*)}
+	\min_{x,\theta} \ & m(x) := c^T x + \theta \\
+	\mbox{s.t. } & Ax = b \\
+	& {\rm feasibility\ cuts} \\
+	& {\rm optimality\ cuts} \\
+	& \|x-x_k\|_{\infty} \leq \Delta_k\\
+	& x \geq 0.
 \end{align*}
+\item
+We can extend the model to multi cuts or scenarios partition in clusters.
+\item
+Only move if the model does perform well.
+\end{itemize}
 
-\mbox{}
+\end{frame}
 
-If $\rho$ is too small (for instance $\rho < \eta_1 < 1$), set $x_{k+1} = x_k$ and set $\Delta_{k+1} < \Delta_k$.
-Otherwise, set $x_{k+1} = x^*$.\\
+\begin{frame}
+\frametitle{Regularization using trust-region methods (cont'd)}
 
-\mbox{}
+\begin{itemize}
+	\item 
+Let $x^*$ be the first-stage solution.
+\item
+Set $0 < \eta_1 \leq \eta_2 < 1$. For instance, $\eta_1 = \eta_2 = 10^{-4}$.
+\item
+Compare the actual reduction to the prediction reduction:
+\begin{align*}
+	\rho = \frac{c^T(x_k-x^*)+\cQ(x_k)-\cQ(x^*)}{m(x_k)-m(x^*)}
+\end{align*}
+\item
+\textcolor{blue}{Unsuccessful iteration}: if $\rho < \eta_1$, set $x_{k+1} = x_k$, $\Delta_{k+1} \leq \Delta_k$, add cuts.
+Enforce $\Delta_{k+1} < \Delta_k$ if $\Delta_k$ has been kept the same for several consecutive unsuccessful iterations or if $\rho \Delta_k$ it too large.
+\item
+\textcolor{blue}{Successful iteration}: if $\rho \geq \eta_1$, set $x_{k+1} = x^*$.
+\item
+\textcolor{blue}{Very successful iteration}: if $\rho \geq \eta_2$, set $\Delta_{k+1} = \min \{ \Delta_{\max}, \beta \Delta_k \}$, with $\beta > 1$.
+\end{itemize}
 
-If $\rho \geq \eta_2 \geq \eta_1$, choose $\Delta_{k+1} \in [\Delta_k, +\infty]$.
+\end{frame}
 
-\mbox{}
+\begin{frame}
+\frametitle{Regularization using trust-region methods: notes}
 
-Note: additional details and considerations in Linderoth and Wright.
+Additional details and considerations in Linderoth and Wright.
+\begin{itemize}
+\item
+Allow deletion of inactive cuts.
+\item
+Investigate parallelization of the method.
+\item
+Do not distinguish successful and very successful iterations: $\eta_1 = \eta_2 \in (0, 1/2)$.
+\end{itemize}
 
 \end{frame}
 
