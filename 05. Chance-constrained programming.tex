@@ -75,7 +75,7 @@ Became an accountant for Eric Louis Kohler, met while hitchhiking.
 	\item 
 Kohler financed his bachelor at University of Chicago.
 \item
-At 26, he enrolled at Columbia University and finished his coursework and dissertation, but never received his PhD due to its clam that decision making was not a centralized process.
+At 26, he enrolled at Columbia University and finished his coursework and dissertation, but never received his PhD due to its claim that decision making was not a centralized process.
 \end{itemize}
 
 \end{frame}
@@ -166,7 +166,7 @@ We then have to satisfy constraints (2) and (3) and either (1) or (4).
 \end{frame}
 
 \begin{frame}
-\frametitle{Example: graph}
+\frametitle{Example: frontiers of constraints}
 
 \begin{center}
 \includegraphics<1>[width=\textwidth,keepaspectratio]{graph.eps}
@@ -240,10 +240,10 @@ use a reduced-gradient technique (see Kall \& Wallace, Section~4.1)
 \begin{frame}
 \frametitle{Single constraint: easy case}
 
-The situation in the single constraint case is somewhat more simple.
-
-\mbox{}
-
+\begin{itemize}
+	\item 
+The situation in the single constraint case is sometimes simple.
+\item 
 Suppose again that $T_i (\xi) = T_i$ is constant. Then
 \[
 P[T_i x \geq h_i (\xi)] = F(T_i x) \geq \alpha
@@ -252,14 +252,13 @@ so the deterministic equivalent is
 \[
 T_i x \geq F^{-1}(\alpha)
 \]
-\ldots linear constraint! The resulting problem is still linear.
-
-\mbox{}
-
+\ldots linear constraint! The resulting problem is still linear. We have simply relaxed the contraint.
+\item 
 Recall that the inverse of the cdf is defined as
 \[
 F^{-1}(\alpha) = \min \lbrace x : F (x)  \geq \alpha \rbrace.
 \]
+\end{itemize}
 
 \end{frame}
 
@@ -314,7 +313,7 @@ Suppose we want to invest in $n$ assets, providing return rates $\beta_1, \beta_
 \mbox{}
 
 The $\beta_i$'s are random variables.
-Assume that they are following a multivariate normal distribution with means $\beta_i$ and covariance matrix $\Sigma$.
+Assume that they are following a multivariate normal distribution with means $\mu_i$ and covariance matrix $\Sigma$.
 
 \mbox{}
 
@@ -339,7 +338,7 @@ where $x$ is the total amount to invest.
 
 The chance constraint can be rewritten as
 \[
-\beta'x - \Phi^{-1}(\alpha) \sqrt{x'\Sigma x} \geq T.
+\mu^Tx - \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} \geq T.
 \]
 
 
@@ -359,10 +358,10 @@ We can add some constraints on the $x_i$ to ensure diversification. We summarize
 
 A complete program can now be expressed as
 \begin{align*}
-\max_x \ & E[\beta'x] \\
-\mbox{s.t. } & P\left[ \beta' x \geq T \right] \geq \alpha  \\
+\max_x \ & E[\beta^T x] = \mu^T x \\
+\mbox{s.t. } & P\left[ \beta^T x \geq T \right] \geq \alpha  \\
 & \sum_{i = 1}^n x_i = 1 \\
-& x \in \mathcal{C}
+& x \in \calC
 \end{align*}
 
 \end{frame}
@@ -376,7 +375,7 @@ Setting $T$ to 0 means that we want to ensure that we will no suffer from loss w
 
 The chanced-constraint can also be expressed as
 \[
-P\left[ \beta' x \leq 0 \right] \leq 1-\alpha = \gamma.
+P\left[ \beta^T x \leq 0 \right] \leq 1-\alpha = \gamma.
 \]
 
 \mbox{}
@@ -407,7 +406,7 @@ uniform portfolio $(1/n)\mathbf{1}$
 
 \begin{center}
 \begin{tabular}{c|c|c}
-portfolio & $E[\beta'x]$ & $P[\beta' x \leq 0])$ \\
+portfolio & $E[\beta^T x]$ & $P[\beta^T x \leq 0])$ \\
 \hline
 optimal & 7.51 & 5.0\% \\
 w/o loss constraint & 10.66 & 20.3\% \\
@@ -434,10 +433,10 @@ or
 \end{align*}
 where
 $$
-\mathcal{I}_{(0,\infty)} =
+\mathcal{I}_{(0,\infty)}(t) =
 \begin{cases}
 	1 & \mbox{if } t \leq 0,\\
-	0 & \mbox{if } t > 0,
+	0 & \mbox{otherwise}.
 \end{cases}
 $$
 
@@ -482,7 +481,7 @@ General form:
 
 \begin{itemize}
 \item 
-A chance constraint also constraint violation with some probability.
+A chance constraint allows constraint violation with some probability.
 \item
 The violation can be large.
 \item
