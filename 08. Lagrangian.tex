@@ -35,6 +35,8 @@
 
 \setbeamercovered{dynamic}
 
+\include{macros}
+
 \def\bxi{\boldsymbol\xi}
 \def\bomega{\boldsymbol\omega}
 \def\aff{\operatorname{aff}}
@@ -67,13 +69,13 @@ We consider the general {\blue two-stage nonlinear program}
 \inf z\ &= f^1(x) + \mathcal{Q}(x) \\
 \mbox{s.t. } & g_i^1(x) \leq 0,\ i = 1,\ldots,m_1,
 \end{align*}
-where $\mathcal{Q}(x) = E_{\bxi}[Q(x,\xi)]$, and
+where $\mathcal{Q}(x) = E_{\bxi}[Q(x,\bxi)]$, and
 \begin{align*}
 Q(x,\xi) = \inf\ & f^2(y(\xi),\xi) \\
 \mbox{t.q. } & b_i^2(x,\xi) + g_i^2(y(\xi), \xi) \leq 0,\ i = 1,\ldots,m_2.
 \end{align*}
 
-We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdot,\xi)$ are continuous in the first argument for any given $\xi$, and measurable in $\xi$ for any fixed first argument.
+We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdot,\xi)$ are continuous in the first argument for any given $\xi$, and measurable in $\xi$ for any fixed first argument. $\xi$ has finite second-order moments.
 
 \end{frame}
 
@@ -104,8 +106,8 @@ We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdo
 	{\blue Assumptions}.
 	\begin{enumerate}
 		\item \mbox{\red Convexity}.
-		The function $f^1$ is convex on $\rit^{n_1}$, $g_i^1$ is convex on $\rit^{n_1}$ ($i =
-		1,\ldots,m_1$), $f^2(\cdot,\xi)$ is convex on $\rit^{n_2}$ for all $\xi \in \Xi$, $g_i^2(\cdot,\xi)$ is convex on $\rit^{n_2}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$, and $b_i^2(\cdot, \xi)$ is convex on $\rit^{n_1}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$.
+		The function $f^1$ is convex on $\RR^{n_1}$, $g_i^1$ is convex on $\RR^{n_1}$ ($i =
+		1,\ldots,m_1$), $f^2(\cdot,\xi)$ is convex on $\RR^{n_2}$ for all $\xi \in \Xi$, $g_i^2(\cdot,\xi)$ is convex on $\RR^{n_2}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$, and $b_i^2(\cdot, \xi)$ is convex on $\RR^{n_1}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$.
 		\item \mbox{\red Slater condition}
 		If $\mathcal{Q}(x) < \infty$, for almost every (a.e.) $\xi \in \Xi$, $\exists$ some $y(\xi)$ s.t. $b_i^2(x, \xi) + g_i^2(y(\xi), \xi) < 0$ ($i = 1,\ldots,m_2)$.
 	\end{enumerate}
@@ -115,7 +117,7 @@ We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdo
 \begin{frame}
 \frametitle{Second-stage properties}
 
-The Slater condition ensures that the strong duality still holds for the dual of the second stage subproblems and the KKT conditions are necessary and sufficient.
+The Slater condition ensures that the \textit{strong duality} holds at the second stage and the KKT conditions are necessary and sufficient.
 
 \mbox{}
 
@@ -124,7 +126,7 @@ Under assumptions 1 and 2, the recourse function $Q(x,\xi)$ is a convex function
 \end{theorem}
 
 \begin{theorem}
-If the recourse feasible set (i.e. in $y$, for given $\xi$) is bounded for any $x \in \rit^{n_1}$, then the function $Q(x,\xi)$ is lower semi-continuous in $x$ for all $\xi \in \Xi$.
+If the recourse feasible set (i.e. in $y$, for given $\xi$) is bounded for any $x \in \RR^{n_1}$, then the function $Q(x,\xi)$ is lower semi-continuous in $x$ for all $\xi \in \Xi$.
 \end{theorem}
 
 \end{frame}
@@ -153,7 +155,7 @@ The function $f$ is {\blue lower semi-continuous} if it is lower semi-continuous
 \frametitle{Lower semi-continuity}
 
 
-A function is lower semi-continuous iff $\lbrace x\in X : f(x) > \alpha \rbrace$ is an open set for every  $\alpha \in \rit$, or, in a similar way, $\lbrace x\in X : f(x) \leq \alpha \rbrace$ is a closed set for every $\alpha \in \rit$.
+A function is lower semi-continuous iff $\lbrace x\in X : f(x) > \alpha \rbrace$ is an open set for every  $\alpha \in \RR$, or, in a similar way, $\lbrace x\in X : f(x) \leq \alpha \rbrace$ is a closed set for every $\alpha \in \RR$.
 
 \mbox{}
 
@@ -180,7 +182,7 @@ The feasible set $K_2 = \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace$ is clos
 \end{corollary}
 
 \begin{corollary}
-If the recourse feasible set if bounded for any $x \in \rit^{n_1}$, $\mathcal{Q}$ is a lower semi-continuous function.
+If the recourse feasible set if bounded for any $x \in \RR^{n_1}$, $\mathcal{Q}$ is a lower semi-continuous function.
 \end{corollary}
 
 \end{frame}
@@ -189,7 +191,7 @@ If the recourse feasible set if bounded for any $x \in \rit^{n_1}$, $\mathcal{Q}
 \frametitle{Solution: existence}
 
 \begin{theorem}
-	If the recourse feasible set is bounded for any $x \in \rit^{n_1}$, $K_1$ is bounded, $f^1$ is continuous, $g_i^1$ and $g_i^2$ are continuous for every $i$, and $K_1 \cap K_2 \ne \emptyset$,
+	If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $K_1$ is bounded, $f^1$ is continuous, $g_i^1$ and $g_i^2$ are continuous for every $i$, and $K_1 \cap K_2 \ne \emptyset$,
 	then the nonlinear stochastic two-stage program has an optimal solution and the infimum is reached.
 \end{theorem}
 
@@ -199,9 +201,11 @@ If the recourse feasible set if bounded for any $x \in \rit^{n_1}$, $\mathcal{Q}
 \frametitle{Solution: optimality}
 
 \begin{theorem}
-Assume that the Slater condition is satisfied, i.e. it exists a $x$ such that $x \in ri(\mbox{dom}(f^1(x))$, $x \in ri(\mbox{dom}(\mathcal{Q}(x)))$ and $g_i^1(x) < 0$ ($i = 1,\ldots,m_1$).
-
-$x^*$ is optimal if and only if there exists $\lambda^*$ such that $(x^*, \lambda^*)$ satisfies the KKT conditions for the two-stage stochastic program, i.e.
+Assume that the Slater condition is satisfied:
+$$
+ \exists\, x \text{ s.t. } x \in ri(\mbox{dom}(f^1(x)), x \in ri(\mbox{dom}(\mathcal{Q}(x))) \text{ and } g_i^1(x) < 0, i = 1,\ldots,m_1.
+$$
+$x^*$ is optimal iff there exists $\lambda^*$ such that $(x^*, \lambda^*)$ satisfies the KKT conditions for the two-stage stochastic program, i.e.
 \begin{align*}
 \bullet\ & x^* \in K_1, \\
 \bullet\ & \lambda^* \geq 0, \\ 
@@ -212,7 +216,6 @@ $x^*$ is optimal if and only if there exists $\lambda^*$ such that $(x^*, \lambd
 \end{theorem}
 
 \end{frame}
-
 
 \begin{frame}
 	\frametitle{Relative interior}
@@ -232,7 +235,7 @@ $x^*$ is optimal if and only if there exists $\lambda^*$ such that $(x^*, \lambd
 	The {\red affine envelop} $\aff(S)$ of $S$ is the set of all affine combinations of elements of $S$, i.e.
 	\[
 	\operatorname{aff} (S)=\left\lbrace \sum_{i=1}^k \alpha_i x_i \,\bigg|\,
-	x_i\in S, \, \alpha_i\in \rit, \, \sum_{i=1}^k \alpha_i=1,
+	x_i\in S, \, \alpha_i\in \RR, \, \sum_{i=1}^k \alpha_i=1,
 	k=1, 2, \dots\right\rbrace. 
 	\]
 \end{frame}
@@ -240,10 +243,11 @@ $x^*$ is optimal if and only if there exists $\lambda^*$ such that $(x^*, \lambd
 \begin{frame}
 \frametitle{Basic principle of Lagrangian approach}
 
-Since the problem is nonlinear, we have to rely on nonlinear techniques.
-The simplest ones aim to build a search direction and compute a step along this direction to reduce the objective.
-
 \begin{itemize}
+\item
+Nonlinear problem.
+\item
+We aim to build a search direction and compute a step along this direction to reduce the objective.
 \item
 Problem: classical nonlinear methods assume that the (sub-)gradients of $\mathcal{Q}$ are available and cheap to obtain.
 Not the case here.
@@ -256,8 +260,11 @@ Link the first and second stages in order to avoid optimization subproblems when
 \begin{frame}
 \frametitle{Basic principle of Lagrangian approach (cont'd)}
 
+\begin{itemize}
+	\item 
 Let $\pi$ be a vector of (dual) multipliers associated to the second-stage constraints.
-We can form a dual problem as follows:
+\item
+We can form the dual problem with respct to the second-stage constraints (linking the first and second stages) as follows:
 \[
 \max_{\pi(\xi) \geq 0} w = \theta(\pi),
 \]
@@ -268,9 +275,10 @@ where
   g_i^2(y(\xi), \xi) \right) \right] \\
 \text{s.t. } & g_i(x) \leq 0, i=1,\ldots{},m_1.
 \end{align*}
-
-We can see that we only consider the dual based on the second-stage constraints (linking first and second stages).
+\item
+We can see that we only consider the dual based on 
 We will establish some duality properties in case of finite distribution.
+\end{itemize}
 
 \end{frame}
 
@@ -278,7 +286,7 @@ We will establish some duality properties in case of finite distribution.
 \frametitle{Duality}
 
 \begin{theorem}
-We assume that all the functions of the stochastic program are convex,
+Assume that all the functions of the stochastic program are convex,
 and there exists a finite optimal value, as well as a point strictly satisfying all the constraints.
 Assume moreover that the support of $\bxi$ is finite.
 
@@ -357,7 +365,7 @@ x_{t+1}(\xi)) \right], \\
 \end{align*}
 where $x_t$ is the decision at stage $t$, and $x^t$ is the decisions history at stage $t$, i.e. $x^t = \lbrace x_1,\ldots, x_t \rbrace$.
 $\mathcal{N}$ designs the close linear subspace of nonanticipative processes.
-Denoting $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection of events subsets, with the probability measure associated to $\bxi$).
+Denote $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection of events subsets, with the probability measure associated to $\bxi$).
 
 \end{frame}
 
