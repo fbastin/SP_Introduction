@@ -33,6 +33,8 @@
 \def\aff{\operatorname{aff}}
 \def\cQ{\mathcal{Q}}
 
+\include{macros}
+
 \newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
 
 \title[SAA]{Stochastic Optimization\\Sample Average Approximation}
@@ -52,7 +54,7 @@
 
 Consider the stochastic program
 \[
-{\red \min_{z \in S} g(z) = E_P \left[ G(z, \bxi) \right]},
+{\red \min_{z \in S} g(z) = \EE_P \left[ G(z, \bxi) \right]},
 \]
 \vspace{-0.5cm}
 \begin{itemize}
@@ -63,7 +65,7 @@ $\bxi$ is a random vector defined on $( \Xi, \mathcal{F}, P )$ and taking values
 \item
 $G: \rit^m \times \rit^k \rightarrow \rit$;
 \item
-$E_P[\cdot]$ is the expectation with respect to $P$.
+$\EE_P[\cdot]$ is the expectation with respect to $P$.
 \end{itemize}
 
 We assume that for each $z \in S$, the expected value function $g(z)$ is well defined, i.e. the function $G(z,\cdot)$ is $\mathcal{F}$-measurable and $P$-integrable.
@@ -327,41 +329,49 @@ Each gradient component $\frac{\partial}{\partial [z]_l} G(z, \xi)$ ($l = 1,\ldo
 \begin{frame}
 \frametitle{Consequences}
 
-\textbf{A.3} implies that the expected value function $g(z)$ is continuously differentiable on $S$, and
-\[
-\nabla_z g(z) = E_P\left[ \nabla_z G(z, \bxi) \right].
-\]
-
-\mbox{}
-
-Thus, $\nabla \hat{g}_n(z^*)$ is an unbiased estimator of $\nabla g( z^*)$.
-
-\mbox{}
-
-The {\blue first-order convergence} can be derived from the stochastic variational inequalities, as presented in A. Shapiro, {\sl Monte Carlo sampling methods},
-in A.~Shapiro and A.~Ruszczy\'nski, editors, {\sl Stochastic Programming}, volume~10 of {\sl Handbooks in Operations Research and Management Science}, pages 353--425. Elsevier, 2003.
+\begin{itemize}
+\item 
+\textbf{A.3} implies that $\EE_P[g(z)]$ is continuously differentiable on $S$, and
+$\nabla_z g(z) = \EE_P\left[ \nabla_z G(z, \bxi) \right]$.
+\item
+Thus, $\EE_P [\nabla \hat{g}_n(z^*)] = \nabla g( z^*)$ (\textcolor{red}{unbiased estimator}).
+\item
+The {\blue first-order convergence} can be derived from the stochastic variational inequalities:
+\begin{itemize}
+	\item 
+A. Shapiro, {\sl Monte Carlo sampling methods},
+in A.~Shapiro and A.~Ruszczy\'nski, editors, {\sl Stochastic Programming}, volume~10 of {\sl Handbooks in Operations Research and Management Science}, pages 353--425. Elsevier, 2003;
+\item
+A. Shapiro, {\sl Statistical Inference}, Chapter 5 in {\sl Lectures Notes in Stochastic Programming} ($3^{\text{rd}}$ edition), SIAM, 2021.
+\end{itemize}
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Stochastic variational inequalities}
 
-Consider a mapping $\Phi: \rit^m \times \rit^k \rightarrow \rit^m$ and a multi-function $\Gamma: \rit^m \rightrightarrows  \rit^m$, and suppose that $\phi(z) := E_{P}[\Phi(z, \bxi)]$ is well defined.
+Consider a mapping $\Phi: \rit^m \times \rit^k \rightarrow \rit^m$ and a multi-function $\Gamma: \rit^m \rightrightarrows  \rit^m$, and suppose that $\phi(z) := \EE_{P}[\Phi(z, \bxi)]$ is well defined.
 We denote
-\[
+\begin{equation}
 \phi(z) \in \Gamma(z)
-\]
+\label{eq:true_generalized}
+\end{equation}
 as the true {\blue generalized equation}, or in expected value.
 $z^* \in \rit^m$ is a solution of the generalized equation if $\phi(z^*) \in \Gamma(z^*)$.
 
 \mbox{}
 
 If $\lbrace \xi_1,\ldots,\xi_n \rbrace$ is a random sample, we denote
-\[
-\hat{\phi}_n(z) \in \Gamma(z)
-\]
-as the generalized SAA equation, where $\hat{\phi}_n(z) = n^{-1}\sum_{i=1}^n \Phi(z,\xi_i)$.
-We denote by $S^*$ and $S^*_n$ the set of (all) solutions of the generalized equations in expected value and from the SAA, respectively.
+\begin{equation}
+\hat{\phi}_n(z) = \frac{1}{n} \sum_{i=1}^n \Phi(z,\xi_i) \in \Gamma(z)
+\label{eq:generalizedSAA}
+\end{equation}
+as the generalized SAA equation, and
+\begin{itemize}
+	\item $S^*$: set of (all) solutions of \eqref{eq:true_generalized};
+	\item $S^*_n$: set of (all) solutions of \eqref{eq:generalizedSAA}.
+\end{itemize}
 
 \end{frame}
 
@@ -369,7 +379,7 @@ We denote by $S^*$ and $S^*_n$ the set of (all) solutions of the generalized equ
 \frametitle{First-order convergence}
 
 Denote by $d(x,A) := \inf_{x' \in A} \| x - x' \|$, the distance from $x \in \rit^m$ to $A$, and $D(A,B) := \sup_{x \in A} D(x, B)$, the deviation of the set $A$ from the set $B$.
-We have the following result (Shapiro, 2003).
+We have the following result (Shapiro, 2003, 2022).
 \begin{theo}[Generalized equations]
 Let $\mathcal{S}$ be a compact subset of $\rit^m$ such that $S^* \subseteq \mathcal{S}$.
 Assume that
@@ -467,10 +477,10 @@ If $f$ is convex (i.e. we are in the convex programming framework), the conditio
 \begin{frame}
 \frametitle{Deterministic and convex constraints}
 
-Therefore, when $S$ is convex, we can rewrite the first-order criticality conditions at some point $z^*$ as the requirement that $-\nabla_z g(z^*)$ belongs to the normal cone to $S$ at $z^*$, denoted by $\mathcal{N}_{S}(z^*)$.
-
-\mbox{}
-
+Therefore, when $S$ is convex, we can rewrite the first-order criticality conditions at $z^*$ as the requirement that 
+$$
+-\nabla_z g(z^*) \in \mathcal{N}_{S}(z^*).
+$$
 If moreover $S$ is deterministic, the feasible sets are the same for the true and SAA problems.
 
 \mbox{}
@@ -508,20 +518,23 @@ The previous theorem ensures therefore the first-order criticality at the limit 
 \begin{frame}
 \frametitle{Remark}
 
-The theorem establishes that $D(S_n^*, S^*) \rightarrow 0$ when $n \rightarrow \infty$, almost surely. However, we cannot write $D(S^*, S_n^*) \rightarrow 0$ when $n \rightarrow \infty$, almost surely.
+The theorem establishes that $D(S_n^*, S^*) \rightarrow 0$ when $n \rightarrow \infty$ a.s.\\
+However, we cannot write $D(S^*, S_n^*) \rightarrow 0$ when $n \rightarrow \infty$ a.s.
 
 \mbox{}
 
-Consider for instance the optimization problem
+Consider the problem
 $$
-\min_{x \in S} |E[\xi]| x^2,
+\min_{x \in S} |\EE[\xi]| x^2,
 $$
 where $S = [-a,a]$, $a > 0$. If $\xi \sim N(0, \sigma^2)$, $S^* = S$.
-The SAA approximation is
+The SAA is
 $$
 \min_{x \in S} \left|\frac{1}{n} \sum_{i=1}^n \xi_i\right| x^2,
 $$
-and almost surely, $S^*_n = \{ 0 \}$. Therefore, a.s. $\lim_{n \rightarrow \infty} S^*_n = \{ 0 \} \ne S^*$, and $D(S^*, \{0\}) = a$.
+and almost surely, $S^*_n = \{ 0 \}$.
+
+Therefore, a.s. $\lim_{n \rightarrow \infty} S^*_n = \{ 0 \} \ne S^*$, and $D(S^*, \{0\}) = a$.
 
 \end{frame}
 
@@ -532,10 +545,10 @@ Under stronger assumptions, it is also possible to prove the first-order converg
 
 \mbox{}
 
-We now assume that the feasible set can be described by equality and inequality constraints.
-The original problem now becomes
+We now assume that $S$ can be described by equality and inequality constraints.
+The original problem becomes
 \begin{align*}
-\min_{z \in V}\ & g(z) = E_P[G(z, \boldsymbol{\xi})],\\
+\min_{z \in V}\ & g(z) = \EE_P[G(z, \boldsymbol{\xi})],\\
 \text{such that } & c_j(z) \geq 0,\ j = 1,\ldots,k,\\
 & c_j(z) = 0,\ j = k+1,\ldots, M,
 \end{align*}
@@ -546,22 +559,19 @@ where $V$ is a compact subset of $\rit^m$.
 \begin{frame}
 \frametitle{Stochastic constraints (cont'd)}
 
-The corresponding SAA problem is defined as
+SAA problem:
 \begin{align*}
 \min_{z \in V}\ & \hat{g}_n(z),\\
 \text{such that } & \hat{c}_{jn}(z) \geq 0,\ j = 1,\ldots,k,\\
 & \hat{c}_{jn}(z) = 0,\ j = k+1,\ldots, M.
 \end{align*}
-
-\mbox{}
-
 Here, for each $j = 1,\ldots,M$, $\lbrace \hat{c}_{jn}(\cdot) \rbrace$ is a sequence of (random) functions converging asymptotically to the corresponding function $c_j(\cdot)$ as $n \rightarrow \infty$.
 
 \mbox{}
 
 We assume that the functions $c_j(\cdot)$ can be represented in form of expectations:
 \[
-c_j(z) = E_P[H_j(z,\boldsymbol{\xi})],\ j = 1,\ldots,M.
+c_j(z) = \EE_P[H_j(z,\boldsymbol{\xi})],\ j = 1,\ldots,M.
 \]
 
 \end{frame}
@@ -569,7 +579,7 @@ c_j(z) = E_P[H_j(z,\boldsymbol{\xi})],\ j = 1,\ldots,M.
 \begin{frame}
 \frametitle{Stochastic constraints (cont'd)}
 
-These functions can then be approximated by corresponding sample average approximations:
+SAA of the constraints:
 \[
 \hat{c}_{jn}(z) = \frac{1}{n} \sum_{i = 1}^n H_j(z,\xi_i).
 \]
@@ -743,7 +753,7 @@ The generalized equation $\phi(\mu) \in \mathcal{N}_{\mathcal{K}}(\mu)$ then rep
 \begin{frame}
 \frametitle{On the Lagrange multipliers (cont'd)}
 
-Assumptions $(a)$ and $(d)$ of the theorem on generalized equations are sufficient as $\bepsilon \rightarrow 0$ almost surely, and assumption $(c)$ holds as feasible set for original and approximate problems are non-empty.
+Assumptions $(a)$ and $(d)$ of the theorem on generalized equations are sufficient as $\bepsilon \rightarrow 0$ almost surely, and assumption $(c)$ holds as feasible sets for original and approximate problems are non-empty.
 
 \mbox{}
 
@@ -774,9 +784,9 @@ S,\ \hat{g}_n \left( z_n^*(\overline{\xi}) \right) \leq \hat{g}_n(z).
 
 Consider the problem
 \begin{equation}\label{eq:ex_true}
-\min_{z \in [-1, 1]} z^3 - \frac{z}{2}E_P[\bxi],
+\min_{z \in [-1, 1]} z^3 - \frac{z}{2}\EE_P[\bxi],
 \end{equation}
-where $\Xi = \lbrace -1, 1\rbrace$ and $P[\xi = -1] = P[\xi = 1] = 0.5$, so $E_P[\bxi] = 0$, and \eqref{eq:ex_true} has one local minimizer only, that is also global, at $z^* = -1$.
+where $\Xi = \lbrace -1, 1\rbrace$ and $P[\xi = -1] = P[\xi = 1] = 0.5$, so $\EE_P[\bxi] = 0$, and \eqref{eq:ex_true} has one local minimizer only, that is also global, at $z^* = -1$.
 The SAA problem is then
 \begin{equation}\label{eq:ex_approx}
 \min_{z \in [-1, 1]} z^3 - \frac{z}{2n}\sum_{i = 1}^n \xi_i.
@@ -786,7 +796,7 @@ Problem \eqref{eq:ex_approx} has two (isolated) local minimizers
 \left\lbrace -1, \sqrt{\frac{\sum_{i=1}^n \xi_i}{6n}}\right\rbrace,
 \]
 when $\sum_{i=1}^n \xi_i > 0$.
-As $n \rightarrow \infty$, we have $P\left[\sum_{i=1}^n \xi_i > 0\right] \rightarrow 0.5$, but from the ULLN, $\frac{1}{6n}\sum_{i=1}^n \xi_i \rightarrow \frac{1}{6}E_P[\bxi] = 0$ a.s.
+As $n \rightarrow \infty$, we have $P\left[\sum_{i=1}^n \xi_i > 0\right] \rightarrow 0.5$, but from the ULLN, $\frac{1}{6n}\sum_{i=1}^n \xi_i \rightarrow \frac{1}{6}\EE_P[\bxi] = 0$ a.s.
 % However zero is a saddle point of the true
 %problem \eqref{eq:ex_true}, not a minimizer, even locally, and the
 %distance to $S^* = \lbrace -1 \rbrace$ is then equal to 1. Note that
@@ -1131,15 +1141,11 @@ $$
 $$
 Taking the expectation on both sides, we obtain
 $$
-g(y) = E[\hat{g}_N(y)] \geq  E\left[ \min_{z \in S} \hat{g}_N(z) \right]
+g(y) = \EE[\hat{g}_N(y)] \geq  \EE\left[ \min_{z \in S} \hat{g}_N(z) \right]
 $$
 Since this is true for any $y$, we have in particular
 $$
-g(z^*) \geq E\left[ \min_{z \in S} \hat{g}_N(z) \right]
-$$
-or, equivalently,
-$$
-E\left[ \min_{z \in S} \hat{g}_N(z) \right] \leq \min_{z \in S} g(z).
+\EE\left[ \min_{z \in S} \hat{g}_N(z) \right] \leq g(z^*) = \min_{z \in S} g(z).
 $$
 
 \mbox{}
@@ -1155,9 +1161,9 @@ Choose $M >> N$, and compute $\hat{g}_M(z_N^*)$. We hope $\hat{g}_M(z_N^*) \appr
 
 \mbox{}
 
-Given $N$, we can estimate $E[\min_{z \in S} \hat{g}_N(z)]$ by averaging over $J$ replications:
+Given $N$, we can estimate $\EE[\min_{z \in S} \hat{g}_N(z)]$ by averaging over $J$ replications:
 $$
-E\left[\min_{z \in S} \hat{g}_N(z)\right] \approxeq \frac{1}{J} \sum_{j = 1}^J \min_{z \in S} \hat{g}_N\left(z, \xi_N^{(j)}\right).
+\EE\left[\min_{z \in S} \hat{g}_N(z)\right] \approxeq \frac{1}{J} \sum_{j = 1}^J \min_{z \in S} \hat{g}_N\left(z, \xi_N^{(j)}\right).
 $$
 We expect
 $$
@@ -1218,7 +1224,7 @@ with a decreasing difference as $N$ grows.
 	\]
 	we can rewrite the chance constraint as
 	\[
-	p(x) = E\left[ \mathcal{I}_{(0,\infty)} \left( G(x, \xi) \right) \right] \leq \alpha.
+	p(x) = \EE\left[ \mathcal{I}_{(0,\infty)} \left( G(x, \xi) \right) \right] \leq \alpha.
 	\]
 	
 	Let $\xi_1,\ldots,\xi_N$ be an i.i.d. sample of $N$ realizations of $\xi$.
