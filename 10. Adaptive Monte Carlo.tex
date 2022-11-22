@@ -127,7 +127,7 @@ We will extend the (pointwise) central limit theorem to a functional central lim
 \item
 $\forall\, x \in S$, $G(x,\cdot)$ is measurable (i.e. its expectation exists).
 \item
-$\exists {x} \in S$ such that $E_P[G(\overline{x}, \xi)^2] < \infty$.
+$\exists \overline{x} \in S$ such that $E_P[G(\overline{x}, \xi)^2] < \infty$.
 \item
 (Lipschitz continuity condition) 
 $\exists$ $K(\xi) \geq 0$ such that $E[K(\xi)]$ is finite, and
@@ -135,7 +135,6 @@ $\forall\, x_1$, $x_2 \in S$ and a.e. $\xi$,
 \[
 | G(x_1, \xi) - G(x_2, \xi) )| \leq K(\xi) \| x_1 - x_2\|,
 \]
-%holds for a positive , such that , for all .
 We assume moreover that $E[K^2(\xi)] < \infty$.% is finite.
 \end{enumerate}
 
@@ -303,7 +302,7 @@ The solution $x_k$ obtained from the $k^{th}$ iteration of RA satisfies $\| \nab
 \item
 The numerical procedure used to solve the sample-path problems in RA exhibits $p^{th}$-order sublinear convergence or $p^{th}$-order linear convergence with respect to the observed derivatives.
 \item
-The sample sizes are increased linearly, i.e., $N_k / N_{k - 1} = c > 1$ for all $k$.
+The sample sizes are increased linearly, i.e., $N_k = c N_{k - 1} > 1$ for all $k$.
 \item
 The error-tolerances are chosen so that
 $\epsilon_k= O(1/\sqrt{N_k})$.
@@ -544,7 +543,7 @@ Define $N_0 = \max\lbrace N^0_{\min}, 0.1N_{\max}\rbrace$ if $\| \nabla \hat{g}_
 \begin{frame}
 \frametitle{Choice of $N^+$ in (Step 3)}										
 
-Sample size required to obtain an accuracy equal to the model decrease:
+Sample size required to obtain an accuracy equal to $\Delta m_k$:
 \[
 N^s = \max \left\lbrace N^k_{\min},
 \left\lceil
@@ -584,17 +583,17 @@ A possible value for $\chi_1$ is 0.5.
 
 \begin{itemize}
 	\item 
-$\tau_1^k \geq 1$: the model decrease if greater of equal to the estimated accuracy.
+$\tau_1^k \geq 1$: $\Delta m_k \geq$ estimated accuracy.
 %, and we reduce the sample size to $\min\{ N^s, \lceil \chi_1 N_{\max}
 %\rceil \}$.
 %The idea to use $\lceil \chi_1 N_{\max} \rceil$ comes from the practical observation that imposing such a decrease in the suggested sample sizes delivers a better numerical performance.
 \item
-$\tau_1^k < 1$: the improvement is smaller than the accuracy.
+$\tau_1^k < 1$: $\Delta m_k <$ accuracy.
 However, %since the sample has been generated before the optimization process,
 a sufficient improvement during several consecutive iterations can lead to a significant decrease.% in comparison to the approximation accuracy, while keeping the computational cost lower than if $N_{\max}$ draws were used.
 \begin{itemize}
 \item 
-If $\tau_1^k \geq \tau_2^k$, the ratio between the current sample size and the potential next one is smaller than the ratio between the model decrease and the estimated error.
+If $\tau_1^k \geq \tau_2^k$, the ratio between the current sample size and the potential next one is smaller than the ratio between $\Delta m_k$ and the estimated error.
 %If the sample size increases, the error decreases for a similar $\Delta m_j^{N_j}$ ($j \geq k$), and therefore $\tau_1^k$ increases.
 We capitalize on $\tau_1^k$ by computing a sample size smaller than  $N^s$, such that an improvement of the order $\epsilon_\delta^{N_k}(z_k)$ would be reached in approximatively $\lceil \tau_1^k \rceil$ iterations if $\tau_1^j$ is similar to $\tau_1^k$ for $j$ close to $k$.
 \item
@@ -633,28 +632,17 @@ m_k^{N^-}}.
 \end{frame}
 
 \begin{frame}
-\frametitle{Minimum sample size update}
+\frametitle{Additional tricks}
 
-While we expect to take advantage of smaller sample sizes when we are far from the solution, we should be sure to use a sample size equal to $N_{\max}$ during the final iteration, in order to work with the desired accuracy.
+\begin{itemize}
+\item Minimum sample size update
 
-\mbox{}
+We want to be sure to use a sample size equal to $N_{\max}$ during the final iteration, in order to work with the desired accuracy.
+We increase $N_{\min}$ when the adaptive strategy does not deliver sufficient numerical gains, or simply by 1 at each iteration.
 
-To this end, we increase the minimum sample size when the adaptive strategy does not deliver sufficient numerical gains. A simpler strategy consists to increase $N_{\min}$ by 1 at each iteration.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Additional safeguards}
-
-Finally, note that if $N_k \ne N_{\max}$, we cannot exclude the pathological case in which $z_k$ is a critical first-order point for $\hat{g}_{N_k}$.
-
-If $\epsilon_{\delta}^{N_k}(x_k) \ne 0$, the algorithm does not stop, but since the model is quadratic, no decrease is achieved if $H_k$ is positive definite.
-
-In order to avoid this situation, we force  $N_{k+1}$ to increase when it occurs.
-
-\mbox{}
-
-In practice, the gradient norm usually changes slowly in the neighborhood of such a critical point, and a small gradient typically leads to a small decrease of the model, implying the increase of the sample size, and $N_{\max}$ is reached before this safeguard is deployed.
+\item
+Additional safeguards to avoid theoretical pathological cases (a critical point of the SAA with $N_k < N_{\max}$ is found).
+\end{itemize}
 
 \end{frame}
 
@@ -919,6 +907,40 @@ and al.)\\
 }
 \end{tiny}
 
+\end{frame}
+
+\begin{frame}{Possible improvmet: how to draw samples?}
+	
+	\textcolor{red}{Sampling methods are notorious for generalization issues.}
+	Common strategies:
+	\begin{itemize}
+		\item \textit{Independent Random Numbers} (IRN) (e.g. stochastic gradient descent)
+		\item Incremental \textit{Common Random Numbers} (CRN): take the first $N_K$ numbers from a predefined sequance of random draws: $\mathcal{N}_k = \{ \xi_1, \ldots, \xi_{N_k} \}$
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}{Incremental Common Random Numbers}    
+	\centering
+	\includegraphics[scale=0.5]{DistTo_sampleSize_CRN.PNG}
+\end{frame}
+
+\begin{frame}{IRN/CRN combination (I/CRN)}
+	
+	\begin{enumerate}
+		\item $N_{k+1} > N_k$
+		
+		Draw new samples $\xi_{N_{k}+1,\ldots,N_{k+1}}$ and set
+		$$
+		\mathcal{N}_{k+1} = \mathcal{N}_k \bigcup \left\{ \xi_{N_{k}+1,\ldots,\xi_{N_{k+1}}} \right\}.
+		$$
+		
+		\item $N_{k+1} < N_k$
+		$$\mathcal{N}_{k+1} = \mathcal{N}_k \backslash  \{\text{unformly randomly selected elements in } \mathcal{N}_k\}$$
+	\end{enumerate}
+	
+	This heuristic reduces the risk to be trapped in a local minimizer or a saddle point.
+	
 \end{frame}
 
 \end{document}
