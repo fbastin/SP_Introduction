@@ -724,7 +724,7 @@ with $M_G = M_V + \mu_G^2 \geq \mu^2 > 0$.
 		\EE_{\xi_k}[f(x_{k+1})] - f(x_k)
 		& \leq - \mu \alpha_k \| \nabla f(x_k) \|^2
 		+ \frac{1}{2} \alpha_k^2 L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right] \\
-		& \leq - \left( \mu -\frac{1}{2}\alpha_k LM_G \right) \| \nabla f(x_k) \|_2^2
+		& \leq - \alpha_k\left( \mu -\frac{1}{2}\alpha_k LM_G \right) \| \nabla f(x_k) \|_2^2
 		+ \frac{1}{2} \alpha_k^2 LM.
 	\end{align*}
 \end{theorem}
@@ -732,6 +732,28 @@ with $M_G = M_V + \mu_G^2 \geq \mu^2 > 0$.
 	\item $\left( \mu -\frac{1}{2}\alpha_k LM_G \right) \| \nabla f(x_k) \|_2^2$: \textcolor{blue}{expected decrease};
 	\item $\frac{1}{2} \alpha_k^2 LM$: \textcolor{blue}{noise}.
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Proof}
+
+We already proved
+\begin{multline*}
+	\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq \\ - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
+\end{multline*}
+From A.5 b), this leads to
+$$
+\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right],
+$$
+giving the first inequality. Since
+$$
+\EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right] \leq M + M_G \| \nabla f(x_k) \|_2^2,
+$$
+we have
+\begin{align*}
+\EE_{\xi_k} [f(x_{x+1})] - f(x_k) & \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \left( M + M_G \| \nabla f(x_k) \|_2^2 \right) \\
+& =  - \alpha_k \left( \mu - \frac{1}{2} \alpha_k L M_G \right) \| \nabla f(x_k) \|_2^2 + \frac{1}{2} \alpha_k^2 LM.
+\end{align*}
 
 \end{frame}
 
