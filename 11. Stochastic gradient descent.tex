@@ -41,13 +41,12 @@
 
 \setbeamercovered{dynamic}
 
+\include{macros}
+
 \def\bxi{\boldsymbol\xi}
 \def\bepsilon{\boldsymbol\epsilon}
 \def\bomega{\boldsymbol\xi}
 \def\aff{\operatorname{aff}}
-
-\def\EE{\mathbb{E}}
-\def\RR{\mathbb{R}}
 
 \newcommand{\tim}[1]{\;\; \mbox{#1} \;\;}
 
@@ -135,7 +134,7 @@ $$
 \begin{frame}
 \frametitle{Stochastic approximation}
 
-Also know as as the \textcolor{red}{stochastic gradient (SG) method}.
+Also know as as the \textcolor{red}{stochastic gradient descent (SGD) method}.
 
 \mbox{}
 
@@ -179,7 +178,7 @@ $$
 \item[A.3]
 There exist scalars $M \geq 0$ and $M_V \geq 0$ s.t. $\forall\, k$,
 $$
-Var[\nabla_x Y(x, \xi_k)] \leq M + M_V\| \nabla_x f(x_k)\|_2^2
+\var[\nabla_x Y(x, \xi_k)] \leq M + M_V\| \nabla_x f(x_k)\|_2^2
 $$
 \item[A.4]
 The sequence $\alpha_k$, $k=1,2,\ldots$, satisfies
@@ -191,13 +190,24 @@ $$
 \end{frame}
 
 \begin{frame}
-\frametitle{Lipschitz continuity}
+\frametitle{Assumptions: notes}
 
-A well-known consequence of the Lipschitz-continous gradients assumption is
+\begin{itemize}
+\item 
+In A.3, $\var_{\xi_k} [\nabla_x Y(x, \xi_k)]$ does not refer to the covariance matrix of $\nabla_x Y(x,  \xi_k)$.
+\item
+Variance of a random vector $g(\xi_k)$:
+\begin{align*}
+\var_{\xi_k} [g] &= \EE_{\xi_k} \left[ \left \| g - \EE_{\xi_k} [g] \right \|^2 \right] \\
+& = \EE_{\xi_k} \left[ \| g \|^2 \right] - \left( \EE_{\xi_k} [ \| [g] \| ] \right)^2.
+\end{align*}
+\item
+A well-known consequence of the Lipschitz continuity assumption A.1 is
 $$
 f(x) \leq f(y) + \nabla f(y)^T ( x - y ) + \frac{L}{2} \| x - y \|^2_2,
 $$
 $\forall\, x, y \in \RR^d$.
+\end{itemize}
 
 \end{frame}
 
@@ -229,12 +239,17 @@ $\alpha_k = \alpha/(k \ln k)$, $\forall\, k \geq 2$, given $\alpha_1 = \alpha > 
 \item 
 Very cheap iteration: gradient w.r.t. just one observation. No function evaluation.
 \item
-Not a descent method as we can have $-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)] \geq 0$ with $\nabla_x f(x) \ne 0$.
+Reminder: $d$ is a descent direction for $f$ at $x$ if
+$$
+d^T \nabla_x f(x) < 0
+$$
+\item
+SGD is not a descent method as we can have $-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)] \geq 0$ with $\nabla_x f(x) \ne 0$.
 \item
 Descent in expectation: if $\nabla_x f(x) \ne 0$,
 \begin{align*}
 & E[-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)]] \\
-&= - \nabla_x E[Y(x,\xi_i)]^T \nabla_x E[Y(x,\xi)]] \\
+&= - \nabla_x E[Y(x,\xi_i)]^T \nabla_x E[Y(x,\xi)] \\
 &= - \nabla_x f(x)^T\nabla_x f(x) < 0
 \end{align*}
 \end{itemize}
@@ -498,15 +513,15 @@ For settings where the derivative is unobservable, there is a slight degradation
 \frametitle{Convergence rate for the SAA method}
 
 \begin{theo}
-	Assumptions:
-	\begin{description}
-		\item[A1]
+Assumptions:
+\begin{enumerate}
+\item
 $E[ Y^2 ( x , \xi)] < \infty$ for all $x \in \Theta$.
-		\item[A2]
-The function $Y(x, \xi)$ is Lipschitz w.p.1, with Lipschitz constant $K(\xi)$ having finite expectation.
-		\item[A3]
+\item
+The function $Y(x, \xi)$ is Lipschitz w.p.1, with Lipschitz constant $K(\xi)$, and $\EE[K(\xi)] < \infty$.
+\item
 The function $f_n(x)$ attains its infimum on $\Theta$ for each $n$ w.p.1.
-	\end{description}
+\end{enumerate}
 Let $c = n \times k$ and $n/c^{1 /( 2p + 1 )} \rightarrow a$ as $c \rightarrow \infty$, with $a \in (0, \infty)$.
 Then, if the numerical procedure exhibits $p^{th}$-order sublinear convergence,
 $$
@@ -537,7 +552,14 @@ of attaining the canonical convergence rate $O_p ( c^{-1/2} )$.
 \begin{frame}
 \frametitle{The generic SG method}
 
-Source: Léon Bottou, Frank E. Curtis, and Jorge Nocedal, Optimization Methods for Large-Scale Machine Learning, SIAM Review 60(2), 2018, pp. 223--311, \url{https://doi.org/10.1137/16M1080173}
+Source:
+\begin{itemize}
+\item 
+Léon Bottou, Frank E. Curtis, and Jorge Nocedal, Optimization Methods for Large-Scale Machine Learning, SIAM Review 60(2), 2018, pp. 223--311, \url{https://doi.org/10.1137/16M1080173}
+\item
+Léon Bottou, Frank E. Curtis, and Jorge Nocedal, Optimization Methods for Machine Learning
+Part II – The theory of SG, \url{https://icml.cc/Conferences/2016/tutorials/part-2.pdf}
+\end{itemize}
 
 \mbox{}
 
@@ -559,8 +581,8 @@ The function $f: \RR^d \rightarrow \RR$ could be
 $$
 f(x) =
 \begin{cases}
-R(x) = \EE [ f(x; \bxi) ] & \text{ the expected risk,} \\
-R_n(x) = \frac{1}{n} \sum_{\xi = 1}^n f(x; \xi) & \text{ the empirical risk.}
+R(x) = \EE [ Y(x; \bxi) ] & \text{ the expected risk,} \\
+R_n(x) = \frac{1}{n} \sum_{\xi = 1}^n Y(x; \xi) & \text{ the empirical risk.}
 \end{cases}
 $$
 
@@ -602,6 +624,118 @@ Active learning is not covered here, but again, the results can be extended to t
 \end{frame}
 
 \begin{frame}
+\frametitle{Smoothness}
+
+\begin{theorem}
+Under Assumption A.1 (Lipschitz continuity), $\forall k \in \NN$, the iterates of the SG method satisfy
+\begin{multline*}
+\EE_{\xi_k}[f(x_{k+1})] - f(x_k)
+\\ \leq
+-\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]
++\frac{1}{2} L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right].
+\end{multline*}
+\end{theorem}
+\begin{itemize}
+	\item $\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]$: \textcolor{blue}{expected decrease};
+	\item $\frac{1}{2} L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right]$: \textcolor{blue}{noise}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Smoothness: proof}
+	
+	From A.1, we have
+	$$
+	f(x_{x+1}) - f(x_k) \leq \nabla f(x_k)^T (x_{k+1} - x_k) + \frac{L}{2} \| x_{k+1} - x_k \|^2_2.
+	$$
+	Since $x_{k+1} = x_k - \alpha_k g(x_k, \xi_k)$, this leads to
+	$$
+	f(x_{x+1}) - f(x_k) \leq - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2.
+	$$
+	This implies
+	\begin{multline*}
+		\EE_{\xi_k} [f(x_{x+1}) - f(x_k)] \leq \\ \EE_{\xi_k} \left[ - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2 \right]
+	\end{multline*}
+	or
+	\begin{multline*}
+		\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq \\ - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
+	\end{multline*}
+	
+	\begin{align*}
+	\end{align*}
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Assumption A.5: first and second moment limits}
+
+The SG method applied to $f(\cdot)$ satisfies
+\begin{enumerate}[a)]
+\item
+The sequence of iterates $\{ x_k \}$ is contained in an open set over which $f \geq f_{lb}$.
+\item
+$\exists \mu, \mu_G$ such that $0 < \mu < \mu_G$ and $\forall k \in \NN$,
+\begin{align*}
+\nabla f(x_k)^T \EE_{\xi_k} [g(x_k, \xi_k)] &\geq \mu \| \nabla f(x_k) \|_2^2, \\
+\| \EE_{\xi_k} [g(x_k, \xi_k)] \|_2 &\leq \mu_G \| \nabla f(x_k) \|_2.
+\end{align*}
+\item
+$\exists M \geq 0, M_V \geq 0$ such that $\forall k \in \NN$,
+\begin{align*}
+\var_{\xi_k} [g(x_k, \xi_k)]
+&= \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right] - \left( \EE_{\xi_k} [\| g(x_k, \xi_k) \|_2] \right)^2 \\
+&\leq M + M_V \| \nabla f(x_k) \|_2^2.
+\end{align*}
+\end{enumerate}
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Assumption A.5: notes}
+
+\begin{itemize}
+\item
+A.5 b) expresses that in expectation, $g(x_k, \xi_k)$ is a sufficient descent direction.
+\begin{itemize}
+	\item True if $\EE_{\xi_k} [g(x_k, \xi_k)] = H_k \nabla f(x_k)$ with $H_k$ positive definite and bounded spectrum.
+	\item Particular case: $H_k = I$. Then A.5 b) holds with $\mu = \mu_G = 1$. 
+\end{itemize}
+\item 
+A.5 c) is a direct generalization of A.3.
+\item
+From A.5 b) and A.5 c),
+\begin{align*}
+\EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right]
+& \leq \left( \EE_{\xi_k} [\| g(x_k, \xi_k) \|_2] \right)^2 + M + M_V \| \nabla f(x_k) \|_2^2 \\
+& \leq \mu_G^2 \| \nabla f(x_k) \|_2^2 + M + M_V \| \nabla f(x_k) \|_2^2 \\
+& = M + M_G \| \nabla f(x_k) \|_2^2,
+\end{align*}
+with $M_G = M_V + \mu_G^2 \geq \mu^2 > 0$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Moments}
+
+\begin{theorem}
+	Under Assumptions A.1 and A.5, $\forall k \in \NN$,
+	\begin{align*}
+		\EE_{\xi_k}[f(x_{k+1})] - f(x_k)
+		& \leq - \mu \alpha_k \| \nabla f(x_k) \|^2
+		+ \frac{1}{2} \alpha_k^2 L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right] \\
+		& \leq - \left( \mu -\frac{1}{2}\alpha_k LM_G \right) \| \nabla f(x_k) \|_2^2
+		+ \frac{1}{2} \alpha_k^2 LM.
+	\end{align*}
+\end{theorem}
+\begin{itemize}
+	\item $\left( \mu -\frac{1}{2}\alpha_k LM_G \right) \| \nabla f(x_k) \|_2^2$: \textcolor{blue}{expected decrease};
+	\item $\frac{1}{2} \alpha_k^2 LM$: \textcolor{blue}{noise}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Analysis}
 
 More details at:
@@ -615,5 +749,6 @@ More details at:
 We will refer to this material.
 
 \end{frame}
+
 
 \end{document}
