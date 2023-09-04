@@ -632,12 +632,12 @@ Under Assumption A.1 (Lipschitz continuity), $\forall k \in \NN$, the iterates o
 \EE_{\xi_k}[f(x_{k+1})] - f(x_k)
 \\ \leq
 -\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]
-+\frac{1}{2} L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right].
++\frac{1}{2} \alpha_k^2 L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right].
 \end{multline*}
 \end{theorem}
 \begin{itemize}
 	\item $\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]$: \textcolor{blue}{expected decrease};
-	\item $\frac{1}{2} L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right]$: \textcolor{blue}{noise}.
+	\item $\frac{1}{2} \alpha_k^2 L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right]$: \textcolor{blue}{noise}.
 \end{itemize}
 
 \end{frame}

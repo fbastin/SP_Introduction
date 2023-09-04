@@ -45,12 +45,25 @@
 
 \begin{document}
 	
+\titlegraphic{\vspace{-0.5cm}
+	\includegraphics[scale=0.2]{imgs/udem.png}
+	\hspace{2cm}
+	\includegraphics[scale=0.07]{imgs/Fin-MLLogo.png}
+}
 	\frame{\titlepage}
 	
-	%\begin{frame}
+\begin{frame}
 	%\frametitle{Outline}
 	%
-	%\end{frame}
+
+\begin{center}
+	\href{https://xkcd.com/221/}{\includegraphics[scale=0.75]{imgs/random_number.png}}
+\begin{small}
+	\url{https://xkcd.com/221/}
+\end{small}
+\end{center}
+
+\end{frame}
 	
 	\begin{frame}
 		\frametitle{U[0,1]-distributed random numbers}
@@ -141,6 +154,8 @@ Given two numbers, a (the dividend) and n (the divisor),
 $$
 a \mod n = a - n\left\lfloor \frac{a}{n} \right\rfloor.
 $$
+\item
+If $c = 0$, the generator is often called a multiplicative congruential generator, or ``{\red Lehmer RNG}''
 \end{itemize}
 		
 \end{frame}
@@ -165,7 +180,7 @@ $$
 				if 4 divides $m$, then 4 divides a-1.
 			\end{enumerate}
 		\end{theorem}
-		''{\red Standard minimal}" (Park and Miller, 1988):
+		``{\red Standard minimal}'' (Park and Miller, 1988):
 		\[
 		x_{n+1} = 16807x_n \mbox{ mod } 2147483647.
 		\]
@@ -179,13 +194,14 @@ $$
 		
 		\begin{small}
 			\begin{verbatim}
-function getlcg(seed::Integer, a::Integer, c::Integer,
-                m::Integer)
+function getlcg(seed::Integer, a::Integer,
+                 c::Integer, m::Integer)
     state = seed
     am_mil = 1.0/m
     return function lcgrand()
         state = mod(a * state + c, m)
-        return state*am_mil  # produce a number in (0,1)
+        # produce a number in (0,1)
+        return state*am_mil
     end
 end
 
@@ -213,10 +229,10 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		x_n = (a_1 x_{n-1} + \cdots + a_k x_{n-k}) \mod {m}, \quad  
 		u_n = x_n / m.
 		\]
-		In practice, we will take $u_n = (x_n + 1) / (m+1)$, or $u_n =
+		In practice, take $u_n = (x_n + 1) / (m+1)$, or $u_n =
 		x_n/(m+1)$ if $x_n>0$ and $u_n = m/(m+1)$ otherwise, but the structure
 		remains the same, and is easier when studying theoretical properties.
-		This kind of generators is very popular.
+%		This kind of generators is very popular.
 		
 		\mbox{}
 		
@@ -252,7 +268,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		
 		\mbox{}
 		
-		It is possible to study theoretical properties of MRG's, and excluding
+		It is possible to study theoretical properties of MRG's, and exclude
 		directly some generators that have known strong deficiencies.
 		
 	\end{frame}
@@ -333,7 +349,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\end{frame}
 	
 	\begin{frame}[containsverbatim]
-		\frametitle{MRG32k3a: implementation}
+		\frametitle{MRG32k3a: basic implementation}
 		
 		\begin{footnotesize}
 			\begin{verbatim}
@@ -360,43 +376,45 @@ end
 			\end{footnotesize}
 			
 		\end{frame}
+
+\begin{frame}
+\frametitle{MRG32k3a: implementations}
+
+Note: more efficient implementations exist.
+
+See for instance \url{https://github.com/vigna/MRG32k3a}.
+
+\end{frame}
 		
 	\begin{frame}
 		\frametitle{Random numbers generators on $\mathcal{F}_2$}
 		
 		Alternatives to MRG's: random numbers generators based on linear
-		recurrence in $\mathcal{F}_2$.
+		recurrences in $\mathcal{F}_2$.
 		
 		\mbox{}
 		
-		Galois field $\mathcal{F}_2$: set $\lbrace 0, 1 \rbrace$ on which we
-		define addition and multiplication operation modulo 2.
+		Galois field $\mathcal{F}_2$: set $\lbrace 0, 1 \rbrace$ equipped with
+		addition and multiplication modulo 2.
 		
 		\mbox{}
 		
-		We construct two sequence of bits vectors $\boldsymbol{x}_n$ and
+		We construct two sequences of bits vectors $\boldsymbol{x}_n$ and
 		$\boldsymbol{y}_n$ with the linear recurrences
-		\[
-		\boldsymbol{x}_n = {X} \boldsymbol{x}_{n-1}  \quad
-		\mbox{({state vector}, ${k}$ bits)},
-		\]
-		and
-		\begin{eqnarray*}
-			\boldsymbol{y}_n &=& {B} \boldsymbol{x}_{n}   
-			\quad \mbox{({output vector}, ${w}$ bits)},\\
-			{u_n}   &=& \sum_{j=1}^w y_{n,j-1} 2^{-j}
-			~=~  .y_{n,0}\; y_{n,1}\; y_{n,2}\; \cdots
-			\quad \mbox{({sortie})}.
-		\end{eqnarray*}
-		
-	\end{frame}
+\begin{align*}
+\boldsymbol{x}_n &= {X} \boldsymbol{x}_{n-1} & \quad \mbox{({state vector}, ${k}$ bits)},\\
+\boldsymbol{y}_n &= {B} \boldsymbol{x}_{n} & \quad \mbox{({output vector}, ${w}$ bits)},
+\end{align*}
+Output:
+$$
+{u_n} = \sum_{j=1}^w y_{n,j-1} 2^{-j} = .y_{n,0}\; y_{n,1}\; y_{n,2}
+$$		
+\end{frame}
 	
-	\begin{frame}
-		\frametitle{Random numbers generators on $\mathcal{F}_2$ (2)}
+\begin{frame}
+\frametitle{LFSR}
 		
-		The implementation of $\mathcal{F}_2$-generators is often quite
-		complex, but it is possible to operate bitwise, so that they are
-		numerically very fast.
+Implementation is often quite complex, but it is possible to operate bitwise, and these RNGs are numerically very fast.
 		
 		\mbox{}
 		
@@ -407,8 +425,8 @@ end
 		
 		We use the relations (with $a_k \ne 0$) 
 		\begin {eqnarray*}
-		u_n &=& \sum_{l=1}^w x_{n\nu+j-1} 2^{-l} 
-		~=~ .x_{n\nu} x_{n\nu+1} x_{n\nu+2} \ldots x_{n\nu+l-1}\\
+		u_n &=& \sum_{\ell=1}^w x_{n\nu+j-1} 2^{-\ell} 
+		~=~ .x_{n\nu} x_{n\nu+1} x_{n\nu+2} \ldots x_{n\nu+\ell-1}\\
 		X &=&
 		\left(
 		\begin{tabular}{cccc}
@@ -417,45 +435,38 @@ end
 			&          &          & 1       \\
 			$a_k$    &$a_{k-1}$ & $\ldots$ & $a_1$   
 		\end{tabular}
-		\right)^\nu \mbox{et } B=I.
+		\right)^\nu, \qquad B=I.
 		\end {eqnarray*}
 		
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Tausworthe Generator (2)}
+		\frametitle{Tausworthe generator}
 		
-		{\blue Maximum period.} $\rho = 2^k-1$ iff ${Q(z)} = z^k - a_1 z^{k-1}
-		- \cdots - a_{k-1} z - a_k$ is primitive and $\mbox{pgcd}(\nu, 2^k-1)
-		= 1$.
+		{\blue Maximum period:} $\rho = 2^k-1$ iff $\mbox{gcd}(\nu, 2^k-1) = 1$ and ${Q(z)} = z^k - a_1 z^{k-1}	- \cdots - a_{k-1} z - a_k$ is primitive.
 		
 		\mbox{}
 		
-		In most applications, only two coefficients are nonzero in order to
-		simplify implementation, so we obtain ${Q(z)} = z^k - a_r z^{k-r} - a_k$.
-		
-		\mbox{}
-		
-		Since we are working in $\mathcal{F}_2$, the recurrence on $x_n$ becomes
-		\[
-		x_n = (x_{n-r}+x_{n-k}) \mod 2.
-		\]
-		
-		\mbox{}
-		
-		The execution of the addition modulo 2 is equivalent to the
-		instruction exclusive-or (xor) ont the bits:
-		\[
-		x_n =
-		\begin{cases}
-			0 & \mbox{ si } x_{n-r} = x_{n-k},\\
-			1 & \mbox{ si } x_{n-r} \ne x_{n-k}.
-		\end{cases}
-		\]
-		
-	\end{frame}
+In most applications, only two coefficients are nonzero:
+$$
+Q(z) = z^k - a_r z^{k-r} - a_k.
+$$
+Since we are working in $\mathcal{F}_2$, the recurrence on $x_n$ becomes
+$$
+x_n = (x_{n-r}+x_{n-k}) \mod 2.
+$$
+The addition modulo 2 is equivalent to the instruction exclusive-or (xor) on the bits:
+$$
+x_n =
+\begin{cases}
+0 & \mbox{ si } x_{n-r} = x_{n-k},\\
+1 & \mbox{ si } x_{n-r} \ne x_{n-k}.
+\end{cases}
+$$		
+
+\end{frame}
 	
-	\begin{frame}
+	\begin{frame}[fragile]
 		\frametitle{Implementations}
 		
 		More generally, we construct a fast implementation by using shifts,
@@ -468,19 +479,63 @@ Most popular:
 	\item 
 	Mersenne Twister MT19937 (Matsumoto and Nishimura); period of $2^{19937}-1$
 	\item
-	xoshiro: \url{https://prng.di.unimi.it/}
+	xoshiro: \url{https://prng.di.unimi.it/}; by default, Julia uses \verb|xoshiro256++|
 \end{itemize}
 
 %The generators are slightly less efficient on a statistical point of view, but are faster.
+
+\mbox{}
+
+But even these recent generators are not without flaws! See e.g.
+\begin{itemize}
+	\item 
+	\href{https://arxiv.org/abs/1910.06437}{It Is High Time We Let Go Of The Mersenne Twister}
+	\item
+	\href{https://www.sciencedirect.com/science/article/abs/pii/S0377042721004131}{Unveiling patterns in xorshift128+ pseudorandom number generators}
+\end{itemize}
 		
-	\end{frame}
+\end{frame}
+
+\begin{frame}
+\frametitle{PCGs}
+
+\begin{itemize}
+\item
+One of the main opponent of the xorshift family is Melissa O'Neil, who proposes the PCGs generators:
+\url{https://www.pcg-random.org/}.
+\item
+PCG combines a linear congruential generator and permutation functions.
+\item
+However, Vigna (the author of xorshift generators) has a lot of critisms regarding PCG: \url{https://pcg.di.unimi.it/pcg.php}.
+\item
+In summary, there are no strong evidence that one should favor a PCG over a MRG. According to Vigna, ``there is technically no sensible reason to use a PCG generator: those without flaws are not competitive.''
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Counter-based generators}
+
+\begin{itemize}
+\item In previously covered RNGs, the transition function does most of the transformation and the output function is very simple.
+\item
+Opposite for CBRNGs: the state is a counter, increased by 1, and the output function is complex.
+\item
+One popular impletation, Philox, is the default generator in TensorFlow.
+\item 
+Efficient on a GPU, but their statistical properties are not well studied.
+\item
+One strength: easy to jump ahead in the state space.
+\end{itemize}
+
+\end{frame}
 
 \begin{frame}
 \frametitle{Jump ahead}
 
 \begin{itemize}
 	\item 
-A very useful possibly proposed by some implementation is the possibility to make a jump of $m$ positions in the random number sequences, with $m$ very large.
+A very useful possibility proposed by some implementation is the possibility to make a jump of $m$ positions in the random number sequences, with $m$ very large.
 \item
 This allows to easily define independant random variables.
 \item
