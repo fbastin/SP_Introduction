@@ -63,7 +63,7 @@
 \begin{frame}
 	\frametitle{A random linear program}
 	
-	Consider the linear program (LP), parametrized by the random (r.v.) $\bxi: \Omega \rightarrow \RR^2$:
+	Consider the linear program (LP), parametrized by the random variable (r.v.) $\bxi: \Omega \rightarrow \RR^2$:
 	\begin{align*}
 		\min_x\ & c^T x \\
 		\mbox{s.t. } & Ax = b \\
@@ -104,7 +104,7 @@
 			\item
 			try to estimate, predict, the uncertainty;
 			\item
-			chance-constraints;
+			chance constraints;
 			\item
 			penalties on deviations.
 		\end{enumerate}
@@ -758,12 +758,12 @@ measure the absolute violations in the stochastic constraints.
 	\item 
 Since the recourse is complete, it is feasible for any first-stage decision $x$.
 \item
-The following results establishes conditions to have a finite recourse (i.e. $\calQ > -\infty$).
+The following results establishes conditions to have a finite recourse (i.e. $| \calQ | < \infty$).
 \end{itemize}
 
 \begin{theo}
 Assume that the two-stage (linear) stochastic program is feasible and has a simple recourse, and that $\bxi$ has finite second-order moments.
-Then $\mathcal{Q}(x)$ is finite if and only if $\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0$ with probability one.
+Then $\mathcal{Q}(x)$ is finite if and only if, for any component $i$, $\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0$ with probability one.
 \end{theo}
 
 \end{frame}
@@ -820,16 +820,21 @@ By componing these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 {\bf $(\Leftarrow)$}
 Assume $\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0$ with probability one, $\forall i$.
 Any feasible solution satisfies
+\begin{small}
 $$
-y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x, \ y^+(\xi(\omega)) \geq 0,\ y^-(\xi(\omega)) \geq 0.
+y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x,\ 
+y^+(\xi(\omega)) \geq 0,\ y^-(\xi(\omega)) \geq 0.
 $$
-Therefore for almost every $\omega$, $Q(x,\xi(\omega))$ is bounded below by 0, and
-from the fundamental theorem of linear programming, we can choose as optimal solution
+\end{small}
+Therefore for a.e. $\omega$, $Q(x,\xi(\omega))$ is bounded below, as, for a.e. $\omega$, $\forall i$,
+\begin{small}
 \begin{align*}
-y^+(\xi(\omega)) &= \left(h(\xi(\omega))-T(\xi(\omega))x\right)^+,\\
-y^-(\xi(\omega)) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
+& q_i^+(\xi(\omega))y_i^+(\xi(\omega)) + q_i^-(\xi(\omega))y_i^-(\xi(\omega)) \\
+& = q_i^+(\xi(\omega))\left( y_i^+(\xi(\omega) - y_i^-(\xi(\omega)) \right) + q_i^+(\xi(\omega))y_i^-(\xi(\omega)) + q_i^-(\xi(\omega))y_i^-(\xi(\omega)) \\
+& = q_i^+(\xi(\omega))\left( h(\xi(\omega))-T(\xi(\omega))x \right)_i + \left( q_i^+(\xi(\omega)) + q_i^-(\xi(\omega)) \right) y_i^-(\xi(\omega)) \\
+& \geq q_i^+(\xi(\omega))\left( h(\xi(\omega))-T(\xi(\omega))x \right)_i.
 \end{align*}
-where $a^+ = \max\{0, a\}$.
+\end{small}
 \end{proof}
 
 \end{frame}
@@ -839,16 +844,30 @@ where $a^+ = \max\{0, a\}$.
 
 \begin{proof}
 {\bf $(\Leftarrow)$}
-Thus,
+From the fundamental theorem of linear programming, we can choose as the optimal solution
+\begin{align*}
+	y^+(\xi(\omega)) &= \left(h(\xi(\omega))-T(\xi(\omega))x\right)^+,\\
+	y^-(\xi(\omega)) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
+\end{align*}
+where $a^+ = \max\{0, a\}$. Thus,
 \begin{align*}
 Q(x,\xi(\omega)) = \sum_{i=1}^{m} & (q_i^+(\xi(\omega))(h_i(\xi(\omega))-T_i(\xi(\omega))x)^+ + \\
-& q_i^-(\xi(\omega))(-h_i(\xi(\omega))+T_i(\xi(\omega))x)^+ )
+& q_i^-(\xi(\omega))(-h_i(\xi(\omega))+T_i(\xi(\omega))x)^+ ).
 \end{align*}
-Consequently $Q(x,\xi(\omega))$ is finite for almost every $\omega$ and bounded below by 0.
+\end{proof}
 
-\mbox{}
+\end{frame}
 
-Therefore, $\mathcal{Q}(x)$ is bounded below by 0, and according to the previous results, $\mathcal{Q}(x) < \infty$. This implies that $\mathcal{Q}(x)$ is finite.
+\begin{frame}
+\frametitle{Simple recourse (cont'd)}
+
+\begin{proof}
+{\bf $(\Leftarrow)$}
+Consequently $Q(x,\xi(\omega))$ is finite for a.e. $\omega$ and $\mathcal{Q}(x) < \infty$.
+$\mathcal{Q}(x) > -\infty$ follows from convexity of $Q(x,\xi(\omega))$ (to be shown) and Jensen inequality:  if $X$ is a random variable and $g$ is a convex function, then
+$$
+g(E[X]) \leq E[g(X)].
+$$
 \end{proof}
 
 \end{frame}
