@@ -864,9 +864,9 @@ Q(x,\xi(\omega)) = \sum_{i=1}^{m} & (q_i^+(\xi(\omega))(h_i(\xi(\omega))-T_i(\xi
 \begin{proof}
 {\bf $(\Leftarrow)$}
 Consequently $Q(x,\xi(\omega))$ is finite for a.e. $\omega$ and $\mathcal{Q}(x) < \infty$.
-$\mathcal{Q}(x) > -\infty$ follows from convexity of $Q(x,\xi(\omega))$ (to be shown) and Jensen inequality:  if $X$ is a random variable and $g$ is a convex function, then
+$\mathcal{Q}(x) > -\infty$ follows from convexity of $Q(x,\xi(\omega))$ (to be shown) and Jensen inequality:  if $X$ is a random variable with $\EE[|X|] < \infty$, and $g$ is a convex function, then
 $$
-g(E[X]) \leq E[g(X)].
+g(\EE[X]) \leq \EE[g(X)].
 $$
 \end{proof}
 
