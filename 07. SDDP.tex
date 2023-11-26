@@ -22,7 +22,7 @@
 %\usepackage{epic,eepic}
 %\usepackage{pstricks, pst-tree}
 
-\usepackage{times}
+%\usepackage{times}
 
 \usepackage{ulem}
 %\usepackage{crayola}
@@ -63,8 +63,8 @@
 \begin{frame}
 \frametitle{Context}
 
-Based on Anthony Papavisiliou's slides:
-\url{https://perso.uclouvain.be/anthony.papavasiliou/public_html/SDDP.pdf}
+Based on Anthony Papavisiliou's slides.
+%\url{https://perso.uclouvain.be/anthony.papavasiliou/public_html/SDDP.pdf}
 
 \mbox{}
 
@@ -126,7 +126,7 @@ Constraints (2): optimality cuts
 Building block: $NLSD(t, k)$: problem at stage $t$, scenario $k$.
 \begin{itemize}
 	\item 
-Repeated application of the L-shaped method.
+Repeated application of the $L$-shaped method.
 	\item 
 	Parent nodes send proposals for solutions to their children
 nodes
@@ -423,7 +423,7 @@ $$
 where
 \begin{align*}
 D_{t-1, a(k)} = \pi_{t,k}^TT_{t-1,k},\\
-d_{t-1, a(k)} = \pi_{t,k}^Th_{t,k} + \rho_{t,k,i}^Td_{t,k}.
+d_{t-1, a(k)} = \pi_{t,k}^Th_{t,k} + \rho_{t,k}^Td_{t,k}. %\rho_{t,k}^Td_{t,k}
 \end{align*}
 	
 \end{frame}

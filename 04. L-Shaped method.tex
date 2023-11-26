@@ -1440,9 +1440,9 @@ u = -T_s^T\hat{\pi}_s \in \partial Q(x^{\nu}, \xi_s).
 	
 \begin{itemize}
 \item
-If $Q(x^{\nu}, \xi_s) \leq \theta_s$, $\forall\, s \in S$, stop: $x^{\nu}$ is optimal.
+If $p_s Q(x^{\nu}, \xi_s) \leq \theta_s$, $\forall\, s \in S$, stop: $x^{\nu}$ is optimal.
 \item
-If $Q(x^{\nu}, \xi_s) > \theta_s$,
+If $p_s Q(x^{\nu}, \xi_s) > \theta_s$,
 \[
 \mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \,|\,
 \theta_s \geq p_s Q(x^{\nu}, \xi_s) + p_s u^T(x-x^{\nu})\rbrace.
@@ -1757,12 +1757,12 @@ In both case, we see the introduction of {\blue nonlinear programming} concepts.
 \begin{frame}
 \frametitle{Summary}
 
-Let $m(x)$ be the "model" used as first-stage problem.
+Let $m(x)$ be the ``model'' used as first-stage problem.
 \begin{itemize}
 \item
 {\red Multicut $L$-shaped}
 \[
-m(x) = \min_x \Big\lbrace c^Tx + \sum_{k = 1}^S \theta_k \,|\, (x, \theta_1,
+m(x) = \min_x \Big\lbrace c^Tx + \sum_{k = 1}^C \theta_k \,|\, (x, \theta_1,
 \theta_2,\ldots, \theta_C) \in \mathcal{B}_0 \cap \mathcal{B}_1
 \Big\rbrace.
 \]
