@@ -592,15 +592,14 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 	\begin{frame}
 		\frametitle{Inversion}
 		
-		This is the prefered method, if it can be applied. The reason is that
-		it is compatible with variance reduction.
+		Prefered method when applicable: compatible with variance reduction and copulae.
 		
 		\mbox{}
 		
-		Consider a random variable $X$ with cumulative distribution function $F$.
+		Consider a random variable $X$ with cdf $F$.
 		Let $U \sim U (0, 1)$ and
 		\[
-		X = F^{-1}(U) = \min \lbrace x : F (x)  \geq U \rbrace.
+		X = F^{-1}(U) = \min \lbrace x : F (x)  \geq U \rbrace \quad \textrm{\textcolor{red}{(Generalized inverse)}}.
 		\]
 		Then
 		\[
@@ -610,10 +609,10 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 		Indeed,
 		\begin{itemize}
 			\item
-			in the continuous case, $F(X) ~ U[0,1]$;
+			in the continuous case, $F(X) \sim U[0,1]$;
 			\item
-			in the discrete case, it is easy to prove that $P[X = x_i] = p(x_i)$,
-			for all $i$, and we assume $x_1 < x_2 < \ldots < x_n$;
+			in the discrete case, it is easy to prove that $\forall\, i$, $P[X = x_i] = p(x_i)$,
+			and we assume $x_1 < x_2 < \ldots < x_n$;
 			\item
 			The principle still works for mixte distributions.
 		\end{itemize}
@@ -822,6 +821,168 @@ Y &= R \sin(\theta)
 \end{align*}
 \end{enumerate}
 		
+\end{frame}
+
+\begin{frame}
+\frametitle{Multivariate distributions}
+
+What if we want to draw from $\bsX: \Omega \rightarrow \calX \subseteq \RR^d$?
+
+General approach:
+\begin{itemize}
+	\item Generate the marginals
+	\item Combine the marginals as desired.
+\end{itemize}
+		
+\end{frame}
+
+\begin{frame}
+\frametitle{Multivariate distributions: simple cases}
+
+\begin{itemize}
+\item 
+Ideally, we can explicitly transform the marginals.
+\item
+Example: multivariate normal $\bsX \sim \calN(\bsmu, \Sigma)$, with
+$$
+\bsmu =
+\begin{pmatrix}
+	\mu_1 \\ \mu_2 \\ \vdots \\ \mu_d
+\end{pmatrix}
+\qquad
+\Sigma = 
+\begin{pmatrix}
+	\sigma^2_1 & \sigma_{1,2} & \ldots & \sigma_{1,d} \\
+	\sigma_{1,2} & \sigma^2_2 & \ldots & \sigma_{2,d} \\
+	\vdots & \vdots & \ddots & \vdots \\
+	\sigma_{1,d} & \sigma_{2,d} & \ldots & \sigma^2_d 
+\end{pmatrix}
+$$
+Then,
+$$
+\bsX = \bsmu + L\calN(\bszero, \bsI)
+$$
+with $\Sigma = LL^T$, and $L$ is the Cholesky factor.
+
+Drawing from $\calN(\bszero,\bsI)$: generate $d$ $\calN(0,1)$ independently.
+\end{itemize}
+		
+\end{frame}
+
+\begin{frame}
+\frametitle{Multivariate distributions: copulae}
+
+A $d$-variate \textcolor{red}{copula} $C: [0, 1]^d \rightarrow [0, 1] $is the cdf of a random vector
+$(U_1,\ldots, U_d)$ with $U(0, 1)$ margins:
+$$
+C(u) = P[U_1 \leq u_1,\ldots, U_d \leq u_d]
+$$
+where
+$$
+P[U_j \leq u_j] = u_j
+$$
+for $j = 1,\ldots,d$, and $0 \leq u_j \leq 1$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Sklar's theorem}
+
+\begin{theorem}[Sklar's theorem (1959)]
+	\begin{itemize}
+		\item 
+	Let $H$ be a multivariate distribution function with margins $F_1,\ldots, F_d$.
+	There exists a copula $C$ such that
+$$
+		H(x_1, \ldots, x_d) = C \left( F_1(x_1), \ldots, F_d(x_d) \right), \quad x_1, \ldots, x_d \in \overline{\RR}.
+%		\label{eq:Copulas}
+$$
+	If $F_i$, $i = 1, \ldots, d$, are continuous then $C$ is unique. Otherwise $C$ is uniquely determined on the Cartesian product of the range of the marginals $F_1 \left( \overline{\RR} \right) \times \ldots \times F_d \left( \overline{\RR} \right)$.
+	\item
+	Conversely, if $C$ is a copula and $F_1, \ldots, F_d$ are univariate distribution functions, then the function $H$ defined above is a multivariate distribution function with margins $F_1, \ldots, F_d$.
+	\end{itemize}
+\end{theorem}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Copula}
+
+If we know the joint CDF $F$ and the marginals $F_1,\ldots,F_d$, we can find the copula via
+$$
+C(u_1,\ldots,u_d) = F\left(F_1^{-1}(u_1),\ldots,F_d^{-1}(u_d)\right),
+$$
+where $F_j^{-1}(\cdot)$ is the generalized inverse for margin $j$:
+$$
+F_j^{-1}(u) = \min \{ x \,:\, F_j(x) \geq u \}.
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fréchet–Hoeffding bounds}
+
+Any bivariate copula $C$ verifies
+$$
+\max(F_X(x) + F_Y(y) - 1, 0) \leq C(x, y) \leq \min(F_X(x), F_Y(y))
+$$
+
+\mbox{}
+
+\textcolor{blue}{Upper bound proof}
+	\begin{align*}
+		C(x, y) &= P[X \leq x \cap Y \leq y] \\ & \leq P[X \leq x] P[Y \leq y] \\ & \leq \min(F_X(x), F_Y(y))
+	\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fréchet–Hoeffding bounds}
+
+\textcolor{blue}{Lower bound proof}
+\begin{align*}
+1 - C(x,y) &= P[X > x \cup Y > y] \\
+& \leq P[X > x] + P[Y > y] \\
+& = 1 - F_X(x) + 1 - F_Y(y)
+\end{align*}
+Thus,
+$$
+C(x,y) \geq F_X(x) + F_Y(y) - 1.
+$$
+
+\mbox{}
+
+\textcolor{red}{Note:} this can be viewed as a particular of the Bonferroni inequality
+$$
+P \left[ \cap_{i = 1}^d A_i \right] \geq 1-d+\sum_{i = 1}^d P [A_i].
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Gaussian copula}
+
+$$
+	C \left( F_1(x_1), \ldots, F_d(x_d) \right)
+	= \Phi_{\Sigma} \left( \phi^{-1} \left( F_1(x_1) \right),\ldots, \phi^{-1}\left( F_d(x_d) \right) \right),
+$$
+where
+\begin{itemize}
+	\item $\phi$ is the cdf of a $\calN(0,1)$,
+	\item $\Phi_{\Sigma}$ is the cdf of a $d$-dimensional $\calN(\bszero,\Sigma)$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Copulae estimation}
+
+\begin{itemize}
+	\item Parametric estimation;
+	\item Non-parametric estimation;
+	\item Machine-learning models (see Jutras et al.: \url{https://arxiv.org/abs/2302.09193v3}).
+\end{itemize}
+
 \end{frame}
 	
 \end{document}
