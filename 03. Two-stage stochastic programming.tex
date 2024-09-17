@@ -228,11 +228,13 @@ where {\it a.e.} stands for ``almost every''.
 	
 	\begin{align*}
 	\min_{x,\ y(\bxi)}\ & E_{\bxi} [ c^T x + q^T y(\bxi) ] \\
-	\mbox{s.t. } & Ax = b & \mbox{first-stage constraints} \\
+	\mbox{s.t. } & Ax = b & \mbox{\textcolor{blue}{first-stage constraints}} \\
 	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi &
-	\mbox{second-stage contraints} \\
+	\mbox{\textcolor{blue}{second-stage contraints}} \\
 	& x \in X,\ y(\xi) \in Y\ \text{ for a.e. } \xi.
 	\end{align*}
+	
+	\mbox{}
 	
 	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
 	\omega_2,\ldots,\omega_S \rbrace \subset \RR^r$.
@@ -410,25 +412,30 @@ Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\
 v(\xi, z) \overset{def}{=} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
 \]
 
-Given a ``policy'' $x$ and a realization of the random vector $\bxi$, $z$ measures the deviation of the first stage, i.e. $z = h(\xi) - T(\xi)x$, $v(\xi, z)$ is the minimum cost to ``correct'' the decision in order to satisfy the constraints again.
+\mbox{}
+
+Given a ``policy'' $x$ and a realization $\xi$, $z$ measures the deviation of the first stage, i.e. $z = h(\xi) - T(\xi)x$, $v(\xi, z)$ is the minimum cost to ``correct'' the decision. % in order to satisfy the constraints again.
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Recourse function}
 
-The {\red expected recourse function}, or the function of minimum expected recourse, $\mathcal{Q}: \RR^n \rightarrow \RR$, for any policy $x \in \RR^n$:
+{\red Expected recourse function}:
+%, or the function of minimum expected recourse, $\mathcal{Q}: \RR^n \rightarrow \RR$, for any policy $x \in \RR^n$:
 \[
-\mathcal{Q} \overset{def}{=} E_{\bxi}[Q(x,\bxi)],
+\mathcal{Q}(x) \overset{def}{=} E_{\bxi}[Q(x,\bxi)],
 \]
-describes the recourse cost expectation, with
+%describes the recourse cost expectation,
+with
 \[
 Q(x, \xi) = v(\xi, h(\xi)-T(\xi)x).
 \]
 
 \mbox{}
 
-With these definitions, the problem can be rewritten as:
+%With these definitions, 
+The problem can now be rewritten as:
 \[
 \min_{x \in X} c^Tx + \mathcal{Q}(x) \mbox{ such that } Ax = b.
 \]
@@ -436,9 +443,8 @@ It is a nonlinear program over $\RR^n$. Properties?
 \end{frame}
 
 \begin{frame}
-\frametitle{Summary}
+\frametitle{Formulations summary}
 
-Summarize our formulations.
 \[
 \min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\xi)^Ty \ |\ Wy = h(\bxi) - T(\bxi)x \rbrace \right] \right\rbrace 
 \]
@@ -719,17 +725,17 @@ A particular case of complete recourse is the {\red simple recourse}, for which 
 \[
 W = \begin{pmatrix} I & -I \end{pmatrix},
 \]
-with $I$ the identiy matrix, of order $m$.
+with $I$ the identity matrix, of order $m$.
 
 \mbox{}
 
-It is easy to see that pos$W = \RR^m$ as, writing
+pos$W = \RR^m$: writing
 $$
 y = \begin{pmatrix}
 	y^+ \\ y^-
 \end{pmatrix},
 $$
-where $y \in \RR^{2m}$, $y^+, y^- \in \RR^m$, for $z \in \RR^m$, we can solve the system
+where $y \in \RR^{2m}$, $y^+, y^- \in \RR^m$, for $z \in \RR^m$, we can solve
 $$
 Wy = z,\ y \geq 0,
 $$
@@ -758,7 +764,7 @@ measure the absolute violations in the stochastic constraints.
 	\item 
 Since the recourse is complete, it is feasible for any first-stage decision $x$.
 \item
-The following results establishes conditions to have a finite recourse (i.e. $| \calQ | < \infty$).
+The following results establishes conditions to have a finite recourse (i.e. $| \calQ(x) | < \infty$).
 \end{itemize}
 
 \begin{theo}
@@ -783,8 +789,9 @@ $$
 y_i^+(\xi(\omega)) - y_i^-(\xi(\omega)) = h_i(\xi(\omega)) - T_i(\xi(\omega))x,\ y_i^+ \geq 0,\ y_i^- \geq 0.
 $$
 %Therefore, $y_i^+ - y_i^-$ are feasible.
-Moreover, since $\mathcal{Q}$ is finite, $Q(x, \xi(\omega))$ is feasible almost surely,
-so, almost surely, we can choose $y_j^+$ and $y_j^-$ feasible, $j \ne i$.
+Moreover, %since $\mathcal{Q}(x)$ is finite, $Q(x, \xi(\omega))$ is feasible a.s.
+%so, almost surely,
+we can choose $y_j^+$ and $y_j^-$ feasible, $j \ne i$.
 
 \end{proof}
 
@@ -818,23 +825,21 @@ By componing these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 \begin{proof}
 
 {\bf $(\Leftarrow)$}
-Assume $\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0$ with probability one, $\forall i$.
+Assume $\forall\, i$, $P[\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0] = 1$.
+%with probability one, $\forall i$.
 Any feasible solution satisfies
-\begin{small}
-$$
-y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x,\ 
-y^+(\xi(\omega)) \geq 0,\ y^-(\xi(\omega)) \geq 0.
-$$
-\end{small}
-Therefore for a.e. $\omega$, $Q(x,\xi(\omega))$ is bounded below, as, for a.e. $\omega$, $\forall i$,
-\begin{small}
 \begin{align*}
-& q_i^+(\xi(\omega))y_i^+(\xi(\omega)) + q_i^-(\xi(\omega))y_i^-(\xi(\omega)) \\
-& = q_i^+(\xi(\omega))\left( y_i^+(\xi(\omega) - y_i^-(\xi(\omega)) \right) + q_i^+(\xi(\omega))y_i^-(\xi(\omega)) + q_i^-(\xi(\omega))y_i^-(\xi(\omega)) \\
-& = q_i^+(\xi(\omega))\left( h(\xi(\omega))-T(\xi(\omega))x \right)_i + \left( q_i^+(\xi(\omega)) + q_i^-(\xi(\omega)) \right) y_i^-(\xi(\omega)) \\
-& \geq q_i^+(\xi(\omega))\left( h(\xi(\omega))-T(\xi(\omega))x \right)_i.
+& y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x := z(\xi(\omega)), \\
+& y^+(\xi(\omega)) \geq 0,\ y^-(\xi(\omega)) \geq 0.
 \end{align*}
-\end{small}
+
+Thus,
+\begin{align*}
+Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\omega)) \\
+&= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-(y_i^+(\xi(\omega))-z_i(\xi(\omega))) \\
+&= \sum_{i=1}^{m} ((q_i^+ + q_i^-)y_i^+(\xi(\omega))-q_i^-z_i(\xi(\omega)))
+\end{align*}
+
 \end{proof}
 
 \end{frame}
@@ -844,29 +849,22 @@ Therefore for a.e. $\omega$, $Q(x,\xi(\omega))$ is bounded below, as, for a.e. $
 
 \begin{proof}
 {\bf $(\Leftarrow)$}
+
+Therefore, a.s.
+$$
+\min Q(x,\xi(\omega)) \geq -q_i^-z_i(\xi(\omega))).
+$$
+
 From the fundamental theorem of linear programming, we can choose as the optimal solution
 \begin{align*}
 	y^+(\xi(\omega)) &= \left(h(\xi(\omega))-T(\xi(\omega))x\right)^+,\\
 	y^-(\xi(\omega)) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
 \end{align*}
-where $a^+ = \max\{0, a\}$. Thus,
-\begin{align*}
-Q(x,\xi(\omega)) = \sum_{i=1}^{m} & (q_i^+(\xi(\omega))(h_i(\xi(\omega))-T_i(\xi(\omega))x)^+ + \\
-& q_i^-(\xi(\omega))(-h_i(\xi(\omega))+T_i(\xi(\omega))x)^+ ).
-\end{align*}
-\end{proof}
+where $a^+ = \max\{0, a\}$.
 
-\end{frame}
-
-\begin{frame}
-\frametitle{Simple recourse (cont'd)}
-
-\begin{proof}
-{\bf $(\Leftarrow)$}
-Consequently $Q(x,\xi(\omega))$ is finite for a.e. $\omega$ and $\mathcal{Q}(x) < \infty$.
-$\mathcal{Q}(x) > -\infty$ follows from convexity of $Q(x,\xi(\omega))$ (to be shown) and Jensen's inequality:  if $X$ is a random variable with $\EE[|X|] < \infty$, and $g$ is a convex function, then
+From previous results, $\calQ(x) < \infty$, and
 $$
-g(\EE[X]) \leq \EE[g(X)].
+\calQ(x) \geq \EE[-q_i^-z_i(\xi(\omega)))].
 $$
 \end{proof}
 
