@@ -106,7 +106,7 @@ INFORMS John Von Neumann prize (with Richard J. Duffin)
 \begin{frame}
 \frametitle{Motivation}
 
-Source: J. Linderoth \url{https://homepages.cae.wisc.edu/~linderot/classes/ie495/lecture22.pdf}
+Source: J. Linderoth \url{https://jlinderoth.github.io/classes/ie495/lecture22.pdf}
 
 We consider the toy problem
 \begin{align*}
@@ -265,10 +265,14 @@ F^{-1}(\alpha) = \min \lbrace x : F (x)  \geq \alpha \rbrace.
 \begin{frame}
 \frametitle{Other ``solvable'' cases}
 
-Let $h(\xi) = h$ be fixed, $T(\xi) = (\xi_1, \xi_2,\ldots, \xi_n)$, with $\xi = (\xi_1, \xi_2,\ldots, \xi_n)$ a multivariate normal distribution with mean $\mu = (\mu_1, \mu_2,\ldots,\mu_n)$ and variance-covariance matrix $\Sigma$.
+Let $h(\xi) = h$ be fixed, $T(\xi) = \rm{diag}(\xi_1, \xi_2,\ldots, \xi_n)$, with $\xi = (\xi_1, \xi_2,\ldots, \xi_n)$ a multivariate normal distribution with mean $\mu = (\mu_1, \mu_2,\ldots,\mu_n)$ and variance-covariance matrix $\Sigma$.
 Then
+$$
+\frac{\sum_{i = 1}^n \xi_i x_i - \mu^T x}{\sqrt{x^T\Sigma x}} \sim N(0,1),
+$$
+and
 \[
-K_1(\alpha) = \lbrace x \,|\, \mu' x \geq h + \Phi^{-1}(\alpha) \sqrt{ x' \Sigma x } \rbrace,
+K_1(\alpha) = \lbrace x \,|\, \mu^T x \geq h + \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} \rbrace,
 \]
 where $\Phi$ is the standard normal cdf.
 
@@ -308,38 +312,38 @@ SOCPs can be solved by interior point methods.
 
 (Taken from S. Boyd and J. Linderoth)
 
-Suppose we want to invest in $n$ assets, providing return rates $\beta_1, \beta_2,\ldots, \beta_n$.
-
-\mbox{}
-
-The $\beta_i$'s are random variables.
-Assume that they are following a multivariate normal distribution with means $\mu_i$ and covariance matrix $\Sigma$.
-
-\mbox{}
-
-Suppose that we want to ensure a return of at least $T$.
+\begin{itemize}
+	\item 
+Suppose we want to invest in $n$ assets, providing random return rates $\beta_1, \beta_2,\ldots, \beta_n$.
+\item
+$\bsbeta \sim N(\bsmu, \Sigma)$.
+\item
+$x$: total amount to invest.
+\item
+Suppose that we want to ensure a return of at least $b$.
 We cannot guarantee it all the time, but we want it to occur most of the time.
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Example: robust portfolio optimization (cont'd)}
 
-Let $x_i \geq 0$ the part of portfolio to invest in stock $i$.
-We have the constraints
-\begin{align*}
-& P\left[ \sum_{i = 1}^n \beta_i x_i \geq T  \right] \geq \alpha  \\
-& \sum_{i = 1}^n x_i \leq x \\
-& x_i \geq 0,\ i = 1,\ldots,n
-\end{align*}
-where $x$ is the total amount to invest.
+Let $x_i \geq 0$ the part of portfolio to invest in asset $i$.
+Constraints:
+\begin{align}
+& P\left[ \sum_{i = 1}^n \beta_i x_i \geq b  \right] \geq \alpha \label{eq:var_constraint} \\
+& \sum_{i = 1}^n x_i \leq x \nonumber \\
+& x_i \geq 0,\ i = 1,\ldots,n.  \nonumber
+\end{align}
 
 \mbox{}
 
-The chance constraint can be rewritten as
-\[
-\mu^Tx - \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} \geq T.
-\]
+\eqref{eq:var_constraint} can be rewritten as
+$$
+\mu^Tx - \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} \geq b.
+$$
+If $b < 0$, \eqref{eq:var_constraint} is also known as \textcolor{red}{Value at Risk constraint} (Ruszczyński and Shapiro, 2003).
 
 
 \end{frame}
@@ -348,7 +352,7 @@ The chance constraint can be rewritten as
 \frametitle{Example: robust portfolio optimization (cont'd)}
 
 We can also interpret $x_i$ as proportion of the portfolio (position of asset $i$), by normalizing $\| x \|_1$ to 1.
-$T$ is now the minimum return rate of the portfolio and $x$ is the portfolio allocation.
+$b$ is now the minimum return rate of the portfolio and $x$ is the portfolio allocation.
 
 \mbox{}
 
@@ -359,7 +363,7 @@ We can add some constraints on the $x_i$ to ensure diversification. We summarize
 A complete program can now be expressed as
 \begin{align*}
 \max_x \ & E[\beta^T x] = \mu^T x \\
-\mbox{s.t. } & P\left[ \beta^T x \geq T \right] \geq \alpha  \\
+\mbox{s.t. } & P\left[ \beta^T x \geq b \right] \geq \alpha  \\
 & \sum_{i = 1}^n x_i = 1 \\
 & x \in \calC
 \end{align*}
@@ -369,7 +373,7 @@ A complete program can now be expressed as
 \begin{frame}
 \frametitle{Example: loss constraint}
 
-Setting $T$ to 0 means that we want to ensure that we will no suffer from loss with some probability. Typicially, $\alpha$ is set to 0.9, 0.95, 0.99,\ldots
+Setting $b$ to 0 means that we want to ensure that we will no suffer from loss with some probability. Typicially, $\alpha$ is set to 0.9, 0.95, 0.99,\ldots
 
 \mbox{}
 
@@ -416,7 +420,77 @@ uniform & 3.41 & 18.9\%
 
 \end{frame}
 
+% Analytical solution if the non-negativity constraints are removed.
+% See page 10 https://www.sciencedirect.com/science/article/pii/S0927050703100011
+
 \begin{frame}
+\frametitle{Short selling case}
+
+Let's ignore the non-negativity constraints and consider the program (Ruszczyński and Shapiro, 2003)
+\begin{align*}
+	\min_x \ & -\mu^T x \\
+	\text{s.t. } & \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \leq 0.
+\end{align*}
+
+The Lagrangian is
+\begin{align*}
+L(x, \lambda) &= -\mu^T x + \lambda \left( \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \right) \\
+&= -(1+\lambda) \mu^T x + \lambda \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} + \lambda b
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Short selling case: KKT conditions}
+
+\begin{align*}
+&	\frac{dL(x, \lambda)}{dx} = 0 \\
+&	\Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \leq 0 \\
+&	\lambda \left( \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \right) = 0 \\
+&	x \geq 0,\ \lambda \geq 0.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Short selling case: solving the KKT conditions}
+
+We have
+$$
+\frac{dL(x, \lambda)}{dx} = -(1+\lambda)\mu+\frac{\lambda \Phi^{-1}(\alpha)\Sigma x}{\sqrt{x^T\Sigma x}}
+$$
+If $\lambda = 0$,
+$$
+\frac{dL(x, \lambda)}{dx} = 0 \Rightarrow \mu = 0.
+$$
+Thus, wlog, we assume $\lambda \ne 0$. Therefore
+$$
+\Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b = 0
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Short selling case: no risk-free asset}
+
+(Ruszczyński and Shapiro, 2003)
+Assume $\Sigma$ nonsingular and define
+$$
+\rho = \sqrt{ \mu^T \Sigma^{-1} \mu}
+$$
+We can show
+$$
+\begin{cases}
+	\text{unbounded problem} & \text{if } \rho \geq \Phi^{-1}(\alpha); \\
+	x^* = \frac{b}{\rho(\Phi^{-1}(\alpha)-\rho)} \Sigma^{-1} \mu & \text{if } \rho < \Phi^{-1}(\alpha).
+\end{cases}
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Numerical illustration}
+
 \frametitle{Generalization}
 
 A more general form is
@@ -532,13 +606,11 @@ $$
 = 1 - \frac{1}{1 - \eta} P[ Z \geq \beta ],
 $$
 leading to
-$$
-P[ Z \geq \beta ] = 1 - \eta.
-$$
-As $Z$ is continuous, this last equation can be rewritten as
-$$
-P[ Z \leq \beta ] = \eta = \text{VaR}(Z; \eta).
-$$
+\begin{align*}
+& P[ Z \geq \beta ] = 1 - \eta \\
+%As $Z$ is continuous, this last equation can be rewritten as
+\Leftrightarrow \quad & P[ Z \leq \beta ] = \eta = \text{VaR}(Z; \eta).
+\end{align*}
 
 \end{frame}
 

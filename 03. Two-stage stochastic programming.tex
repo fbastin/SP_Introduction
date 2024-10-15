@@ -366,7 +366,7 @@ where {\it a.e.} stands for ``almost every''.
 	\end{align*}
 	and
 	\begin{align*}
-	Q(x,xi) &= \min_y q_1y_1 + q_2y_2 \\
+	Q(x, \xi) &= \min_y q_1y_1 + q_2y_2 \\
 	\mbox{s.t. } & \xi_1 x_1 + x_2 + y_1 \geq 7, \\
 	& \xi_2 x_1 + x_2 + y_2 \geq 4.
 	\end{align*}
@@ -409,7 +409,7 @@ Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\
 
 {\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \RR^m \rightarrow \RR$:
 \[
-v(\xi, z) \overset{def}{=} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
+v(\xi, z) \overset{def}{=} \min_{y \in Y} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
 \]
 
 \mbox{}
