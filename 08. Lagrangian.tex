@@ -370,7 +370,7 @@ Denote $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection o
 \end{frame}
 
 \begin{frame}
-\frametitle{Nonanticipativity: 2 stages}
+\frametitle{Nonanticipativity}
 
 \begin{minipage}{0.45\textwidth}
 \begin{center}
@@ -542,7 +542,7 @@ Moreover, with augmented Lagrangian techniques, we can try to exploit the proble
 \begin{frame}
 \frametitle{Augmented Lagrangian and Stochastic Programming}
 
-We again develop the ideas in the two-stages contact, while the approach can be easily generalized in the multi-stage context.
+We again develop the ideas in the two-stages context, while the approach can be easily generalized in the multi-stage context.
 
 \mbox{}
 
@@ -562,7 +562,7 @@ Penalizing the nonanticipativity constraints, we obtain the following program, w
 \end{frame}
 
 \begin{frame}
-\frametitle{Augmented Lagrangian and SP (cont'd)}
+\frametitle{Augmented Lagrangian and SP:: two stages}
 
 \vspace*{-0.5cm}
 
@@ -641,7 +641,7 @@ However, it is easy to decompose the problem!
 Algorithm:
 \begin{description}
 \item[Step 0.]
-Assume that we have a nonanticipative solution $x^0$, an initial vector ofmultipliers $\rho^0$, and $r > 0$.
+Assume that we have a nonanticipative solution $x^0$, an initial vector of multipliers $\rho^0$, and $r > 0$.
   $\nu \leftarrow 0$. Go to Step 1.
 \item[Step 1.]
 Let $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$ be a solution of the previous Lagrangian program, for $s=1,\ldots{},S$. Set
@@ -686,7 +686,7 @@ In practice, the optimality test is replaced by a convergence test for instance 
 \end{frame}
 
 \begin{frame}
-\frametitle{Generalization}
+\frametitle{Generalization to multistage}
 
 $$
 \begin{aligned}
@@ -721,6 +721,17 @@ L(x,\lambda,\rho) =  E \Biggl[ & f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 
 & + \frac{\rho}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s)} \right\|^2 \biggr) \Biggr],
 \end{align*}
 where $\lambda$ is the Lagrange multipliers vector associated to the NA constraints, and $\rho > 0$ is a penalty parameter.
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Implementation}
+
+The \verb|StochasticPrograms.jl| package proposes an implementation of the progressive hedging algorithm, but limited to two stages.
+
+\mbox{}
+
+Some variations or non-maintained versions exist.
 
 \end{frame}
 

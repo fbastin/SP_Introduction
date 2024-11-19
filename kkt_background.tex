@@ -47,7 +47,7 @@ $$
 \calX = \{ x \,|\, g_i(x) \leq 0, i = 1,\ldots,m, h_j(x) = 0, j = 1,\ldots,r \}.
 $$
 
-$x^*$ is a global minimizer of $f(\cdot)$ if $\forall x \in \calX$, $f(x) \leq f(x^*)$.
+$x^*$ is a global minimizer of $f(\cdot)$ if $\forall x \in \calX$, $f(x^*) \leq f(x)$.
 
 $x^*$ is a local minimizer of $f(\cdot)$ if
 $\exists \epsilon > 0$ such that $\forall x \in \calB(x^*, \epsilon) \cap \calX$, $f(x^*) \leq f(x).$
@@ -86,7 +86,7 @@ $$
 L(x, \lambda) = f(x) + \sum_{i = 1}^{m} \lambda_i g_i(x).
 $$
 
-We can obtain very general conditions under which $x^*$ is an optimial solution to the optimization problem, while only basic assumptions are made over $\calX$ and the functions $f$ and $g_i$, $i = 1,\ldots,m$.
+We can obtain very general conditions under which $x^*$ is an optimal solution to the optimization problem, while only basic assumptions are made over $\calX$ and the functions $f$ and $g_i$, $i = 1,\ldots,m$.
 
 \end{frame}
 
@@ -94,7 +94,7 @@ We can obtain very general conditions under which $x^*$ is an optimial solution 
 \frametitle{Optimality}
 
 \begin{thm}
-Assume that the Lagrangian
+Assume that the Lagrangian associated to the problem
 \begin{align*}
 \min_{x \in \calX} \ & f(x) \\
 \mbox{s.t. } & g_i(x) = 0,\ i = 1,\ldots,m,
@@ -271,7 +271,7 @@ The inequality can be strict.
 	
 	Let $x^*$ be a minimizer of $f(\cdot)$ in $\calB(x^*,\epsilon)$, $\epsilon > 0$, and $(\lambda^*, \mu^*)$ be a dual solution if $x$ is restricted to $\calB(x^*,\epsilon)$, with a zero duality gap (the strong duality holds). Then
 	\begin{align*}
-		f(x^*) &= \calL(\lambda^*, \mu^*) \\
+		f(x^*) &= \calL_{\calB(x^*, \epsilon)}(\lambda^*, \mu^*) \\
 		&= \min_{x \in \calB(x^*,\epsilon)} \left( f(x) + \sum_{i = 1}^m \lambda_i^* g_i(x) + \sum_{i = 1}^r \mu_i^* h_i(x) \right) \\
 		& \leq f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{i = 1}^r \mu_i^* h_i(x^*) \\
 		& \leq f(x^*)
@@ -350,11 +350,11 @@ See Nocedal \& Wright, ``Numerical Optimization'', Section 12.4.
 	$$
 	L(\lambda^*, \mu^*) = f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{i = 1}^r \mu_i^* h_i(x^*) = f(x^*)
 	$$
-	Thus, the duality gap is null ({\red strong duality})
+	Thus, the duality gap is null ({\red strong duality}).
 		
 	\mbox{}
 	
-	In the convex case, this implies that $x^*$ and $(\lambda^*, \mu^*)$ are global primal and dual solutions, respectively.
+	In the convex case, this implies that $x^*$ and $(\lambda^*, \mu^*)$ are global primal and dual optimal solutions, respectively.
 
 	\mbox{}
 
