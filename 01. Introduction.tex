@@ -36,8 +36,7 @@
 
 \setbeamercovered{dynamic}
 
-\def\bxi{\boldsymbol\xi}
-\def\bomega{\boldsymbol\omega}
+\include{macros}
 
 \def\eqdef {\buildrel \rm def \over =}    % Egal par definition.
 \def\eqas  {\buildrel \rm a.s. \over =}   % Egal a.s.
@@ -47,7 +46,6 @@
 \def\g   {{\;\leftarrow\;}}
 
 \def\E {{\mathbb E}}
-\def\EE {{\mathbb E}}
 \def\FF {{\mathbb F}}
 \def\II {{\mathbb I}}
 \def\LL {{\mathbb L}}
@@ -81,15 +79,15 @@
 
 \title[Stochastic optimization]{Stochastic optimization}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 
 \begin{document}
 
 \titlegraphic{\vspace{-0.5cm}
 	\includegraphics[scale=0.2]{imgs/udem.png}
-	\hspace{2cm}
-	\includegraphics[scale=0.07]{imgs/Fin-MLLogo.png}
+%	\hspace{2cm}
+%	\includegraphics[scale=0.07]{imgs/Fin-MLLogo.png}
 }
 \frame{\titlepage}
 
@@ -132,11 +130,11 @@ data unavailable;
 \end{itemize}
 \[
 \begin{split}
-& ``\min_{x \in X}" g_0(x,\bxi) \\
-& \text{s.t. }g_i(x, \bxi) \leq 0,\ i=1,\ldots{},m,\\
+& ``\min_{x \in X}" g_0(x,\bsxi) \\
+& \text{s.t. }g_i(x, \bsxi) \leq 0,\ i=1,\ldots{},m,\\
 \end{split}
 \]
-where $\bxi$ is a random vector. Meaning of ``$\min$''?
+where $\bsxi$ is a random vector. Meaning of ``$\min$''?
 
 \mbox{}
 
@@ -399,7 +397,7 @@ $s = 3$ & Productions (T) & 340 & 192 & 4000 \\
 The optimal decision has changed!!!
 \item
 Decision under {\red perfect information}:
-if the farmer could know the scenario in advance, or wait to observe the realization of the random variables ({\red wait-and-see} approach),
+if the farmer could know the scenario in advance, or wait to observe the realization of the random variables (r.v.) ({\red wait-and-see} approach),
 the average annual profit would be \$115406.
 \item
 The difference with the optimal decision under uncertainty is called {\blue expected value of perfect information (EVPI)}: profit loss due to uncertainty. 
@@ -412,10 +410,9 @@ The difference with the optimal decision under uncertainty is called {\blue expe
 
 \begin{itemize}
 \item
-Replacing the r.v. by their expectation 
-leads to the expected value (EV) problem, delivering the {\blue expected value solution}.
+Replacing $\bsxi$ by $\EE[\bsxi]$ in the problem leads to the expected value (EV) problem, delivering the {\blue expected value solution}.
 \item
-The {\blue expectation of the expected value (EEV)} problem is obtained by computing the expected profit over the scenarios when the expected value solution is always used.
+The {\blue expectation of the expected value (EEV)} problem is obtained by computing the expected profit over the scenarios when the EV solution is always used.
 \item
 Here, the expectation of scenarios is the average year, but in general, the expectation will not necessarily correspond to a pre-existent scenario.
 \item
@@ -443,7 +440,7 @@ Source: Birge and Louveaux, Section~1.1.
 	\item
 	The newsvendor can turn back the unsold newspapers at the end of the day, and obtain a price $r$ for each of them
 	\item
-	Knowing the probability distribution $F(t) = P(\bomega \leq t$), how many newspapers should the newsvendor buy in order to maximize his revenue?
+	Knowing the probability distribution $F(t) = P(\bsxi \leq t$), how many newspapers should the newsvendor buy in order to maximize his revenue?
 \end{itemize}
 
 \end{frame}
@@ -460,13 +457,13 @@ With the previous definitions, the newsvendor would like to solve the following 
 \item
 $\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buy $x$ newspapers:
 \[
-\mathcal{Q}(x) = E_{\bomega} [ Q(x, \bomega)].
+\mathcal{Q}(x) = \EE_{\bsxi} [ Q(x, \bsxi)].
 \]
 %\item
 %Dans le cadre linéaire, nous écrirons aussi souvent
 %$Q(x, \omega) = v(h(\omega) - T (\omega)x)$.
 \item
-Here $Q(x, \omega)$ is the amount of money obtained by the newsvendor if he buys $x$ newspaper and the demand is $\omega$.
+Here $Q(x, \xi)$ is the amount of money obtained by the newsvendor if he buys $x$ newspaper and the demand is $\xi$.
 \end{itemize}
 
 \end{frame}
@@ -480,18 +477,18 @@ As previously, we could construct an equivalent linear problem (presented in Bir
 \item
 Can we simplify? It is easy to see that
 \[
-Q(x, \omega) =
+Q(x, \xi) =
 \begin{cases} 
 qx & \mbox{if } x \leq \omega, \\
-q\omega + r(x - \omega) & \mbox{if } x \geq \omega.
+q\xi + r(x - \xi) & \mbox{if } x \geq \xi.
 \end{cases}
 \]
 Therefore,
 \begin{align*}
-\mathcal{Q}(x) & = E_{\bomega} [ Q(x, \bomega) ] =
-\int_{-\infty}^{\infty} Q(x, \omega) dF(\omega) 
-\\ & = \int_{-\infty}^x(q\omega + r(x - \omega))dF(\omega) + \int^{\infty}_x
-qxdF(\omega).
+\mathcal{Q}(x) & = E_{\bsxi} [ Q(x, \bsxi) ] =
+\int_{-\infty}^{\infty} Q(x, \xi) dF(\xi) 
+\\ & = \int_{-\infty}^x(q\xi + r(x - \xi))dF(\xi) + \int^{\infty}_x
+qxdF(\xi).
 \end{align*}
 \end{itemize}
 
@@ -502,10 +499,10 @@ qxdF(\omega).
 
 Therefore, we have
 \begin{align*}
-\mathcal{Q}(x) & = (q-r) \int_{-\infty}^x \omega dF(\omega) + rx
-\int_{-\infty}^x dF(\omega) + qx \int_x^{\infty} dF(\omega) \\
-& = (q-r) \int_{-\infty}^x \omega dF(\omega) + rx F(x) + qx (1-F(x)) \\
-& = (q-r) \left[ \int_{-\infty}^x \omega dF(\omega) - x F(x) \right] + qx. \\
+\mathcal{Q}(x) & = (q-r) \int_{-\infty}^x \xi dF(\xi) + rx
+\int_{-\infty}^x dF(\xi) + qx \int_x^{\infty} dF(\xi) \\
+& = (q-r) \int_{-\infty}^x \xi dF(\xi) + rx F(x) + qx (1-F(x)) \\
+& = (q-r) \left[ \int_{-\infty}^x \xi dF(\xi) - x F(x) \right] + qx. \\
 \end{align*}
 
 \end{frame}
@@ -520,17 +517,15 @@ tF(t) = 0$.
 
 We can then integrate by parts to obtain:
 \begin{align*}
-\int_{-\infty}^x \omega dF(\omega) &= \omega F(\omega) |_{-\infty}^x -
-\int_{-\infty}^x F(\omega) d\omega \\
-&=  xF(x) - \int_{-\infty}^x F(\omega) d\omega.
+\int_{-\infty}^x \xi dF(\xi) &= \xi F(\xi) |_{-\infty}^x -
+\int_{-\infty}^x F(\xi) d\xi \\
+&=  xF(x) - \int_{-\infty}^x F(\xi) d\xi.
 \end{align*}
 
 Thus,
 \[
-\mathcal{Q}(x) = qx - (q - r)\int_{-\infty}^x F(\omega)d\omega.
+\mathcal{Q}(x) = qx - (q - r)\int_{-\infty}^x F(\xi)d\xi.
 \]
-%Par conséquent, nous allons réviser ce point,\ldots lors du prochain
-%épisode de IFT6512!
 
 \end{frame}
 
@@ -568,7 +563,7 @@ x^* = F^{-1} \left( \frac{q-c}{q-r} \right).
 
 \mbox{}
 
-Example: $c = 0.15$, $q = 0.25$, $r = 0.02$, $\omega \sim N(650, 80^2)$. Alors
+Example: $c = 0.15$, $q = 0.25$, $r = 0.02$, $\bsxi \sim N(650, 80^2)$. Alors
 \[
 x^* = N^{-1}_{(650,80^2)}(0.1/0.23).
 \]
@@ -599,7 +594,7 @@ On an economical point of view, we would like this marginal revenue to be equal 
 
 The expected marginal revenue (MR) is
 \begin{align*}
-MR(t) &= -c + qP[\bomega \geq t] + rP[\bomega \leq t]\\
+MR(t) &= -c + qP[\bsxi \geq t] + rP[\bsxi \leq t]\\
 &= -c + q(1-F(t)) + rF(t).
 \end{align*}
 If we set the marginal revenue to 0, we get

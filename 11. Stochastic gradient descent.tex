@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[usepdftitle=false, aspectratio=169]{beamer}
 
 
 \usepackage[utf8]{inputenc}
@@ -43,7 +43,6 @@
 
 \include{macros}
 
-\def\bxi{\boldsymbol\xi}
 \def\bepsilon{\boldsymbol\epsilon}
 \def\bomega{\boldsymbol\xi}
 \def\aff{\operatorname{aff}}
@@ -103,7 +102,7 @@ We therefore search for a zero of the gradient of $f(x)$.
 
 We can also restrain the feasible domain to $\Theta \subseteq \RR^d$:
 $$
-\min_{x \in \Theta} f(x) = E[Y(x,\xi)]
+\min_{x \in \Theta} f(x) = \EE[Y(x,\xi)]
 $$
 In this case, we have to assume that $f$ reaches its minimum in the interior of $\Theta$.
 
@@ -114,7 +113,7 @@ In this case, we have to assume that $f$ reaches its minimum in the interior of 
 
 We consider here
 $$
-f(x) = E[Y(x,\xi)]
+f(x) = \EE[Y(x,\xi)]
 $$
 where the support of $\xi$ is $\Xi$.
 
@@ -122,11 +121,11 @@ where the support of $\xi$ is $\Xi$.
 
 The problem to solve is
 $$
-\nabla_x E[Y(x,\xi)] = 0
+\nabla_x \EE[Y(x,\xi)] = 0
 $$
 We assume here that we can exchange the expectation and derivation operators, i.e.
 $$
-\nabla_x E[Y(x,\xi)] = E[\nabla_x Y(x,\xi)]
+\nabla_x \EE[Y(x,\xi)] = \EE[\nabla_x Y(x,\xi)]
 $$
 
 \end{frame}
@@ -142,7 +141,7 @@ Also know as as the \textcolor{red}{stochastic gradient descent (SGD) method}.
 \State Choose a starting point $x_1$.
 \State $k \leftarrow 1$
 \While{Stopping criteria not satisfied}
-\State Draw $\xi_k$ from $\bxi$.
+\State Draw $\xi_k$ from $\bsxi$.
 \State Select a step length $\alpha_k$.
 \State Compute
 $$
@@ -244,12 +243,12 @@ $$
 d^T \nabla_x f(x) < 0
 $$
 \item
-SGD is not a descent method as we can have $-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)] \geq 0$ with $\nabla_x f(x) \ne 0$.
+SGD is not a descent method as we can have $-\nabla_x Y(x,\xi_i)^T \EE[\nabla_x Y(x,\xi)] \geq 0$ with $\nabla_x f(x) \ne 0$.
 \item
 Descent in expectation: if $\nabla_x f(x) \ne 0$,
 \begin{align*}
-& E[-\nabla_x Y(x,\xi_i)^T E[\nabla_x Y(x,\xi)]] \\
-&= - \nabla_x E[Y(x,\xi_i)]^T \nabla_x E[Y(x,\xi)] \\
+& \EE[-\nabla_x Y(x,\xi_i)^T \EE[\nabla_x Y(x,\xi)]] \\
+&= - \nabla_x \EE[Y(x,\xi_i)]^T \nabla_x \EE[Y(x,\xi)] \\
 &= - \nabla_x f(x)^T\nabla_x f(x) < 0
 \end{align*}
 \end{itemize}
@@ -291,7 +290,7 @@ The cost per iteration is $n_k$ times bigger, but
 
 Assume for now that the support $\Xi$ is finite, of cardinality $n$. Then
 $$
-E[Y(x,\xi)] = \frac{1}{n} \sum_{i = 1}^n Y(x,\xi_i), \quad E[\nabla_x Y(x,\xi)] = \frac{1}{n} \sum_{i = 1}^n \nabla_x Y(x,\xi_i)
+\EE[Y(x,\xi)] = \frac{1}{n} \sum_{i = 1}^n Y(x,\xi_i), \quad \EE[\nabla_x Y(x,\xi)] = \frac{1}{n} \sum_{i = 1}^n \nabla_x Y(x,\xi_i)
 $$
 
 \mbox{}
@@ -581,7 +580,7 @@ The function $f: \RR^d \rightarrow \RR$ could be
 $$
 f(x) =
 \begin{cases}
-R(x) = \EE [ Y(x; \bxi) ] & \text{ the expected risk,} \\
+R(x) = \EE [ Y(x; \bsxi) ] & \text{ the expected risk,} \\
 R_n(x) = \frac{1}{n} \sum_{\xi = 1}^n Y(x; \xi) & \text{ the empirical risk.}
 \end{cases}
 $$
@@ -654,13 +653,13 @@ Under Assumption A.1 (Lipschitz continuity), $\forall k \in \NN$, the iterates o
 	f(x_{x+1}) - f(x_k) \leq - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2.
 	$$
 	This implies
-	\begin{multline*}
-		\EE_{\xi_k} [f(x_{x+1}) - f(x_k)] \leq \\ \EE_{\xi_k} \left[ - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2 \right]
-	\end{multline*}
+    $$
+		\EE_{\xi_k} [f(x_{x+1}) - f(x_k)] \leq \EE_{\xi_k} \left[ - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2 \right]
+	$$
 	or
-	\begin{multline*}
-		\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq \\ - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
-	\end{multline*}
+	$$
+		\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
+	$$
 	
 	\begin{align*}
 	\end{align*}
@@ -738,9 +737,9 @@ with $M_G = M_V + \mu_G^2 \geq \mu^2 > 0$.
 \frametitle{Proof}
 
 We already proved
-\begin{multline*}
-	\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq \\ - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
-\end{multline*}
+$$
+	\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
+$$
 From A.5 b), this leads to
 $$
 \EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right],
@@ -754,6 +753,51 @@ we have
 \EE_{\xi_k} [f(x_{x+1})] - f(x_k) & \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \left( M + M_G \| \nabla f(x_k) \|_2^2 \right) \\
 & =  - \alpha_k \left( \mu - \frac{1}{2} \alpha_k L M_G \right) \| \nabla f(x_k) \|_2^2 + \frac{1}{2} \alpha_k^2 LM.
 \end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Strong convexity}
+
+Consider $f(\cdot) \in C^2$ with a convex domain.
+\begin{itemize}
+	\item Convexity:
+	$$
+	\forall x, y \in dom(f),\ f(y) \geq f(x) + \nabla f(x)^T(y-x)
+	$$
+	\item Strong convexity
+	$$
+	\exists c > 0, \forall x, y \in dom(f),\ f(y) \geq f(x) + \nabla f(x)^T(y-x) + \frac{1}{2} c \| y - x \|^2_2.
+	$$
+	Alternate definition if $f(\cdot) \in C^2$:
+	$$
+	\nabla^2 f(x) \succeq cI,
+	$$
+	where $I$ is the identity matrix.
+\end{itemize}
+
+Implications of strong convexity:
+\begin{itemize}
+	\item
+	$\exists \mu > 0, \forall x, y \in dom(f),\ \| \nabla_x f(x) - \nabla_x f(y) \|_2 \geq \mu \| x - y \|_2$
+	\item
+	$\forall x \in dom(f), 2c (f(x) - f^*) \leq \| \nabla f(x) \|_2^2$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Strong convexity}
+
+\begin{itemize}
+	\item Simplify the theoretical analysis and provide the strongest results.
+	\item We can use regularization to locally convexify the function.
+	\item Strong local minimizer:
+        $\exists \epsilon > 0$ such that $f(x) > f(x^*) + \epsilon^*\| x-x^* \|_2,\ \forall\ x \in \calB(x^*,\epsilon)\setminus\{x^*\}$.\\
+       Therefore, a strong local minimizer is a strict local minimizer: $\exists \epsilon > 0$ such that $f(x) > f(x^*),\ \forall\ x \in \calB(x^*,\epsilon)\setminus\{x^*\}$.
+	\item If $f(x)$ is locally strongly convex in $\calB(x^*)$, any local minimizer $x^*$ is a strong local minimizer.
+	\item But a strong local minimizer does not imply local strong convexity. Exemple: $f(x) = x^4$.
+\end{itemize}
 
 \end{frame}
 
