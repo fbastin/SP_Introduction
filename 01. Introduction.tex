@@ -45,16 +45,6 @@
 \def\?{\discretionary{}{}{}}  % Same as \- but does not print the - sign
 \def\g   {{\;\leftarrow\;}}
 
-\def\E {{\mathbb E}}
-\def\FF {{\mathbb F}}
-\def\II {{\mathbb I}}
-\def\LL {{\mathbb L}}
-\def\P {{\mathbb P}}
-\def\PP {{\mathbb P}}
-\def\QQ {{\mathbb Q}}
-\def\RR {{\mathbb R}}
-\def\ZZ {{\mathbb Z}}
-
 \def\Var{{\rm Var}}
 \def\Cov{{\rm Cov}}
 \def\MSE{{\rm MSE}}
@@ -69,10 +59,6 @@
 \def\byY {{\bf \yel{Y}}}
 \def\byzero {{\bf \yel{0}}}
 \def\bySigma {{\bf \yel{\Sigma}}}
-
-\def\cF {{\mathcal{F}}}
-\def\cQ {{\mathcal{Q}}}
-\def\cR {{\mathcal{F}}}
 
 \def\blue{\color{blue}}
 \def\red{\color{red}}
@@ -99,7 +85,7 @@ Consider the general deterministic program
 \begin{split}
 & \min g_0(x) \\
 & \text{s.t. }g_i(x) \leq 0, i = 1,\ldots{},m \\
-& \phantom{t.q. }x \in X \subset \cR^n.
+& \phantom{t.q. }x \in X \subset \calR^n.
 \end{split}
 \]
 
@@ -479,7 +465,7 @@ Can we simplify? It is easy to see that
 \[
 Q(x, \xi) =
 \begin{cases} 
-qx & \mbox{if } x \leq \omega, \\
+qx & \mbox{if } x \leq \xi, \\
 q\xi + r(x - \xi) & \mbox{if } x \geq \xi.
 \end{cases}
 \]
