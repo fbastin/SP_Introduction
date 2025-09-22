@@ -56,7 +56,7 @@
 
 \def\RR{\mathbb{R}}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 \title[Linear programming]{Linear programming\\Background material}
 
@@ -147,9 +147,9 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 	
 	\mbox{}
 	
-	{\it Basic solution}: $\bx = (\bx_b \ 0)$, with $\bB\bx_b = \bb$.\\
-	{\it Degenerated basic solution}: if some components of $\bx_b$ are equal to zero. \\
-	{\it Feasible basic solution}: basic solution such that $\bA\bx = \bb$ and $\bx \geq 0$.
+	\textcolor{blue}{\it Basic solution}: $\bx = (\bx_b \ 0)$, with $\bB\bx_b = \bb$.\\
+	\textcolor{blue}{\it Degenerated basic solution}: some components of $\bx_b$ are equal to zero. \\
+	\textcolor{blue}{\it Feasible basic solution}: basic solution such that $\bA\bx = \bb$ and $\bx \geq 0$.
 
 \end{frame}
 
@@ -171,16 +171,22 @@ Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\
 \begin{itemize}
 	\item 
 {\red Primal} program
-\begin{align*}
+\begin{equation}
+	\begin{aligned}
 	\min_{x \geq 0} \ & c^T x \\
 	\mbox{s.t. } & Ax \geq b
-\end{align*}
+	\end{aligned}
+\tag{P}\label{eq:primal}
+\end{equation}
 \item
 {\red Dual} program
-\begin{align*}
+\begin{equation}
+	\begin{aligned}
 	\max_{\lambda \geq 0} \ & \lambda^T b \\
 	\mbox{s.t. } & A^T \lambda \leq c
-\end{align*}
+	\end{aligned}
+\tag{D}\label{eq:dual}
+\end{equation}
 \item
 $A \in \RR^{m \times n}$, $c, x, \in \RR^n$, $\lambda, b \in \RR^m$.
 \end{itemize}
@@ -310,7 +316,7 @@ Asymmetric from $\lambda \in \RR^m$.
 \begin{frame}
 	\frametitle{Strong duality}
 	
-	If one of the problems, primal or dual, has a finite optimal solution, the other problem also has a finite optimal solution, and the corresponding values of the objective functions are equal.
+	If one of the problems \eqref{eq:primal} or \eqref{eq:dual} has a finite optimal solution, the other problem also has a finite optimal solution, and the corresponding values of the objective functions are equal.
 	If one of the problems has an unbounded objective, the other problem has no feasible solution.
 
 \mbox{}

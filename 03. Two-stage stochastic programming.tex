@@ -31,13 +31,11 @@
 
 \setbeamercovered{dynamic}
 
-\def\bxi{\boldsymbol\xi}
 \def\bomega{\boldsymbol\omega}
-\def\bxi{\boldsymbol\xi}
 
 \def\cQ{\mathcal{Q}}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 \title[Two-stage SP]{Stochastic optimization\\Two-stage stochastic programming with recourse}
 
@@ -63,18 +61,18 @@
 \begin{frame}
 	\frametitle{A random linear program}
 	
-	Consider the linear program (LP), parametrized by the random variable (r.v.) $\bxi: \Omega \rightarrow \RR^2$:
+	Consider the linear program (LP), parametrized by the random variable (r.v.) $\bsxi: \Omega \rightarrow \RR^2$:
 	\begin{align*}
 		\min_x\ & c^T x \\
 		\mbox{s.t. } & Ax = b \\
-		& T(\bxi)x = h(\bxi) \\
+		& T(\bsxi)x = h(\bsxi) \\
 		& x \in X,
 	\end{align*}
 	with $X = \lbrace x \in \RR^n | l \leq x \leq u \rbrace$. Example:
 	\begin{align*}
 		\min_x\ & x_1+x_2\\
-		\mbox{s.t. } & \bxi_1x_1 + x_2 \geq 7 \\
-		& \bxi_2x_1 + x_2 \geq 4 \\
+		\mbox{s.t. } & \bsxi_1x_1 + x_2 \geq 7 \\
+		& \bsxi_2x_1 + x_2 \geq 4 \\
 		& x_1, x_2 \geq 0,
 	\end{align*}
 	where $\xi_1 \sim U[1,4]$, $\xi_2\sim U[1/3,1]$.
@@ -89,13 +87,13 @@
 		\item
 		What is the {\sl meaning} of solving this problem?
 		\item
-		Can we decide on $x$ {\sl after} having observed the realization of the r.v. $\bxi$?\\
+		Can we decide on $x$ {\sl after} having observed the realization of the r.v. $\bsxi$?\\
 		We then talk of an {\red wait-and-see} approach.
 		The problem is then easier to solve (we have here a simple linear program).
 		\item
-		But this approach is rarely appropriate!!! We usually have to decide on $x$ {\red before} we know the realizations of $\bxi$!
+		But this approach is rarely appropriate!!! We usually have to decide on $x$ {\red before} we know the realizations of $\bsxi$!
 		\item
-		Usually, the ``wait-and-see'' approach is not appropriate to model the reality behavior: we have to decide on $x$ before we know the realizations from $\bxi$.
+		Usually, the ``wait-and-see'' approach is not appropriate to model the reality behavior: we have to decide on $x$ before we know the realizations from $\bsxi$.
 		%		\item
 		%It the example, we have to decide what to do before we know the realizations $\omega_1$, $\omega_2$.
 		\item
@@ -115,7 +113,7 @@
 \begin{frame}
 	\frametitle{Remove the randomness?}
 	
-	A popular approach consists to look for reasonable values for $\bxi_1$ and $\bxi_2$.
+	A popular approach consists to look for reasonable values for $\bsxi_1$ and $\bsxi_2$.
 	How?
 	
 	\mbox{}
@@ -123,8 +121,8 @@
 	Propositions:
 	\begin{itemize}
 		\item unbiased: choose the mean values for each random variable;
-		\item pessimistic: choose the worst-case values for $\bxi$;
-		\item optimistic: choose the best-case values for $\bxi$.
+		\item pessimistic: choose the worst-case values for $\bsxi$;
+		\item optimistic: choose the best-case values for $\bsxi$.
 	\end{itemize}
 	
 	Each approach will deliver a different optimal solution!
@@ -134,13 +132,13 @@
 \begin{frame}
 	\frametitle{Penalization of violations}
 	
-	Again, we have to deal with decision problems where the decision $x$ has to be taken before we know the realization of $\bxi$
+	Again, we have to deal with decision problems where the decision $x$ has to be taken before we know the realization of $\bsxi$
 	
 	In the simplest case, we can simply penalize the constraints deviations by vectors of penalty coefficients $q_+$ and $q_-$.
 	\begin{align*}
-	\min\ & c^Tx+q^T_+s(\bxi)+q^T_-t(\bxi) \\
+	\min\ & c^Tx+q^T_+s(\bsxi)+q^T_-t(\bsxi) \\
 	\mbox{s.t. } & Ax = b, \\
-	& T(\bxi)x + s(\bxi)-t(\bxi) = h(\bxi), \\
+	& T(\bsxi)x + s(\bsxi)-t(\bsxi) = h(\bsxi), \\
 	& x \in X.
 	\end{align*}
 	
@@ -155,7 +153,7 @@
 	
 	A reasonable, and solvable, problem is then
 	\begin{align*}
-	\min\ & c^Tx+E_{\bxi}[q^T_+s(\bxi)+q^T_-t(\bxi)] \\
+	\min\ & c^Tx+\EE_{\bsxi}[q^T_+s(\bsxi)+q^T_-t(\bsxi)] \\
 	\mbox{s.t. } & Ax = b, \\
 	& T(\xi)x + s(\xi)-t(\xi) = h(\xi),\ \text{ for a.e. } \xi \\
 	& x \in X,
@@ -181,11 +179,11 @@ where {\it a.e.} stands for ``almost every''.
 \begin{frame}
 	\frametitle{Recourse formulation}
 	
-	The previous considerations lead us to formulate the more general following program:
+	More general, consider the following program:
 	\begin{align*}
-	\min\ & c^Tx+E_{\bxi}[q^T(\bxi)y(\bxi)] \\
+	\min\ & c^Tx+\EE_{\bsxi}[q^T(\bsxi)y(\bsxi)] \\
 	\mbox{s.t. } & Ax = b, \\
-	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \\
+	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi \\
 	& x \in X, \\
 	& y(\xi) \in Y,\ \text{ for a.e. } \xi.
 	\end{align*}
@@ -199,7 +197,7 @@ where {\it a.e.} stands for ``almost every''.
 \begin{frame}
 	\frametitle{The two-stage linear stochastic problem (SP)}
 	
-	Using the previous definitions, we can rewrite the stochastic programming problem with recourse in terms of $x$ only:
+	We can also rewrite the stochastic programming problem with recourse in terms of $x$ only:
 	\[
 	\min_{x \in X} \lbrace c^T x + \mathcal{Q}(x) \ |\  Ax = b \rbrace.
 	\]
@@ -227,7 +225,7 @@ where {\it a.e.} stands for ``almost every''.
 	\frametitle{Expression in terms of $y$'s}
 	
 	\begin{align*}
-	\min_{x,\ y(\bxi)}\ & E_{\bxi} [ c^T x + q^T y(\bxi) ] \\
+	\min_{x,\ y(\bsxi)}\ & E_{\bsxi} [ c^T x + q^T y(\bsxi) ] \\
 	\mbox{s.t. } & Ax = b & \mbox{\textcolor{blue}{first-stage constraints}} \\
 	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi &
 	\mbox{\textcolor{blue}{second-stage contraints}} \\
@@ -237,7 +235,7 @@ where {\it a.e.} stands for ``almost every''.
 	\mbox{}
 	
 	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
-	\omega_2,\ldots,\omega_S \rbrace \subset \RR^r$.
+	\omega_2,\ldots,\omega_S \rbrace \subseteq \RR^r$.
 	\begin{align*}
 	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots . . . , S \\
 	T_s & = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s)) 
@@ -269,12 +267,12 @@ where {\it a.e.} stands for ``almost every''.
 	
 	\begin{itemize}
 		\item
-		$y_s = y(\xi(\omega_s))$ is the recourse action to take if the scenario
+		$y_s = y(\xi(\omega_s))$: recourse action to take if the scenario
 		$s$ occurs.
 		\item
-		Advantage: it is a linear program.
+		\textcolor{blue}{Advantage}: linear program.
 		\item
-		Drawback: it is a linear program of (very) large dimension:
+		\textcolor{blue}{Drawback}: linear program of (very) large dimension:
 		\begin{itemize}
 			\item
 			$n+pS$ variables;
@@ -282,7 +280,7 @@ where {\it a.e.} stands for ``almost every''.
 			$m_1+mS$ constraints.
 		\end{itemize}
 		\item
-		Advantage: the linear program matrix has a special structure (stairway shape).\\
+		\textcolor{blue}{Advantage}: the linear program matrix has a special structure (stairway shape).\\
 		Can we exploit it?
 	\end{itemize}
 	
@@ -321,11 +319,11 @@ where {\it a.e.} stands for ``almost every''.
 	Consider again our toy problem
 	\begin{align*}
 	\min_x\ & x_1+x_2\\
-	\mbox{s.t. } & \bxi_1x_1 + x_2 \geq 7 \\
-	& \bxi_2x_1 + x_2 \geq 4 \\
+	\mbox{s.t. } & \bsxi_1x_1 + x_2 \geq 7 \\
+	& \bsxi_2x_1 + x_2 \geq 4 \\
 	& x_1, x_2 \geq 0,
 	\end{align*}
-	where $\bxi_1 \sim U[1,4]$, $\bxi_2[1/3,1]$.
+	where $\bsxi_1 \sim U[1,4]$, $\bsxi_2[1/3,1]$.
 	
 	\mbox{}
 	
@@ -361,7 +359,7 @@ where {\it a.e.} stands for ``almost every''.
 	
 	More generally, we can build the program
 	\begin{align*}
-	\min_x\ & x_1+x_2 + E_{\bxi}[Q(x,\bxi)] \\
+	\min_x\ & x_1+x_2 + \EE_{\bsxi}[Q(x,\bsxi)] \\
 	\mbox{s.t. } & x_1, x_2 \geq 0,
 	\end{align*}
 	and
@@ -376,9 +374,9 @@ where {\it a.e.} stands for ``almost every''.
 \begin{frame}
 \frametitle{Two-stage linear programming problem, fixed recourse}
 
-More generally, consider the problem
+We go a bit further by considering the problem
 \[
-\min c^Tx + E_{\bxi}[q(\bxi)^Ty(\bxi)]
+\min c^Tx + E_{\bsxi}[q(\bsxi)^Ty(\bsxi)]
 \]
 subject to the constraints
 \begin{align*}
@@ -387,22 +385,26 @@ T(\xi)x + Wy(\xi) &= h(\xi) \qquad \text{for a.e. } \xi \in \Xi, \\
 x & \in X, \\
 y(\xi) & \in Y,
 \end{align*}
-where $\bxi$ is a random vector defined on the random space 
-$(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bxi$.
+where $\bsxi$ is a random vector defined on the random space 
+$(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bsxi$.
 
-\mbox{}
-
-Let
-\[
-Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\rbrace.
-\]
 \end{frame}
 
 \begin{frame}
 \frametitle{Reformulation(s)}
 
+
+The problem becomes
 \[
-\min_{x \in X \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ \min_{y \in Y} \lbrace q(\bxi)^Ty \ |\ Wy = h(\bxi) - T(\bxi)x \rbrace \right] \right\rbrace 
+\min_{x \in X \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi} \left[ \min_{y \in Y} \left\lbrace q(\bsxi)^Ty \ |\ Wy = h(\bsxi) - T(\bsxi)x \right\rbrace \right] \right\rbrace,
+\]
+or
+\[
+\min_{x \in X \,|\, Ax = b} c^Tx + \EE_{\bsxi} [ Q(x,\bsxi)], 
+\]
+with
+\[
+Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\rbrace.
 \]
 
 \mbox{}
@@ -424,7 +426,7 @@ Given a ``policy'' $x$ and a realization $\xi$, $z$ measures the deviation of th
 {\red Expected recourse function}:
 %, or the function of minimum expected recourse, $\mathcal{Q}: \RR^n \rightarrow \RR$, for any policy $x \in \RR^n$:
 \[
-\mathcal{Q}(x) \overset{def}{=} E_{\bxi}[Q(x,\bxi)],
+\mathcal{Q}(x) \overset{def}{=} \EE_{\bsxi}[Q(x,\bsxi)],
 \]
 %describes the recourse cost expectation,
 with
@@ -445,15 +447,16 @@ It is a nonlinear program over $\RR^n$. Properties?
 \begin{frame}
 \frametitle{Formulations summary}
 
+Set $X = \RR^n_+$.
 \[
-\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\xi)^Ty \ |\ Wy = h(\bxi) - T(\bxi)x \rbrace \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\xi)^Ty \ |\ Wy = h(\bsxi) - T(\bsxi)x \rbrace \right] \right\rbrace 
 \]
 \[
-\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi}
-  \left[  v(\bxi, h(\bxi)-T(\bxi)x) \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi}
+  \left[  v(\bsxi, h(\bsxi)-T(\bsxi)x) \right] \right\rbrace 
 \]
 \[
-\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + E_{\bxi} \left[ Q(x,\bxi) \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi} \left[ Q(x,\bsxi) \right] \right\rbrace 
 \]
 \[
 \min_{x \in \RR^n_+} \left\lbrace c^Tx + \mathcal{Q}(x)
@@ -517,7 +520,10 @@ A problem is said to have a {\red relatively complete recourse} if $K_1
 
 \mbox{}
 
-{\blue Advantage}: the second-stage problem is feasible $\forall x$ feasible in the first stage, almost surely.
+{\blue Advantage}: the second-stage problem is feasible $\forall x$ feasible in the first stage, almost surely (i.e. with probability equal to 1).
+%Reminder: almost surely, or with probability one. An event $A$ is said to occur almost surely if $P[A] = 1$.
+
+
 
 \mbox{}
 
@@ -531,14 +537,13 @@ A problem is said to have a {\red relatively complete recourse} if $K_1
 \begin{itemize}
 	\item 
 	The relatively complete recourse is very useful in practice and on a theoretical point of view, but it can be difficult to identify.
-	\item 
-	A particular case of relatively complete recourse can however often be identified from the structure of $W$.
+%	\item 
+%	A particular case of relatively complete recourse can however often be identified from the structure of $W$.
 \item
-	{\red Complete recourse}: $\text{pos}W = \RR^m$.
-\item
-	The complete recourse property implies that $\forall x$, $T(\xi)$, $h(\xi)$, $Q(x,\xi) < \infty$, as $z = h(\xi)-T(\xi)x$.
+	{\red Complete recourse}: $\text{pos}W = \RR^m$, i.e. $\forall z \in \RR^m$, $\exists y \in \RR^p_+$ such that $Wy = z$.
 	\item
-	Complete recourse $\Rightarrow$ relatively complete recourse.
+	Complete recourse $\Rightarrow$ relatively complete recourse, as 
+$\forall x$, $T(\xi)$, $h(\xi)$, $Q(x,\xi) < \infty$ with $z = h(\xi)-T(\xi)x$.
 \end{itemize}
 
 \end{frame}
@@ -555,11 +560,11 @@ Consider the second-stage problem
 \end{align*}
 with
 $$
-P\left[ \bxi = 2^n \right] = \frac{1}{2^{n+1}},\ n = 0,1,2,\ldots
+P\left[ \bsxi = 2^n \right] = \frac{1}{2^{n+1}},\ n = 0,1,2,\ldots
 $$
-Note that $P\left[ \bxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n \in \NN_+ \rbrace$, and
+Note that $P\left[ \bsxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n \in \NN_+ \rbrace$, and
 $$
-\sum_{n=0}^{+\infty} P\left[ \bxi = 2^n \right] = \sum_{n=0}^{+\infty} 2^{-n-1} = \frac{1}{2} \frac{1}{1-\frac{1}{2}} = 1.
+\sum_{n=0}^{+\infty} P\left[ \bsxi = 2^n \right] = \sum_{n=0}^{+\infty} 2^{-n-1} = \frac{1}{2} \frac{1}{1-\frac{1}{2}} = 1.
 $$
 
 \end{frame}
@@ -569,10 +574,10 @@ $$
 
 Given $x \in \RR^2$, we have
 \begin{align*}
-\calQ(x) &= \EE_{\bxi} \left[ \min_{y \geq 0} 2y_1+y_2 \,\bigg|\, y_1 + y_2 \geq 1 - x_1,\ y_1 \geq \xi - x_1 - x_2 \right] \\
-&\geq \EE_{\bxi} \left[ \min_{y_1 \geq 0} 2y_1 \,\bigg|\, y_1 \geq \xi - x_1 - x_2 \right] \\
-& = 2 \EE_{\bxi} \left[ \max \{ 0, \bxi - x_1 - x_2 \}\right] \\
-& = 2 \sum_{\xi \in \Xi} P[\bxi = \xi] \max \{ 0, \xi - x_1 - x_2 \} \\
+\calQ(x) &= \EE_{\bsxi} \left[ \min_{y \geq 0} 2y_1+y_2 \,\bigg|\, y_1 + y_2 \geq 1 - x_1,\ y_1 \geq \xi - x_1 - x_2 \right] \\
+&\geq \EE_{\bsxi} \left[ \min_{y_1 \geq 0} 2y_1 \,\bigg|\, y_1 \geq \xi - x_1 - x_2 \right] \\
+& = 2 \EE_{\bsxi} \left[ \max \{ 0, \bsxi - x_1 - x_2 \}\right] \\
+& = 2 \sum_{\xi \in \Xi} P[\bsxi = \xi] \max \{ 0, \xi - x_1 - x_2 \} \\
 & = 2 \sum_{n = 0}^{+\infty} 2^{-n-1} \max \{ 0, 2^n - x_1 - x_2 \} \\
 & = \sum_{n = 0}^{+\infty} 2^{-n} \max \{ 0, 2^n - x_1 - x_2 \} = +\infty
 \end{align*}
@@ -652,7 +657,7 @@ Thus,
 
 Note that
 $$
-\EE[\bxi] = \sum_{n=0}^{+\infty} P\left[ \bxi = 2^n \right] 2^n = \sum_{n=0}^{+\infty} \frac{2^n}{2^{n+1}} = \sum_{n=0}^{+\infty} \frac{1}{2} = +\infty.
+\EE[\bsxi] = \sum_{n=0}^{+\infty} P\left[ \bsxi = 2^n \right] 2^n = \sum_{n=0}^{+\infty} \frac{2^n}{2^{n+1}} = \sum_{n=0}^{+\infty} \frac{1}{2} = +\infty.
 $$
 
 \end{frame}
@@ -660,7 +665,7 @@ $$
 \begin{frame}
 \frametitle{$K_2 \ne K_2^s$ (cont'd)}
 
-$\EE[\bxi]$ not finite does not necessarily imply that $\calQ(x) = +\infty$. Consider
+$\EE[\bsxi]$ not finite does not necessarily imply that $\calQ(x) = +\infty$. Consider
 \begin{align*}
 \min_y \ & y_1 - y_2 \\
 \text{s.t. } & y_1 \geq \xi \\
@@ -674,7 +679,7 @@ We have that $\forall \xi, Q(x, \xi) = 0$, and therefore $\calQ(x) = 0$.
 \frametitle{$K_2 = K_2^s$}
 
 \begin{theo}
-If $\bxi$ has finite second order moments, then
+If $\bsxi$ has finite second order moments, then
 $$
 P[ \xi \ |\ Q(x,\xi) < \infty] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
 $$
@@ -684,11 +689,7 @@ K_2 = K_2^s.
 $$
 \end{theo}
 
-%In other words, we must have that $Q(x,\bxi)$ is upper bounded almost surely. Proof: technical!
-
-\mbox{}
-
-Reminder: almost surely, or with probability one. An event $A$ is said to occur almost surely if $P[A] = 1$.
+%In other words, we must have that $Q(x,\bsxi)$ is upper bounded almost surely. Proof: technical!
 
 \end{frame}
 
@@ -707,12 +708,12 @@ Define {\red possibility interpretation} of the second-stage feasibility as
 K_2^P = \cap_{\xi \in \Xi} K_2(\xi).
 \]
 \item
-Clearly $K_2 = K_2^P$ if $\bxi$ has a finite support.
-Is it still the case when $\bxi$ follows a continuous distribution?
+Clearly $K_2 = K_2^P$ if $\bsxi$ has a finite support.
+Is it still the case when $\bsxi$ follows a continuous distribution?
 \end{itemize}
 
 \begin{theo}
-For a stochastic program with fixed recourse, where $\bxi$ has finite second order moments,
+For a stochastic program with fixed recourse, where $\bsxi$ has finite second order moments,
 $$K_2 = K_2^s = K_2^p.$$
 \end{theo}
 
@@ -768,7 +769,7 @@ The following results establishes conditions to have a finite recourse (i.e. $| 
 \end{itemize}
 
 \begin{theo}
-Assume that the two-stage (linear) stochastic program is feasible and has a simple recourse, and that $\bxi$ has finite second-order moments.
+Assume that the two-stage (linear) stochastic program is feasible and has a simple recourse, and that $\bsxi$ has finite second-order moments.
 Then $\mathcal{Q}(x)$ is finite if and only if, for any component $i$, $\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0$ with probability one.
 \end{theo}
 
@@ -852,8 +853,11 @@ Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\om
 
 Therefore, a.s.
 $$
-\min Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega))).
+\min Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega))),
 $$
+so, a.s., $\exists$ a lower bound on $Q(x,\xi(\omega))$, and since the program is feasible, it admits an optimal solution.
+
+\mbox{}
 
 From the fundamental theorem of linear programming, we can choose as the optimal solution
 \begin{align*}
@@ -861,6 +865,16 @@ From the fundamental theorem of linear programming, we can choose as the optimal
 	y^-(\xi(\omega)) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
 \end{align*}
 where $a^+ = \max\{0, a\}$.
+
+\end{proof}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Simple recourse (cont'd)}
+
+\begin{proof}
+{\bf $(\Leftarrow)$}
 
 From previous results, $\calQ(x) < \infty$, and
 $$
@@ -878,7 +892,7 @@ Consider the second stage program
 \[
 Q(x, \xi) = \min_y \lbrace y \ |\ \xi y = 1-x, y \geq 0 \rbrace.
 \]
-We assume that $\bxi$ follows a triangular distribution on $[0,1]$, with $P[\bxi \leq u] = u^2$.
+We assume that $\bsxi$ follows a triangular distribution on $[0,1]$, with $P[\bsxi \leq u] = u^2$.
 	
 \mbox{}
 	
@@ -887,7 +901,7 @@ Is the recourse fixed? Why?
 	
 \mbox{}
 	
-The recourse is not fixed, as $W \equiv \bxi$, and therefore, $W$ is random.
+The recourse is not fixed, as $W \equiv \bsxi$, and therefore, $W$ is random.
 Moreover, as $\xi$ can take the value 0, the transformation
 \[
 y = 1/\xi - x/\xi,
@@ -956,7 +970,7 @@ The difference comes from the fact that a point is not in $K_2^P$ as soon as it 
 	
 %	\mbox{}
 	
-%	\underline{Rappel}: pour un programme stochastique avec un recours%	fixe (pas le cas ici!) où $\bxi$ a des moments seconds finis, $K_2 = K_2^P$.
+%	\underline{Rappel}: pour un programme stochastique avec un recours%	fixe (pas le cas ici!) où $\bsxi$ a des moments seconds finis, $K_2 = K_2^P$.
 	
 \end{frame}
 
@@ -1041,12 +1055,12 @@ The piecewise linearity follows from the fact that the number of different optim
 {\red Convexity of the recourse?}
 
 \[
-\mathcal{Q}(x) = E_{\bxi} [Q(x,\xi)].
+\mathcal{Q}(x) = E_{\bsxi} [Q(x,\xi)].
 \]
 Suppose for now that $\xi$ has a finite support, i.e. $\Xi = \lbrace \xi_1 ,
 \xi_2,\ldots, \xi_m \rbrace$. Then
 \[
-\mathcal{Q}(x) = \sum_{i = 1}^{m} P[\bxi = \xi_i] Q(x,\xi_i).
+\mathcal{Q}(x) = \sum_{i = 1}^{m} P[\bsxi = \xi_i] Q(x,\xi_i).
 \]
 \end{frame}
 
@@ -1187,7 +1201,7 @@ y^- = x-\xi,\quad y^+ = 0.
 \begin{frame}
 \frametitle{Graphically?}
 
-Assume that $\bxi$ can take the realizations $1$, $2$, $4$.
+Assume that $\bsxi$ can take the realizations $1$, $2$, $4$.
 
 \begin{center}
 \begin{minipage}{0.9\textwidth}
@@ -1255,15 +1269,15 @@ $4 \leq x$: $\mathcal{Q}(x) = x-7/3$;
 \frametitle{Properties of $\mathcal{Q}(x)$}
 
 We note that $\mathcal{Q}(x)$ is convex and piecewise linear.
-As $\mathcal{Q}(x)$ is a finite weighted sum of piecewise linear functions when the support of $\bxi$ is finite, we have the following result.
+As $\mathcal{Q}(x)$ is a finite weighted sum of piecewise linear functions when the support of $\bsxi$ is finite, we have the following result.
 
 \begin{theo}
-For a stochastic program with fixed recourses where $\bxi$ has finite second-order moments,
+For a stochastic program with fixed recourses where $\bsxi$ has finite second-order moments,
 \begin{enumerate}[(a)]
 \item
 $\mathcal{Q}(x)$ is a convex Lipschitz function and is finite over $K_2$;
 \item
-when $\bxi$ has a finite support, $\mathcal{Q}(x)$ is piecewise linear.
+when $\bsxi$ has a finite support, $\mathcal{Q}(x)$ is piecewise linear.
 \end{enumerate}
 \end{theo}
 
@@ -1338,7 +1352,7 @@ But how to prove $(1/p) \int_{\Xi
 
 \mbox{}
 
-If we stay in the linear framework with fixed recourse, and vectors $\bxi$ with finite second-order moments, we have seen that for $\bxi$ with finite support, $\mathcal{Q}(x)$ is piecewise linear.
+If we stay in the linear framework with fixed recourse, and vectors $\bsxi$ with finite second-order moments, we have seen that for $\bsxi$ with finite support, $\mathcal{Q}(x)$ is piecewise linear.
 Therefore $\mathcal{Q}(x)$ is not differentiable.
 
 \end{frame}
@@ -1346,14 +1360,14 @@ Therefore $\mathcal{Q}(x)$ is not differentiable.
 \begin{frame}
 \frametitle{Differentiability of the recourse: continuous case}
 
-If $\bxi$ is continuous, $\mathcal{Q}(x)$ is obtained as an integral over the $Q(x,\xi)$'s, that are not differentiable as they are piecewise linear given $\xi$.
+If $\bsxi$ is continuous, $\mathcal{Q}(x)$ is obtained as an integral over the $Q(x,\xi)$'s, that are not differentiable as they are piecewise linear given $\xi$.
 However, it is $x$ that has to be fixed, not $\xi$.
 It is possible to show that (the proof is quite technical)
 
 \mbox{}
 
 \begin{theo}
-For a stochastic program with fixed recourse where $\bxi$ has finite second-order moments, if $\bxi$ is continuous, $\mathcal{Q}(x)$ is differentiable over $K_2$.
+For a stochastic program with fixed recourse where $\bsxi$ has finite second-order moments, if $\bsxi$ is continuous, $\mathcal{Q}(x)$ is differentiable over $K_2$.
 \end{theo}
 
 \mbox{}
@@ -1367,8 +1381,8 @@ Intuitively, the function $\mathcal{Q}(x)$ is ``smoothed'' by the superposition 
 
 Now consider the general program
 \[
-\min_{x \in X} E_{\bxi} [ f_0(x, \bxi) ] = \min_{x \in X}
-E_{\bxi} [g_0(x,\bxi) + Q(x, \bxi)].
+\min_{x \in X} E_{\bsxi} [ f_0(x, \bsxi) ] = \min_{x \in X}
+E_{\bsxi} [g_0(x,\bsxi) + Q(x, \bsxi)].
 \]
 
 \begin{theo}
