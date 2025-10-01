@@ -42,7 +42,7 @@
 \def\cB{\mathcal{B}}
 \def\cQ{\mathcal{Q}}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 \title[$L$-shaped method]{Stochastic optimization\\$L$-shaped method}
 
@@ -283,7 +283,7 @@ Evaluate
 \begin{align*}
 f(\hat{x}) &= \min_y \lbrace q^Ty \,|\, Wy = h-T\hat{x},\ y \geq 0
 \rbrace \\
-&= \max_u \lbrace (h-T\hat{x})^Tu \,|\, W^Tu \leq q \rbrace. \mbox{ (duality)}
+&= \max_{\pi} \lbrace (h-T\hat{x})^T\pi \,|\, W^T\pi \leq q \rbrace. \mbox{ (duality)}
 \end{align*}
 We have to consider two cases.
 \end{description}
@@ -495,9 +495,8 @@ As in the simple example, two types of cuts have to be considered:
 \begin{frame}
 \frametitle{Feasibility cuts}
 
-Solving the master problem can produce a solution $(\hat{x}, \hat{\theta})$ such that $\mathcal{Q}(\hat{x}) = +\infty$.
-In other words $\hat{x} \notin K_2$: $\hat{x}$ is not feasible for the second-stage program.
-No relatively complete recourse or complete recourse!
+Solving the master problem can produce a solution $(\hat{x}, \hat{\theta})$ such that $\mathcal{Q}(\hat{x}) = +\infty$, i.e. $\hat{x} \notin K_2$.
+%: $\hat{x}$ is not feasible for the second-stage program. No relatively complete recourse or complete recourse!
 	
 \mbox{}
 	
@@ -551,7 +550,7 @@ Lot of technical details in Birge \& Louveaux (Chapter 5). We will try to simpli
 \begin{frame}
 \frametitle{Feasibility cuts (cont'd)}
 
-We can proceed in a similar way to the two-phase method in linear programming.
+Similar to the two-phase method in linear programming.
 The first phase looks for a feasible solution by solving an artificial program.
 We do the same scenario by scenario, but what we look for is an infeasible scenario!
 
@@ -575,7 +574,7 @@ if $w^* = 0$, $v^+_* = v^-_* = 0$ and $Wy^* = h_s - T_sx^{\nu}$; in other terms 
 \item
 if $w^* \ne 0$, $v^+_* \ne 0$ or $v^-_* \ne 0$, so $Wy^* \ne h_s - T_sx^{\nu}$, and we cannot find some $y$ such that $Wy = h_s - T_sx^{\nu}$.
 \end{itemize}
-	
+
 \end{frame}
 
 \begin{frame}
@@ -871,56 +870,58 @@ The first-stage solution becomes $x^1 = (33.6, 22.4)^T$.
 
 
 \begin{frame}
-\frametitle{Optimality cut}
+	\frametitle{Optimality cuts}
 	
-Initially, the only constraint on $\theta$ is $\theta \in \RR$.
+	The problem
+	\begin{align*}
+		\min\ & c^Tx + \mathcal{Q}(x) \\
+		\mbox{s.t. } & x \in K_1 \cap K_2,
+	\end{align*}
+	is equivalent to
+	\begin{align*}
+		\min\ & c^Tx + \theta \\
+		\mbox{s.t. } & \mathcal{Q}(x) \leq \theta, \\
+		& x \in K_1 \cap K_2,
+	\end{align*}
 	
+The constraint $\theta \geq \mathcal{Q}(x)$ cannot be directly used, and will be expressed by means of optimality cuts.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Master problem}
+	
+Initially, the only constraint on $\theta$ is $\theta \in \RR$, and we obtain the infimum of the objective with $\theta = -\infty$.	
+
+% Initially, there is no cut
+
 \mbox{}
-	
-Rewrite the master program
-\begin{align*}
-\min c^Tx & + \theta \\
-\mbox{s.t. } Ax & = b, \\
-\theta &\geq \mathcal{Q}(x),\\
-x & \geq 0,\ \theta \in \RR.
-\end{align*}
-	
-The constraint $\theta \geq \mathcal{Q}(x)$ will be expressed by means of optimality cuts.
-Initially, there is no cut, and we obtain the infimum of the objective with $\theta = -\infty$.
-	
-\mbox{}
-	
+
 As long as $\theta = -\infty$, we remove it from the objective function.
 In other terms, we solve the first-stage problem only.
+
+%Rewrite the master program
+%\begin{align*}
+%\min c^Tx & + \theta \\
+%\mbox{s.t. } Ax & = b, \\
+%\theta &\geq \mathcal{Q}(x),\\
+%x & \geq 0,\ \theta \in \RR.
+%\end{align*}
 	
+	\mbox{}
+
+{\blue Temporarily ignore} this constraint.
+We obtain an optimal solution $(\hat{x}, \theta)^T$, with $\theta$ set to $-\infty$ during the first iteration of the method.
+
+\mbox{}
+
+The structure of the deterministic equivalent is exploited by minimizing each second-stage function separately, and the decomposition is based on the primal problem.
+Therefore we speak of primal decomposition, or Benders decomposition.	
+
 \end{frame}
 
 \begin{frame}
-\frametitle{Optimality cut (cont'd)}
-	
-If {\red the second-stage problem is feasible}, we can consider its dual
-\[
-\max \lbrace \pi^T(h(\xi)-T(\xi)x) \,|\, \pi^TW \leq q(\xi)^T \rbrace.
-\]
-	
-\mbox{}
-
-As long as $q(\xi)$ is fixed, the dual is feasible or unfeasible for all $x$ and $\xi$, as $x$ and $\xi$ do not enter the constraints.
-	
-\mbox{}
-	
-If the value of $q$ depends of the realization $\xi$, the situation is more complex.
-Nevertheless, given $\xi$, if the dual is feasible for some $x$, it is feasible for any value of $x$.
-	
-\mbox{}
-
-Following the duality properties, the primal is unbounded implies that the dual is not feasible.
-Assume that we know that our problem is bounded.
-	
-\end{frame}
-
-\begin{frame}
-\frametitle{Optimality cut (cont'd)}
+\frametitle{Optimality cut}
 	
 Consider the expected second-stage cost
 \[
@@ -933,56 +934,43 @@ y \geq 0 \rbrace.
 \]
 We know that $Q(x,\xi_j)$ is convex and piecewise linear, and since $\Xi$ is finite, $\mathcal{Q}$ is also convex and piecewise linear.
 	
-\mbox{}
+%\mbox{}
 	
-As in the simplified problem, we reformulate the problem by introducing a variable $\theta$:
-\begin{align*}
-\min_{x,\theta}\ & c^Tx+\theta\\
-\mbox{s.t. } & Ax = b, x \geq 0,\\
-& \theta \geq \mathcal{Q}(x),\ 
-\sigma_k^T(h(\xi_k)-T(\xi_k)x) \leq 0,\ k = 1,\ldots,K.\\
-\end{align*}
-	
-\end{frame}
-
-\begin{frame}
-\frametitle{Justification}
-	
-The problem
-	\begin{align*}
-	\min\ & c^Tx + \mathcal{Q}(x) \\
-	\mbox{s.t. } & x \in K_1 \cap K_2,
-	\end{align*}
-is equivalent to
-	\begin{align*}
-	\min\ & c^Tx + \theta \\
-	\mbox{s.t. } & \mathcal{Q}(x) \leq \theta, \\
-	& x \in K_1 \cap K_2,
-	\end{align*}
+%As in the simplified problem, we reformulate the problem by introducing a variable $\theta$:
+%\begin{align*}
+%\min_{x,\theta}\ & c^Tx+\theta\\
+%\mbox{s.t. } & Ax = b, x \geq 0,\\
+%& \theta \geq \mathcal{Q}(x),\ 
+%\sigma_k^T(h(\xi_k)-T(\xi_k)x) \leq 0,\ k = 1,\ldots,K.\\
+%\end{align*}
 	
 \end{frame}
 
 \begin{frame}
-\frametitle{Master problem}
-
-We cannot use $\theta \geq \mathcal{Q}(x)$ directly as a constraint since $\mathcal{Q}(x)$ is implicitely defined.
+	\frametitle{Optimality cut (cont'd)}
 	
-\mbox{}
+	If {\red the second-stage problem is feasible} for a given $\xi$, we can consider its dual
+	\[
+	\max \lbrace \pi^T(h(\xi)-T(\xi)x) \,|\, \pi^TW \leq q(\xi)^T \rbrace.
+	\]
 	
-{\blue Temporarily ignore} this constraint.
-We obtain an optimal solution $(\hat{x}, \theta)^T$, with $\theta$ set to $-\infty$ during the first iteration of the method.
+	\begin{itemize}
+		\item 
+		If $q(\xi)$ is fixed, the dual is feasible or unfeasible for all $x$ and $\xi$, as $x$ and $\xi$ do not enter the constraints.
+		\item
+		If $q$ depends on the realization $\xi$, given $\xi$, if the dual is feasible for some $x$, it is feasible for any value of $x$.
+		\item
+		From the duality properties, the primal is unbounded implies that the dual is not feasible.
+		Assume that we know that our problem is bounded.
+	\end{itemize}
 	
-\mbox{}
-
-The structure of the deterministic equivalent is therefore exploited by minimizing each second-stage function separately, and the decomposition is based on the primal problem.
-Therefore we speak of primal decomposition, or Benders decomposition.	
 	
 \end{frame}
 
 \begin{frame}
 \frametitle{Subproblems}
 	
-We now have
+Consider the master problem solution $(\hat{x}, \hat{\theta})$. We have
 \[
 \mathcal{Q}(\hat{x}) = \sum_j p_j Q(\hat{x}, \xi_j) = \sum_j p_jq(\xi_j)^Ty_j,
 \]
@@ -1021,15 +1009,12 @@ The constraint $\theta \geq \mathcal{Q}(x)$ implies
 \]
 or
 \[
--\beta^Tx + \theta \geq \alpha.
+-\beta^Tx + \theta \geq \alpha,
 \]
+with $\alpha = \sum_j p_j(\hat{\pi}_j)^Th(\xi_j)$ and
+$\beta = -\sum_j T(\xi_j)^Tp_j(\hat{\pi}_j)$.
 	
 \end{frame}
-
-%Deux points tout d'abord.
-
-%La liste des destinataires trie les noms suivant le langage informatique, ce qui fait que les noms d'utilisateurs commençant par une majuscule apparaissent avant les noms commençant pas une minuscule. C'est perturbant et on ne trouve
-
 
 \begin{frame}
 \frametitle{Subgradients}
