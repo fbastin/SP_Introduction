@@ -1017,55 +1017,6 @@ $\beta = -\sum_j T(\xi_j)^Tp_j(\hat{\pi}_j)$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Subgradients}
-
-We can also interpret the cuts in terms of subgradients.
-Recall that $\mathcal{Q}(x)$ is convex and piecewise linear, so not differentiable everywhere.
-	
-\mbox{}
-	
-We can however show that the optimality cuts are support hyperplans of $\mathcal{Q}(x)$, by means of subgradients, and the feasibility cuts adequately define the feasible points in $K_2$.
-
-\mbox{}
-	
-A vector $\eta \in \RR^n$ is a {\red subgradient} of a convex function $f$ at $x$ iff
-\[ f(y) \geq f(x) + \eta^T(y-x),\ \forall y \in \RR^n.\]
-The graph of the (linear) function $h(y) = f(x) + \eta^T(y-x)$ is a support hyperplan for the convex set $epi(f) = \{ (x, \mu) \, : \, x \in \mathbb{R}^n,\, \mu \in \mathbb{R},\, \mu \ge f(x) \} \subseteq \mathbb{R}^{n+1}$, at $(x, f(x))$.
-	
-\end{frame}
-
-\begin{frame}
-\frametitle{Subgradients (cont'd)}
-
-Recall that, by duality,
-\[
-Q(\hat{x}, \xi_s) =
-\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)x) \,|\, \pi^TW \leq q(\xi_s)^T \right\rbrace.
-\]
-Therefore, if $x \in \cK_1 \cap \cK_2$, $\exists\ \hat{\pi}$ such that
-\[
-Q(\hat{x}, \xi_s) = \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s)\hat{x}.
-\]
-With respect to the dual variables,
-\[
-Q(x, \xi_s) \geq \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s) x,
-\ \forall x \in K_2(\xi_s)
-\]
-and thus
-\[
-Q(x, \xi_s) \geq Q({\hat{x}, \xi_s}) - \hat{\pi}^TT(\xi_s) (x-\hat{x}),
-\ \forall x \in K_2(\xi_s).
-\]
-	
-In other words, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
-	
-\mbox{}
-	
-Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
-	
-\end{frame}
-
-\begin{frame}
 \frametitle{Master problem}
 
 Taking account of feasibility and optimality cuts, the master problem can be formulated as:
@@ -1113,8 +1064,8 @@ where $e^T = (1,\ldots,1)$, until we find a strictly positive optimal value for 
 \item[Step 2.] (continuation)
 Let $\sigma^{\nu}$ be the optimal solution of the dual program, and define
 \begin{align*}
-D_{K+1} &= (\sigma^{\nu})^TT_k, \\
-d_{K+1} &= (\sigma^{\nu})^Th_k,
+D_{K+1} &= (\sigma^{\nu})^TT_s, \\
+d_{K+1} &= (\sigma^{\nu})^Th_s,
 \end{align*}
 in order to generate a feasibility cut.
 Increment $K$ and go to Step 4.
@@ -1168,48 +1119,68 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 	
 \end{frame}
 
-%\begin{frame}
-%\frametitle{Optimality cut}
+\begin{frame}
+	\frametitle{Subgradients and optimality cuts}
 	
-%Recall that from the subgradient inequality ($\mathcal{Q}(x)$ is convex):
-%\[
-%\mathcal{Q}(x) \geq \mathcal{Q}(\hat{x}) + u^T(x-\hat{x}).
-%\]
-%In other words, $\mathcal{Q}(\hat{x}) + u^T(x-\hat{x})$ is a support hyperplan to  $\mathcal{Q}$ at $\hat{x}$.
-
-%\mbox{}
+	We can also interpret the optimality cuts in terms of subgradients.
+	Recall that $\mathcal{Q}(x)$ is convex and piecewise linear, so not differentiable everywhere.
 	
-%Suppose that we have $L$ subgradients of $\mathcal{Q}(x)$:
-%\[
-%u_1 \in \partial\mathcal{Q}(x_1),
-%u_2 \in \partial\mathcal{Q}(x_2),\ldots,
-%u_L \in \partial\mathcal{Q}(x_l).
-%\]
-
-%The master program becomes
-%\begin{align*}
-%\min \ & c^Tx + \theta \\
-%\mbox{s.t. } & Ax = b \\
-%& \theta \geq \mathcal{Q}(x_{\ell}) + u_{\ell}(x-x_{\ell}),\ \forall
-%\ell = 1,2,\ldots, L.
-%\end{align*}
-
-%\end{frame}
-
-%\begin{frame}
-%\frametitle{Optimality cuts (cont'd)}
+	\mbox{}
 	
-%A (feasibility or optimality) cut is obtained by handling a subproblem related to one (and only one) realization of $\bsxi$.
+	We can however show that the optimality cuts are support hyperplans of $\mathcal{Q}(x)$, by means of subgradients, and the feasibility cuts adequately define the feasible points in $K_2$.
 	
-%\mbox{}
+	
+\end{frame}
 
-%These subproblems have the same size order than the second-stage problem.
+\begin{frame}
+\frametitle{Subgradients}
+	
+\begin{definition}[Subgradient]
+	A vector $\eta \in \RR^n$ is a {\red subgradient} of a convex function $f$ at $x$ iff
+\[ f(y) \geq f(x) + \eta^T(y-x),\ \forall y \in \RR^n.\]
+\end{definition}
 
-%\mbox{}
+\begin{definition}[Subdifferential]
+	The set of all subgradients of $f$ at $x$ is called the {\red subdifferenntial} of $f$ at $x$ and is denoted by $\partial f(x)$.
+\end{definition}
+
+\mbox{}
+
+	The graph of the (linear) function $h(y) = f(x) + \eta^T(y-x)$ is a support hyperplan for the convex set $epi(f) = \{ (x, \mu) \, : \, x \in \mathbb{R}^n,\, \mu \in \mathbb{R},\, \mu \ge f(x) \} \subseteq \mathbb{R}^{n+1}$, at $(x, f(x))$.
+
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Subgradients (cont'd)}
 	
-%Therefore, we reduce the initial large problem to a sequence of small, or at worst medium, size problems, easier to solve.
+	Recall that, by duality,
+	\[
+	Q(\hat{x}, \xi_s) =
+	\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)x) \,|\, \pi^TW \leq q(\xi_s)^T \right\rbrace.
+	\]
+	Therefore, if $x \in \cK_1 \cap \cK_2$, $\exists\ \hat{\pi}$ such that
+	\[
+	Q(\hat{x}, \xi_s) = \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s)\hat{x}.
+	\]
+	With respect to the dual variables,
+	\[
+	Q(x, \xi_s) \geq \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s) x,
+	\ \forall x \in K_2(\xi_s)
+	\]
+	and thus
+	\[
+	Q(x, \xi_s) \geq Q({\hat{x}, \xi_s}) - \hat{\pi}^TT(\xi_s) (x-\hat{x}),
+	\ \forall x \in K_2(\xi_s).
+	\]
 	
-%\end{frame}
+	In other words, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
+	
+	\mbox{}
+	
+	Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
+	
+\end{frame}
 
 \begin{frame}
 \frametitle{Optimality cuts: example}
