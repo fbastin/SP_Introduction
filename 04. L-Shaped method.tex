@@ -1293,17 +1293,21 @@ The sequence of iterates for the $L$-shaped method is as follows.
 	Why do we build one cut only?
 	{\red Idea}: approximate {\blue each} $Q(x,\xi_s)$ by an auxiliary variable $\theta_s$, $s \in S$.
 	\item
-	We new introduce the cuts
+	We now introduce a cut by scenario
 	\[
 	\theta_s \geq p_s(\hat{\pi}_s)^T(h(\xi_s) - T(\xi_s)x) = \alpha_s +
 	\beta_s^Tx,\ s = 1 \in S.
 	\]
-	In other terms, we keep $|S|$ cuts instead of aggregating them.
-	If it is not possible to build these $|S|$ cuts, the solution is optimal.
+	%In other terms, we keep $|S|$ cuts instead of aggregating them.
+	If no cut can be built, the solution is optimal.
 	\item
 	Which method works the best?
-	The multi-cut version offers a more detailed information, so in general, we can expect less major iterations, but as more cuts are added, the first-stage program is more expensive to solve.
-	As a rule of thumb, the multi-cut approach is more efficient when the number of realizations $S$ is not significantly greater than the number of first-stage constraints.
+	\begin{itemize}
+		\item 
+	Multi-cut: more detailed information, so in general, we can expect less major iterations, but as more cuts are added, the first-stage program is more expensive to solve.
+	\item
+	Rule of thumb: the multi-cut approach is more efficient when the number of realizations $S$ is not significantly greater than the number of first-stage constraints.
+	\end{itemize}
 \end{itemize}
 
 \end{frame}
@@ -1675,9 +1679,9 @@ pp. 207--250, 2003.
 \begin{frame}
 \frametitle{Penalization of the step length}
 
-At iteration $k$, we solve the program
+At iteration $\nu$, we solve the program
 \[
-\min_x c^Tx + \sum_{j \in C} \theta_j + \frac{1}{2\rho} \| x-x_k \|^2.
+\min_x c^Tx + \sum_{j \in C} \theta_j + \frac{1}{2\rho} \| x-x_{\nu} \|^2.
 \]
 \begin{itemize}
 \item
@@ -1748,17 +1752,17 @@ m(x) = \min_x \Big\lbrace & c^Tx + \sum_{k = 1}^C \theta_k + (1/2\rho_l)
 
 \begin{description}
 \item[Step 0]
-Set $\rho = 1$, $r = \nu = 0$, $s(k) = 0$ for all $k = 1,\ldots,S$.
+Set $\rho = 1$, $r = \nu = 0$, $\kappa(s) = 0$ for all $s = 1,\ldots,S$.
 Select a feasible solution $a^1$.
 \item[Step 1]
 Set $\nu := \nu+1$, and solve the regularized master program
 \begin{align*}
-\min\ & c^Tx + \sum_{k = 1}^S \theta_k + \frac{1}{2\rho} \| x - a^{\nu}
+\min\ & c^Tx + \sum_{s = 1}^S \theta_s + \frac{1}{2\rho} \| x - a^{\nu}
 \|^2,\\
 \mbox{s.t. } & Ax = b,\\
 & D_{\ell}^Tx \geq d_{\ell},\ \ell = 1,\ldots,r, \\
-& -\beta^T_{\ell(k)} x + \theta_k \geq \alpha_{\ell(k)},\ \ell(k) =
-1,\ldots,s(k),\\
+& -\beta^T_{\ell(s)} x + \theta_s \geq \alpha_{\ell(s)},\ \ell(s) =
+1,\ldots,\kappa(s),\\
 & x \geq 0.
 \end{align*}
 \end{description}
@@ -1770,21 +1774,21 @@ Set $\nu := \nu+1$, and solve the regularized master program
 
 \begin{description}
 \item[Step 1] (cont'd)
-Let $(x^{\nu}, \theta^{\nu})$ be an optimal solution of this program, where $(\theta^{\nu})^T = (\theta^{\nu}_1,\ldots,\theta^{\nu}_K)^T$.
+Let $(x^{\nu}, \theta^{\nu})$ be an optimal solution of this program, where $(\theta^{\nu})^T = (\theta^{\nu}_1,\ldots,\theta^{\nu}_S)^T$.
 
-If $s(k) = 0$ for some $k$, $\theta_k^{\nu}$ is ignored in the computation.
+If $\kappa(s) = 0$ for some $s$, $\theta_s^{\nu}$ is ignored in the computation.
 If $c^Tx^{\nu} + e^T\theta^{\nu} = c^Ta^{\nu} + \mathcal{Q}(a^{\nu})$, stop: $a^{\nu}$ is optimal.
 \item[Step 2]
 If a feasibility cut is generated, set $a^{\nu+1} = a^{\nu}$
 (unfeasible null step), and return to Step 1.
 \item[Step 3]
-For $k = 1,\ldots,S$, solve the linear subproblem
+For $s = 1,\ldots,S$, solve the linear subproblem
 \begin{align*}
-\min_y &\ q_k^Ty \\
-\mbox{s.t. } & Wy = h_k - T_kx^{\nu}, \\
+\min_y &\ q_s^Ty \\
+\mbox{s.t. } & Wy = h_s - T_sx^{\nu}, \\
 & y \geq 0.
 \end{align*}
-Compute $\mathcal{Q}_k(x^{\nu})$.
+Compute $\mathcal{Q}_s(x^{\nu})$.
 \end{description}
 
 \end{frame}
@@ -1795,16 +1799,16 @@ Compute $\mathcal{Q}_k(x^{\nu})$.
 \begin{description}
 \item[Step 3] (cont'd) If
 \[
-\theta_k^{\nu} < p_k (\pi_k^{\nu})^T(h_k - T_kx^{\nu}),
+\theta_s^{\nu} < p_s (\pi_s^{\nu})^T(h_s - T_s x^{\nu}),
 \]
 add an optimality cut of the form
 \[
--\beta^T_{\ell(k)} x + \theta_k \geq \alpha_{\ell(k)}.
+-\beta^T_{\ell(s)} x + \theta_s \geq \alpha_{\ell(s)}.
 \]
-Set $s(k) = s(k)+1$.
-\item[Step 4] If for all $k$,
+Set $\kappa(s) := \kappa(s)+1$.
+\item[Step 4] If for all $s$,
 \[
-\theta_k^{\nu} \geq p_k (\pi_k^{\nu})^T(h_k - T_kx^{\nu}),
+\theta_s^{\nu} \geq p_s (\pi_s^{\nu})^T(h_s - T_s x^{\nu}),
 \]
 set $a^{\nu+1} := x^{\nu}$ (exact serious step). Return to Step 1.
 \end{description}
@@ -1939,15 +1943,15 @@ See Birge and Louveaux, Section~5.2.
 
 \begin{itemize}
 	\item The model $m(\cdot)$ is valid locally only.
-	\item Constrain the candidate iterate to stay in a trust region $\calB_k$ centered at the current solution $x_k$:
+	\item Constrain the candidate iterate to stay in a trust region $\calB_{\nu}$ centered at the current solution $x_{\nu}$:
 $$
-\cB_k = \{ x \,|\, \| x-x_k \|_k \leq \Delta_k \},
+\cB_{\nu} = \{ x \,|\, \| x-x_{\nu} \|_{\nu} \leq \Delta_{\nu} \},
 $$
-where $\Delta_k$ is the trust-region radius, and $\|\cdot\|_k$ is the norm used at iteration $k$.
+where $\Delta_{\nu}$ is the trust-region radius, and $\|\cdot\|_{\nu}$ is the norm used at iteration ${\nu}$.
 \item
 In the context a linear programming, it is common to use $\infty$-norm as
 $$
-\| x-x_k \|_{\infty} \leq \Delta_k \text{ iff } -\Delta_k \bse \leq x-x_k \leq \Delta_k \bse.
+\| x-x_{\nu} \|_{\infty} \leq \Delta_{\nu} \text{ iff } -\Delta_{\nu} \bse \leq x-x_{\nu} \leq \Delta_{\nu} \bse.
 $$
 \end{itemize}
 \end{frame}
@@ -1963,7 +1967,7 @@ The trust-region subproblem at iteration $k$ is now
 	\mbox{s.t. } & Ax = b \\
 	& {\rm feasibility\ cuts} \\
 	& {\rm optimality\ cuts} \\
-	& \|x-x_k\|_{\infty} \leq \Delta_k\\
+	& \|x-x_{\nu}\|_{\infty} \leq \Delta_{\nu}\\
 	& x \geq 0.
 \end{align*}
 \item
@@ -1985,15 +1989,15 @@ Set $0 < \eta_1 \leq \eta_2 < 1$. For instance, $\eta_1 = \eta_2 = 10^{-4}$.
 \item
 Compare the actual reduction to the prediction reduction:
 \begin{align*}
-	\rho = \frac{c^T(x_k-x^*)+\cQ(x_k)-\cQ(x^*)}{m(x_k)-m(x^*)}
+	\rho = \frac{c^T(x_{\nu}-x^*)+\cQ(x_{\nu})-\cQ(x^*)}{m(x_{\nu})-m(x^*)}
 \end{align*}
 \item
-\textcolor{blue}{Unsuccessful iteration}: if $\rho < \eta_1$, set $x_{k+1} = x_k$, $\Delta_{k+1} \leq \Delta_k$, add cuts.
-Enforce $\Delta_{k+1} < \Delta_k$ if $\Delta_k$ has been kept the same for several consecutive unsuccessful iterations or if $\rho \Delta_k$ it too large.
+\textcolor{blue}{Unsuccessful iteration}: if $\rho < \eta_1$, set $x_{{\nu}+1} = x_{\nu}$, $\Delta_{{\nu}+1} \leq \Delta_{\nu}$, add cuts.
+Enforce $\Delta_{{\nu}+1} < \Delta_{\nu}$ if $\Delta_{\nu}$ has been kept the same for several consecutive unsuccessful iterations or if $\rho \Delta_{\nu}$ it too large.
 \item
-\textcolor{blue}{Successful iteration}: if $\rho \geq \eta_1$, set $x_{k+1} = x^*$.
+\textcolor{blue}{Successful iteration}: if $\rho \geq \eta_1$, set $x_{{\nu}+1} = x^*$.
 \item
-\textcolor{blue}{Very successful iteration}: if $\rho \geq \eta_2$, set $\Delta_{k+1} = \min \{ \Delta_{\max}, \beta \Delta_k \}$, with $\beta > 1$.
+\textcolor{blue}{Very successful iteration}: if $\rho \geq \eta_2$, set $\Delta_{{\nu}+1} = \min \{ \Delta_{\max}, \beta \Delta_{\nu} \}$, with $\beta > 1$.
 \end{itemize}
 
 \end{frame}
