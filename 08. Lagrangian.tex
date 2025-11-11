@@ -1,4 +1,4 @@
-\documentclass[french]{beamer}
+\documentclass{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
@@ -38,7 +38,6 @@
 \include{macros}
 
 \def\bxi{\boldsymbol\xi}
-\def\bomega{\boldsymbol\omega}
 \def\aff{\operatorname{aff}}
 \def\cD{\mathcal{D}}
 \def\cS{\mathcal{S}}
@@ -264,20 +263,17 @@ Link the first and second stages in order to avoid optimization subproblems when
 	\item 
 Let $\pi$ be a vector of (dual) multipliers associated to the second-stage constraints.
 \item
-We can form the dual problem with respct to the second-stage constraints (linking the first and second stages) as follows:
+Dual problem with respect to the second-stage constraints (linking the first and second stages):
 \[
 \max_{\pi(\xi) \geq 0} w = \theta(\pi),
 \]
 where
 \begin{align*}
-\theta(\pi) = \inf_{x, {\bf y}}\ & f^1(x)+E_{\bxi} [f^2(y(\xi),\xi)] + \\
-& E_{\xi}\left[\sum_{i=1}^{m_2} \pi_i(\xi) \left( b_i^2(x,\xi) +
-  g_i^2(y(\xi), \xi) \right) \right] \\
+\theta(\pi) = \inf_{x, {\bf y}}\ & f^1(x)+\EE_{\bsxi} [f^2(y(\bsxi),\bsxi)] + \\
+& \EE_{\bsxi}\left[\sum_{i=1}^{m_2} \pi_i(\bsxi) \left( b_i^2(x,\bsxi) +
+  g_i^2(y(\bsxi), \bsxi) \right) \right] \\
 \text{s.t. } & g_i(x) \leq 0, i=1,\ldots{},m_1.
 \end{align*}
-\item
-We can see that we only consider the dual based on 
-We will establish some duality properties in case of finite distribution.
 \end{itemize}
 
 \end{frame}
@@ -286,11 +282,17 @@ We will establish some duality properties in case of finite distribution.
 \frametitle{Duality}
 
 \begin{theorem}
-Assume that all the functions of the stochastic program are convex,
-and there exists a finite optimal value, as well as a point strictly satisfying all the constraints.
-Assume moreover that the support of $\bxi$ is finite.
-
-\mbox{}
+Assume that
+\begin{itemize}
+\item
+all the functions of the stochastic program are convex,
+\item
+there exists a finite optimal value,
+\item
+the Slater constraints qualification condition holds,
+\item
+the support of $\bxi$ is finite.
+\end{itemize}
 
 Then $z \geq w$ for all $x, y_1,\ldots{},y_S$ feasible in the primal formulation and $\pi_1,\ldots{},\pi_S$ feasible in the dual formulation (weak duality).
 
@@ -359,12 +361,12 @@ As $\Xi$ is finite, we can consider that $S$ scenarios exist, and we can link a 
 
 Consider the general problem
 \begin{align*}
-\inf_{x \in \mathcal{N}}\ & E \left[ \sum_{t=0}^T f_{t+1}(\xi, x^t(\xi),
+\inf_{x \in \mathcal{N}}\ & \EE \left[ \sum_{t=0}^T f_{t+1}(\xi, x^t(\xi),
 x_{t+1}(\xi)) \right], \\
 \mbox{s.t. } & x_t(\xi) \in X_t(\xi) \mbox{ a.s.},
 \end{align*}
 where $x_t$ is the decision at stage $t$, and $x^t$ is the decisions history at stage $t$, i.e. $x^t = \lbrace x_1,\ldots, x_t \rbrace$.
-$\mathcal{N}$ designs the close linear subspace of nonanticipative processes.
+$\mathcal{N}$ designs the closed linear subspace of nonanticipative processes.
 Denote $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection of events subsets, with the probability measure associated to $\bxi$).
 
 \end{frame}
@@ -436,8 +438,8 @@ We then have to ensure that
 x_{its} = x_{its'},\ \forall i \in N,\ \forall t \in T,\ \forall s \in
 S,\ \forall s' \in S_s^t.
 \]
-In other words, the scenarios share identical decisions as long as they share the same history, i.e. the observed realizations until a given stage are the same.
-As soon as the scenarios diverge, the associated decisions can be different.
+%In other words, the scenarios share identical decisions as long as they share the same history, i.e. the observed realizations until a given stage are the same.
+%As soon as the scenarios diverge, the associated decisions can be different.
 
 \mbox{}
 
@@ -455,8 +457,8 @@ Consider the maximization of the dual built on the nonanticipativity constraints
 where
 \begin{align*}
 \theta(\pi) = \inf_{x \in \mathcal{X}} z = & 
-E\left[\sum_{t = 0}^T f_{t+1} (\xi, x^t(\xi), x_{t+1}(\xi) \right] \\
-& + E\left[\sum_{t = 0}^T \pi^t(\xi)(I-\Pi_t)x^t(\xi) \right],
+\EE\left[\sum_{t = 0}^T f_{t+1} (\bsxi, x^t(\xi), x_{t+1}(\bsxi) \right] \\
+& + \EE\left[\sum_{t = 0}^T \pi^t(\bsxi)(I-\Pi_t)x^t(\bsxi) \right],
 \end{align*}
 where $\pi^t$ corresponds to the components of $\pi$ associated to the $t$ first periods.
 
@@ -506,20 +508,17 @@ Set $\pi^{\nu+1} = \pi^{\nu} + \alpha^{\nu}\hat{\pi}$, $\nu = \nu+1$. Return to 
 \begin{frame}
 \frametitle{Augmented Lagrangian}
 
-Unfortunately, this type of procedure is usually slow as there is a linearization at a single point of $\theta$ only.
-It is nevertheless easy to implement and can give good results, especially for small size problems.
-
-\mbox{}
-
+\begin{itemize}
+	\item 
+Unfortunately, usually slow as there is a linearization at a single point of $\theta$ only. It is nevertheless easy to implement and can give good results, especially for small size problems.
+\item 
 In order to improve the performances, we will turn to another technique inspired by nonlinear programming: {\blue augmented Lagrangian} approaches.
-
-\mbox{}
-
-The basic idea in an augmented Lagrangian procedure is to add a penalty on $\theta(\pi)$ and to build iterations by including this term.
-
-\mbox{}
-
+\item 
+Augmented Lagrangian: add a penalty on $\theta(\pi)$.
+% and to build iterations by including this term.
+\item
 Moreover, with augmented Lagrangian techniques, we can try to exploit the problem structure in order to decompose the problem.
+\end{itemize}
 
 \end{frame}
 
@@ -553,8 +552,8 @@ Recall that we aim to solve
 where
 \begin{align*}
 \theta(\pi) = \inf_{x \in \mathcal{X}} z = & 
-E\left[\sum_{t = 0}^T f_{t+1} (\xi, x^t(\xi), x_{t+1}(\xi) \right] \\
-& + E\left[\sum_{t = 0}^T \pi^t(\xi)(I-\Pi_t)x^t(\xi) \right],
+\EE\left[\sum_{t = 0}^T f_{t+1} (\xi, x^t(\xi), x_{t+1}(\xi) \right] \\
+& + \EE\left[\sum_{t = 0}^T \pi^t(\xi)(I-\Pi_t)x^t(\xi) \right],
 \end{align*}
 
 Penalizing the nonanticipativity constraints, we obtain the following program, where $\hat{x}$ is nonanticipative.
@@ -562,23 +561,23 @@ Penalizing the nonanticipativity constraints, we obtain the following program, w
 \end{frame}
 
 \begin{frame}
-\frametitle{Augmented Lagrangian and SP:: two stages}
+\frametitle{Augmented Lagrangian and SP: two stages}
 
 \vspace*{-0.5cm}
 
 \begin{align*}
-\theta(\rho) = & \inf z = f^1(\hat{x}) + \sum_{s=1}^{S} \left(
-  p_sf^2(y_s,\xi_s) + \rho_s^T(x_s-\hat{x}) + \frac{r}{2} \|
+\theta(\pi) = & \inf z = f^1(\hat{x}) + \sum_{s=1}^{S} \left(
+  p_sf^2(y_s,\xi_s) + \pi_s^T(x_s-\hat{x}) + \frac{\rho}{2} \|
 x_s-\hat{x} \|^2\right) \\
 & \text{s.t. } g_i^1(\hat{x}) \leq 0,\ i=1,\ldots{},m_1,\\
 & \phantom{\text{s.t. }} t_i^2(x_s,\xi_s)+g_i^2(y_s,\xi_S) \leq 0,\ 
 i=1,\ldots{},m_2,\ s=1,\ldots{},S.
 \end{align*}
-$r$ if the augmented Lagrangian penalty parameter, and $\rho_s$ is the vector of dual variables associated to the nonanticipativity constraints of the scenario  $s$.
+$\rho$ if the augmented Lagrangian penalty parameter, and $\pi_s$ is the vector of dual variables associated to the nonanticipativity constraints of the scenario  $s$.
 
 \mbox{}
 
-The method that we will develop aims to contract the pair $(\hat{x}^{\nu+1}, \rho^{\nu+1})$ around a saddle point.
+The method aims to contract the pair $(\hat{x}^{\nu+1}, \pi^{\nu+1})$ around a saddle point.
 
 \end{frame}
 
@@ -597,7 +596,7 @@ The method performs a complete separation of the problems, scenario by scenario,
 \item
 The number of iterations can however increase\ldots
 \item
-But for structures problems, it is possible to exploit parallelism, and therefore solve large-scale problems.
+But for structured problems, it is possible to exploit parallelism, and therefore solve large-scale problems.
 \item
 {\red Observation}:
 the Lagrangian function is not separable with respect to the scenarios due to the term $(\hat{x}-x_s)$.
@@ -622,7 +621,7 @@ In other words, we work scenario by scenario, and we enforce progressively the n
 At iteration $\nu$, we solve the subproblems
 \begin{align*}
 \inf z = & \sum_{s=1}^S p_s\left( f^1(x_s) + f^2\left(y_s,\xi_s\right) +
-\left(\rho_s^{\nu}\right)^T\left(x_s-\hat{x}^{\nu}\right)+\frac{r}{2}\|
+\left(\pi_s^{\nu}\right)^T\left(x_s-\hat{x}^{\nu}\right)+\frac{\rho}{2}\|
 x_s-\hat{x}^{\nu} \|^2\right) \\
 & \text{s.t. } g_i^1(x_s) \leq 0,\ i=1,\ldots{},m_1,\ s=1,\ldots{},S,\\
 & \phantom{\text{t.q. }}
@@ -641,7 +640,7 @@ However, it is easy to decompose the problem!
 Algorithm:
 \begin{description}
 \item[Step 0.]
-Assume that we have a nonanticipative solution $x^0$, an initial vector of multipliers $\rho^0$, and $r > 0$.
+Assume that we have a nonanticipative solution $x^0$, an initial vector of multipliers $\pi^0$, and $\rho > 0$.
   $\nu \leftarrow 0$. Go to Step 1.
 \item[Step 1.]
 Let $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$ be a solution of the previous Lagrangian program, for $s=1,\ldots{},S$. Set
@@ -660,10 +659,10 @@ Let $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$ be a solution of the previous Lagran
 
 \begin{description}
 \item[Step 2.]
-Let $\rho^{\nu+1}_s = \rho^{\nu}_s + r\left(x_s^{\nu+1}-\hat{x}_s
+Let $\pi^{\nu+1}_s = \pi^{\nu}_s + \rho \left(x_s^{\nu+1}-\hat{x}_s
 ^{\nu+1}\right)$, $s = 1,\ldots{}, S$.\\
-If $\hat{x}^{\nu+1} = \hat{x}^{\nu}$ and $\rho^{\nu+1} = \rho^{\nu}$,
-stop: $(\hat{x}^{\nu}, \rho^{\nu})$ is optimal.\\
+If $\hat{x}^{\nu+1} = \hat{x}^{\nu}$ and $\pi^{\nu+1} = \pi^{\nu}$,
+stop: $(\hat{x}^{\nu}, \pi^{\nu})$ is optimal.\\
 Otherwise, set $\nu = \nu+1$ and return to Step 1.
 \end{description}
 
@@ -674,7 +673,7 @@ Otherwise, set $\nu = \nu+1$ and return to Step 1.
 Step 2 simply consists to take the expected value of $x^{\nu+1}$
 as $\hat{x}^{\nu+1}$.
 \item
-The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \rho^{\nu})$ around a saddle point rather than a dual ascent strategy.
+The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point rather than a dual ascent strategy.
 \item
 In practice, the optimality test is replaced by a convergence test for instance if the following quantity is small enough (De Silva et Abramson):
 \[
@@ -698,7 +697,7 @@ $$
 
 Nonanticipativity:
 $$
-x_t^{(s)} = E\left[ x_t^{(s')} \,\big|\, s' \in \cS_t^{(s)} \right],
+x_t^{(s)} = \EE\left[ x_t^{(s')} \,\big|\, s' \in \cS_t^{(s)} \right],
 $$
 where $\cS_t^{(s)} = \left\{ s' \,\big|\, \bar{\xi}_t^{(s)} = \bar{\xi}_t^{(s') }\right\}$.
 It can be reformulated as
@@ -717,10 +716,10 @@ $$
 
 Augmented Lagrangian:
 \begin{align*}
-L(x,\lambda,\rho) =  E \Biggl[ & f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \biggl( {\lambda_t^{(s)}}' \left(x_t^{(s)} - \hat{x}_t^{(s)}\right) \\
+L(x,\pi,\rho) =  \EE \Biggl[ & f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \biggl( {\pi_t^{(s)}}' \left(x_t^{(s)} - \hat{x}_t^{(s)}\right) \\
 & + \frac{\rho}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s)} \right\|^2 \biggr) \Biggr],
 \end{align*}
-where $\lambda$ is the Lagrange multipliers vector associated to the NA constraints, and $\rho > 0$ is a penalty parameter.
+where $\pi$ is the Lagrange multipliers vector associated to the NA constraints, and $\rho > 0$ is a penalty parameter.
 
 \end{frame}
 
@@ -731,17 +730,17 @@ The \verb|StochasticPrograms.jl| package proposes an implementation of the progr
 
 \mbox{}
 
-Some variations or non-maintained versions exist.
+Some variations or unmaintained versions exist.
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Generalization}
 
-Given $\lambda$, the augmented Lagrangian program is
+Given $\pi$, the augmented Lagrangian program is
 \begin{equation}
 \begin{aligned}
-\min_{x} & \; L(x,\lambda,\rho)\\
+\min_{x} & \; L(x,\pi,\rho)\\
 \text{s.t.} & \; x^{(s)} \in \mathcal{X}^{(s)}, \, s \in \mathcal{S}.\\
 \end{aligned}
 \label{Gen-PHA-Form}
@@ -755,14 +754,14 @@ In order to achieve full separability, fix $\hat{x}_t^{(s)}$ and repeatedly solv
 
 \begin{description}
 	\item[Step 0.]
-	Set $\hat{x}^{(s) ,0} = \left(\hat{x}_1^{(s),0}, \dots, \hat{x}_T^{(s),0}\right)$ and $k = 0$. Choose $\lambda^{(s),0} = \bf{0}$, $\rho^0 > 0$.
+	Set $\hat{x}^{(s) ,0} = \left(\hat{x}_1^{(s),0}, \dots, \hat{x}_T^{(s),0}\right)$ and $k = 0$. Choose $\pi^{(s),0} = \bf{0}$, $\rho^0 > 0$.
 	\item[Step 1.]
 	Compute $x^{(s),k+1} =  (x_1^{s,k+1}, \dots, x_T^{s,k+1})$, $s = 1,\ldots,S$, by solving each scenario subproblem
 	$$
 	%\begin{equation}
 	%\label{PHA-Scen-subprob}
 	\begin{aligned}
-	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \left( {\lambda_t^{(s)}}' \biggl(x_t^{(s)} - \hat{x}_t^{(s),k}\right) \\
+	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \left( {\pi_t^{(s)}}' \biggl(x_t^{(s)} - \hat{x}_t^{(s),k}\right) \\
 	& + \frac{\rho^k}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s),k} \right\|^2 \biggr)\\
 	\text{s.t.} & \; x^{(s)}  \in \mathcal{X}^{(s)}.
 	\end{aligned}
@@ -784,7 +783,7 @@ In order to achieve full separability, fix $\hat{x}_t^{(s)}$ and repeatedly solv
 	\item[Step 3.]
 	Set $\rho^{k+1}$ and
 	\[
-	\lambda_t^{(s), k+1} =  \lambda_t^{(s),k} + \rho^k \left( x_t^{(s),k+1} -  \hat{x}_t^{(s),k+1}  \right),
+	\pi_t^{(s), k+1} =  \pi_t^{(s),k} + \rho^k \left( x_t^{(s),k+1} -  \hat{x}_t^{(s),k+1}  \right),
 	\]
 	for $t = 1, \dots, T, \, s \in \mathcal{S}$.
 	\item[Step 4.]
@@ -800,7 +799,7 @@ In order to achieve full separability, fix $\hat{x}_t^{(s)}$ and repeatedly solv
 \begin{theorem}
 Assume that the initial nonlinear stochastic program has only convex functions and a finite optimal value, as well as a strictly feasible point.
 Assume moreover that the support of $\bxi$ is finite.
-The progressive hedging algorithm converges to an optimal solution $x^*, \rho^*$.
+The progressive hedging algorithm converges to an optimal solution $x^*, \pi^*$.
 \end{theorem}
 
 \begin{itemize}
