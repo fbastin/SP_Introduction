@@ -79,12 +79,12 @@ For simplicity, we assume for now that {\blue $S$ is deterministic}.
 \begin{frame}
 \frametitle{Framework (cont'd)}
 
-If the cumulative distribution function of $\bxi$ is continuous or discrete with a large number of possible realizations, $g(z)$ is usually very difficult to evaluate.
+If $\bxi$ cdf is continuous or discrete with a large number of possible realizations, $g(z)$ is usually very difficult to evaluate.
 
 \mbox{}
 
-We have to use some approximations as the Monte Carlo methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_N$.
-The approximation for a sample of size $N$ is
+We have to use some approximations as the Monte Carlo (MC) methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_N$:
+%The approximation for a sample of size $N$ is
 \[
 {\red \min_{z \in S} \hat{g}_N(z) = \frac{1}{N} \sum_{i = 1}^N
   G(z, \xi_i)}.
@@ -98,12 +98,12 @@ We sometimes refer to the original program as the {\blue true program}, or {\blu
 
 This framework include the two-stage programs that we have analyzed, as
 \begin{align*}
-\min_x\ & c^Tx + E[\cQ(x)] \\
+\min_x\ & c^Tx + \EE[\cQ(x)] \\
 \mbox{s.t. } & Ax = b,\ x \geq 0
 \end{align*}
 is equivalent to
 $$
-\min_{x \in S} E[c^Tx + \cQ(x)],
+\min_{x \in S} \EE[c^Tx + \cQ(x)],
 $$
 where $S = \{ x \,|\, Ax = b, x \geq 0 \}$
 
@@ -147,7 +147,7 @@ Consider the stochastic process
 \[
 \overline{\bxi} = \lbrace \bxi_k \rbrace_{k = 1}^{\infty},
 \]
-later called the sampling process, where the random vectors $\bxi_k$, $k = 1,\ldots, \infty$, are assumed to be independent and identically distributed (i.i.d.).
+later called the {\it sampling process}, where the random vectors $\bxi_k$, $k = 1,\ldots, \infty$, are assumed to be independent and identically distributed (i.i.d.).
 
 \end{frame}
 
@@ -730,34 +730,36 @@ The uniform convergence property implied that $( z^*, \lambda^* )$ satisfies the
 \begin{frame}
 \frametitle{On the Lagrange multipliers}
 
-The assumption of Lagrange multipliers convergence always holds if the Lagrange multipliers are bounded.
-This stronger assumption allows us to use the convergence results on the variational inequalities in order to prove the first-order criticality of limit points (Shapiro, 2003).
-%conditions of Theorem~\ref{th:fod_first} is first-order critical,
+\begin{itemize}
+	\item 
+If $\exists M > 0$ s.t. $\| \lambda^*_N (\overline{\xi}) \|$ for all $N$, 
+$\lbrace \lambda^*_{\ell} (\overline{\xi}) \rbrace_{\ell = 1}^{\infty}$ admits a limit point.
+\item 
+This also allows the use of stochastic variational inequalities (Shapiro, 2003).
+\end{itemize}
 
-\mbox{}
+\end{frame}
+
+\begin{frame}
+\frametitle{Stochastic variational inequalities for KKT}
 
 Let $\mu := (z,\lambda) \in \rit^{m+M}$ and $\mathcal{K} := \rit^m
 \times \rit^k_+ \times \rit^{M-k} \subset \rit^{m+M}$.
 Define
 \begin{align*}
-\phi(\mu) &= \left( \nabla_z \mathcal{L}(z, \lambda), c_1(z),
-\ldots, c_M(z) \right),\\
-\hat{\phi}_n(\mu) &= \left( \nabla_z L(z, \lambda, \bepsilon_n),
-\hat{c}_1(z, \bepsilon_n), \ldots, \hat{c}_{M}(z,
-\bepsilon_n)\right).
+	\phi(\mu) &= \left( \nabla_z \mathcal{L}(z, \lambda), c_1(z),
+	\ldots, c_M(z) \right),\\
+	\hat{\phi}_n(\mu) &= \left( \nabla_z L(z, \lambda, \bepsilon_n),
+	\hat{c}_1(z, \bepsilon_n), \ldots, \hat{c}_{M}(z,
+	\bepsilon_n)\right).
 \end{align*}
 The generalized equation $\phi(\mu) \in \mathcal{N}_{\mathcal{K}}(\mu)$ then represents the KKT optimality conditions for the original optimization problem, $S^* \subseteq \overset{o}{V}$, and the theorem on generalized equations then implies first-order criticality almost surely, with $\Gamma(\mu) := \mathcal{N}_{\mathcal{K}}(\mu)$.
 
-\end{frame}
+Assumptions $(a)$ and $(d)$ of the theorem on generalized equations are sufficient as $\bepsilon \rightarrow 0$ a.s., and assumption $(c)$ holds as feasible sets for original and approximate problems are non-empty.
 
-\begin{frame}
-\frametitle{On the Lagrange multipliers (cont'd)}
+%\mbox{}
 
-Assumptions $(a)$ and $(d)$ of the theorem on generalized equations are sufficient as $\bepsilon \rightarrow 0$ almost surely, and assumption $(c)$ holds as feasible sets for original and approximate problems are non-empty.
-
-\mbox{}
-
-Trickier: second-order.
+%Trickier: second-order.
 
 \end{frame}
 
@@ -808,30 +810,28 @@ As $n \rightarrow \infty$, we have $P\left[\sum_{i=1}^n \xi_i > 0\right] \righta
 \begin{frame}
 \frametitle{Rigidity assumption}
 
-(Bastin, Cirillo, and Toint, 2006, Pasupathy, 2010)
-
-
-In order to show that $z^* \in \mathcal{Z}\left(\lbrace z^*_n(\overline{\xi})\rbrace\right)$ is a local minimizer of $g(\cdot)$ over $S$, 
-we have to show that for some subsequence $\lbrace z^*_{\ell} (\overline{\xi}) \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace z^*_{n} (\overline{\xi}) \rbrace_{n = 1}^{\infty}$ converging to $z^*$, the neighborhood where $z_{\ell}^*(\overline{\xi})$ is a local minimizer do not reduce to a singleton as $\ell \rightarrow \infty$.
-
-\mbox{}
-
-We express this requirement with the technical assumption.
-
-\noindent
+%We express this requirement with the technical assumption.
+(Bastin, Cirillo, and Toint, 2006, Pasupathy, 2010)\\
 \textbf{A.4}
 There exists some subsequence $\left\lbrace z^*_{\ell} (\overline{\xi}) \right\rbrace_{\ell = 1}^{\infty}$ converging to some $z^*$, with $\left\lbrace z^*_{\ell} (\overline{\xi}) \right\rbrace_{\ell = 1}^{\infty} \subseteq \left\lbrace z^*_{N} (\overline{\xi}) \right\rbrace_{N = 1}^{\infty}$, and some constants $\delta_{z^*\overline{\xi}} >0$ and $\ell_{z^* \overline{\xi}} > 0$ such that for all $\ell \geq \ell_{ z^* \overline{\xi}}$,
 \[
 \forall z \in B\left( z_{\ell}^*(\overline{\xi}), \delta_{z^*
-  \overline{\xi}} \right) \cap S, \  \hat{g}_{\ell} \left(
-  z_{\ell}^*(\overline{\xi}) \right) \leq \hat{g}_{\ell}(z).
+	\overline{\xi}} \right) \cap S, \  \hat{g}_{\ell} \left(
+z_{\ell}^*(\overline{\xi}) \right) \leq \hat{g}_{\ell}(z).
 \]
 
+\mbox{}
+
+%In order to show that $z^* \in \mathcal{Z}\left(\lbrace z^*_n(\overline{\xi})\rbrace\right)$ is a local minimizer of $g(\cdot)$ over $S$,  we have to show that for some subsequence
+{\blue Idea:} given $\lbrace z^*_{\ell} (\overline{\xi}) \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace z^*_{n} (\overline{\xi}) \rbrace_{n = 1}^{\infty}$ s.t. $\lbrace z^*_{\ell} \rightarrow z^*$, the neighborhood where $z_{\ell}^*(\overline{\xi})$ is a local minimizer do not reduce to a singleton as $\ell \rightarrow \infty$.
+
+\noindent
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Basic theorem}
+
 
 \begin{theo}
 \label{th:basic_second_order}
@@ -843,9 +843,9 @@ $\left \lbrace z^* \in \mathcal{Z}\left(\lbrace
 \end{theo}
 
 \begin{proof}
-Voir Bastin, Cirillo, and Toint, {\sl Convergence theory for
-  nonconvex stochastic programming with an application to mixed logit},
-  Mathematical Programming, 108(2--3):207--234 (2006).
+See Bastin, Cirillo, and Toint (2006), {\sl Convergence theory for
+	nonconvex stochastic programming with an application to mixed logit},
+Mathematical Programming, 108(2--3):207--234.
 \end{proof}
 
 \end{frame}
@@ -870,7 +870,9 @@ As previously, we consider the case where the feasible set is described by a set
 
 Consider a particular sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, and $z^*
 \in \mathcal{Z}\left(\lbrace z^*_n(\overline{\xi})\rbrace\right)$.
-Under some conditions, if the subsequence $\lbrace z_{\ell}^* \rbrace_{\ell =  1}^{\infty}$ converges to $z^*$, the sequence of associated Lagrange multipliers vectors $\lbrace \lambda_{\ell}^* \rbrace$ also converges to some Lagrange multipliers vector $\lambda^*$ associated to $z^*$ for the true problem.
+Under some conditions, if the subsequence $\lbrace z_{\ell}^* \rbrace_{\ell =  1}^{\infty} \rightarrow z^*$, then %the sequence of associated Lagrange multipliers vectors
+$\lbrace \lambda_{\ell}^* \rbrace %$ also converges to some Lagrange multipliers vector $
+\rightarrow \lambda^*$, associated to $z^*$. % for the true problem.
 
 \mbox{}
 
@@ -889,41 +891,41 @@ and there exists some unique Lagrange multipliers vector associated to $z^*$ sat
 \end{frame}
 
 \begin{frame}
-\frametitle{Lagrange multipliers convergence (cont'd)}
+\frametitle{LICQ}
 
-\begin{proof}
-From the unicity of $\lambda^*$, the Mangasarian-Fromowitz constraint qualification (MFCQ) holds at $z^*$, and therefore in a neighborhood of $z^*$.
-A consequence is that the Lagrange multipliers are uniformly bounded for $\epsilon$ close to zero.
-It is therefore sufficient to show that every limit point of the sequence $\lbrace \lambda^*_{\ell}(\overline{\xi}) \rbrace$, $\ell = 1,\ldots,\infty$, is equal to $\lambda^*$.
+%\begin{proof}
+%From the unicity of $\lambda^*$, the Mangasarian-Fromowitz constraint qualification (MFCQ) holds at $z^*$, and therefore in a neighborhood of $z^*$.
+%A consequence is that the Lagrange multipliers are uniformly bounded for $\epsilon$ close to zero.
+%It is therefore sufficient to show that every limit point of the sequence $\lbrace \lambda^*_{\ell}(\overline{\xi}) \rbrace$, $\ell = 1,\ldots,\infty$, is equal to $\lambda^*$.
 
-\mbox{}
+%\mbox{}
 
-Let $\lambda'$ be such a limit point.
-By continuity, $(z^*, \lambda' )$ satisfies the KKT conditions, so $\lambda'$ is equal to $\lambda^*$.
-\end{proof}
+%Let $\lambda'$ be such a limit point.
+%By continuity, $(z^*, \lambda' )$ satisfies the KKT conditions, so $\lambda'$ is equal to $\lambda^*$.
+%\end{proof}
 
-\mbox{}
+%\mbox{}
 
 The unicity of $\lambda^*$ can be ensured with some appropriate constraints qualification condition, as the  linear independence constraint qualification (LICQ).
 
-\end{frame}
+%\end{frame}
 
-\begin{frame}
-\frametitle{On the LICQ}
+%\begin{frame}
+%\frametitle{On the LICQ}
 
-This constraints qualification will be especially useful for our discusssion.
+%This constraints qualification will be especially useful for our discusssion.
 
 \mbox{}
 
-Consider the original program.
-Recall that the active set $\mathcal{A}(z)$ at any feasible point $z$ is the union of the index set of equality constraints and active inequality constraints:
-\[
-\mathcal{A}(z) = \lbrace i \in \lbrace 1,\ldots,k \rbrace \, | \,
-c_i(z) = 0 \rbrace \cup \lbrace k+1,\ldots,M \rbrace.
-\]
-
 \begin{defi}
-Given the point $z^*$ and the active set $\mathcal{A}(z^*)$, we say that the LICQ holds at $z^*$ if the set of active constraints gradients $\lbrace \nabla c_j(z^*),\ j \in \mathcal{A}(z^*) \rbrace$ is linearly independent.
+Consider $z^*$ and the active set $\mathcal{A}(z^*)$:
+%Consider the original program.
+%Recall that the active set $\mathcal{A}(z)$ at any feasible point $z$ is the union of the index set of equality constraints and active inequality constraints:
+\[
+\mathcal{A}(z^*) = \lbrace i \in \lbrace 1,\ldots,k \rbrace \, | \,
+c_i(z^*) = 0 \rbrace \cup \lbrace k+1,\ldots,M \rbrace.
+\]
+The LICQ holds at $z^*$ if the set of active constraints gradients $\lbrace \nabla c_j(z^*),\ j \in \mathcal{A}(z^*) \rbrace$ is linearly independent.
 \end{defi}
 
 \end{frame}
@@ -934,7 +936,8 @@ Given the point $z^*$ and the active set $\mathcal{A}(z^*)$, we say that the LIC
 Another useful concept for our needs is the strict complementarity condition.
 
 \begin{defi}
-Given $z^*$ and a vector $\lambda^*$ satisfying the KKT conditions, we say that the strict complementarity condition holds if exactly one of $[\lambda]_j^*$ and $c_j(z^*)$ is null for every index $j=1,\ldots,k$, i.e. we have that $[\lambda]_j^* > 0$ for each $j \in \lbrace 1,\ldots,k \rbrace \cap \mathcal{A}(z^*)$.
+Given $z^*$ and a vector $\lambda^*$ satisfying the KKT conditions, the strict complementarity condition holds if %exactly one of $[\lambda]_j^*$ and $c_j(z^*)$ is null for every index $j=1,\ldots,k$, i.e. we have that 
+$[\lambda]_j^* > 0$ for each $j \in \lbrace 1,\ldots,k \rbrace \cap \mathcal{A}(z^*)$.
 \end{defi}
 
 \mbox{}
@@ -1057,11 +1060,11 @@ See Bastin, Cirillo and Toint, 2006.
 \begin{frame}
 \frametitle{Discussion}
 
-Remark that the LICQ and the strict complementarity condition imply that the minimizer is isolated while sufficient second-order condition is usually used to characterize strict local minimizers.
+Remark that the LICQ and the strict complementarity condition imply that the minimizer is isolated while sufficient second-order conditions are usually used to characterize strict local minimizers.
 
-\mbox{}
+%\mbox{}
 
-Reminder: an isolated local minimizer is also strict, but the converse is not necessarily true.
+%Reminder: an isolated local minimizer is also strict, but the converse is not necessarily true.
 
 \mbox{}
 
@@ -1094,39 +1097,32 @@ is non-singular at $(z^*, \lambda^*)$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Second-order convergence: corollary (cont'd)}
+\frametitle{Second-order convergence: corollary}
 
 \begin{coro}
-Assume that, for almost every sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, there exist some $z^* \in \mathcal{Z} \left(\lbrace
-  z^*_n(\overline{\xi})\rbrace\right) \cap \overset{o}{V}$ associated to an unique Lagrange multipliers vector $\lambda^*$ and some subsequence
- $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace  z_n^* \rbrace_{n = 1}^{\infty}$, such that $z^*_{\ell}(\overline{\xi}) \rightarrow z^*$, that assumptions (a)--(d) of the second-order convergence theorem hold and that the strict complementarity condition hold at $( z^*, \lambda^* )$ for the original program.
+Assume that, for almost every sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, there exist some $z^* \in \mathcal{Z} \left(\lbrace z^*_n(\overline{\xi})\rbrace\right) \cap \overset{o}{V}$ associated to an unique Lagrange multipliers vector $\lambda^*$ and some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace  z_n^* \rbrace_{n = 1}^{\infty}$, such that $z^*_{\ell}(\overline{\xi}) \rightarrow z^*$, that assumptions (a)--(d) of the second-order convergence theorem hold and that the strict complementarity condition hold at $( z^*, \lambda^* )$ for the original program.
 
 \mbox{}
 
 Assume moreover that the Jacobian of the equality relations of the KKT conditions is not-singular at $( z^*, \lambda^* )$.
-Then there exists almost surely some $z^*$ in $\mathcal{Z} \left(
-\lbrace z_N^*(\overline{\bxi}) \rbrace \right) \cap \overset{o}{V}$,
-associated to some vector $\lambda^*$, that satisfies the sufficient second-order conditions of the original program.
+Then there exists almost surely some $z^*$ in $\mathcal{Z} \left( \lbrace z_N^*(\overline{\bxi}) \rbrace \right) \cap \overset{o}{V}$, associated to some vector $\lambda^*$, that satisfies the sufficient second-order conditions of the original program.
 \end{coro}
 
 \end{frame}
 
-\begin{frame}
-\frametitle{Second-order convergence: corollary (cont'd)}
+%\begin{frame}
+%\frametitle{Second-order convergence: corollary (cont'd)}
 
-\begin{proof}
-See Bastin, Cirillo, and Toint, 2006.
-\end{proof}
+%\begin{proof}
+%See Bastin, Cirillo, and Toint, 2006.
+%\end{proof}
 
-\mbox{}
+%\mbox{}
 
-The inverse implication of the second-order convergence theorem can be obtained from classical results in perturbations analysis (A.~V. Fiacco, {\sl Introduction to Sensitivity and  Stability Analysis in Nonlinear Programming}, Academic Press, New
-York, USA (1983), Theorem~3.2.2).
-More developments if the context of stochastic programming can be found in  Rubinstein and Shapiro (2003) and A.~Shapiro, {\sl Probabilistic constrained optimization: Methodology and applications}, in S.~Uryasev, editor, {\sl Statistical
-  inference of stochastic optimization problems}, pages
-282--304. Kluwer Academic Publishers, 2000.
+%The inverse implication of the second-order convergence theorem can be obtained from classical results in perturbations analysis (A.~V. Fiacco, {\sl Introduction to Sensitivity and  Stability Analysis in Nonlinear Programming}, Academic Press, New York, USA (1983), Theorem~3.2.2).
+%More developments if the context of stochastic programming can be found in  Rubinstein and Shapiro (2003) and A.~Shapiro, {\sl Probabilistic constrained optimization: Methodology and applications}, in S.~Uryasev, editor, {\sl Statistical inference of stochastic optimization problems}, pages 282--304. Kluwer Academic Publishers, 2000.
 
-\end{frame}
+%\end{frame}
 
 \begin{frame}
 \frametitle{Overfitting}
@@ -1256,8 +1252,8 @@ with a decreasing difference as $N$ grows.
 	
 	For theoretical justifications, see
 	\begin{quote}
-		B.K. Pagnoncelli, S. Ahmed, and A. Shapiro, ``Sample Average Approximation Method for Chance
-		Constrained Programming: Theory and Applications'', Journal of Optimization Theory and Applications 142 (2), pp. 399--416, 2009.
+		B.K. Pagnoncelli, S. Ahmed, and A. Shapiro (2009), ``Sample Average Approximation Method for Chance
+		Constrained Programming: Theory and Applications'', Journal of Optimization Theory and Applications 142 (2), pp. 399--416.
 	\end{quote}
 	
 	\mbox{}
