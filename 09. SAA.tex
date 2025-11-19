@@ -86,7 +86,7 @@ If $\bxi$ cdf is continuous or discrete with a large number of possible realizat
 We have to use some approximations as the Monte Carlo (MC) methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_N$:
 %The approximation for a sample of size $N$ is
 \[
-{\red \min_{z \in S} \hat{g}_N(z) = \frac{1}{N} \sum_{i = 1}^N
+{\red \min_{z \in S} \hat{g}_n(z) = \frac{1}{n} \sum_{i = 1}^n
   G(z, \xi_i)}.
 \]
 We sometimes refer to the original program as the {\blue true program}, or {\blue expected value program}, and the approximate program as the {\blue sample average approximation (SAA)}.
@@ -112,19 +112,19 @@ where $S = \{ x \,|\, Ax = b, x \geq 0 \}$
 \begin{frame}
 \frametitle{First-order convergence}
 
-What happens when $N \rightarrow \infty$?
+What happens when $n \rightarrow \infty$?
 
 \mbox{}
 
-Let {\red $z_N^*$ be a first-order critical point} for the approximate problem, i.e. the KKT conditions are satisfied at $z_N^*$.
+Let {\red $z_n^*$ be a first-order critical point} for the approximate problem, i.e. the KKT conditions are satisfied at $z_n^*$.
 
 \mbox{}
 
-$(\xi_1,\ldots,\xi_N)$ can be seen as the finite truncature of an infinite sequence $\overline{\xi} := \lbrace \xi_k \rbrace_{k =   1}^{\infty}$.
+$(\xi_1,\ldots,\xi_n)$ can be seen as the finite truncature of an infinite sequence $\overline{\xi} := \lbrace \xi_k \rbrace_{k =   1}^{\infty}$.
 
 \mbox{}
 
-Solution for a sample size $N$: $z_N^*(\xi_1,\ldots,\xi_N)$, or $z_N^*\left(\overline{\xi}\right)$.
+Solution for a sample size $n$: $z_n^*(\xi_1,\ldots,\xi_n)$, or $z_n^*\left(\overline{\xi}\right)$.
 
 \mbox{}
 
@@ -269,13 +269,57 @@ The random draws $\lbrace \xi_k \rbrace_{k= 1}^{\infty}$ are i.i.d.
 
 \noindent
 \textbf{A.1}
-For $P$-almost all $\xi$, the function $G(\cdot, \xi)$ is continuously differentiable on $S$.
+For $P$-almost all $\xi$, the function $G(\cdot, \xi)$ is continuously ifferentiable on $S$.
 
 \mbox{}
 
 \noindent
 \textbf{A.2}
-The family $G(z, \xi)$, $z \in S$, is dominated by a $P$-integrable function $K(\xi)$, i.e. $E_P[K]$ is finite and $| G(z, \xi) | \leq K(\xi)$ for all $z \in S$ and $P$-almost each $\xi$.
+The family $G(z, \xi)$, $z \in S$, is dominated by a $P$-integrable function $K(\xi)$, i.e. $\EE_P[K]$ is finite and $| G(z, \xi) | \leq K(\bxi)$ for all $z \in S$ and $P$-almost each $\xi$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Do we need {\bf A.2}?}
+
+{\bf A.2} is not implied by {\bf A.1}.
+
+\mbox{}
+
+Consider $\bxi$ s.t.
+$$
+P[\xi = n] = \frac{C}{n^5},\ n = 1, 2, 3,\ldots,
+$$
+where
+$$
+C = \frac{1}{\sum_{n = 1}^{\infty} n^{-5}} = \frac{1}{\zeta(5)} \approx 0.9644
+$$
+We have
+$$
+\EE[\xi^2] = C \sum_{n = 1}^{\infty} n^2\frac{1}{n^5} = C \sum_{n = 1}^{\infty}\frac{1}{n^3} = \frac{\zeta(3)}{\zeta(5)} < \infty
+$$
+
+\end{frame}
+
+\begin{frame}
+\frametitle{{\bf A.1} but not {\bf A.2}}
+
+Let $S=[0,1]$ and
+$$
+G(z,\bxi) := \bxi^4 z.
+$$
+Then
+$$
+G(z,n) = n^4 z \in C^1 \text{ on } S.
+$$
+So {\bf A.1} holds. Moreover
+$$
+\sup_{z \in S} | G(x,\bxi) | = \sup_{z \in S} \bxi^4 z = \bxi^4.
+$$
+Hence any candidate $K(\bxi)$ must satisfy $K(\bxi) \geq \bxi^4$. Thus
+$$
+\EE [K(\bxi)] \geq \EE \left[ \bxi^4 \right] = C \sum_{n = 1}^{\infty} n^4\frac{1}{n^5} = C \sum_{n = 1}^{\infty}\frac{1}{n} = +\infty.
+$$
 
 \end{frame}
 
@@ -286,8 +330,7 @@ The family $G(z, \xi)$, $z \in S$, is dominated by a $P$-integrable function $K(
 
 \mbox{}
 
-This last property and \textbf{A.2}, are typical assumptions in stochastic programming (see for instance Rubinstein and Shapiro, {\sl Discrete Event Systems}, John Wiley \& Sons, 1993).
-
+This last property and \textbf{A.2}, are typical assumptions in stochastic programming.
 \mbox{}
 
 The stronger form \textbf{A.1} is justified by our interest in the first-order optimality conditions.%, which are expressed in term of the gradient of the objective.
@@ -316,6 +359,13 @@ The convergence can be in probability (weak law) or almost surely (strong law).
 
 \mbox{}
 
+Proof: see Theorem 7.48 in \href{https://bpb-us-e1.wpmucdn.com/sites.gatech.edu/dist/4/1470/files/2021/03/SPbook.pdf}{Lecture notes on stochastic programming}.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Derivatives}
+
 Our motivation to study the first-order conditions leads us to introduce an additional assumption on the gradient.
 
 \mbox{}
@@ -324,18 +374,19 @@ Our motivation to study the first-order conditions leads us to introduce an addi
 \textbf{A.3}
 Each gradient component $\frac{\partial}{\partial [z]_l} G(z, \xi)$ ($l = 1,\ldots,m$), $z \in S$, is dominated by a $P$-integrable function.
 
+\begin{itemize}
+	\item 
+	\textbf{A.3} implies that $\EE_P[g(z)]$ is continuously differentiable on $S$, and
+	$\nabla_z g(z) = \EE_P\left[ \nabla_z G(z, \bxi) \right]$.
+	\item
+	Thus, $\EE_P [\nabla \hat{g}_n(z^*)] = \nabla g( z^*)$ (\textcolor{red}{unbiased estimator}).
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}
-\frametitle{Consequences}
+\frametitle{First-order convergence}
 
-\begin{itemize}
-\item 
-\textbf{A.3} implies that $\EE_P[g(z)]$ is continuously differentiable on $S$, and
-$\nabla_z g(z) = \EE_P\left[ \nabla_z G(z, \bxi) \right]$.
-\item
-Thus, $\EE_P [\nabla \hat{g}_n(z^*)] = \nabla g( z^*)$ (\textcolor{red}{unbiased estimator}).
-\item
 The {\blue first-order convergence} can be derived from the stochastic variational inequalities:
 \begin{itemize}
 	\item 
@@ -343,7 +394,6 @@ A. Shapiro, {\sl Monte Carlo sampling methods},
 in A.~Shapiro and A.~Ruszczy\'nski, editors, {\sl Stochastic Programming}, volume~10 of {\sl Handbooks in Operations Research and Management Science}, pages 353--425. Elsevier, 2003;
 \item
 A. Shapiro, {\sl Statistical Inference}, Chapter 5 in {\sl Lectures Notes in Stochastic Programming} ($3^{\text{rd}}$ edition), SIAM, 2021.
-\end{itemize}
 \end{itemize}
 
 \end{frame}
@@ -477,28 +527,30 @@ If $f$ is convex (i.e. we are in the convex programming framework), the conditio
 \begin{frame}
 \frametitle{Deterministic and convex constraints}
 
-Therefore, when $S$ is convex, we can rewrite the first-order criticality conditions at $z^*$ as the requirement that 
+\begin{itemize}
+	\item 
+Thus, when $S$ is convex, we can rewrite the first-order criticality conditions at $z^*$ as 
 $$
 -\nabla_z g(z^*) \in \mathcal{N}_{S}(z^*).
 $$
+\item 
 If moreover $S$ is deterministic, the feasible sets are the same for the true and SAA problems.
-
-\mbox{}
-
-The previous theorem allows us to easily establish the first-order convergence.
-Consider the choice $\Gamma(\cdot) = \mathcal{N}_S(\cdot)$; $\phi(z^*)$ belongs to $\Gamma(z^*)$ iff
+\item
+%The previous theorem allows us to easily establish the first-order convergence.
+Consider %the choice
+$\Gamma(\cdot) = \mathcal{N}_S(\cdot)$; $\phi(z^*)$ belongs to $\Gamma(z^*)$ iff
 \[
 \langle \phi(z^*), u-z^*\rangle \leq 0,\ \forall u \in S.
 \]
-
+\item
 We design such variational inequalities as \textcolor{red}{stochastic variational inequalities}.
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Convergence}
 
-The assumption (a) of the theorem always holds in this case.
 Take $\Phi(z,\xi) = -\nabla_z G(z, \xi)$ and represent by $S^*$ and $S^*_n$ the set of first-order critical points of the true and SAA generalized equations, respectively.
 
 \begin{itemize}
@@ -511,7 +563,7 @@ g(z)$, and that $\phi(z)$ is a continuous random vector on $S$, giving assumptio
 Assumption (d) follows from the ULLN, while \textbf{A.1} and the compacity of $S$ ensure assumption (c) by setting $\mathcal{S} = S$. 
 \end{itemize}
 
-The previous theorem ensures therefore the first-order criticality at the limit as $n\rightarrow\infty$, almost surely.
+The previous theorem therefore ensures the first-order criticality at the limit as $n\rightarrow\infty$, almost surely.
 
 \end{frame}
 
