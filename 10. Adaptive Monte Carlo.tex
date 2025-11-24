@@ -1,5 +1,4 @@
 % Compilé avec lualatex
-
 \documentclass{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -34,6 +33,8 @@
 
 \setbeamercovered{dynamic}
 
+\input{macros}
+
 \def\bxi{\boldsymbol\xi}
 \def\bepsilon{\boldsymbol\epsilon}
 \def\bomega{\boldsymbol\omega}
@@ -64,7 +65,7 @@
 
 \underline{Reminder}: we consider the stochastic problem
 \[
-\textcolor{red}{\min_{x \in S} g(x) = E_P \left[ G(x, \bxi) \right]},
+\textcolor{red}{\min_{x \in S} g(x) = \EE_P \left[ G(x, \bxi) \right]},
 \]
 where
 \begin{itemize}
@@ -281,11 +282,11 @@ Set $k \leftarrow k + 1$ and go to Step 1.
 \item
 The true function $g$ has a unique minimizer $x^* \in S$.
 \item
-$G(\cdot,\xi)$ is Lipschitz with Lipschitz constant $L(\xi)$ on $S$ a.s., and $E[L(\xi)] < \infty$.
+$G(\cdot,\xi)$ is Lipschitz with Lipschitz constant $L(\xi)$ on $S$ a.s., and $\EE[L(\xi)] < \infty$.
 \item
 $G(\cdot,\xi)$ is continuously differentiable at any $x \in \cB(x^*, \epsilon)$, $\epsilon > 0$, a.s.
 \item
-$\exists x \in S$ such that $E[\|\nabla_x G(x,\xi)\|^2] < \infty$.
+$\exists\, x \in S$ such that $\EE[\|\nabla_x G(x,\xi)\|^2] < \infty$.
 \item
 The sample function $\hat{g}_N(x)$ has a unique minimum $x_N^*$ a.s.
 \item
@@ -343,46 +344,48 @@ We recover the convergence rate of stochastic approximation method.
 \begin{frame}
 \frametitle{Internal-external adaptive method}
 
+\begin{itemize}
+	\item 
 The major issue with this procedure is how to quantify the word ``approximative'' in Step~1.
 If no care is taken, the resulting algorithm can in fact be more time-consuming that the direct minimization of $\hat{g}_{N_{\max}}$.
-
-\mbox{}
-
+\item
 We can also replace the stopping test on $N_{\max}$ by a test of the criticality conditions of optimality.
-
-\mbox{}
-
+\item 
 The \textcolor{blue}{internal approach} is a non-monotone strategy that depends on the underlying optimization methods.
 Here, we consider the unconstrained case.
-
-\mbox{}
-
+\item 
 More precisely, we generate a sample before the optimization process, with $N_{\max}$ i.i.d. random draws.
 At iteration $k$, we will use a subset of this initial sample, using $N_k$ of the $N_{\max}$ random draws, typically the first ones.
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Accuracy estimation}
 
+\begin{itemize}
+	\item 
 %For simplicity, we will use the first $N_k$ random draws.
 This implies that $\hat{g}_N$ is a smooth function, well defined for each choice of $N$.
-
-%\mbox{}
-
-In order to determine a sample size, we can measure the approximation accuracy.
-Let $\alpha_{\delta}$ be the quantile of a $\cN(0,1)$ associated to some significance level $\delta$, i.e. $P_{\bxi} [ -\alpha_{\delta} \leq Y \leq \alpha_{\delta} ] = \delta$, where $Y \sim \cN(0,1)$.
-
-\mbox{}
-
-We will use the central limit theorem
+\item
+%In order to determine a sample size, we can measure the approximation accuracy.
+Let $\alpha_{\delta}$ be the quantile of a $\cN(0,1)$ associated to some significance level $\delta$, i.e.
+$$
+P_{\bxi} [ -\alpha_{\delta} \leq Y \leq \alpha_{\delta} ] = \delta,
+$$
+where $Y \sim \cN(0,1)$.
+\item
+Central limit theorem:
 \[
 g(x) - \hat{g}_N(x) \Rightarrow \cN \left( 0, \frac{\sigma^2(x)}{N} \right),
 \]
-where $\sigma^2(x)$ is the variance of $g$, taken at the point $x$, in order to build a confidence interval for $g(x)$ around $\hat{g}_N(x)$, as
+%where $\sigma^2(x)$ is the variance of $g$, taken at the point $x$,
+\item
+Confidence interval for $g(x)$ around $\hat{g}_N(x)$:
 \[
 [\hat{g}_N(x) - \epsilon^{\delta}_N(x),\ \hat{g}_N(x) + \epsilon^{\delta}_N(x)],
 \]
+\end{itemize}
 
 \end{frame}
 
@@ -416,19 +419,14 @@ We will exploit this error estimation in the context of trust-region methods.
 \begin{frame}
 \frametitle{Basic principles}
 
-The basic idea is that if the model approximates the objective function well enough w.r.t. the accuracy of the objective function (which depends on the sample size), we presume that we could work with a less accurate approximation, and therefore reduce the sample size.
-
-\mbox{}
-
-On the other hand, if the adequation of the model with respect to the accuracy of the objective function is poor, we can increase the sample size in an attempt to correct this deficiency.
-
-\mbox{}
-
+\begin{itemize}
+\item
+Basic idea:if the model approximates the objective function well enough w.r.t. the accuracy of the objective function (which depends on the sample size), we presume that we could work with a less accurate approximation, and reduce the sample size.
+\item
+If the adequation of the model w.r.t. the accuracy of the objective function is poor, we can increase the sample size in an attempt to correct this deficiency.
+\item
 We assume the assumptions developed for the consistency analysis hold.
-
-\mbox{}
-
-A formal algorithm description follows.
+\end{itemize}
 
 \end{frame}
 
@@ -595,9 +593,11 @@ However, %since the sample has been generated before the optimization process,
 a sufficient improvement during several consecutive iterations can lead to a significant decrease.% in comparison to the approximation accuracy, while keeping the computational cost lower than if $N_{\max}$ draws were used.
 \begin{itemize}
 \item 
-If $\tau_1^k \geq \tau_2^k$, the ratio between the current sample size and the potential next one is smaller than the ratio between $\Delta m_k$ and the estimated error.
+If $\tau_1^k \geq \tau_2^k$, 
+%the ratio between the current sample size and the potential next one is smaller than the ratio between $\Delta m_k$ and the estimated error.
 %If the sample size increases, the error decreases for a similar $\Delta m_j^{N_j}$ ($j \geq k$), and therefore $\tau_1^k$ increases.
-We capitalize on $\tau_1^k$ by computing a sample size smaller than  $N^s$, such that an improvement of the order $\epsilon_\delta^{N_k}(z_k)$ would be reached in approximatively $\lceil \tau_1^k \rceil$ iterations if $\tau_1^j$ is similar to $\tau_1^k$ for $j$ close to $k$.
+%We capitalize on $\tau_1^k$ by
+compute a sample size smaller than  $N^s$, such that an improvement of the order $\epsilon_\delta^{N_k}(z_k)$ would be reached in approximatively $\lceil \tau_1^k \rceil$ iterations if $\tau_1^j$ is similar to $\tau_1^k$ for $j$ close to $k$.
 \item
 If $\tau_1^k < \tau_2^k$, it can nevertheless be cheaper to continue to work with a smaller sample size, defined again as $\lceil \chi_1 N_{\max} \rceil$, as long as $\tau_1^k$ is greater to some threshold $\nu_1$ (for instance 0.2).
 %Below this threshold, we consider that the decrease is too small compared to the accuracy, and we possiblty increase the sample size.
@@ -633,23 +633,25 @@ m_k^{N^-}}.
 
 \end{frame}
 
-\begin{frame}
-\frametitle{Additional tricks}
+%\begin{frame}
+%\frametitle{Additional tricks}
 
-\begin{itemize}
-\item Minimum sample size update
+%\begin{itemize}
+%\item Minimum sample size update
 
-We want to be sure to use a sample size equal to $N_{\max}$ during the final iteration, in order to work with the desired accuracy.
-We increase $N_{\min}$ when the adaptive strategy does not deliver sufficient numerical gains, or simply by 1 at each iteration.
+%We want to be sure to use a sample size equal to $N_{\max}$ during the final iteration, in order to work with the desired accuracy.
+%We increase $N_{\min}$ when the adaptive strategy does not deliver sufficient numerical gains, or simply by 1 at each iteration.
 
-\item
-Additional safeguards to avoid theoretical pathological cases (a critical point of the SAA with $N_k < N_{\max}$ is found).
-\end{itemize}
+%\item
+%Additional safeguards to avoid theoretical pathological cases (a critical point of the SAA with $N_k < N_{\max}$ is found).
+%\end{itemize}
 
-\end{frame}
+%\end{frame}
 
 \begin{frame}
 \frametitle{Convergence}
+
+Additional computational safeguards allow to establish the following result.
 
 \begin{theo}
 Under some regularity assumptions, if
@@ -657,7 +659,9 @@ Under some regularity assumptions, if
 \exists \kappa > 0\text{ such that }
 \epsilon_{\delta}^{N_k}(x_k) \geq \kappa,
 \]
-for all $k$ large enough, then, almost surely, the algorithm converges in a finite number of iterations with a final sample size equal to $N_{\max}$, or the number of iterations is infinite and there exists some $j$ such that for all the iterations $i$, $i \geq j$, $N_i$ is equal to $N_{\max}$.
+for all $k$ large enough, then, a.s., the algorithm converges 
+with $N_i = N_{\max}$ for all $i$ large enough.
+%in a finite number of iterations with a final sample size equal to $N_{\max}$, or the number of iterations is infinite and there exists some $j$ such that for all the iterations $i$, $i \geq j$, $N_i$ is equal to $$.
 \end{theo}
 %Proof: see Bastin, Cirillo et Toint, {\sl An adaptive {Monte Carlo}
 %  algorithm for computing mixed logit estimators}, Computational
@@ -665,7 +669,8 @@ for all $k$ large enough, then, almost surely, the algorithm converges in a fini
 
 \end{frame}
 
-\begin{frame}{Application to discrete choice theory}
+\begin{frame}[fragile]
+\frametitle{Application to discrete choice theory}
 		
 			Discrete {\blue set of alternatives} available for individual $i$:
 			$\mathcal{A}(i)$.
@@ -927,7 +932,7 @@ and al.)\\
 	\includegraphics[scale=0.5]{DistTo_sampleSize_CRN.PNG}
 \end{frame}
 
-\begin{frame}{IRN/CRN combination (I/CRN)}
+\begin{frame}{IRN/CRN combination (ICRN)}
 	
 	\begin{enumerate}
 		\item $N_{k+1} > N_k$
