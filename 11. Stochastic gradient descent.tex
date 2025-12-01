@@ -9,6 +9,10 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
 %\usepackage{mathlist}
 
 \usepackage{amsmath,amssymb,amsthm}
@@ -166,24 +170,32 @@ Assume a unique minimizer $x^*$, and
 \begin{enumerate}
 \item[A.1]
 $f(x)$ is continuously differentiable and its gradient is Lipschitz continuous with Lipschitz constant $L > 0$, i.e. $\forall\, x, y \in \RR^d$,
-$$
+\begin{equation}
 \| \nabla_x f(x) - \nabla_x f(y) \|_2 \leq L \| x - y \|_2
-$$
+\tag{A.1}
+\label{ass:Lipschitz}
+\end{equation}
 \item[A.2]
 The iterates remain a.s. bounded, i.e.
-$$
+\begin{equation}
 \sup_k \| x_k \| < \infty\ \text{almost surely}.
-$$
+\tag{A.2}
+\label{ass:bounds}
+\end{equation}
 \item[A.3]
 There exist scalars $M \geq 0$ and $M_V \geq 0$ s.t. $\forall\, k$,
-$$
+\begin{equation}
 \var[\nabla_x Y(x, \xi_k)] \leq M + M_V\| \nabla_x f(x_k)\|_2^2
-$$
+\tag{A.3}
+\label{ass:var}
+\end{equation}
 \item[A.4]
 The sequence $\alpha_k$, $k=1,2,\ldots$, satisfies
-$$
+\begin{equation}
 \sum_{k=0}^{\infty}\alpha_k=\infty \quad \mbox{ and } \quad \sum_{k=0}^{\infty}\alpha_k^{2} < \infty.
-$$
+\tag{A.4}
+\label{ass:steps}
+\end{equation}
 \end{enumerate}
 
 \end{frame}
@@ -193,7 +205,7 @@ $$
 
 \begin{itemize}
 \item 
-In A.3, $\var_{\xi_k} [\nabla_x Y(x, \xi_k)]$ does not refer to the covariance matrix of $\nabla_x Y(x,  \xi_k)$.
+In \ref{ass:var}, $\var_{\xi_k} [\nabla_x Y(x, \xi_k)]$ does not refer to the covariance matrix of $\nabla_x Y(x,  \xi_k)$.
 \item
 Variance of a random vector $g(\xi_k)$:
 \begin{align*}
@@ -447,7 +459,7 @@ $A(x) : \Theta \rightarrow \Theta$.
 \mbox{}
 
 Let $A_k(x)$ represent the iterate obtained after $k$ successive applications
-of the $A(\cdot)$ on the initial iterate $x$.
+of $A(\cdot)$ on the initial iterate $x$.
 
 \mbox{}
 
@@ -515,7 +527,7 @@ For settings where the derivative is unobservable, there is a slight degradation
 Assumptions:
 \begin{enumerate}
 \item
-$E[ Y^2 ( x , \xi)] < \infty$ for all $x \in \Theta$.
+$\EE[ Y^2 ( x , \xi)] < \infty$ for all $x \in \Theta$.
 \item
 The function $Y(x, \xi)$ is Lipschitz w.p.1, with Lipschitz constant $K(\xi)$, and $\EE[K(\xi)] < \infty$.
 \item
@@ -603,7 +615,7 @@ $$
 \begin{frame}
 \frametitle{Stochastic processes}
 
-While we assumme the draws $\xi_i$, $i = 1,2,\ldots$ are i.i.d., it is possible to extend the results to the situation where $\lbrace \xi_i, i = 1,2,\ldots \rbrace$ form an adapted stochastic process, where each $\xi_i$ can depend on the previous ones.
+While we assume the draws $\xi_i$, $i = 1,2,\ldots$ are i.i.d., it is possible to extend the results to the situation where $\lbrace \xi_i, i = 1,2,\ldots \rbrace$ form an adapted stochastic process, where each $\xi_i$ can depend on the previous ones.
 
 \end{frame}
 
@@ -627,12 +639,14 @@ Active learning is not covered here, but again, the results can be extended to t
 
 \begin{theorem}
 Under Assumption A.1 (Lipschitz continuity), $\forall k \in \NN$, the iterates of the SG method satisfy
-\begin{multline*}
+%\begin{multline*}
+$$
 \EE_{\xi_k}[f(x_{k+1})] - f(x_k)
-\\ \leq
--\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]
+%\\
+ \leq -\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]
 +\frac{1}{2} \alpha_k^2 L \EE_{\xi_k} \left[ \| g(x_k, \xi_k )\|_2^2 \right].
-\end{multline*}
+$$
+%\end{multline*}
 \end{theorem}
 \begin{itemize}
 	\item $\alpha_k \nabla f(x_k)^T\EE_{\xi_k}[g(x_k,\xi_k)]$: \textcolor{blue}{expected decrease};
@@ -667,43 +681,60 @@ Under Assumption A.1 (Lipschitz continuity), $\forall k \in \NN$, the iterates o
 \end{frame}
 
 \begin{frame}
-\frametitle{Assumption A.5: first and second moment limits}
+\frametitle{Assumptions: first and second moment limits}
 
 The SG method applied to $f(\cdot)$ satisfies
 \begin{enumerate}[a)]
 \item
-The sequence of iterates $\{ x_k \}$ is contained in an open set over which $f \geq f_{lb}$.
+There exists an open set $\calA$ such that
+$$
+f(x) \geq f_{lb}(x),\ \forall\, x \in \calA,
+$$
+and
+\begin{equation}
+x_k \in \calA,\ \forall k \in \NN
+\tag{A.5}
+\label{ass:open_set}
+\end{equation}
 \item
 $\exists \mu, \mu_G$ such that $0 < \mu < \mu_G$ and $\forall k \in \NN$,
-\begin{align*}
+\begin{equation}
+\begin{aligned}
 \nabla f(x_k)^T \EE_{\xi_k} [g(x_k, \xi_k)] &\geq \mu \| \nabla f(x_k) \|_2^2, \\
 \| \EE_{\xi_k} [g(x_k, \xi_k)] \|_2 &\leq \mu_G \| \nabla f(x_k) \|_2.
-\end{align*}
+\end{aligned}
+\tag{A.6}
+\label{ass:sufficient_descent}
+\end{equation}
 \item
 $\exists M \geq 0, M_V \geq 0$ such that $\forall k \in \NN$,
-\begin{align*}
+\begin{equation}
+	\begin{aligned}
 \var_{\xi_k} [g(x_k, \xi_k)]
 &= \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right] - \left( \EE_{\xi_k} [\| g(x_k, \xi_k) \|_2] \right)^2 \\
 &\leq M + M_V \| \nabla f(x_k) \|_2^2.
-\end{align*}
+\end{aligned}
+\tag{A.7}
+\label{ass:varg}
+\end{equation}
 \end{enumerate}
 	
 \end{frame}
 
 \begin{frame}
-\frametitle{Assumption A.5: notes}
+\frametitle{Assumptions: notes}
 
 \begin{itemize}
 \item
-A.5 b) expresses that in expectation, $g(x_k, \xi_k)$ is a sufficient descent direction.
+\ref{ass:sufficient_descent} expresses that in expectation, $g(x_k, \xi_k)$ is a sufficient descent direction.
 \begin{itemize}
 	\item True if $\EE_{\xi_k} [g(x_k, \xi_k)] = H_k \nabla f(x_k)$ with $H_k$ positive definite and bounded spectrum.
-	\item Particular case: $H_k = I$. Then A.5 b) holds with $\mu = \mu_G = 1$. 
+	\item Particular case: $H_k = I$. Then \ref{ass:sufficient_descent} holds with $\mu = \mu_G = 1$. 
 \end{itemize}
 \item 
-A.5 c) is a direct generalization of A.3.
+\ref{ass:varg} is a direct generalization of \ref{ass:var}.
 \item
-From A.5 b) and A.5 c),
+From \ref{ass:sufficient_descent} and \ref{ass:varg},
 \begin{align*}
 \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right]
 & \leq \left( \EE_{\xi_k} [\| g(x_k, \xi_k) \|_2] \right)^2 + M + M_V \| \nabla f(x_k) \|_2^2 \\
@@ -717,8 +748,8 @@ with $M_G = M_V + \mu_G^2 \geq \mu^2 > 0$.
 \begin{frame}
 \frametitle{Moments}
 
-\begin{theorem}
-	Under Assumptions A.1 and A.5, $\forall k \in \NN$,
+\begin{theorem}[Moments]
+	Under Assumptions~\ref{ass:Lipschitz} and \ref{ass:open_set}--\ref{ass:varg}, $\forall k \in \NN$,
 	\begin{align*}
 		\EE_{\xi_k}[f(x_{k+1})] - f(x_k)
 		& \leq - \mu \alpha_k \| \nabla f(x_k) \|^2
@@ -740,7 +771,7 @@ We already proved
 $$
 	\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
 $$
-From A.5 b), this leads to
+From \ref{ass:sufficient_descent}, this leads to
 $$
 \EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right],
 $$
@@ -766,9 +797,11 @@ Consider $f(\cdot) \in C^2$ with a convex domain.
 	\forall x, y \in dom(f),\ f(y) \geq f(x) + \nabla f(x)^T(y-x)
 	$$
 	\item Strong convexity
-	$$
+	\begin{equation}
 	\exists c > 0, \forall x, y \in dom(f),\ f(y) \geq f(x) + \nabla f(x)^T(y-x) + \frac{1}{2} c \| y - x \|^2_2.
-	$$
+	\tag{A.8}
+	\label{ass:strong_convexity}
+	\end{equation}
 	Alternate definition if $f(\cdot) \in C^2$:
 	$$
 	\nabla^2 f(x) \succeq cI,
@@ -784,6 +817,199 @@ Implications of strong convexity:
 	$\forall x \in dom(f), 2c (f(x) - f^*) \leq \| \nabla f(x) \|_2^2$
 \end{itemize}
 
+\end{frame}
+
+	\begin{frame}{Hierarchy of Convexity}
+	\begin{center}
+		\begin{tikzpicture}[scale=1.2]
+			% Boxes
+			\node[draw, rectangle, minimum width=4cm, minimum height=1cm, fill=blue!10] (strong) at (0,0) {Strongly Convex};
+			\node[draw, rectangle, minimum width=5cm, minimum height=1cm, fill=blue!20] (strict) at (0,1.5) {Strictly Convex};
+			\node[draw, rectangle, minimum width=6cm, minimum height=1cm, fill=blue!30] (convex) at (0,3) {Convex};
+			
+			% Arrows
+			\draw[->, thick] (strong) -- (strict);
+			\draw[->, thick] (strict) -- (convex);
+			
+			% Labels
+%			\node[right] at (3.5,0.75) {$\subset$};
+%			\node[right] at (3.5,2.25) {$\subset$};
+		\end{tikzpicture}
+	\end{center}
+	
+	\vspace{0.5cm}
+	\textbf{Implication chain:}
+	\[
+	\text{Strongly convex} \Rightarrow \text{Strictly convex} \Rightarrow \text{Convex}
+	\]
+	
+	The reverse implications do not hold!
+\end{frame}
+
+\begin{frame}{Example 1: Linear Function}
+\begin{columns}
+	\column{0.5\textwidth}
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8]
+			\begin{axis}[
+				axis lines=middle,
+				xlabel=$x$,
+				ylabel=$f(x)$,
+				domain=-2:2,
+				samples=100,
+				width=6cm,
+				height=5cm,
+				title={$f(x) = 2x + 1$}
+				]
+				\addplot[blue, thick] {2*x + 1};
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
+	
+	\column{0.5\textwidth}
+	\textbf{Classification:}
+	\begin{itemize}
+		\item[$\checkmark$] Convex
+		\item[$\times$] Strictly convex
+		\item[$\times$] Strongly convex
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	Linear functions satisfy convexity with equality, but not the strict inequalities.
+\end{columns}
+\end{frame}
+
+\begin{frame}{Example 2: Quadratic Function}
+\begin{columns}
+	\column{0.5\textwidth}
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8]
+			\begin{axis}[
+				axis lines=middle,
+				xlabel=$x$,
+				ylabel=$f(x)$,
+				domain=-2:2,
+				samples=100,
+				width=6cm,
+				height=5cm,
+				title={$f(x) = x^2$}
+				]
+				\addplot[blue, thick] {x^2};
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
+	
+	\column{0.5\textwidth}
+	\textbf{Classification:}
+	\begin{itemize}
+		\item $\checkmark$ Convex
+		\item $\checkmark$ Strictly convex
+		\item $\checkmark$ Strongly convex ($m=2$)
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	The second derivative $f''(x) = 2 > 0$ ensures strong convexity.
+\end{columns}
+\end{frame}
+
+\begin{frame}{Example 3: Quartic Function}
+\begin{columns}
+	\column{0.5\textwidth}
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8]
+			\begin{axis}[
+				axis lines=middle,
+				xlabel=$x$,
+				ylabel=$f(x)$,
+				domain=-1.5:1.5,
+				samples=100,
+				width=6cm,
+				height=5cm,
+				title={$f(x) = x^4$}
+				]
+				\addplot[blue, thick] {x^4};
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
+	
+	\column{0.5\textwidth}
+	\textbf{Classification:}
+	\begin{itemize}
+		\item $\checkmark$ Convex
+		\item $\checkmark$ Strictly convex
+		\item $\times$ Strongly convex
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	$f''(0) = 0$ means no uniform lower bound on curvature. Strictly convex but not strongly convex.
+\end{columns}
+\end{frame}
+
+\begin{frame}{Example 4: Exponential Function}
+\begin{columns}
+	\column{0.5\textwidth}
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8]
+			\begin{axis}[
+				axis lines=middle,
+				xlabel=$x$,
+				ylabel=$f(x)$,
+				domain=-2:2,
+				samples=100,
+				width=6cm,
+				height=5cm,
+				ymax=8,
+				title={$f(x) = e^x$}
+				]
+				\addplot[blue, thick] {exp(x)};
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
+	
+	\column{0.5\textwidth}
+	\textbf{Classification:}
+	\begin{itemize}
+		\item $\checkmark$ Convex
+		\item $\checkmark$ Strictly convex
+		\item $\times$ Strongly convex (globally)
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	Strictly convex since $f''(x) = e^x > 0$, but $f''(x) \to 0$ as $x \to -\infty$.
+\end{columns}
+\end{frame}
+
+\begin{frame}{Example 5: Piecewise Linear Function}
+\begin{columns}
+	\column{0.5\textwidth}
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8]
+			\begin{axis}[
+				axis lines=middle,
+				xlabel=$x$,
+				ylabel=$f(x)$,
+				domain=-2:2,
+				samples=100,
+				width=6cm,
+				height=5cm,
+				title={$f(x) = |x|$}
+				]
+				\addplot[blue, thick] {abs(x)};
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
+	
+	\column{0.5\textwidth}
+	\textbf{Classification:}
+	\begin{itemize}
+		\item $\checkmark$ Convex
+		\item $\times$ Strictly convex
+		\item $\times$ Strongly convex
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	Convex but has linear segments where strict inequality fails.
+\end{columns}
 \end{frame}
 
 \begin{frame}
@@ -802,19 +1028,125 @@ Implications of strong convexity:
 \end{frame}
 
 \begin{frame}
-\frametitle{Analysis}
+	\frametitle{Total expectation}
 
-More details at:
 \begin{itemize}
-\item 
-\url{https://icml.cc/2016/tutorials/part-2.pdf}
-\item 
-\url{https://icml.cc/2016/tutorials/part-3.pdf}
+\item \( \EE_k \): expectation w.r.t. \( \bsxi_k \).
+\item \( \EE \): full expectation w.r.t. all \( \bsxi_1,\ldots,\bsxi_k \):
+$$
+\EE [ x_{k+1} ] =
+\EE_{\bsxi_1}[\EE_{\bsxi_2}[\ldots\EE_{\bsxi_k}[x_{k+1}]]]
+$$
 \end{itemize}
+	
+\end{frame}
 
-We will refer to this material.
+\begin{frame}{SG with fixed stepsize}
+
+\begin{theorem}
+Under Assumptions~\ref{ass:Lipschitz}, \ref{ass:open_set}--\ref{ass:varg}, and \ref{ass:strong_convexity}, if we apply the SGD with a \textcolor{red}{fixed stepsize} $\alpha_k = \overline{\alpha}$ satisfying
+\begin{equation}
+0 < \overline{\alpha} \leq \frac{\mu}{LM_G},
+\label{eq:fixed_stepsize}
+\end{equation}
+then, for all $k \in \NN$,
+\begin{align*}
+\EE[ f(x_k) - f^* ] & \leq \frac{\overline{\alpha}LM}{2c\mu} - (1-\overline{\alpha}c\mu)^{k-1} \left( f(x_1) - f^* - \frac{\overline{\alpha}LM}{2c\mu} \right) \\
+& \overset{k \rightarrow \infty}{\longrightarrow} \frac{\overline{\alpha}LM}{2c\mu}.
+\end{align*}
+\end{theorem}
+
+\begin{itemize}
+	\item Converges only to a neighborhood of optimum.
+\end{itemize}
 
 \end{frame}
 
+\begin{frame}{Proof}
+
+The moments theorem, with $\alpha_k = \overline{\alpha}$ and \eqref{eq:fixed_stepsize}, gives
+\begin{align*}
+\EE_{\xi_k}[f(x_{k+1})] - f(x_k)
+	& \leq - \overline{\alpha}\left( \mu -\frac{1}{2}\overline{\alpha} LM_G \right) \| \nabla f(x_k) \|_2^2
+	+ \frac{1}{2} \overline{\alpha}^2 LM \\
+	& \leq -\frac{1}{2} \overline{\alpha} \mu \| \nabla f(x_k) \|_2^2
+	+ \frac{1}{2} \overline{\alpha}^2 LM.
+\end{align*}
+From strong convexity, this implies
+$$
+\EE_{\xi_k}[f(x_{k+1})] - f(x_k) \leq
+- \overline{\alpha} c \mu \left( f(x_k) - f^* \right) + \frac{1}{2} \overline{\alpha}^2 LM,
+$$
+or equivalently
+$$
+\EE_{\xi_k}[f(x_{k+1})] - f^* \leq
+f(x_k) - f^* - \overline{\alpha} c \mu \left( f(x_k) - f^* \right) + \frac{1}{2} \overline{\alpha}^2 LM.
+$$
+
+\end{frame}
+
+\begin{frame}{Proof}
+
+Thus,
+$$
+\EE \left[ \EE_{\xi_k}[f(x_{k+1})] - f^* \right] \leq
+(1 - \overline{\alpha} c \mu) \EE \left[ f(x_k) - f^* \right] + \frac{1}{2} \overline{\alpha}^2 LM,
+$$
+or
+\begin{align*}
+\EE \left[ f(x_{k+1}) - f^* \right] - \frac{\overline{\alpha} LM}{ 2c \mu}
+& \leq
+(1 - \overline{\alpha} c \mu) \left( \EE \left[ f(x_k) - f^* \right] - \frac{\overline{\alpha} LM}{ 2c \mu} \right) \\
+& \leq
+(1 - \overline{\alpha} c \mu)^{k-1} \left( \EE \left[ f(x_1) - f^* \right] - \frac{\overline{\alpha} LM}{ 2c \mu} \right) \\
+& \overset{k \rightarrow \infty}{\longrightarrow} \frac{\overline{\alpha}LM}{2c\mu},
+\end{align*}
+as
+$$
+0 < \overline{\alpha} c \mu \leq \frac{c\mu^2}{LM_G}
+\leq \frac{c\mu^2}{L\mu^2} \leq 1.
+$$
+	
+\end{frame}
+
+\begin{frame}{SG with fixed stepsize}
+
+\begin{itemize}
+	\item If noise \(M=0\), recovers linear convergence.
+	\item If \(M>0\), noise limits accuracy.
+\end{itemize}
+	
+\end{frame}
+
+%\begin{frame}{SG with diminishing stepsizes}
+%	\begin{itemize}
+%		\item Halving \(\alpha\) eventually halves \(F(w_k)-F^\star\).
+%		\item Overall rate: \( O(1/k) \).
+%	\end{itemize}
+%\end{frame}
+
+%\begin{frame}{Minibatching}
+%	Using minibatches with stepsize \( \alpha_k \):
+	
+%	\begin{itemize}
+%		\item Variance decreases as \(1/b\) (batch size).
+%		\item Implementation advantages on GPUs.
+%	\end{itemize}
+%\end{frame}
+
+\begin{frame}
+	\frametitle{Analysis}
+	
+	More details at:
+	\begin{itemize}
+		\item 
+		\url{https://icml.cc/2016/tutorials/part-2.pdf}
+		\item 
+		\url{https://icml.cc/2016/tutorials/part-3.pdf}
+	\end{itemize}
+	
+	We will refer to this material.
+	
+\end{frame}
 
 \end{document}
