@@ -13,11 +13,13 @@
 
 \usepackage{amsmath}
 
+\include{macros}
+
 % \setbeamercovered{transparent}
 %\usecolortheme{crane}
 \title[Simulation]{Discrete event simulation}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 
 \def\bu{\boldsymbol{u}}
@@ -33,17 +35,17 @@
 	
 	\begin{description}
 		\item[System]
-		collection d'entités qui agissent et interagissent afin d'accomplir une certaine fin logique.\\
-		L'état d'un système est la collection de variables nécessaires pour décrire un système à un instant particulier.
+		A collection of entities that act and interact in order to achieve a certain logical goal.\\
+		The state of a system is the collection of variables necessary to describe the system at a particular moment.
 		\item[Model]
-		description simplifiée d'un système, dans le but d'évaluer sa performance ou l'effet de certaines décisions.
+		A simplified description of a system, aimed at evaluating its performance or the effect of certain decisions.
 		\item[Simulation]
-		faire évoluer le modèle d'un système en fournissant les entrées appropriées, puis observer et analyser les résultats.
+		Evolving the model of a system by providing appropriate inputs, then observing and analyzing the results.
 	\end{description}
 	
 	\mbox{}
 	
-	Two main system types: discrete and continuous.Deux types principaux de systèmes: discrets et continus.
+	Two main system types: discrete and continuous.
 	
 \end{frame}
 
@@ -312,258 +314,223 @@ We assume $S_i$ and $A_i$ mutually independent.
 \end{frame}
 
 \begin{frame}
-\frametitle{Example: GI/G/1 queue}
-
-The first client arrives at time ${A_0}$ in an empty system.
-
-\mbox{}
-
-Nous souhaitons simuler ce système pour une durée ${T}$ et calculer
-l'attente moyenne par client et la longueur moyenne de la file d'attente.
-Les types d'événements sont
-\begin{enumerate}
-\item
-arrivée;
-\item
-départ;
-\item
-fin de la simulation.
-\end{enumerate}
-Les variables aléatoires (indépendentes) à générer sont $A_1, A_2,
-A_3, \dots$ et $S_1, S_2, S_3, \dots$.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Example: GI/G/1 queue}
-
-\begin{itemize}
-\item
-${W_i}$, le temps d'attente du client $i$;
-\item
-${Q(t)}$, la longueur de la file d'attente au temps $t$;
-\item
-${N_c(t)}$, le nombre de clients ayant débuté leur service durant l'intervalle $[0,t]$.
-\end{itemize}
-Supposons que nous voulons calculer, pour l'intervalle $[0,T]$,
-l'\emph{attente moyenne} par client,
-\[
- {\overline{W}_{N_c(T)}} = {1\over N_c(T)} \sum_{i=1}^{N_c(T)} W_i;
-\]
-et la \emph{longueur moyenne} de la file d'attente:
-\[
- {\overline{Q}_T} = {1\over T} \int_0^T Q(t) dt.
-\]
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Example: GI/G/1 queue}
-
-Cette dernière intégrale est facile à calculer par simulation.
-
-\mbox{}
-
-Pour chaque \emph{client}, nous créons un \emph{objet} contenant l'instant  d'arrivée et la durée de service.
-
-\mbox{}
-
-Variables d'état: liste des clients en attente et la liste les clients en service.
-
-\mbox{}
-
-+ horloge de simulation,
-compteurs statistiques (au besoin), \emph{liste} des événements futurs prévus, 
- par ordre chronologique, et une procédure pour chaque type d'événement.
- 
-\end{frame}
-
-\begin{frame}
-\frametitle{Queueing system simulation}
-
-\begin{small}
-\begin{description}
-\item[Arrivée]
-Générer $A$ selon $F$ et prévoir une autre arrivée 
-    dans $A$ unités de temps;\\
-Créer le nouveau client et noter son instant d'arrivée;\\
-Générer sa durée de service $S$ selon $G$;\\
-{\bf Si} (serveur est occupé) {\bf alors}\\
-\quad Insérer ce client dans la liste des clients en attente;\\
-{\bf sinon}\\
-\quad   Insérer le client dans la liste des clients en service;\\
-\quad   Prévoir son départ dans $S$ unités de temps; \\
-Mise à jour des statistiques voulues.
-\item[Départ]
-Enlever le client de la liste des clients en service;\\
-{\bf Si} la file d'attente n'est pas vide {\bf alors}\\
-\quad  Enlever le premier client de la liste d'attente;\\
-\quad  L'insérer dans la liste des clients en service;\\
-\quad  Récupérer son $S$ et prévoir son départ dans 
-       $S$ unités de temps;\\
-Mise à jour des statistiques voulues.
-\item[Fin-de-la-Simulation]
-Imprimer un rapport et terminer le programme.
-\end{description}
-\end{small}
-\end{frame}
-
-\begin{frame}
-\frametitle{Simulation}
-
-Démarrer la simulation:
-\begin{itemize}
-\item
-initialiser des variables et compteurs,
-\item
-prévoir la ``Fin-de-la-Simulation'' au temps $T$
-\item
-générer $A$ selon $F$ et prévoir la première ``Arrivée'' dans $A$ unités de temps,
-\item
-lancement de la simulation.
-\end{itemize}
-
-\mbox{}
-
-L'exécution de la simulation consiste simplement à répéter la boucle
-suivante:\\
-{\bf Répéter:} exécuter le prochain événement
-     dans la liste d'événements\\
-{\bf jusqu'à:} la liste des événements prévus est vide,\\
-\quad    ou bien un événement stoppe la simulation.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Simulation sans liste d'événements.}
-
-Pas toujours indispensable de recourir à l'approche par événements.
-
-\mbox{}
-
-Exemple: récurrence de Lindley:
-\[
- W_1 = 0,\quad W_{i+1} = \max(0,\; W_i + S_i - A_{i+1}).
-\]
-
-Nous pouvons ainsi facilement simuler pour un nombre fixe de clients (au lieu d'un horizon de temps $T$ fixe).
-
-\mbox{}
-
-Le formulation du programme basée sur la récurrence de Lindsley revient à traiter un problème d'intégration sur $[0,1)^t$.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Récurrence de Lindley}
-
-Supposons que nous souhaitions estimer $E[\overline{W}_{100}]$ par
-${\overline{W}_{100}}$:
-\[
-{\overline{W}_{100}} = \frac{1}{100} \sum_{i=1}^{100} W_i.
-\]
-
-\mbox{}
-
-Il nous faut $A_1, S_1, A_2, S_2, \dots, A_{99}, S_{99}$.
-Si on pose ${A_i} = F^{-1}(U_{2i-1})$ et ${S_i} = G^{-1}(U_{2i})$, où
-$U_j$, $j = 1,\ldots,99$, sont des variables aléatoires uniformes sur
-$(0,1)$, alors $\overline{W}_{100} = f(U_1,\dots,U_{198})$ ($f$ étant de
-forme inconnue dans le cas présent).
-
-\mbox{}
-
-Nous avons donc $t=198$, i.e., 
-\[
-  E[\overline{W}_{100}] = \int_{[0,1)^{198}} f(\bu)d\bu.
-\]
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Nombre aléatoire de clients}
-
-Par contre, si nous voulons simuler $\overline{W}_{N_c(T)}$, le nombre de clients
-$N_c(T)$ est aléatoire et non borné.
-Nous devrions donc choisir $t=\infty$ comme dimension.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Approche par processus}
-
-Un processus est une séquence temporellement ordonnée d'événements interreliés, séparés par certains intervalles de temps,
-qui décrit l'expérience entière d'une ``entité'' comme celle-ci évolue à travers un ``système''.
-Un système ou un modèle de simulation peut avoir différents types de
-processus.
-
-\mbox{}
-
-Une routine sera associée à chaque processus du modèle, décrivant son
-histoire entière à travers le système.
-
-\mbox{}
-
-Au contraire de l'approche par événements, une routine de processus
-contient explicitement le passage du temps simulé et a généralement de
-multiples points d'entrée.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Processes vs Events}
-
-Une simulation utilisant l'approche par processus évolue aussi au
-cours du temps en exécutant les événements dans l'ordre de leur
-occurence.
-
-\mbox{}
-
-En interne, les approches par événement et par processus sont donc
-très similaires.
-
-\mbox{}
-
-Pour l'utilisateur, le raisonnement soit
-différent, et puisse parfois (mais pas toujours) être plus naturel pour l'approche par processus.
-
-%\mbox{}
-
-%En outre, l'approche par processus est souvent plus lente en terme de
-%temps d'exécution, puisque le simulateur doit au final traiter des
-%événements, et gérer des processus pouvant être concurrents.
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Amélioration de l'Efficacité}
-
-The following material is adapted from Pierre L'Ecuyer's class ``Simulation: stochastic aspects''..
-
-\mbox{}
+	\frametitle{Example: GI/G/1 queue}
 	
-	L'efficacité d'un estimateur $X$ se
-	définit comme suit:
-	$$
-	eff[X] = {1\over MSE[X] C(X)},
-	$$
-	where MSE stands for mean square error and $C(X)$ represents the cost to compute $X$.
+	The first client arrives at time ${A_0}$ in an empty system.
 	
 	\mbox{}
 	
-	Est-il possible, étant donné $X$, de construire un nouvel estimateur $Y$ plus efficace que $X$?
-	
-	\mbox{}
-	
-	Nous allons introduire les principaux concepts d'amélioration de l'efficacité au moyen d'un exemple introductif sur les centres d'appels téléphoniques.
+	We wish to simulate this system for a duration ${T}$ and calculate the average waiting time per client and the average queue length. The types of events are
+	\begin{enumerate}
+		\item Arrival;
+		\item Departure;
+		\item End of simulation.
+	\end{enumerate}
+	The random variables (independent) to generate are $A_1, A_2, A_3, \dots$ and $S_1, S_2, S_3, \dots$.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Exemple introductif}
+	\frametitle{Example: GI/G/1 queue}
 	
-	Posons ${B}$, le \emph{facteur d'achalandage} pour la journée, et
-	supposons que $P[B = b_t] = q_t$, o\`u
+	\begin{itemize}
+		\item ${W_i}$, the waiting time of client $i$;
+		\item ${Q(t)}$, the length of the queue at time $t$;
+		\item ${N_c(t)}$, the number of clients who started their service during the interval $[0,t]$.
+	\end{itemize}
+	Suppose we want to calculate, for the interval $[0,T]$, the \emph{average waiting time} per client,
+	$${\overline{W}_{N_c(T)}} = {1\over N_c(T)} \sum_{i=1}^{N_c(T)} W_i;$$
+	and the \emph{average queue length}:
+	$${\overline{Q}_T} = {1\over T} \int_0^T Q(t) dt.$$
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example: GI/G/1 queue}
+	
+	This last integral is easy to calculate through simulation.
+	
+	\mbox{}
+	
+	For each \emph{client}, we create an \emph{object} containing the arrival time and service duration.
+	
+	\mbox{}
+	
+	State variables: list of clients waiting and the list of clients in service.
+	
+	\mbox{}
+	
+	+ simulation clock, statistical counters (if needed), \emph{list} of future scheduled events, in chronological order, and a procedure for each type of event.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Queueing System Simulation}
+	
+	\begin{small}
+		\begin{description}
+			\item[Arrival]
+			Generate $A$ according to $F$ and schedule another arrival 
+			in $A$ time units;\\
+			Create the new client and note their arrival time;\\
+			Generate their service duration $S$ according to $G$;\\
+			{\bf If} (server is busy) {\bf then}\\
+			\quad Insert this client into the waiting list;\\
+			{\bf else}\\
+			\quad Insert the client into the service list;\\
+			\quad Schedule their departure in $S$ time units; \\
+			Update the desired statistics.
+			\item[Departure]
+			Remove the client from the service list;\\
+			{\bf If} the queue is not empty {\bf then}\\
+			\quad Remove the first client from the waiting list;\\
+			\quad Insert them into the service list;\\
+			\quad Schedule their departure in 
+			$S$ time units;\\
+			Update the desired statistics.
+			\item[End of Simulation]
+			Print a report and terminate the program.
+		\end{description}
+	\end{small}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Simulation}
+	
+	Start the simulation:
+	\begin{itemize}
+		\item Initialize variables and counters,
+		\item Schedule the ``End of Simulation'' at time $T$,
+		\item Generate $A$ according to $F$ and schedule the first ``Arrival'' in $A$ time units,
+		\item Launch the simulation.
+	\end{itemize}
+	
+	\mbox{}
+	
+	The execution of the simulation simply consists of repeating the following loop:\\
+	{\bf Repeat:} execute the next event
+	in the event list\\
+	{\bf until:} the list of scheduled events is empty,\\
+	\quad    or an event stops the simulation.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Simulation without Event List}
+	
+	It is not always necessary to resort to the event-driven approach.
+	
+	\mbox{}
+	
+	Example: Lindley's recurrence:
+	\[
+	W_1 = 0,\quad W_{i+1} = \max(0,\; W_i + S_i - A_{i+1}).
+	\]
+	
+	We can easily simulate for a fixed number of clients (instead of a fixed time horizon $T$).
+	
+	\mbox{}
+	
+	The program formulation based on Lindley's recurrence reduces to solving an integration problem over $[0,1)^t$.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Lindley's Recurrence}
+	
+	Suppose we want to estimate \(E[\overline{W}_{100}]\) by \({\overline{W}_{100}}\):
+	\[
+	{\overline{W}_{100}} = \frac{1}{100} \sum_{i=1}^{100} W_i.
+	\]
+	
+	\mbox{}
+	
+	We need \(A_1, S_1, A_2, S_2, \dots, A_{99}, S_{99}\). If we set \({A_i} = F^{-1}(U_{2i-1})\) and \({S_i} = G^{-1}(U_{2i})\), where \(U_j\), \(j = 1,\ldots,99\), are uniform random variables over \((0,1)\), then \(\overline{W}_{100} = f(U_1,\dots,U_{198})\) (with \(f\) being an unknown function in this case).
+	
+	\mbox{}
+	
+	We then have \(t=198\), i.e., 
+	\[
+	E[\overline{W}_{100}] = \int_{[0,1)^{198}} f(\bu)d\bu.
+	\]
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Random Number of Clients}
+	
+	On the other hand, if we want to simulate \(\overline{W}_{N_c(T)}\), the number of clients 
+	\(N_c(T)\) is random and unbounded. 
+	We should therefore choose \(t=\infty\) as the dimension.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Process Approach}
+	
+	A process is a temporally ordered sequence of interrelated events, separated by certain time intervals,
+	that describes the entire experience of an ``entity'' as it evolves through a ``system''.
+	A simulation system or model may involve different types of processes.
+	
+	\mbox{}
+	
+	A routine will be associated with each process in the model, describing its
+	entire history through the system.
+	
+	\mbox{}
+	
+	In contrast to the event-driven approach, a process routine
+	explicitly contains the passage of simulated time and generally has
+	multiple entry points.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Processes vs Events}
+	
+	A simulation using the process approach also evolves over time by executing events in the order of their occurrence.
+	
+	\mbox{}
+	
+	Internally, the event-driven and process approaches are very similar.
+	
+	\mbox{}
+	
+	For the user, reasoning may differ, and it can sometimes (but not always) feel more natural to use the process approach.
+	
+	%\mbox{}
+	
+	%Moreover, the process approach is often slower in terms of execution time, as the simulator ultimately has to handle events and manage potentially concurrent processes.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Improving Efficiency}
+	
+	The following material is adapted from Pierre L'Ecuyer's class ``Simulation: stochastic aspects''.
+	
+	\mbox{}
+	
+	The efficiency of an estimator \(X\) is defined as follows:
+	$$
+	eff[X] = \frac{1}{MSE[X] C(X)},
+	$$
+	where MSE stands for mean square error and \(C(X)\) represents the cost to compute \(X\).
+	
+	\mbox{}
+	
+	Is it possible, given \(X\), to construct a new estimator \(Y\) that is more efficient than \(X\)?
+	
+	\mbox{}
+	
+	We will introduce the main concepts of improving efficiency using an introductory example about call centers.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Introductory Example}
+	
+	Let \(B\) be the \emph{load factor} for the day, and suppose that \(P[B = b_t] = q_t\), where
 	\begin{center}
 		\begin{tabular}{c|cccc}
 			${t}$   &   1  &  2   &   3  &  4  \\  
@@ -575,37 +542,37 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 	
 	\mbox{}
 	
-	Il est facile de vérifier que $E[B] = 1$. %% et $\Var[B] = 0.024$.
+	It is easy to verify that \(E[B] = 1\). %% and \(\Var[B] = 0.024\).
 	
 	\mbox{}
 	
-	Les \emph{arrivées} des appels suivent processus de Poisson de taux
-	$B{\lambda_j}$ durant l'heure $j$.
+	The \emph{arrivals} of calls follow a Poisson process with rate
+	\(B{\lambda_j}\) during hour \(j\).
 	
 	\mbox{}
 	
-	Notons ${G_i(s)}=$ nombre d'appels dont le service a débuté
-	après moins de ${s}$ secondes d'attente, le jour $i$.
+	Let \(G_i(s)\) be the number of calls that started service
+	after less than \(s\) seconds of waiting on day \(i\).
 	
 	\mbox{}
 	
-	On veut estimer ${\mu} = E[G_i(s)]$, disons pour ${s=20}$.
+	We want to estimate \(\mu = E[G_i(s)]\), say for \(s=20\).
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{Example}
 	
-	Nous supposons de plus que les durées de service des appels suivent la loi
-	$\Gamma(\alpha,\gamma)$, dont la moyenne est $\alpha\gamma$.
+	We also assume that the service durations of the calls follow the distribution 
+	\(\Gamma(\alpha,\gamma)\), with a mean of \(\alpha\gamma\).
 	
 	\mbox{}
 	
-	Dans notre exemple, on a $\alpha = 1$ et $\gamma = {\gamma_1} = 100$.
+	In our example, we have \(\alpha = 1\) and \(\gamma = {\gamma_1} = 100\).
 	
 	\mbox{}
 	
-	Nombre d'agents $n_j$ et taux d'arrivée $\lambda_j$ (par heure) pour 13 périodes d'une heure dans le centre d'appel:
+	Number of agents \(n_j\) and arrival rate \(\lambda_j\) (per hour) for 13 hourly periods in the call center:
 	
 	\begin{footnotesize}
 		\hspace*{-1cm}
@@ -621,7 +588,7 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 	
 	\mbox{}
 	
-	We simulate ${n}$ independent days.
+	We simulate \(n\) independent days.
 	
 \end{frame}
 
@@ -643,64 +610,59 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 \end{frame}
 
 \begin{frame}
-	\frametitle{Exemple introductif}
+	\frametitle{Introductory Example}
 	
-	Nous souhaitons construire un intervalle de confiance pour $\sigma^2 = n Var[\bar X_n]$, sous
-	l'hypothèse que $(n-1)S_n^2/\sigma^2$ suit approximativement une $\chi^2$ à ${n-1}$ degrés de
-	liberté. Ceci permet de construire l'intervalle à $90\%$: $[0.930S_n^2, 1.077S_n^2]$.
+	We want to construct a confidence interval for \(\sigma^2 = n Var[\bar X_n]\), under the assumption that \((n-1)S_n^2/\sigma^2\) approximately follows a \(\chi^2\) distribution with \(n-1\) degrees of freedom. This allows us to construct the \(90\%\) interval: \([0.930S_n^2, 1.077S_n^2]\).
 	
 	\mbox{}
 	
-	En d'autres termes, l'erreur relative de cet estimateur est inférieure \`a $8\%$ avec une
-	``confiance'' d'environ 90\%.
+	In other words, the relative error of this estimator is less than \(8\%\) with a ``confidence'' of approximately \(90\%\).
 	
 	\mbox{}
 	
-	Voyons comment \emph{améliorer} cet estimateur $\bar X_n$,
-	en réduisant sa variance. Pour chaque méthode proposée, 
-	nous donnerons des résultats numériques pour {$n = 1000$}.
+	Let's see how to \emph{improve} this estimator \(\bar X_n\) by reducing its variance. For each proposed method, we will provide numerical results for \(n = 1000\).
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Estimation indirecte.}
+	\frametitle{Indirect Estimation}
 	
-	Soit ${A_i}$ le nombre total d'arrivées au jour $i$; posons ${D_i} = A_i - X_i$.
-	
-	\mbox{}
-	
-	On sait que ${a} = E[A_i] = \sum_{j=1}^m \lambda_j = 1660$.
+	Let \(A_i\) be the total number of arrivals on day \(i\); let \(D_i = A_i - X_i\).
 	
 	\mbox{}
 	
-	Nous pouvons dès lors écrire $\mu = E[X_i] = E[A_i - D_i] = a - E[D_i]$, que 
-	l'on peut estimer par
+	We know that \(a = E[A_i] = \sum_{j=1}^m \lambda_j = 1660\).
+	
+	\mbox{}
+	
+	Thus, we can write \(\mu = E[X_i] = E[A_i - D_i] = a - E[D_i]\), which 
+	can be estimated by
 	$$ {\bar X_{\rm{i},n}} = E[A_i] - \bar D_n = a - {1\over n} \sum_{i=1}^n D_i.$$
 	
 	\mbox{}
 	
-	Cet estimateur a moins de variance que $\bar X_n$ ssi $Var[D_i] < Var[X_i]$. 
-	Variance estimée: $\widehat{Var}[X_{\rm{i},i}] = {18389}$.
+	This estimator has less variance than \(\bar X_n\) if and only if \(Var[D_i] < Var[X_i]\). 
+	Estimated variance: \(\widehat{Var}[X_{\rm{i},i}] = {18389}\).
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Control variate (CV)}
+	\frametitle{Control Variate (CV)}
 	
-	Idée: exploiter l'information auxiliaire.
-	
-	\mbox{}
-	
-	Par exemple, si ${A_i}$ est plus grand que d'habitude ($A_i > E[A_i] = 1660$),
-	on s'attend \`a ce que ce jour l\`a, $X_i$ et $D_i$
-	\emph{surestiment} $E[X_i]$ et $E[D_i]$.
+	Idea: leverage auxiliary information.
 	
 	\mbox{}
 	
-	On pourrait faire une ``\emph{correction}'' \`a ces estimateurs:
-	remplacer $X_i$ par
+	For example, if \(A_i\) is higher than usual \((A_i > E[A_i] = 1660)\),
+	we expect that on that day, \(X_i\) and \(D_i\) 
+	\emph{overestimate} \(E[X_i]\) and \(E[D_i]\).
+	
+	\mbox{}
+	
+	We could make a ``\emph{correction}'' to these estimators:
+	replace \(X_i\) with
 	$$ X_{\rm{c},i} = X_i - {\beta} (A_i - 1660) $$
-	o\`u $\beta$ est une constante appropriée.  \ Alors
+	where \(\beta\) is an appropriate constant. Then
 	\[
 	{\bar X_{\rm{c},n}} = \bar X_n - \beta (\bar A_n - 1660).
 	\]
@@ -708,119 +670,116 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 \end{frame}
 
 \begin{frame}
-	\frametitle{Control variate (CV)}
+	\frametitle{Control Variate (CV)}
 	
-	On a $E[\bar X_{\rm{c},n}] = E[X_i]$ et 
+	We have \(E[\bar X_{\rm{c},n}] = E[X_i]\) and 
 	$$ Var[\bar X_{\rm{c},n}] 
 	= \frac{Var[X_i] + \beta^2Var[A_i] - 2 \beta Cov[A_i,X_i]}{n}. $$ 
-	Cette variance est une fonction quadratique en $\beta$, que l'on minimise
-	en prenant
+	This variance is a quadratic function of \(\beta\), which we minimize
+	by taking
 	\[
-	\beta = {\beta^*} = Cov[A_i, X_i] / Var[A_i].
+	\beta = {\beta^*} = \frac{Cov[A_i, X_i]}{Var[A_i]}.
 	\]
 	
 	\mbox{}
 	
-	La \emph{variance minimale} est
+	The \emph{minimum variance} is
 	$$ Var[\bar X_{\rm{c},n}] = \frac{Var[X_i] - (\beta^*)^2 Var[A_i]}{n}
 	= Var[\bar X_n] (1- \rho^2[A_i,X_i]) $$
-	o\`u ${\rho[A_i, X_i]}$ est le coeff.\ de corrélation entre 
-	$A_i$ et $X_i$.
+	where \({\rho[A_i, X_i]}\) is the correlation coefficient between 
+	\(A_i\) and \(X_i\).
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Control variate (CV)}
+	\frametitle{Control Variate (CV)}
 	
-	On ne connaît pas $Cov[A_i, X_i]$, mais:
+	We do not know \(Cov[A_i, X_i]\), but:
 	\begin{enumerate}[(a)]
-		\item
-		On peut l'estimer par des \emph{expériences pilotes}.
-		\item
-		On peut l'estimer par les \emph{m\^emes $n$ simulations} que $\bar X_n$.
+		\item We can estimate it through \emph{pilot experiments}.
+		\item We can estimate it using the \emph{same \(n\) simulations} as \(\bar X_n\).
 	\end{enumerate}
 	
 	\mbox{}
 	
-	Avec (b) on obtient l'estimateur (légèrement biaisé):
+	With (b), we obtain the estimator (slightly biased):
 	\[
-	\bar X_{\rm{c}e,n} = \bar X_n - {1\over n-1} \left[\sum_{i=1}^n
+	\bar X_{\rm{c},e,n} = \bar X_n - {1\over n-1} \left[\sum_{i=1}^n
 	(A_i-\bar A_n)(X_i-\bar X_n)\right] {\bar A_n - a\over Var[A_i]}.
 	\]
 	
 	\mbox{}
 	
-	Conditionnellement \`a $B_i$, $A_i\sim\mbox{Poisson}(1660 B_i)$.  On a donc
+	Conditional on \(B_i\), \(A_i \sim \text{Poisson}(1660 B_i)\). Thus, we have
 	\begin{align*}
 		{Var[A_i]} &= Var[E[A_i|B_i]] + E[Var[A_i|B_i]] \\
 		&= Var[1660 B_i] + E[1660 B_i] \\
 		&= 1660^2 Var[B_i] + 1660 E[B_i] \\
 		&= 67794.4.
 	\end{align*}
-	Variance empirique obtenue ici: {3310}.
+	The empirical variance obtained here is: {3310}.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Variable de contrôle (VC)}
+	\frametitle{Control Variable (CV)}
 	
-	En prenant $\beta=1$, on retrouve l'estimateur indirect:
+	By taking \(\beta=1\), we recover the indirect estimator:
 	\[
 	\bar X_{\rm{i},n} = \bar X_n - (\bar A_n - 1660) = 1660 - \bar D_n.
 	\]
-	Si on combine \emph{VC + indirect}, on obtient:
+	If we combine \emph{CV + indirect}, we obtain:
 	\begin{eqnarray*}
 		{\bar X_{\rm{i},\rm{c},n}} &=& a - \bar D_n - \beta_2 (\bar A_n - a) \\
 		&=& \bar A_n - \bar D_n -(1+\beta_2)(\bar A_n - a) \\
 		&=& \bar X_n -(1+\beta_2)(\bar A_n - a),
 	\end{eqnarray*}
-	i.e., $\bar X_{\rm{i},\rm{c},n}$ est équivalent \`a $\bar X_{\rm{c},n}$ 
-	avec $\beta = 1+\beta_2$.
-	Par conséquence, en présence de la variable de contrôle, l'estimation indirecte n'apporte rien.
+	i.e., \(\bar X_{\rm{i},\rm{c},n}\) is equivalent to \(\bar X_{\rm{c},n}\) 
+	with \(\beta = 1+\beta_2\).
+	As a result, in the presence of the control variable, the indirect estimation provides no additional benefit.
 	
 	\mbox{}
 	
-	Nous pourrions aussi considérer d'autres variables de contrôle, comme $B_i$, la moyenne des durées de service, etc.
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Stratification.}
-	
-	Le facteur d'achalandage ${B_i}$ est une source importante de variabilité 
-	importante dans le cas présent. Essayons de la contr\^oler.
-	
-	\mbox{}
-	
-	En posant $\mu_t = E[X_i\mid B_i=b_t]$, on a
-	\begin{eqnarray*}
-		\mu &=& E[X_i]  = \sum_{t=1}^4 P[B_i = b_t]\cdot E[X_i\mid B_i=b_t] \\
-		&=&  .25\, E[X_i\mid B_i=0.8] + .55\, E[X_i\mid B_i=1.0]  \\
-		&& + .15\, E[X_i\mid B_i=1.2] + .05\, E[X_i\mid B_i=1.4]  \\
-		&=&  .25\,\mu_1 + .55\, \mu_2 + .15\, \mu_3 + .05\, \mu_4.
-	\end{eqnarray*}
-	
-	\mbox{}
-	
-	\emph{Idée}: estimer ${\mu_t}$ \emph{séparément} 
-	pour chaque $t$.
+	We could also consider other control variables, such as \(B_i\), the average service durations, etc.
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{Stratification}
 	
-	Supposons qu'il y a ${N_t}$ jours o\`u $B_i = b_t$ et soient
-	${X_{t,1}},\dots, {X_{t,N_t}}$ les valeurs de $X_i$ pour ces jours. 
+	The load factor \(B_i\) is a significant source of variability in this case. Let's try to control it.
 	
 	\mbox{}
 	
-	On peut estimer $\mu_t = E[X_i\mid B_i=b_t]$ par
+	By setting \(\mu_t = E[X_i\mid B_i=b_t]\), we have
+	\begin{eqnarray*}
+		\mu &=& E[X_i]  = \sum_{t=1}^4 P[B_i = b_t] \cdot E[X_i\mid B_i=b_t] \\
+		&=&  0.25\, E[X_i\mid B_i=0.8] + 0.55\, E[X_i\mid B_i=1.0]  \\
+		&& + 0.15\, E[X_i\mid B_i=1.2] + 0.05\, E[X_i\mid B_i=1.4]  \\
+		&=&  0.25\,\mu_1 + 0.55\, \mu_2 + 0.15\, \mu_3 + 0.05\, \mu_4.
+	\end{eqnarray*}
+	
+	\mbox{}
+	
+	\emph{Idea}: estimate \(\mu_t\) \emph{separately} 
+	for each \(t\).
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Stratification}
+	
+	Suppose there are \(N_t\) days where \(B_i = b_t\) and let
+	\(X_{t,1},\dots, X_{t,N_t}\) be the values of \(X_i\) for those days. 
+	
+	\mbox{}
+	
+	We can estimate \(\mu_t = E[X_i\mid B_i=b_t]\) by
 	$$ {\hat\mu_t} = {1\over N_t} \sum_{i=1}^{N_t} X_{t,i} $$
-	et $\mu$ par
+	and \(\mu\) by
 	\[
-	{\bar X_{\rm{s},n}} = \sum_{t=1}^4 q_t \hat\mu_t.
-	= .25 \hat\mu_1 + .55 \hat\mu_2 + .15 \hat\mu_3 + .05 \hat\mu_4.
+	{\bar X_{\rm{s},n}} = \sum_{t=1}^4 q_t \hat\mu_t 
+	= 0.25 \hat\mu_1 + 0.55 \hat\mu_2 + 0.15 \hat\mu_3 + 0.05 \hat\mu_4.
 	\]
 	
 \end{frame}
@@ -828,30 +787,30 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 \begin{frame}
 	\frametitle{Stratification}
 	
-	On a 
+	We have 
 	\begin{align*}
 		&  Var[\bar X_{\rm{s},n} \mid N_1, N_2, N_3, N_4] \\
 		&= \sum_{t=1}^4 q_t^2 Var[\hat\mu_t | N_t]  
-		= \sum_{t=1}^4 q_t^2 \sigma^2_t/N_t \\
-		&= .25^2 \sigma^2_1/N_1 + .55^2 \sigma^2_2/N_2 + 
-		.15^2 \sigma^2_3/N_3 + .05^2 \sigma^2_4/N_4.
+		= \sum_{t=1}^4 q_t^2 \frac{\sigma^2_t}{N_t} \\
+		&= 0.25^2 \frac{\sigma^2_1}{N_1} + 0.55^2 \frac{\sigma^2_2}{N_2} + 
+		0.15^2 \frac{\sigma^2_3}{N_3} + 0.05^2 \frac{\sigma^2_4}{N_4}.
 	\end{align*}
-	o\`u ${\sigma^2_t} = Var[X_i\mid B_i=b_t]$.
+	where \(\sigma^2_t = Var[X_i\mid B_i=b_t]\).
 	
 	\mbox{}
 	
-	La variance est réduite si les $\sigma_t^2$ sont inférieurs \`a $Var[X_i]$.
+	The variance is reduced if the \(\sigma_t^2\) are less than \(Var[X_i]\).
 	
 	\mbox{}
 	
-	Si les $B_i$ sont générés normalement: \emph{post-stratification}.
+	If the \(B_i\) are normally generated: \emph{post-stratification}.
 	
 	\mbox{}
 	
-	Pour estimer $\mu$ par stratification, on peut aussi 
-	\emph{fixer les $N_t = n_t$ \`a l'avance}, c'est-\`a-dire choisir \`a
-	l'avance combien de jours on aura $B_i = b_t$ pour chaque valeur de
-	$t$.
+	To estimate \(\mu\) through stratification, we can also 
+	\emph{fix the \(N_t = n_t\) in advance}, meaning we choose 
+	in advance how many days will have \(B_i = b_t\) for each value of 
+	\(t\).
 	
 \end{frame}
 
@@ -860,30 +819,27 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 	
 	\begin{itemize}
 		\item
-		\emph{Allocation proportionnelle}: prendre ${n_t} = n q_t$.\\
-		Avec $n=1000$, cela donne $n_1 = 250$, $n_2 = 550$, $n_3 = 150$, $n_4
-		= 50$.
+		\emph{Proportional allocation}: set \(n_t = n q_t\).\\
+		With \(n=1000\), this gives \(n_1 = 250\), \(n_2 = 550\), \(n_3 = 150\), \(n_4 = 50\).
 		\item
-		\emph{Allocation optimale}: 
-		choisir les $n_t$ pour minimiser $Var[\bar X_{\rm{s},n}]$ sous la contrainte
-		$n_1+n_2+n_3+n_4=n$.  On obtient:
+		\emph{Optimal allocation}: 
+		choose the \(n_t\) to minimize \(Var[\bar X_{\rm{s},n}]\) under the constraint
+		\(n_1+n_2+n_3+n_4=n\). We obtain:
 		\[
 		\frac{{n_t}}{n} 
-		= {\sigma_t P[B_i=t] \over\sum_{k=1}^4 \sigma_k P[B_i=k]}
-		= {\sigma_k q_k \over\sum_{k=1}^4 \sigma_k q_k}.
+		= \frac{\sigma_t P[B_i=t]}{\sum_{k=1}^4 \sigma_k P[B_i=k]}
+		= \frac{\sigma_k q_k}{\sum_{k=1}^4 \sigma_k q_k}.
 		\]
-		On ne connait pas ces $\sigma_k$, mais on peut les estimer par des 
-		essais pilotes.
-		Avec ${n_0=800}$ essais pilotes, 200 par valeur de $t$, on obtient par
-		exemple $(n_1, n_2, n_3, n_4) = (219, 512, 182, 87)$ (après arrondi). 
+		We do not know these \(\sigma_k\), but we can estimate them through pilot trials.
+		With \(n_0=800\) pilot trials, 200 for each value of \(t\), we obtain, for example, \((n_1, n_2, n_3, n_4) = (219, 512, 182, 87)\) (after rounding). 
 	\end{itemize}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Stratégies combinées.}
+	\frametitle{Combined Strategies}
 	
-	\emph{Stratification combinée avec VC:}\\
+	\emph{Stratification combined with CV:}\\
 	$$ 
 	{\hat\mu_t} = {1\over n_t} \sum_{i=1}^{n_t} X_{\rm{c},t,i} 
 	= {1\over n_t} \sum_{i=1}^{n_t} 
@@ -892,31 +848,30 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 	
 	\mbox{}
 	
-	On minimise ${\sigma_t^2} = Var[X_{\rm{c},t,i}]$ en prenant 
+	We minimize \(\sigma_t^2 = Var[X_{\rm{c},t,i}]\) by taking 
 	\[
-	\beta_t = {\beta_t^*} = Cov[A_{t,i},\, X_{t,i}] / Var[A_{t,i}]
-	= Cov[A_i, X_i | B_i=b_t] / (a b_t).
+	\beta_t = {\beta_t^*} = \frac{Cov[A_{t,i},\, X_{t,i}]}{Var[A_{t,i}]}
+	= \frac{Cov[A_i, X_i | B_i=b_t]}{(a b_t)}.
 	\]
 	
 	\mbox{}
 	
-	L'ajout d'une VC change les $\sigma_t^2$: l'allocation 
-	optimale n'est plus la m\^eme.
+	The addition of a CV alters the \(\sigma_t^2\): the optimal allocation 
+	is no longer the same.
 	
 	\mbox{}
 	
-	Avec $n_0=800$ essais pilotes, on obtient
-	$(\beta_1,\beta_2, \beta_3, \beta_4) = (1.020, 0.648, 0.224, -0.202)$ 
-	et $(n_1, n_2, n_3, n_4) = (131, 503, 247, 119)$ 
-	comme estimation des valeurs optimales.
+	With \(n_0=800\) pilot trials, we obtain
+	\((\beta_1,\beta_2, \beta_3, \beta_4) = (1.020, 0.648, 0.224, -0.202)\) 
+	and \((n_1, n_2, n_3, n_4) = (131, 503, 247, 119)\) 
+	as estimates of the optimal values.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Stratégies combinées.}
+	\frametitle{Combined Strategies}
 	
-	En répétant l'expérience avec ${n = 100000}$, on peut trouver les
-	estimations suivantes pour la variance ($\pm 1\%$):\\
+	By repeating the experiment with \(n = 100000\), we can find the following estimates for the variance (\(\pm 1\%\)):\\
 	$Var[X_{n}] = 21998$; \
 	$Var[X_{\rm{i},n}] = 17996$; \
 	$Var[X_{\rm{c},n}] = 3043$; \
@@ -925,12 +880,12 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 \end{frame}
 
 \begin{frame}
-	\frametitle{Résultats numériques pour $n = 1000$}
+	\frametitle{Numerical Results for \(n = 1000\)}
 	
 	\begin{small}
 		\begin{tabular}{llrrr}
 			\hline
-			\ Méthode                & Estimateur
+			Method                & Estimator
 			& Mean   & $S_n^2 (\pm 9\%)$ & Ratio \\
 			\hline
 			&&&&\\
@@ -944,12 +899,12 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 			& 1510.2 &  3310  &  0.153 \\
 			Indirect + CV, no pilot runs & $\bar X_{\rm{i},\rm{c},n}$
 			& 1510.1 &  3309  &  0.153 \\
-			Stratification (propor.)   & $\bar X_{\rm{s}p,n}$
+			Stratification (proportional)   & $\bar X_{\rm{s}p,n}$
 			& 1509.5 &  1778  &  0.082 \\
 			Stratification (optimal)    & $\bar X_{\rm{s}o,n}$
 			& 1509.4 &  1568  &  0.073 \\
 			&&&& \\
-			Strat.\ (propor.) + CV & $\bar X_{\rm{s}p,\rm{c},n}$
+			Strat.\ (proportional) + CV & $\bar X_{\rm{s}p,\rm{c},n}$
 			& 1509.2 &  1140  &  0.053 \\
 			Strat.\ (optimal) + CV & $\bar X_{\rm{s}o,\rm{c},n}$
 			& 1508.3 &   900  &  0.042 \\
@@ -957,39 +912,38 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 		\end{tabular}
 	\end{small}
 	
-	%comparaison de deux systèmes
+	%comparison of two systems
 \end{frame}
 
 \begin{frame}
-	\frametitle{Comparaison de deux systèmes similaires}
+	\frametitle{Comparison of Two Similar Systems}
 	
-	Supposons à présent qu'il est possible de diminuer légèrement le paramètre $\gamma$ à de la loi gouvernant les durées de service, en prenant
+	Now suppose it is possible to slightly decrease the parameter \(\gamma\) of the distribution governing the service durations, by taking
 	\[
 	\gamma = {\gamma_2} = \gamma_1(1-\delta),
 	\]
-	pour ${\delta} > 0$ très petit.
+	for \({\delta} > 0\) being very small.
 	
 	\mbox{}
 	
-	Si on utilise les m\^emes nombres aléatoires, cela équivaut \`a multiplier
-	les durées de service par $(1-\delta)$.
+	If we use the same random numbers, this is equivalent to multiplying the service durations by \((1-\delta)\).
 	
 	\mbox{}
 	
-	Nous voulons estimer $\mu(\gamma_2) - \mu(\gamma_1) = E_\gamma[X_2] - E_\gamma[X_1]$,
-	afin de mesurer l'effet d'augmenter un peu la vitesse des serveurs.
+	We want to estimate \(\mu(\gamma_2) - \mu(\gamma_1) = \EE_\gamma[X_2] - \EE_\gamma[X_1]\),
+	in order to measure the effect of slightly increasing the speed of the servers.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Comparaison de deux systèmes similaires}
+	\frametitle{Comparison of Two Similar Systems}
 	
-	On simule $n$ jours pour chaque valeur de $\gamma$.
+	We simulate \(n\) days for each value of \(\gamma\).
 	\begin{itemize}
 		\item
-		${X_{1,i}}=$ valeur de $G_i(s)$ avec $\gamma_1$;
+		${X_{1,i}}=$ value of \(G_i(s)\) with \(\gamma_1\);
 		\item
-		${X_{2,i}}=$ valeur de $G_i(s)$ avec $\gamma_2$;
+		${X_{2,i}}=$ value of \(G_i(s)\) with \(\gamma_2\);
 		\item
 		${\Delta_i} = X_{2,i}-X_{1,i}$,
 		\[
@@ -999,88 +953,80 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 	
 	\mbox{}
 	
-	On peut simuler $X_{1,i}$ et $X_{2,i}$
+	We can simulate \(X_{1,i}\) and \(X_{2,i}\)
 	\begin{enumerate}[(i)]
-		\item
-		avec des v.a.{} indépendantes (\emph{VAI}),
-		\item
-		avec des v.a.{} communes (\emph{VAC}).
+		\item with independent random variables (\emph{IRV}),
+		\item with common random variables (\emph{CRV}).
 	\end{enumerate}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Comparaison de deux systèmes similaires}
+	\frametitle{Comparison of Two Similar Systems}
 	
-	Comme
+	As
 	\[
 	Var[\Delta_i] = Var[X_{1,i}] + Var[X_{2,i}] - 2Cov[X_{1,i},\,X_{2,i}],
 	\]
-	le but des variables aléatoires communes est de rendre la covariance positive.
+	the goal of common random variables is to make the covariance positive.
 	
 	\mbox{}
 	
-	Comment implanter les VAC?
+	How to implement CRNs?
 	
 	\mbox{}
 	
-	Utiliser des suites aléatoires différentes pour générer:
+	Use different random sequences to generate:
 	\begin{enumerate}
-		\item
-		le facteur d'achalandage $B_i$;
-		\item
-		les temps inter-arrivées;
-		\item
-		les durées des appels;
-		\item
-		les durées de patience.
+		\item The load factor \(B_i\);
+		\item The inter-arrival times;
+		\item The call durations;
+		\item The patience durations.
 	\end{enumerate}
-	Tout est généré par inversion:  on utilise une uniforme par v.a.
+	Everything is generated by inversion: a uniform distribution is used for each random variable.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Synchronisation}
+	\frametitle{Synchronization}
 	
-	Lorsqu'on change les durées de service, les durées d'attente changent
-	et les décisions d'abandon peuvent ainsi changer.
-	
-	\mbox{}
-	
-	Si on ne génère les durées de service que pour les clients qui 
-	n'abandonnent pas, alors on peut perdre la synchronisation:
-	on peut avoir une durée de service de moins \`a générer dans 
-	un système que dans l'autre.
+	When service durations change, waiting times also change,
+	and abandonment decisions may consequently change.
 	
 	\mbox{}
 	
-	On peut générer les durées de service:
+	If we generate service durations only for clients who do not abandon, we may lose synchronization:
+	we might have to generate fewer service durations in one system than in the other.
+	
+	\mbox{}
+	
+	Service durations can be generated:
 	%
 	\begin{itemize}
 		\item[(a)] 
-		pour tous les appels, m\^eme les abandons,
+		for all calls, including those that abandon,
 		\item[(b)] 
-		seulement pour les appels servis.
+		only for served calls.
 	\end{itemize}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Synchronisation}
+	\frametitle{Synchronization}
 	
-	De m\^eme, la durée de patience n'a pas besoin d'\^etre générée pour 
-	les clients qui n'attendent pas.  On peut la générer:
+	Similarly, the patience duration does not need to be generated for 
+	clients who do not wait. It can be generated:
 	\begin{itemize}
 		\item[(c)] 
-		pour tous les appels,
+		for all calls,
 		\item[(d)] 
-		seulement si nécessaire.
+		only if necessary.
 	\end{itemize}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Synchronization: résultats (avec ${n=10^4}$)}
+	\frametitle{Synchronization: results (with ${n=10^4}$)}
 	
 	\begin{footnotesize}
 		\begin{center}
@@ -1116,129 +1062,126 @@ The following material is adapted from Pierre L'Ecuyer's class ``Simulation: sto
 \end{frame}
 
 \begin{frame}
-	\frametitle{Induction de corrélation}
+	\frametitle{Induction of Correlation}
 	
-	Conditions suffisantes pour que $Cov[X,Y]$ 
-	soit positive, ou soit négative?
+	Sufficient conditions for $Cov[X,Y]$ 
+	to be positive or negative?
 	
 	\mbox{}
 	
-	Comment maximiser ou minimiser la corrélation pour des lois 
-	marginales données?
+	How to maximize or minimize correlation for given marginal distributions?
 	
 	\mbox{}
 	
 	\begin{theorem}[Fréchet bounds]
-		Parmi les paires de v.a.{} $(X,Y)$ dont les f.r.{} marginales sont 
-		${F}$ et ${G}$, la paire $(X,Y) = (F^{-1}(U), G^{-1}(U))$ 
-		o\`u ${U} \sim U(0,1)$, 
-		\emph{maximise} $\rho[X, Y]$, \
-		et la paire $(X,Y) = (F^{-1}(U), G^{-1}(1-U))$
-		\emph{minimise} $\rho[X, Y]$.
+		Among pairs of random variables $(X,Y)$ with marginal 
+		distribution functions $F$ and $G$, the pair $(X,Y) = (F^{-1}(U), G^{-1}(U))$ 
+		where $U \sim U(0,1)$, \emph{maximizes} $\rho[X, Y]$, \
+		and the pair $(X,Y) = (F^{-1}(U), G^{-1}(1-U))$
+		\emph{minimizes} $\rho[X, Y]$.
 	\end{theorem}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Correlation induction}
+	\frametitle{Correlation Induction}
 	
-	Par exemple, si la fonction de répartition d'une durée de service est 
-	${F}$ dans le premier système et ${G}$ dans le second,
-	et si on génère les durées de service par
-	$X = F^{-1}(U)$ et $Y = G^{-1}(U)$, alors $Cov[X, Y] \ge 0$.
+	For example, if the distribution function of a service duration is 
+	${F}$ in the first system and ${G}$ in the second,
+	and if we generate the service durations by
+	$X = F^{-1}(U)$ and $Y = G^{-1}(U)$, then $Cov[X, Y] \ge 0$.
 	
 	\begin{theorem}
-		Soient \ ${X} = {f}(U)$ o\`u ${U} \sim U(0,1)$ et \
-		${Y} = {g}(V)$ o\`u ${V} \sim U(0,1)$. Alors,
+		Let \ ${X} = {f}(U)$ where ${U} \sim U(0,1)$ and \
+		${Y} = {g}(V)$ where ${V} \sim U(0,1)$. Then,
 		\begin{itemize}
 			\item
-			si $f$ et $g$ sont monotones dans le m\^eme sens et $V=U$,
-			alors $Cov[X, Y] \ge 0$;
+			if $f$ and $g$ are monotonic in the same direction and $V=U$,
+			then $Cov[X, Y] \ge 0$;
 			\item
-			si $f$ et $g$ sont monotones dans le m\^eme sens et $V=1-U$,
-			alors $Cov[X, Y] \le 0$.
+			if $f$ and $g$ are monotonic in the same direction and $V=1-U$,
+			then $Cov[X, Y] \le 0$.
 		\end{itemize}
 	\end{theorem}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Common random numbers (CRN)}
+	\frametitle{Common Random Numbers (CRN)}
 	
-	We use ${\Delta} = {X_2}-{X_1}$ to estimae ${\mu_2}-{\mu_1} = E[X_2] - E[X_1]$.
+	We use ${\Delta} = {X_2}-{X_1}$ to estimate ${\mu_2}-{\mu_1} = E[X_2] - E[X_1]$.
 	Then
 	\[
 	Var[\Delta] = Var[X_1] + Var[X_2] - 2 \, Cov[X_1,X_2].
 	\]
-	\emph{Goal}: induire une corrélation positive entre $X_1$ et $X_2$
-	sans changer leurs lois individuelles.
+	\emph{Goal}: to induce a positive correlation between $X_1$ and $X_2$
+	without changing their individual distributions.
 	
 	\mbox{}
 	
-	Technique: utiliser les m\^emes nombres aléatoires pour simuler
-	les deux systèmes, en essayant de maintenir la \emph{synchronisation}
-	le mieux possible.
+	Technique: use the same random numbers to simulate
+	both systems, trying to maintain \emph{synchronization}
+	as best as possible.
 	
 	\mbox{}
 	
-	Si $X_k = {f_k}(\bU_k) = f_k({U_{k,1}},{U_{k,2}},\dots)$ 
-	pour $k=1,2$, utiliser des VAC partout veut dire prendre $\bU_1=\bU_2$.
+	If $X_k = {f_k}(\bU_k) = f_k({U_{k,1}},{U_{k,2}},\dots)$ 
+	for $k=1,2$, using RNGs everywhere means taking $\bU_1=\bU_2$.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Common random numbers (CRN)}
+	\frametitle{Common Random Numbers (CRN)}
 	
 	\begin{theorem}
-		Si $f_1$ et $f_2$ sont monotones dans le m\^eme sens par rapport \`a
-		tous leurs arguments, alors  $Cov[X_1, X_2] \ge 0$.
+		If $f_1$ and $f_2$ are monotonic in the same direction with respect to
+		all their arguments, then  $Cov[X_1, X_2] \ge 0$.
 	\end{theorem}
 	
 	\mbox{}
 	
-	Pour \emph{maximiser} la corrélation, il faudrait générer
-	$X_1$ et $X_2$ directement par inversion!
+	To \emph{maximize} the correlation, one should generate
+	$X_1$ and $X_2$ directly through inversion!
+	
+\end{frame}
+\begin{frame}
+	\frametitle{Example: Lindley Process}
+	
+	${W_{i+1}} = \max(0,\, W_i + S_i - A_i)$, where $S_i - A_i$ is
+	independent of $W_i$.
+	
+	\mbox{}
+	
+	If ${X_1}$ and ${X_2}$ are non-decreasing functions of the $W_i$
+	for two Lindley processes simulated with common random numbers,
+	then $Cov[X_1, X_2] \ge 0$.
+	
+	\mbox{}
+	
+	Sometimes it is very difficult to check the conditions of the
+	theorem.
+	
+	\mbox{}
+	
+	For example, in a bank or a call center, monotonicity
+	is hard to verify due to abandonment possibilities.
+	Moreover, the conditions of the theorem are \emph{sufficient}, but 
+	\emph{not necessary}.
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Example: Lindley process}
+	\frametitle{Common Random Numbers (CRN)}
 	
-	${W_{i+1}} = \max(0,\, W_i + S_i - A_i)$, o\`u $S_i-A_i$ est
-	indépendant de $W_i$.
-	
-	\mbox{}
-	
-	Si ${X_1}$ et ${X_2}$ sont des fonctions non-décroissantes des $W_i$
-	pour deux processus de Lindley simulés avec des VAC, 
-	alors $Cov[X_1, X_2] \ge 0$.
-	
-	\mbox{}
-	
-	Parfois il est très difficile de vérifier les conditions du
-	théorème.
-	
-	\mbox{}
-	
-	Par exemple, pour la banque ou un centre d'appels, la monotonicité
-	est difficile \`a vérifier \`a cause des possibilités d'abandon.
-	De plus, les conditions du théorème sont \emph{suffisantes}, mais 
-	\emph{pas nécessaires}.
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Common random numbers (CRN)}
-	
-	Pour \emph{tester} si c'est efficace en pratique:
-	faire une \emph{expérience pilote avec les VAC} et estimer 
+	To \emph{test} if it is effective in practice:
+	conduct a \emph{pilot experiment with common random numbers} and estimate 
 	$Cov(X_1, X_2)$.
 	
 	\mbox{}
 	
-	Il n'est pas nécessaire de faire de simulations sans les VAC:
-	pour estimer la variance qu'on aurait sans les VAC,
-	il suffit de prendre la version empirique de $Var[X_1] + Var[X_2]$.
+	It is not necessary to perform simulations without common random numbers:
+	to estimate the variance one would have without common random numbers,
+	it is sufficient to take the empirical version of $Var[X_1] + Var[X_2]$.
 	
 \end{frame}
 
