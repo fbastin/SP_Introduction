@@ -1,0 +1,19 @@
+# TeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*-eps-converted-to.pdf
+*.dvi
+*.ps
+
+# OS / Editor temporary files
+.DS_Store
+*.swp
+*~

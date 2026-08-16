@@ -6,7 +6,7 @@
 \usepackage{xcolor}
 \setbeamertemplate{footline}[frame number]
 
-\usepackage{mathlist}
+\usepackage{../sty/mathlist}
 
 \usepackage{amsmath,amssymb, amsthm}
 \usepackage{amscd}
@@ -27,7 +27,7 @@
 
 \setbeamercovered{dynamic}
 
-\include{macros.tex}
+\input{../sty/macros}
 
 \def\bxi{\boldsymbol\xi}
 \def\bomega{\boldsymbol\omega}
@@ -46,7 +46,7 @@
 \begin{document}
 	
 \titlegraphic{\vspace{-0.5cm}
-	\includegraphics[scale=0.2]{imgs/udem.png}
+	\includegraphics[scale=0.2]{udem.png}
 }
 	\frame{\titlepage}
 	
@@ -55,7 +55,7 @@
 	%
 
 \begin{center}
-	\href{https://xkcd.com/221/}{\includegraphics[scale=0.75]{imgs/random_number.png}}
+	\href{https://xkcd.com/221/}{\includegraphics[scale=0.75]{random_number.png}}
 \begin{small}
 	\url{https://xkcd.com/221/}
 \end{small}
@@ -222,7 +222,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\begin{frame}
 		\frametitle{Standard minimal generator: illustration}
 		\begin{center}
-			\includegraphics[width=0.8\linewidth]{imgs/lcg.png}
+			\includegraphics[width=0.8\linewidth]{lcg.png}
 			
 			10000 generated points on the unit square.
 		\end{center}
@@ -776,7 +776,7 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 			\end{enumerate}
 		\end{minipage}
 		\begin{minipage}{0.47\linewidth}
-			\includegraphics[width=\linewidth]{imgs/NormalRejectGrid.eps}
+			\includegraphics[width=\linewidth]{NormalRejectGrid.eps}
 		\end{minipage}
 		
 	\end{frame}

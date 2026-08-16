@@ -1,2 +1,0 @@
-latex --shell-escape 06.Multistage.tex
-dvipdf 06.Multistage.dvi
