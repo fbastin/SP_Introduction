@@ -15,6 +15,9 @@
 
 \usepackage{pstricks, pst-node}
 
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning}
+
 \usepackage{times}
 
 \usepackage{ulem}
@@ -34,11 +37,13 @@
 \def\bC{\boldsymbol{C}}
 \def\bu{\boldsymbol{u}}
 \def\bU{\boldsymbol{U}}
-\def\bu{\boldsymbol{u}}
 \def\by{\boldsymbol{y}}
 \def\vol{\mbox{vol}}
 
-\title[Random Numbers Generation]{A short tutorial of random numbers generation}
+\def\blue{\color{blue}}
+\def\red{\color{red}}
+
+\title[Random Numbers Generation]{A short tutorial on random number generation}
 
 \author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
@@ -81,7 +86,7 @@
 			A good uniform random generator on the interval $[0,1]$ is a major
 			component of any good random generator library.
 			\item
-			Draws from other distributions are usually obtained by adequately transform an
+			Draws from other distributions are usually obtained by adequately transforming a
 			uniformly distributed sample.
 		\end{itemize}
 		
@@ -193,7 +198,7 @@ If $c = 0$, the generator is often called a multiplicative congruential generato
 		x_{n+1} = 16807x_n \mbox{ mod } 2147483647.
 		\]
 		Observe that $2147483647 = 2^{31}-1$; on 32-bit architectures, the
-		largest representable (signed) integer is $2^{31}$.
+		largest representable (signed) integer is $2^{31}-1$.
 		
 	\end{frame}
 	
@@ -252,12 +257,12 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		
 		\mbox{}
 		
-		The maximal period if $\rho = m^k-1$.
+		The maximal period is $\rho = m^k-1$.
 		
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Period of MRG's}
+		\frametitle{Period of MRGs}
 		
 		It can be shown that for $k > 1$, it is sufficient to have at least
 		two non-zero coefficients, including $a_k$, in order to get the maximal period.
@@ -281,14 +286,14 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Choosing a good MRG's}
+		\frametitle{Choosing a good MRG}
 		
 		{\blue Example: Lagged-Fibonacci}
 		\[
 		x_n = (\pm x_{n-r} \pm x_{n-k}) \mod m.
 		\]
 		It can be shown the vectors $(u_n, u_{n+k-r}, u_{n+k})$ are all
-		contained in two plans! We therefore know without additional tests
+		contained in two planes! We therefore know without additional tests
 		that the numbers cannot be considered as random.
 		
 		\mbox{}
@@ -319,7 +324,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		\mbox{}
 		
 		The sequence ${\{w_n,\, n\ge 0\}}$ is the output of another MRG, of
-		module ${m} = m_1 m_2$, and ${\{u_n,\, n\ge 0\}}$ is nearly the same
+		modulus ${m} = m_1 m_2$, and ${\{u_n,\, n\ge 0\}}$ is nearly the same
 		sequence if $m_1$ and $m_2$ are close.\\
 		We can achieve the period $(m_1^k-1)(m_2^k-1)/2$.
 		
@@ -352,7 +357,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		
 		\mbox{}
 		
-		P\'eriod $\rho = (m_1^3-1)(m_2^3-1)/2 \approx 2^{191}$.
+		Period $\rho = (m_1^3-1)(m_2^3-1)/2 \approx 2^{191}$.
 	\end{frame}
 	
 	\begin{frame}[containsverbatim]
@@ -393,85 +398,196 @@ See for instance \url{https://github.com/vigna/MRG32k3a}.
 
 \end{frame}
 		
-	\begin{frame}
+\begin{frame}
 		\frametitle{Random numbers generators on $\mathcal{F}_2$}
 		
-		Alternatives to MRG's: random numbers generators based on linear
-		recurrences in $\mathcal{F}_2$.
+		MRGs work on integers. An alternative is to build generators directly
+		on {\blue bits}, with {\blue linear recurrences in}\, $\mathcal{F}_2$.
 		
 		\mbox{}
 		
-		Galois field $\mathcal{F}_2$: set $\lbrace 0, 1 \rbrace$ equipped with
-		addition and multiplication modulo 2.
+		Recall the Galois field $\mathcal{F}_2$: the set $\lbrace 0,1 \rbrace$
+		with addition and multiplication computed modulo 2.
 		
 		\mbox{}
 		
-		We construct two sequences of bits vectors $\boldsymbol{x}_n$ and
-		$\boldsymbol{y}_n$ with the linear recurrences
-\begin{align*}
-\boldsymbol{x}_n &= {X} \boldsymbol{x}_{n-1} & \quad \mbox{({state vector}, ${k}$ bits)},\\
-\boldsymbol{y}_n &= {B} \boldsymbol{x}_{n} & \quad \mbox{({output vector}, ${w}$ bits)},
-\end{align*}
-Output:
-$$
-{u_n} = \sum_{j=1}^w y_{n,j-1} 2^{-j} = .y_{n,0}\; y_{n,1}\; y_{n,2}
-$$		
-\end{frame}
-	
-\begin{frame}
-\frametitle{LFSR}
-		
-Implementation is often quite complex, but it is possible to operate bitwise, and these RNGs are numerically very fast.
-		
-		\mbox{}
-		
-		The LFSR (linear feedback shift register), while known to have
-		important deficiencies, gives an illustration of such generators.
-		
-		\mbox{}
-		
-		We use the relations (with $a_k \ne 0$) 
-		\begin {eqnarray*}
-		u_n &=& \sum_{\ell=1}^w x_{n\nu+j-1} 2^{-\ell} 
-		~=~ .x_{n\nu} x_{n\nu+1} x_{n\nu+2} \ldots x_{n\nu+\ell-1}\\
-		X &=&
-		\left(
-		\begin{tabular}{cccc}
-			& 1        &          &         \\
-			&          & $\ddots$ &         \\
-			&          &          & 1       \\
-			$a_k$    &$a_{k-1}$ & $\ldots$ & $a_1$   
-		\end{tabular}
-		\right)^\nu, \qquad B=I.
-		\end {eqnarray*}
+		All operations are then {\blue bitwise}: shifts, xors and masks,
+		which makes these generators {\blue numerically very fast}.
 		
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Tausworthe generator}
+		\frametitle{Generators on $\mathcal{F}_2$: state and output}
 		
-		{\blue Maximum period:} $\rho = 2^k-1$ iff $\mbox{gcd}(\nu, 2^k-1) = 1$ and ${Q(z)} = z^k - a_1 z^{k-1}	- \cdots - a_{k-1} z - a_k$ is primitive.
+		We construct two sequences of bit vectors, the {\blue state} and the
+		{\blue output}, with linear recurrences ($k$-bit state, $w$-bit output):
+		\begin{align*}
+			\boldsymbol{x}_n &= {X} \boldsymbol{x}_{n-1} & \quad \mbox{(state vector, $k$ bits)},\\
+			\boldsymbol{y}_n &= {B} \boldsymbol{x}_{n}  & \quad \mbox{(output vector, $w$ bits)},
+		\end{align*}
+		where $X$ and $B$ are binary matrices and all arithmetic is in $\mathcal{F}_2$.
 		
 		\mbox{}
 		
-In most applications, only two coefficients are nonzero:
-$$
-Q(z) = z^k - a_r z^{k-r} - a_k.
-$$
-Since we are working in $\mathcal{F}_2$, the recurrence on $x_n$ becomes
-$$
-x_n = (x_{n-r}+x_{n-k}) \mod 2.
-$$
-The addition modulo 2 is equivalent to the instruction exclusive-or (xor) on the bits:
-$$
-x_n =
-\begin{cases}
-0 & \mbox{ si } x_{n-r} = x_{n-k},\\
-1 & \mbox{ si } x_{n-r} \ne x_{n-k}.
-\end{cases}
-$$		
-
-\end{frame}
+		{\blue Reading a binary fraction.} The $w$ output bits are stacked after the radix point:
+		\[
+			u_n = \sum_{j=1}^w y_{n,j-1}\, 2^{-j} = .y_{n,0}\; y_{n,1}\; \ldots\; y_{n,w-1}.
+		\]
+		Example: $y_n = (1,0,1,1)$ gives $2^{-1} + 2^{-3} + 2^{-4} = 0.6875 = .1011_2$.
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{LFSR: a shift register with linear feedback}
+		
+		\begin{minipage}{0.57\linewidth}
+			A {\blue linear feedback shift register} (LFSR) is a $k$-bit register
+			updated in three steps:
+			\begin{enumerate}
+				\item
+				read the {\blue tapped bits} --- here the positions $r$ and $k$;
+				\item
+				{\blue xor} them: the new bit is $x_n = x_{n-r} \oplus x_{n-k}$
+				(it is read before the shift);
+				\item
+				{\blue shift} the register by one position and insert $x_n$.
+			\end{enumerate}
+			
+			\vspace{0.15cm}
+			
+			In $\mathcal{F}_2$, addition is the {\blue exclusive-or} (xor):
+			$0\oplus0=0,\ \; 0\oplus1=1,\ \; 1\oplus1=0$.
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.40\linewidth}
+			\begin{center}
+			\begin{tikzpicture}[
+				box/.style={draw, minimum width=0.55cm, minimum height=0.5cm, font=\footnotesize, inner sep=0pt},
+				>=latex]
+				\node[box] (b1) at (0,0)    {$x_{n-1}$};
+				\node[box] (b2) at (0.65,0) {$x_{n-2}$};
+				\node[box] (b3) at (1.3,0)  {$x_{n-3}$};
+				\node[box] (b4) at (1.95,0) {$x_{n-4}$};
+				\node[circle,draw,inner sep=1pt,font=\footnotesize] (xor) at (0.975,-0.9) {$\oplus$};
+				\draw[->] (b1.south) to[out=-70,in=175] (xor.north west);
+				\draw[->] (b4.south) to[out=-110,in=5]  (xor.north east);
+				\draw[->] (xor.south) -- (0.975,-1.4) -- (-0.3,-1.4) -- (b1.south west);
+				\node[font=\footnotesize] at (-0.8,-1.05) {$x_n$};
+			\end{tikzpicture}
+			\end{center}
+		\end{minipage}
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{LFSR: a tiny example ($k = 4$, taps $r = 1$ and $r = 4$)}
+		
+		Seed $0001$, recurrence $x_n = x_{n-1} \oplus x_{n-4}$:
+		\begin{center}
+			\small
+			\setlength{\tabcolsep}{4pt}
+			\begin{tabular}{r|cccc|c}
+				step & \multicolumn{4}{c|}{register} & new bit\\
+				& $x_{n-1}$ & $x_{n-2}$ & $x_{n-3}$ & $x_{n-4}$ & $x_n$\\
+				\hline
+				0 & 0 & 0 & 0 & 1 & \text{--}\\
+				1 & 1 & 0 & 0 & 0 & 1\\
+				3 & 1 & 1 & 1 & 0 & 1\\
+				7 & 0 & 1 & 0 & 1 & 0\\
+				9 & 1 & 1 & 0 & 1 & 1\\
+				$\vdots$ & & & & & $\vdots$
+			\end{tabular}
+		\end{center}
+		
+		\begin{itemize}
+			\item
+			After $15$ steps we are back to the seed $0001$: period $2^4 - 1$.
+			\item
+			All $2^4-1$ {\blue non-zero} states have been visited: {\blue maximal period}.
+		\end{itemize}
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{LFSR: matrix form}
+		
+		The recurrence is a linear recurrence over $\mathcal{F}_2$ on the state vector
+		(we assume $a_k \ne 0$):
+		\[
+			\boldsymbol{x}_n = X\, \boldsymbol{x}_{n-1},
+			\qquad
+			X =
+			\begin{pmatrix}
+				0    & 1      &        &        \\
+				     & \ddots & \ddots &        \\
+				     &        & \ddots & 1      \\
+				a_k  & a_{k-1} & \ldots & a_1
+			\end{pmatrix}.
+		\]
+		
+		\begin{itemize}
+			\item
+			The {\blue last row} encodes the taps (the feedback coefficients), the rest of
+			the matrix is a pure shift.
+			\item
+			$X^\nu$ shifts the register by $\nu$ bits in one step: this is the spacing
+			$\nu$ used when assembling output words.
+			\item
+			For {\blue Tausworthe} generators, $B = I$ (no output transformation).
+		\end{itemize}
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Tausworthe generators: assembling words}
+		
+		{\blue Tausworthe (1965):} read the bit stream $w$ bits at a time, spaced
+		$\nu$ apart, and interpret them as a binary fraction:
+		\[
+			u_n = \sum_{\ell=1}^{w} x_{n\nu + \ell - 1}\, 2^{-\ell}
+			    = .x_{n\nu}\; x_{n\nu+1}\; \ldots\; x_{n\nu+w-1}.
+		\]
+		
+		\vfill
+		
+		{\blue Example} (previous LFSR, $w = 3$, $\nu = 1$): the output bit stream is
+		\[
+			\underbrace{1\,1\,1}_{\tfrac78}\ \ \underbrace{1\,0\,1}_{\tfrac58}\ \ \underbrace{0\,1\,1}_{\tfrac38}\ \ \underbrace{0\,0\,1}_{\tfrac18}\ \ \underbrace{0\,0\,0}_{0}
+		\]
+		so the uniforms are $u = .111,\ .101,\ .011,\ .001,\ .000,\ \ldots$
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Tausworthe generators: maximal period}
+		
+		{\blue Maximum period.} The output period reaches its maximal value
+		\[
+			\rho = 2^k - 1
+		\]
+		iff the characteristic polynomial is {\blue primitive} and the spacing is
+		{\blue coprime} to the period:
+		\[
+			Q(z) = z^k - a_1 z^{k-1} - \cdots - a_{k-1} z - a_k \ \text{primitive},
+		\]
+		\[
+			\gcd(\nu,\, 2^k - 1) = 1.
+		\]
+		
+		In most applications, only two coefficients are non-zero:
+		\[
+			Q(z) = z^k - a_r z^{k-r} - a_k,
+		\]
+		which, in $\mathcal{F}_2$, brings us back to the xor recurrence
+		$x_n = x_{n-r} \oplus x_{n-k}$ of the LFSR.
+		
+		\vfill
+		
+		{\red Caveat.} Linearity in $\mathcal{F}_2$ is a strong structural flaw: plain
+		LFSRs/Tausworthe are {\blue not good on their own}, and are combined, or replaced
+		by MT19937 and xoshiro (next slide).
+		
+	\end{frame}
 	
 	\begin{frame}[fragile]
 		\frametitle{Implementations}
@@ -513,7 +629,7 @@ One of the main opponent of the xorshift family is Melissa O'Neil, who proposes 
 \item
 PCG combines a linear congruential generator and permutation functions.
 \item
-However, Vigna (the author of xorshift generators) has a lot of critisms regarding PCG: \url{https://pcg.di.unimi.it/pcg.php}.
+However, Vigna (the author of xorshift generators) has a lot of criticisms regarding PCG: \url{https://pcg.di.unimi.it/pcg.php}.
 \item
 In summary, there are no strong evidence that one should favor a PCG over a MRG. According to Vigna, ``there is technically no sensible reason to use a PCG generator: those without flaws are not competitive.''
 \end{itemize}
@@ -528,12 +644,229 @@ In summary, there are no strong evidence that one should favor a PCG over a MRG.
 \item
 Opposite for CBRNGs: the state is a counter, increased by 1, and the output function is complex.
 \item
-One popular impletation, Philox, is the default generator in TensorFlow.
-\item 
-Efficient on a GPU, but their statistical properties are not well studied.
+The most popular implementation, Philox, detailed next, is the default generator in TensorFlow.
+\item
+They pass demanding test suites such as TestU01's BigCrush, with sufficiently many rounds, and are efficient on both CPUs and GPUs.
 \item
 One strength: easy to jump ahead in the state space.
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Counter-based generators: a stateless map}
+
+A CBRNG is a {\blue stateless map} onto a block of random bits:
+\[
+R = E_{K}(C),
+\]
+where
+\begin{itemize}
+\item
+$C = (c_1,\ldots,c_N)$ is a {\blue counter}: the position in the sequence;
+\item
+$K = (k_1,\ldots,k_M)$ is a {\blue key}: it identifies the stream; for Philox,
+$M = N/2$.
+\end{itemize}
+
+\mbox{}
+
+The sequence follows by {\blue incrementing} the counter:
+\[
+C,\ C+1,\ C+2,\ \ldots
+\]
+
+\vfill
+
+{\blue Consequence:} identical $(C,K)$ always yields identical bits on any
+architecture --- ideal for reproducible parallel Monte Carlo.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Philox: an encrypt-increment CBRNG}
+
+Introduced by {\blue Salmon, Moraes, Dror \& Shaw} (SC 2011), together with
+Threefry and AES-based designs: the \textsl{Random123} library,
+\url{https://github.com/DEShawResearch/random123}.
+
+\begin{itemize}
+\item
+{\blue Default variant} (PyTorch, TensorFlow, NumPy \texttt{Generator}, JAX,
+cuRAND):
+\[
+\text{Philox}4\times32{-}10, \qquad N = 4,\ W = 32 \ \text{bits},\ r = 10 \ \text{rounds},
+\]
+i.e.\ a block of $4 \times 32 = 128$ bits per call.
+\item
+{\blue Not cryptographic:} the few rounds are meant to pass statistical tests,
+not to resist cryptanalysis (e.g.\ the key space is finite: $2^{64}$ keys).
+\item
+Fewer rounds are faster but display measurable correlations.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Philox: one round --- four elementary operations}
+
+Each round is a bijection on $(x_0, x_1, x_2, x_3)$, given two subkeys $(k_0, k_1)$.
+It alternates {\blue arithmetic} (multiplication) and {\blue bitwise} (xor) mixing.
+
+\begin{enumerate}
+\item
+{\blue Multiply.} Build the 64-bit products $P_0 = M_0 x_0$ and $P_1 = M_1 x_2$,
+with the odd multipliers $M_0 = \mathtt{D2511F53}_{16}$,
+$M_1 = \mathtt{CD9E8D57}_{16}$.
+\item
+{\blue Split.} Cut each product into a high and a low 32-bit half,
+$P_j = \mathrm{hi}_j\, 2^{32} + \mathrm{lo}_j$: bits travel from the low counter
+words to all 64 positions.
+\item
+{\blue Fold.} Mix a high half, a passing lane and a subkey with xor:
+$y_0 = \mathrm{hi}_1 \oplus x_1 \oplus k_0$ and
+$y_2 = \mathrm{hi}_0 \oplus x_3 \oplus k_1$.
+\item
+{\blue Swap the lows} across the lanes: $y_1 = \mathrm{lo}_1$ and $y_3 = \mathrm{lo}_0$.
+\end{enumerate}
+
+\vfill
+
+{\blue Why a bijection?} $M_0, M_1$ odd $\Rightarrow$ invertible modulo $2^{32}$:
+any $y$ has a unique predecessor. Bijectivity avoids collisions and gives a clean period.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Philox: one round --- wiring}
+
+\begin{center}
+\begin{tikzpicture}[>=latex, scale=0.92, every node/.style={font=\small}]
+	\node (x0) at (0, 0)    {$x_0$};
+	\node (x1) at (0,-0.75) {$x_1$};
+	\node (x2) at (0,-1.5)  {$x_2$};
+	\node (x3) at (0,-2.25) {$x_3$};
+	\node[draw]  (M0) at (1.7, 0)    {\texttt{$\times M_0$}};
+	\node[draw]  (M1) at (1.7,-1.5)  {\texttt{$\times M_1$}};
+	\node[draw, circle, inner sep=0.9pt] (c0) at (4.55, 0)    {$\oplus$};
+	\node[draw, circle, inner sep=0.9pt] (c1) at (4.55,-1.5)  {$\oplus$};
+	\node (y0) at (6.3, 0)    {$y_0$};
+	\node (y1) at (6.3,-0.75) {$y_1$};
+	\node (y2) at (6.3,-1.5)  {$y_2$};
+	\node (y3) at (6.3,-2.25) {$y_3$};
+	\node (k0n) at (4.55, 0.85)  {$k_0$};
+	\node (k1n) at (4.55,-2.6)   {$k_1$};
+	\draw[->] (x0) -- (M0);
+	\draw[->] (x2) -- (M1);
+	\draw[->] (x1.east) to[out=-5,in=180] (c0.west);
+	\draw[->] (x3.east) to[out=5,in=180] (c1.west);
+	\draw[->] (M0.east) to[out=-25,in=155] node[pos=0.5, above]{$\mathrm{hi}_0$} (c1.west);
+	\draw[->] (M0.south east) to[out=-60,in=170] node[pos=0.65, below]{$\mathrm{lo}_0$} (y3.west);
+	\draw[->] (M1.east) to[out=25,in=205] node[pos=0.5, below]{$\mathrm{hi}_1$} (c0.west);
+	\draw[->] (M1.south east) to[out=-35,in=180] node[pos=0.65, below]{$\mathrm{lo}_1$} (y1.west);
+	\draw[->] (k0n) -- (c0.north);
+	\draw[->] (k1n) -- (c1.south);
+	\draw[->] (c0.east) -- (y0.west);
+	\draw[->] (c1.east) -- (y2.west);
+\end{tikzpicture}
+\end{center}
+
+\begin{align*}
+(y_0,\, y_1,\, y_2,\, y_3) &= (\mathrm{hi}_1 \oplus x_1 \oplus k_0,\; \mathrm{lo}_1,\; \mathrm{hi}_0 \oplus x_3 \oplus k_1,\; \mathrm{lo}_0),
+\end{align*}
+where $(\mathrm{hi}_j, \mathrm{lo}_j)$ are the high/low 32-bit halves of $M_j x_j$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Philox: the key schedule (Weyl sequence)}
+
+Each round must use {\blue different subkeys}, otherwise round symmetry would leak
+structure. Between two rounds, the subkeys advance by a fixed {\blue Weyl step}:
+\[
+(k_0,\, k_1) \;+\!\!=\; (W_0,\, W_1)
+\]
+with the constants
+\[
+W_0 = \mathtt{9E3779B9}_{16}, \qquad W_1 = \mathtt{BB67AE85}_{16},
+\]
+taken as odd parts of well-chosen irrationals ($W_0$ from the golden ratio
+$\varphi$, $W_1$ from $\sqrt{3}-1$).
+
+\begin{itemize}
+\item
+A single 64-bit integer addition per round: {\blue cheap}.
+\item
+The schedule is invertible, so each round stays a bijection.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Philox: from blocks to a number sequence}
+
+After $r = 10$ rounds, the counter/key pair has been fully scrambled into a block
+$R = E_K(C)$. We map a 32-bit word to $[0,1)$ with a plain division:
+\[
+u = \frac{R_j}{2^{32}} \in [0,1),
+\]
+so each call provides up to $4$ uniforms (or a 128-bit block).
+
+\vfill
+
+Summary of the {\blue streaming model}:
+\begin{itemize}
+\item
+draw next block: increment the counter, $C \leftarrow C + 1$;
+\item
+jump $m$ blocks ahead: $C \leftarrow C + m$ (an integer addition);
+\item
+switch stream: change the key $K$;
+\item
+no state to store or synchronize: natural for GPUs and parallel workers.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Counter-based generators: parallel streams}
+
+\begin{itemize}
+\item The key identifies an independent stream, and the counter its position: jumping ahead amounts to integer addition.
+\item Stateless: no internal array to store or synchronize; the value at position $i$ does not depend on the draw order. Well-suited to GPUs and parallel Monte Carlo.
+\item Reproducibility: identical (counter, key) yields identical bits on all architectures.
+\item Natural fit for stochastic optimization: one stream per scenario or sample index.
+\end{itemize}
+
+\mbox{}
+
+{\red Adoption:}
+\begin{itemize}
+	\item NVIDIA cuRAND and PyTorch (GPU): Philox4$\times$32--10;
+	\item TensorFlow: Philox by default, Threefry optional;
+	\item NumPy \texttt{Generator}: Philox bit generator; JAX: Threefry.
+	\item Modern ML leans on it: dropout masks and distributed training draw thread- or rank-independent numbers.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Counter-based vs conventional generators}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l|p{3.7cm}|p{3.7cm}}
+ & \textbf{Conventional} & \textbf{Counter-based} \\
+ & (MRG, PCG, xorshift) & (Philox, Threefry) \\
+\hline
+Stored state & full generator state & counter + key \\
+Workload & transition function & output function (rounds) \\
+Jump ahead & dedicated algorithms & addition on the counter \\
+Independent streams & dedicated machinery & distinct keys \\
+Draw order & sequential & position-indexed \\
+GPUs & serial dependency & stateless threads \\
+\end{tabular}
+\end{center}
 
 \end{frame}
 
@@ -544,9 +877,9 @@ One strength: easy to jump ahead in the state space.
 	\item 
 A very useful possibility proposed by some implementation is the possibility to make a jump of $m$ positions in the random number sequences, with $m$ very large.
 \item
-This allows to easily define independant random variables.
+This allows one to easily define independent random variables.
 \item
-Useful in simulation when relying on common random random numbers.
+Useful in simulation when relying on common random numbers.
 \end{itemize}
 
 The MRG32k3a implementation proposes functions to generate independent streams and substreams.
@@ -554,14 +887,22 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 \end{frame}
 
 		\begin{frame}[containsverbatim]
-	\frametitle{RDST library}
-	
-	\url{https://github.com/JLChartrand/RDST.jl}		
-	
+	\frametitle{RandomDataStreams.jl}
+
+	\url{https://github.com/JLChartrand/RandomDataStreams.jl}\\
+	Documentation: \url{https://jlchartrand.github.io/RandomDataStreams.jl/dev/}
+
 	\mbox{}
-	
-	This package proposes an implementation of MRG32k3a with streams and substreams.
-	
+
+	This package proposes an implementation of MRG32k3a with streams and substreams, following the same philosophy as counter-based generators: explicitly indexed, reproducible subsequences rather than synchronized states.
+
+	\mbox{}
+
+	Illustration (one independent stream per scenario, one substream per replication):
+\begin{semiverbatim}
+u = draw(stream = s, substream = r, position = i)
+\end{semiverbatim}
+
 \end{frame}
 
 	\begin{frame}
@@ -599,7 +940,7 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 	\begin{frame}
 		\frametitle{Inversion}
 		
-		Prefered method when applicable: compatible with variance reduction and copulae.
+		Preferred method when applicable: compatible with variance reduction and copulae.
 		
 		\mbox{}
 		
@@ -621,7 +962,7 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 			in the discrete case, it is easy to prove that $\forall\, i$, $P[X = x_i] = p(x_i)$,
 			and we assume $x_1 < x_2 < \ldots < x_n$;
 			\item
-			The principle still works for mixte distributions.
+			The principle still works for mixed distributions.
 		\end{itemize}
 		
 	\end{frame}
@@ -737,8 +1078,8 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 		
 		\mbox{}
 		
-		We consider the case where $X$ is continuous (the discrete cas is
-		analoge).
+		We consider the case where $X$ is continuous (the discrete case is
+		analogous).
 		Let $f(x)$ be the density of $X$, and let $t$ be a "hat" function that
 		majors $f$, i.e. $f (x) \leq t(x)\ \forall\, x$.
 		
@@ -768,7 +1109,7 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 				\item
 				generate $Y$ of density $r(x)$;
 				\item
-				generate $U: U (0, 1)$ independantly of $Y$;
+				generate $U: U (0, 1)$ independently of $Y$;
 				\item
 				until $U \leq f (Y )/t(Y )$;
 				\item
@@ -938,8 +1279,10 @@ $$
 
 \textcolor{blue}{Upper bound proof}
 	\begin{align*}
-		C(x, y) &= P[X \leq x \cap Y \leq y] \\ & \leq P[X \leq x] P[Y \leq y] \\ & \leq \min(F_X(x), F_Y(y))
+		C(x, y) &= P[X \leq x \cap Y \leq y] \\
+		&\leq \min\left(P[X \leq x], P[Y \leq y]\right) = \min(F_X(x), F_Y(y))
 	\end{align*}
+	since $\lbrace X \leq x \rbrace \cap \lbrace Y \leq y \rbrace \subseteq \lbrace X \leq x \rbrace$ and $\subseteq \lbrace Y \leq y \rbrace$.
 
 \end{frame}
 
@@ -971,11 +1314,11 @@ $$
 
 $$
 	C \left( F_1(x_1), \ldots, F_d(x_d) \right)
-	= \Phi_{\Sigma} \left( \phi^{-1} \left( F_1(x_1) \right),\ldots, \phi^{-1}\left( F_d(x_d) \right) \right),
+	= \Phi_{\Sigma} \left( \Phi^{-1} \left( F_1(x_1) \right),\ldots, \Phi^{-1}\left( F_d(x_d) \right) \right),
 $$
 where
 \begin{itemize}
-	\item $\phi$ is the cdf of a $\calN(0,1)$,
+	\item $\Phi$ is the cdf of a $\calN(0,1)$,
 	\item $\Phi_{\Sigma}$ is the cdf of a $d$-dimensional $\calN(\bszero,\Sigma)$.
 \end{itemize}
 
