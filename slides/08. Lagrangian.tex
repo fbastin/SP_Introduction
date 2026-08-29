@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
@@ -10,10 +10,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb}
 
-\newtheorem{defi}{Définition}
-\newtheorem{theo}{Théorème}
-\newtheorem{coro}{Corollaire}
-\newtheorem{lem}{Lemme}
+\newtheorem{defi}{Definition}
+\newtheorem{theo}{Theorem}
+\newtheorem{coro}{Corollary}
+\newtheorem{lem}{Lemma}
 
 \usepackage{epic,eepic}
 \usepackage{pstricks, pst-tree}
@@ -71,7 +71,7 @@ We consider the general {\blue two-stage nonlinear program}
 where $\mathcal{Q}(x) = E_{\bxi}[Q(x,\bxi)]$, and
 \begin{align*}
 Q(x,\xi) = \inf\ & f^2(y(\xi),\xi) \\
-\mbox{t.q. } & b_i^2(x,\xi) + g_i^2(y(\xi), \xi) \leq 0,\ i = 1,\ldots,m_2.
+\mbox{s.t. } & b_i^2(x,\xi) + g_i^2(y(\xi), \xi) \leq 0,\ i = 1,\ldots,m_2.
 \end{align*}
 
 We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdot,\xi)$ are continuous in the first argument for any given $\xi$, and measurable in $\xi$ for any fixed first argument. $\xi$ has finite second-order moments.
@@ -97,7 +97,7 @@ We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdo
 	We can extend the definitions of $K_1$ and $K_2$.
 	\begin{align*}
 		K_1 &= \lbrace x \,|\, g_i^1(x) \leq 0,\ i = 1,\ldots,m_1 \rbrace,\\
-		K_2(\xi) &= \lbrace x \,|\, \exists y(\xi) \mbox{ t.q. } b_i^2(x,\xi) +
+		K_2(\xi) &= \lbrace x \,|\, \exists y(\xi) \mbox{ s.t. } b_i^2(x,\xi) +
 		g_i^2(y(\xi),\xi) \leq 0,\ i = 1,\ldots,m_2 \rbrace,\\
 		K_2 &= \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace.
 	\end{align*}
@@ -470,6 +470,7 @@ where $\pi^t$ corresponds to the components of $\pi$ associated to the $t$ first
 We still have to describe the projection operator.
 For simplicity, consider two steps.
 The primal problem becomes (omitting all the constraints except the nonanticipativity ones)
+{\small
 \begin{align*}
 \min z\ & = \sum_{s = 1}^S p_s \left( f^1(x_s)+f^2(x_s, y_s) \right) \\
 \mbox{s.t. } & x_s - \sum_{k=1}^S p_k x_k = 0,\ s=1,\ldots,S. 
@@ -480,6 +481,7 @@ The dual problem can now be written as
 y_s))\\
 & + \pi_s\left( x_s - \sum_{k=1}^S p_kx_k \right) \Biggr).
 \end{align*}
+}
 
 \end{frame}
 
@@ -624,7 +626,7 @@ At iteration $\nu$, we solve the subproblems
 \left(\pi_s^{\nu}\right)^T\left(x_s-\hat{x}^{\nu}\right)+\frac{\rho}{2}\|
 x_s-\hat{x}^{\nu} \|^2\right) \\
 & \text{s.t. } g_i^1(x_s) \leq 0,\ i=1,\ldots{},m_1,\ s=1,\ldots{},S,\\
-& \phantom{\text{t.q. }}
+& \phantom{\text{s.t. }}
 t_i^2\left(x_s,k\right)+g_i^2\left(y_s,\xi_s\right) \leq 0,\
 i=1,\ldots{},m_2,\ s=1,\ldots{},S.
 \end{align*}
@@ -675,7 +677,7 @@ as $\hat{x}^{\nu+1}$.
 \item
 The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point rather than a dual ascent strategy.
 \item
-In practice, the optimality test is replaced by a convergence test for instance if the following quantity is small enough (De Silva et Abramson):
+In practice, the optimality test is replaced by a convergence test for instance if the following quantity is small enough (De Silva and Abramson):
 \[
 \sqrt{ \| \hat{x}^{\nu} - \hat{x}^{\nu+1} \|^2 + \sum_{s = 1}^S p_s \|
   x_s^{\nu} - \hat{x}^{\nu}\|^2}.
@@ -687,6 +689,7 @@ In practice, the optimality test is replaced by a convergence test for instance 
 \begin{frame}
 \frametitle{Generalization to multistage}
 
+{\small
 $$
 \begin{aligned}
 \min_{x}\; & \sum_{s \in \cS} p_s f\left(x^{(s)}, \xi^{(s)}\right)\\
@@ -708,6 +711,8 @@ with
 $$
 \hat{x}_t^{(s)} = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s')}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
 $$
+
+}
 
 \end{frame}
 

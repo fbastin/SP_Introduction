@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -11,7 +11,6 @@
 %\usepackage{xxcolor}
 \usepackage{../sty/mathlist}
 
-\usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb}
 \usepackage{colortbl}
 %\usepackage[english]{babel}
@@ -85,7 +84,7 @@ Consider the general deterministic program
 \begin{split}
 & \min g_0(x) \\
 & \text{s.t. }g_i(x) \leq 0, i = 1,\ldots{},m \\
-& \phantom{t.q. }x \in X \subset \calR^n.
+& \phantom{\text{s.t. }}x \in X \subset \calR^n.
 \end{split}
 \]
 
@@ -116,7 +115,7 @@ data unavailable;
 \end{itemize}
 \[
 \begin{split}
-& ``\min_{x \in X}" g_0(x,\bsxi) \\
+& \text{``}\min_{x \in X}\text{''} g_0(x,\bsxi) \\
 & \text{s.t. }g_i(x, \bsxi) \leq 0,\ i=1,\ldots{},m,\\
 \end{split}
 \]
@@ -131,7 +130,7 @@ where $\bsxi$ is a random vector. Meaning of ``$\min$''?
 \begin{frame}
 \frametitle{The farmer problem}
 
-Source: Birge et Louveaux, Section~1.1.
+Source: Birge and Louveaux, Section~1.1.
 
 \mbox{}
 
@@ -157,7 +156,7 @@ Must buy if less production, but can sell the overproduction.
 \item
 The purchase cost is 40\% greater than the sale cost.
 \item
-The farmer can sold the sugar beets at \$36T for the first 6000 tons, and \$10T after, due to European quotas.
+The farmer can sell the sugar beets at \$36/T for the first 6000 tons, and \$10/T thereafter, due to European quotas.
 \end{itemize}
 
 \end{frame}
@@ -170,8 +169,8 @@ The farmer can sold the sugar beets at \$36T for the first 6000 tons, and \$10T 
 \hline
 Culture & Wheat & Corn & Sugar beets \\
 \hline
-Average return ($T$) & 2.5 & 3 & 20 \\
-Plantation cost (\$/acre) & 150 & 230 & 260 \\
+Average yield (T/acre) & 2.5 & 3 & 20 \\
+Planting cost (\$/acre) & 150 & 230 & 260 \\
 Selling price (\$/T) & 170 & 150 & 36 ($\leq$ 6000T), 10 \\
 Buying price (\$/T) & 238 & 210 & - \\
 Minimum required (T) & 200 & 240 & - \\
@@ -270,10 +269,6 @@ Purchases (T) & - & - & - \\
 \end{tabular}
 \end{center}
 
-\mbox{}
-
-\mbox{}
-
 {\red Bad year}. Total profit: \$59950.
 \begin{center}
 \begin{tabular}{lccc}
@@ -319,12 +314,12 @@ We now want to maximize the {\red expected profit}.
 \item
 Assumption: 3 equiprobable scenarios.
 \end{itemize}
-\begin{small}
+\begin{footnotesize}
 \begin{align*}
 \min\ & 150x_1 + 230x_2 + 260x_3 +\\
-&  + \sum_{s = 1}^3 \frac{1}{3}(238y_{1s} - 170w_{1s} + 210y_{2s} - 150w_{2s} -
+& + \sum_{s = 1}^3 \frac{1}{3}(238y_{1s} - 170w_{1s} + 210y_{2s} - 150w_{2s} -
 36w_{3s} - 10w_{4s}) \\
-\text{t.q. } & x_1 + x_2 + x_3 \leq 500; \\
+\text{s.t. } & x_1 + x_2 + x_3 \leq 500; \\
 & 3x_1 + y_{11} - w_{11} \geq 200; 2.5x_1 + y_{12} - w_{12} \geq 200; \\
 & \quad{}  2x_1 + y_{13} - w_{13} \geq 200; \\
 & 3.6x_2 + y_{21} - w_{21} \geq 240; 3x_2 + y_{22} - w_{22} \geq
@@ -335,7 +330,7 @@ w_{43} \leq 16 x_3; \\
 & w_{31} \leq 6000; w_{32} \leq 6000; w_{33} \leq 6000; \\
 & x, y, w \geq 0.
 \end{align*}
-\end{small}
+\end{footnotesize}
 $\rightarrow$ {\blue extensive form} (or {\blue deterministic equivalent}).
 
 \end{frame}
@@ -358,15 +353,15 @@ Total profit: \$108390.
 \hline
 First stage & Surface (acres) & 170 & 80 & 250 \\
 \hline
-$s = 1$ & Productions (T) & 510 & 288 & 6000 \\
+$s = 1$ & Production (T) & 510 & 288 & 6000 \\
 & Sales (T) & 310 & 48 & 6000 \\
 & Purchases (T) & - & - & - \\
 \hline
-$s = 2$ & Productions (T) & 425 & 240 & 5000 \\
+$s = 2$ & Production (T) & 425 & 240 & 5000 \\
 & Sales (T) & 225 & - & 5000 \\
 & Purchases (T) & - & - & - \\
 \hline
-$s = 3$ & Productions (T) & 340 & 192 & 4000 \\
+$s = 3$ & Production (T) & 340 & 192 & 4000 \\
 & Sales (T) & 140 & - & 4000 \\
 & Purchases (T) & - & 48 & - \\
 \hline
@@ -426,7 +421,7 @@ Source: Birge and Louveaux, Section~1.1.
 	\item
 	The newsvendor can turn back the unsold newspapers at the end of the day, and obtain a price $r$ for each of them
 	\item
-	Knowing the probability distribution $F(t) = P(\bsxi \leq t$), how many newspapers should the newsvendor buy in order to maximize his revenue?
+	Knowing the probability distribution $F(t) = P(\bsxi \leq t)$, how many newspapers should the newsvendor buy in order to maximize his revenue?
 \end{itemize}
 
 \end{frame}
@@ -441,7 +436,7 @@ With the previous definitions, the newsvendor would like to solve the following 
 \max_{x \geq 0} -cx + \mathcal{Q}(x),
 \]
 \item
-$\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buy $x$ newspapers:
+$\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buys $x$ newspapers:
 \[
 \mathcal{Q}(x) = \EE_{\bsxi} [ Q(x, \bsxi)].
 \]
@@ -449,7 +444,7 @@ $\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buy $x$ newspaper
 %Dans le cadre linéaire, nous écrirons aussi souvent
 %$Q(x, \omega) = v(h(\omega) - T (\omega)x)$.
 \item
-Here $Q(x, \xi)$ is the amount of money obtained by the newsvendor if he buys $x$ newspaper and the demand is $\xi$.
+Here $Q(x, \xi)$ is the amount of money obtained by the newsvendor if he buys $x$ newspapers and the demand is $\xi$.
 \end{itemize}
 
 \end{frame}
@@ -527,7 +522,7 @@ We will consider the associated optimality conditions.
 
 \mbox{}
 
-Assuming $x \ne 0$, the solution of the second-stage is obtained by computing the zero of the objective gradient.
+Assuming $x > 0$, the optimal order quantity $x^*$ is obtained by setting the derivative of the objective function to zero.
 As
 \[
 \frac{d}{dx} \mathcal{Q}(x) = q - (q - r)F(x),
@@ -549,11 +544,11 @@ x^* = F^{-1} \left( \frac{q-c}{q-r} \right).
 
 \mbox{}
 
-Example: $c = 0.15$, $q = 0.25$, $r = 0.02$, $\bsxi \sim N(650, 80^2)$. Alors
+Example: $c = 0.15$, $q = 0.25$, $r = 0.02$, $\bsxi \sim N(650, 80^2)$. Then
 \[
 x^* = N^{-1}_{(650,80^2)}(0.1/0.23).
 \]
-Since $N(650, 80^2) \sim 80\Phi+650$, where $\Phi$ is the distribution function of a $N(0,1)$, it easy to show that
+Since $\bsxi = 80 Z + 650$ where $Z \sim N(0,1)$ has distribution function $\Phi$, it is easy to show that
 \[
 x^* = 80\Phi^{-1}(0.1/0.23) + 650 \approx 636.86.
 \]
@@ -572,9 +567,9 @@ quantile(d, 0.1/0.23)
 \begin{frame}
 \frametitle{Marginal revenue}
 
-{\sl Other interpretation}, more intuitive: assume that the vendor has bought $t$ journaux.
+{\sl Other interpretation}, more intuitive: assume that the vendor has bought $t$ newspapers.
 What is the expected marginal revenue if he buys an additional newspaper?
-On an economical point of view, we would like this marginal revenue to be equal to 0.
+From an economic point of view, we would like this marginal revenue to be equal to 0.
 
 \mbox{}
 

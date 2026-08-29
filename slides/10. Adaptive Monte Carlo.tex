@@ -1,5 +1,5 @@
 % Compilé avec lualatex
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
@@ -13,12 +13,15 @@
 
 \newtheorem{defi}{Definition}
 \newtheorem{theo}{Theorem}
-\newtheorem{coro}{Corollaire}
-\newtheorem{lem}{Lemme}
+\newtheorem{coro}{Corollary}
+\newtheorem{lem}{Lemma}
 
 %\usepackage{doublespace}
 \usepackage{epic,eepic}
 \usepackage{pstricks, pst-tree}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning}
 
 \usepackage{times}
 
@@ -165,7 +168,7 @@ where $\Sigma$ is the covariance matrix from $(G(x_1, \xi), \ldots, G(x_k, \xi))
 
 If $N^{1/2}(\hat{g}_N - g) \Rightarrow Y \in C(S)$ (with $\lbrace \hat{g}_n \rbrace$ and $g$ in $C(S)$), and
 \[
-\hat{v}_N = \min_{x \in S} \hat{g}_N(x) \mbox{ et } v^*= \min_{x \in S} g(x),
+\hat{v}_N = \min_{x \in S} \hat{g}_N(x) \mbox{ and } v^*= \min_{x \in S} g(x),
 \]
 then
 \[
@@ -627,7 +630,7 @@ If $N^+ > N_k$, compute $\hat{g}_{N^+}(x_k)$, $\Delta m_k^{N^+}$ and
 $\epsilon_{\delta}^{N^+}(x_k)$, otherwise if $N^+ < N_k$ compute $\hat{g}_{N_k}(x_k + s_k)$.
 Set $N^-$ to $\max\lbrace N_k, N^+ \rbrace$, and %redefine
 \[
-\rho_k = \frac{\hat{g}_{N^-}(x_k+s_k) - \hat{g}_{N^-}(x_k)}{\Delta
+\rho_k = \frac{\hat{g}_{N^-}(x_k) - \hat{g}_{N^-}(x_k+s_k)}{\Delta
 m_k^{N^-}}.
 \]
 
@@ -675,21 +678,26 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			Discrete {\blue set of alternatives} available for individual $i$:
 			$\mathcal{A}(i)$.
 			
-			\textcolor{orange}Example: Which mode of transport have you chosen to come?
-			
+			\textcolor{orange}{Example:} Which mode of transport have you chosen to come?
+
 			\vspace*{0.3cm}
-			
+
 			\begin{minipage}[c]{0.3\linewidth}
 				\begin{center}
 					\scalebox{0.8}{
-						\psset{nodesep=0.5cm, treesep=0.4cm}
-						\pstree[treemode=R, nodesep=3pt]{\Tr{\bf{i}}}{
-							\TC~[tnpos=r]{\quad\bf{car}}
-							\TC~[tnpos=r]{\quad\bf{train}}
-							\TC~[tnpos=r]{\quad\bf{bus}}
-							\TC~[tnpos=r]{\quad\bf{bike}}
-							\TC~[tnpos=r]{\quad\bf{walk}}
-						}
+						\begin{tikzpicture}[>=latex, every node/.style={font=\small}]
+							\node (i) at (0,0) {$\mathbf{i}$};
+							\node (car)  at (1.8, 1.2) {\textbf{car}};
+							\node (train) at (1.8, 0.6) {\textbf{train}};
+							\node (bus)  at (1.8, 0.0) {\textbf{bus}};
+							\node (bike) at (1.8,-0.6) {\textbf{bike}};
+							\node (walk) at (1.8,-1.2) {\textbf{walk}};
+							\draw[->] (i.east) -- (car.west);
+							\draw[->] (i.east) -- (train.west);
+							\draw[->] (i.east) -- (bus.west);
+							\draw[->] (i.east) -- (bike.west);
+							\draw[->] (i.east) -- (walk.west);
+						\end{tikzpicture}
 					}%
 				\end{center}%
 			\end{minipage}
@@ -712,7 +720,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 				{\red $\rightarrow$ multinomial logit} (MNL).
 				
 				{\blue Probability} that individual $i$ choose $A_j$:
-					\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					\colorbox{lightgray}{
 					$P_{ij} = \frac{e^{\mu V_{ij}(\beta)}}{\sum_{n= 1}^N e^{\mu
 							V_{in}(\beta)}}$
 					}
@@ -734,7 +742,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			
 				Probability choice of $A_j$ by individual $i$:
 				\begin{center}
-					\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					\colorbox{lightgray}{
 						$P_{ij} (\theta) = E_{\bxi} \left[ L_{ij} (\gamma, \theta)\ \right] =
 						\int { L_{ij} (\gamma, \theta)} f(\gamma) d\gamma$
 					}
@@ -742,14 +750,14 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 				
 				This integral is approximated by
 				\begin{center}
-					\psframebox[fillstyle=solid, fillcolor=lightgray]{
+					\colorbox{lightgray}{
 						$SP_{ij_i}^{R} = \frac{1}{R} \sum_{r= 1}^R L_{ij_i} (\gamma_r, \theta)$
 					}
 				\end{center}
 
 				{\red SAA} problem:
 				\begin{center}
-					\psshadowbox[fillstyle=solid, fillcolor=orange]{
+					\colorbox{orange}{
 						$\max_{\theta} \hat{g}_R(\theta) = \max_{\theta} SLL(\theta) =
 						\max_{\theta} \frac{1}{N} \sum_{n = 1}^{N} \ln SP_{ij_i}^{R}$
 					}
@@ -767,14 +775,14 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 		\begin{footnotesize}
 			{\blue Stochastic programming}:
 			\begin{center}
-				\psframebox[fillstyle=solid, fillcolor=lightgray]{
+				\colorbox{lightgray}{
 					$\min_z g(z) = \min_z E_{\bxi} \left[G(z,\boldsymbol{\xi})\right]$
 				}
 			\end{center}
 			
 			{\blue Mixed logit}:
 			\begin{center}
-				\psframebox[fillstyle=solid, fillcolor=lightgray]{
+				\colorbox{lightgray}{
 					$\max_{\theta} g\left(\theta\right) = \max_{\theta} LL(\theta) \notag
 					= \frac{1}{n} \sum_n \ln E_{\bxi} \left[ L_{in} \left(
 					\boldsymbol{\gamma}, \theta \right) \right]$
@@ -786,7 +794,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 					$R$ grows toward $\infty$}.
 				
 				\begin{center}
-					\psshadowbox[fillstyle=solid, fillcolor=gray]{
+					\colorbox{gray}{
 						\begin{minipage}[fillstyle=solid, fillcolor=orange]{0.9\textwidth}
 							If $\theta^*_R$, $R=1,\ldots$, are first (second)-order critical for
 							the corresponding SAA problem, under some regularity conditions, for
@@ -814,7 +822,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			With an i.i.d. sample for each individual, we have, from the delta
 			method (see for instance Shapiro and Rubinstein):
 			\begin{center}
-				\psframebox[fillstyle=solid, fillcolor=lightgray]{
+				\colorbox{lightgray}{
 					$LL(\theta) - SLL^R(\theta) \Rightarrow N \left(0, \frac{1}{I}
 					\sqrt{ \sum_{i = 1}^I \frac{ \sigma^2_{ij_i} (\theta)}
 						{R \left( P_{ij_i} (\theta) \right)^2 }} \right)$
@@ -823,7 +831,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			
 			Asymptotic value of the confidence interval radius:
 			\begin{center}
-				\psframebox[fillstyle=solid, fillcolor=orange]{
+				\colorbox{orange}{
 					$\epsilon_{\delta} = \alpha_{\delta} \frac{1}{I} \sqrt{ \sum_{i=1}^I
 						\frac{ \sigma^2_{ij_i}\left(\theta \right) }
 						{R \left( P_{ij_i} (\theta) \right)^2} }$
@@ -833,7 +841,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			
 				Bias of simulation (Taylor expansion):
 				\begin{center}
-					\psframebox[fillstyle=solid, fillcolor=orange]{
+					\colorbox{orange}{
 						$B := E[SLL^R(\theta)] - LL(\theta) =
 						-\frac{I\epsilon_{\delta}^2}{2\alpha_{\delta}^2}$
 					}
@@ -853,17 +861,15 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			
 			\begin{center}
 				\hspace*{\stretch{1}}
-				\includegraphics[width=0.30\linewidth]{2dims.eps}
-				\includegraphics[width=0.30\linewidth]{5dims.eps}
-				\includegraphics[width=0.30\linewidth]{10dims.eps}
+				\includegraphics[width=0.25\linewidth]{2dims.eps}
+				\includegraphics[width=0.25\linewidth]{5dims.eps}
+				\includegraphics[width=0.25\linewidth]{10dims.eps}
 				\hspace*{\stretch{1}}
 				
-				\vspace*{-0.2cm}
-				\includegraphics[width=0.3\linewidth]{legend.eps}
+				\includegraphics[width=0.25\linewidth]{legend.eps}
 			\end{center}
 			
 				\begin{center}
-					\vspace*{0.2cm}
 %					\begin{spacing}{0.8}
 						\begin{tabular}{|c|c|c|c|}
 							\cline{2-4}
@@ -875,8 +881,6 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 							\hline
 						\end{tabular}
 %					\end{spacing}
-					
-					\vspace*{0.4cm}
 					
 				\end{center}
 				
@@ -900,17 +904,17 @@ and al.)\\
 {\red $\rightarrow$} 14 parameters (3 random, normally distributed).
 
 \begin{center}
-\begin{minipage}{0.49\linewidth}
+\begin{minipage}{0.40\linewidth}
 \includegraphics[width=\linewidth]{2000_sample_iter.pdf}
 \end{minipage}
-\begin{minipage}{0.49\linewidth}
+\begin{minipage}{0.40\linewidth}
 \includegraphics[width=\linewidth]{2000_sample_fct.pdf}
 \end{minipage}
 \end{center}
 \begin{tiny}
 {%\red
-\hspace*{6.8cm}$\downarrow$\hspace*{3cm}$\downarrow$\\
-\hspace*{6.0cm}Starting value\hspace*{1.2cm}Maximum value\\
+\hspace*{5.5cm}$\downarrow$\hspace*{2.6cm}$\downarrow$\\
+\hspace*{4.8cm}Starting value\hspace*{1.3cm}Maximum value\\
 }
 \end{tiny}
 
@@ -929,7 +933,7 @@ and al.)\\
 
 \begin{frame}{Incremental Common Random Numbers}    
 	\centering
-	\includegraphics[scale=0.5]{DistTo_sampleSize_CRN.PNG}
+	\includegraphics[scale=0.43]{DistTo_sampleSize_CRN.PNG}
 \end{frame}
 
 \begin{frame}{IRN/CRN combination (ICRN)}

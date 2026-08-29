@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -227,7 +227,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\begin{frame}
 		\frametitle{Standard minimal generator: illustration}
 		\begin{center}
-			\includegraphics[width=0.8\linewidth]{lcg.png}
+			\includegraphics[width=0.65\linewidth]{lcg.png}
 			
 			10000 generated points on the unit square.
 		\end{center}
@@ -337,8 +337,6 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		the most popular and efficient known generators.
 		It combines 2 MRG's.
 		
-		\mbox{}
-		
 		$k=3$, \\
 		$m_1 = 2^{32} -209$, $a_{11} = 0$, $a_{12} = 1403580$, $a_{13} = -810728$,\\
 		$m_2 = 2^{32}-22853$, $a_{21} = 527612$, $a_{22} = 0$, $a_{23} = -1370589$.\\
@@ -373,14 +371,12 @@ p1 += p1 < 0 ? m1 : 0
 rng.Cg[1] = rng.Cg[2]
 rng.Cg[2] = rng.Cg[3]
 rng.Cg[3] = p1
-
 p2::Int64 = (a21 * rng.Cg[6] + a23 * rng.Cg[4]) % m2
 p2 += p2 < 0 ? m2 : 0
 
 rng.Cg[4] = rng.Cg[5]
 rng.Cg[5] = rng.Cg[6]
 rng.Cg[6] = p2
-
 u::Float64 = p1 > p2 ? (p1 - p2) * norm :
    (p1 + m1 - p2) * norm
 end
@@ -838,8 +834,6 @@ no state to store or synchronize: natural for GPUs and parallel workers.
 \item Natural fit for stochastic optimization: one stream per scenario or sample index.
 \end{itemize}
 
-\mbox{}
-
 {\red Adoption:}
 \begin{itemize}
 	\item NVIDIA cuRAND and PyTorch (GPU): Philox4$\times$32--10;
@@ -1117,7 +1111,7 @@ u = draw(stream = s, substream = r, position = i)
 			\end{enumerate}
 		\end{minipage}
 		\begin{minipage}{0.47\linewidth}
-			\includegraphics[width=\linewidth]{NormalRejectGrid.eps}
+			\includegraphics[width=0.7\linewidth]{NormalRejectGrid.eps}
 		\end{minipage}
 		
 	\end{frame}

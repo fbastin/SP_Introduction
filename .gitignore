@@ -10,6 +10,7 @@
 *.fdb_latexmk
 *.synctex.gz
 *-eps-converted-to.pdf
+*-pics.pdf
 *.dvi
 *.ps
 

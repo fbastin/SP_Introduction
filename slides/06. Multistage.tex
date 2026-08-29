@@ -1,6 +1,6 @@
 % Compile with xelatex --shell-escape
 
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -180,7 +180,7 @@ There is one leaf per scenario.
 \begin{center}
 %\begin{footnotesize}
 \scalebox{0.45}{
-\pstree[treemode=D]{\TC}{
+\pstree[treemode=D,treesep=0.12]{\TC}{
  \pstree{\TC}
   {\TC~[tnpos=b]{\quad\bf{\large {\blue $1$}}}
    \TC~[tnpos=b]{\quad\bf{\large {\blue $2$}}}
@@ -263,7 +263,7 @@ There are many formulations of these conditions!
 		\begin{center}
 			%\begin{footnotesize}
 			\hspace*{1cm} \scalebox{0.55}{
-				\pstree[treemode=R]{\TC}{
+				\pstree[treemode=R,levelsep=0.3]{\TC}{
 					\pstree{\TC}
 					{\TC~[tnpos=r]{\quad\bf scenario 1}
 						\TC~[tnpos=r]{\quad\bf scenario 2}
@@ -463,6 +463,7 @@ $b_{it}$: amount of ressource $i \in M$ available at time $t \in T$.
 \begin{frame}
 \frametitle{Model}
 
+{\small
 \begin{multline*}
 \min \sum_{j \in N} \sum_{t \in T} \alpha_{jt} x_{jt} + \sum_{i \in M}
 \sum_{t \in T} \beta_{it} u_{it} + \sum_{t \in T\backslash 1} \left(
@@ -480,11 +481,13 @@ z^+_{t-1,t} - z^-_{t-1,t} &= \sum_{j \in N} a_{jt}(x_{jt} - x_{j,
 x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt} \qquad
 \forall j \in N,\ \forall t \in T\ \mbox{(demand satisfaction)},\\
 \end{align*}
+}
 \end{frame}
 
 \begin{frame}
 \frametitle{Extended form of the recourse model}
 
+{\small
 \begin{multline*}
 \min \sum_{j \in N} \sum_{t \in T} \alpha_{jt} \bx_{jt} + \sum_{i \in M}
 \sum_{t \in T} \beta_{it} \bu_{it} + \sum_{t \in T\backslash 1} \left(
@@ -503,6 +506,7 @@ M,\ \forall t \in T,\\
 \forall j \in N,\ \forall t \in T,\\
 \mbox{nonanticipativity }& \mbox{constraints}.
 \end{align*}
+}
 \end{frame}
 
 \begin{frame}

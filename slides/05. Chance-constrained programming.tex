@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
@@ -91,7 +91,7 @@ Source: \url{https://www.informs.org/Explore/History-of-O.R.-Excellence/Biograph
 \frametitle{Cooper and Charnes}
 
 \begin{center}
-\includegraphics[width=0.4\textwidth]{coopercharnes.png}
+\includegraphics[width=0.4\textwidth,height=0.62\textheight,keepaspectratio]{coopercharnes.png}
 
 INFORMS John Von Neumann prize (with Richard J. Duffin)
 \end{center}
@@ -217,7 +217,7 @@ We then have to satisfy constraints (2) and (3) and either (1) or (4).
 \frametitle{Example: frontiers of constraints}
 
 \begin{center}
-\includegraphics<1>[width=\textwidth,keepaspectratio]{"chance_constraint_feasible_region.pdf"}
+\includegraphics<1>[width=\textwidth,height=0.75\textheight,keepaspectratio]{"chance_constraint_feasible_region.pdf"}
 \end{center}
 
 \end{frame}
@@ -365,7 +365,7 @@ The maximum of quasi-convex functions is quasi-convex.
 	\text{Gamma (shape $\geq 1$):} &\quad f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}, \quad x > 0, \alpha \geq 1 \\
 	\text{Beta ($\alpha \geq 1, \beta \geq 1$):} &\quad f(x) = \frac{x^{\alpha-1}(1-x)^{\beta-1}}{B(\alpha,\beta)}, \quad x \in [0,1]\\
 \text{Multivariate normal:} &\quad
-f(x) = \frac{1}{\sqrt{(2\pi)^n/2\det(\Sigma)}}e^{-\frac{1}{2}(x-\mu)'\Sigma (x-\mu)}
+f(x) = \frac{1}{\sqrt{(2\pi)^n \det(\Sigma)}} \exp\left( -\frac{1}{2}(x-\mu)^T \Sigma^{-1} (x-\mu) \right)
 \end{align*}
 
 \end{frame}

@@ -17,10 +17,10 @@
 
 \usepackage{amsmath,amssymb,amsthm}
 
-\newtheorem{defi}{Définition}
+\newtheorem{defi}{Definition}
 \newtheorem{theo}{Theorem}
-\newtheorem{coro}{Corollaire}
-\newtheorem{lem}{Lemme}
+\newtheorem{coro}{Corollary}
+\newtheorem{lem}{Lemma}
 
 %\usepackage{epic,eepic}
 %\usepackage{pstricks, pst-tree}
@@ -210,7 +210,7 @@ In \ref{ass:var}, $\var_{\xi_k} [\nabla_x Y(x, \xi_k)]$ does not refer to the co
 Variance of a random vector $g(\xi_k)$:
 \begin{align*}
 \var_{\xi_k} [g] &= \EE_{\xi_k} \left[ \left \| g - \EE_{\xi_k} [g] \right \|^2 \right] \\
-& = \EE_{\xi_k} \left[ \| g \|^2 \right] - \left( \EE_{\xi_k} [ \| [g] \| ] \right)^2.
+& = \EE_{\xi_k} \left[ \| g \|^2 \right] - \left\| \EE_{\xi_k} [ g ] \right\|^2.
 \end{align*}
 \item
 A well-known consequence of the Lipschitz continuity assumption A.1 is
@@ -660,19 +660,19 @@ $$
 	
 	From A.1, we have
 	$$
-	f(x_{x+1}) - f(x_k) \leq \nabla f(x_k)^T (x_{k+1} - x_k) + \frac{L}{2} \| x_{k+1} - x_k \|^2_2.
+	f(x_{k+1}) - f(x_k) \leq \nabla f(x_k)^T (x_{k+1} - x_k) + \frac{L}{2} \| x_{k+1} - x_k \|^2_2.
 	$$
 	Since $x_{k+1} = x_k - \alpha_k g(x_k, \xi_k)$, this leads to
 	$$
-	f(x_{x+1}) - f(x_k) \leq - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2.
+	f(x_{k+1}) - f(x_k) \leq - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2.
 	$$
 	This implies
     $$
-		\EE_{\xi_k} [f(x_{x+1}) - f(x_k)] \leq \EE_{\xi_k} \left[ - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2 \right]
+		\EE_{\xi_k} [f(x_{k+1}) - f(x_k)] \leq \EE_{\xi_k} \left[ - \alpha_k \nabla f(x_k)^T g(x_k, \xi_k) + \alpha_k^2 \frac{L}{2} \| g(x_k, \xi_k) \|^2_2 \right]
 	$$
 	or
 	$$
-		\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
+		\EE_{\xi_k} [f(x_{k+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
 	$$
 	
 	\begin{align*}
@@ -711,7 +711,7 @@ $\exists M \geq 0, M_V \geq 0$ such that $\forall k \in \NN$,
 \begin{equation}
 	\begin{aligned}
 \var_{\xi_k} [g(x_k, \xi_k)]
-&= \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right] - \left( \EE_{\xi_k} [\| g(x_k, \xi_k) \|_2] \right)^2 \\
+&= \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right] - \left\| \EE_{\xi_k} [ g(x_k, \xi_k) ] \right\|^2_2 \\
 &\leq M + M_V \| \nabla f(x_k) \|_2^2.
 \end{aligned}
 \tag{A.7}
@@ -737,7 +737,7 @@ $\exists M \geq 0, M_V \geq 0$ such that $\forall k \in \NN$,
 From \ref{ass:sufficient_descent} and \ref{ass:varg},
 \begin{align*}
 \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right]
-& \leq \left( \EE_{\xi_k} [\| g(x_k, \xi_k) \|_2] \right)^2 + M + M_V \| \nabla f(x_k) \|_2^2 \\
+& \leq \left\| \EE_{\xi_k} [ g(x_k, \xi_k) ] \right\|^2_2 + M + M_V \| \nabla f(x_k) \|_2^2 \\
 & \leq \mu_G^2 \| \nabla f(x_k) \|_2^2 + M + M_V \| \nabla f(x_k) \|_2^2 \\
 & = M + M_G \| \nabla f(x_k) \|_2^2,
 \end{align*}
@@ -769,11 +769,11 @@ with $M_G = M_V + \mu_G^2 \geq \mu^2 > 0$.
 
 We already proved
 $$
-	\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
+	\EE_{\xi_k} [f(x_{k+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
 $$
 From \ref{ass:sufficient_descent}, this leads to
 $$
-\EE_{\xi_k} [f(x_{x+1})] - f(x_k) \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right],
+\EE_{\xi_k} [f(x_{k+1})] - f(x_k) \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right],
 $$
 giving the first inequality. Since
 $$
@@ -781,7 +781,7 @@ $$
 $$
 we have
 \begin{align*}
-\EE_{\xi_k} [f(x_{x+1})] - f(x_k) & \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \left( M + M_G \| \nabla f(x_k) \|_2^2 \right) \\
+\EE_{\xi_k} [f(x_{k+1})] - f(x_k) & \leq - \alpha_k \mu \| \nabla f(x_k) \|_2^2 + \alpha_k^2 \frac{L}{2} \left( M + M_G \| \nabla f(x_k) \|_2^2 \right) \\
 & =  - \alpha_k \left( \mu - \frac{1}{2} \alpha_k L M_G \right) \| \nabla f(x_k) \|_2^2 + \frac{1}{2} \alpha_k^2 LM.
 \end{align*}
 
@@ -1051,7 +1051,7 @@ Under Assumptions~\ref{ass:Lipschitz}, \ref{ass:open_set}--\ref{ass:varg}, and \
 \end{equation}
 then, for all $k \in \NN$,
 \begin{align*}
-\EE[ f(x_k) - f^* ] & \leq \frac{\overline{\alpha}LM}{2c\mu} - (1-\overline{\alpha}c\mu)^{k-1} \left( f(x_1) - f^* - \frac{\overline{\alpha}LM}{2c\mu} \right) \\
+\EE[ f(x_k) - f^* ] & \leq \frac{\overline{\alpha}LM}{2c\mu} + (1-\overline{\alpha}c\mu)^{k-1} \left( f(x_1) - f^* - \frac{\overline{\alpha}LM}{2c\mu} \right) \\
 & \overset{k \rightarrow \infty}{\longrightarrow} \frac{\overline{\alpha}LM}{2c\mu}.
 \end{align*}
 \end{theorem}

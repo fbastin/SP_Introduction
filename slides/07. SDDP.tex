@@ -1,6 +1,6 @@
 % Compile with xelatex --shell-escape
 
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
@@ -14,10 +14,10 @@
 
 \usepackage{amsmath,amssymb,amsthm}
 
-\newtheorem{defi}{Définition}
+\newtheorem{defi}{Definition}
 \newtheorem{theo}{Theorem}
-\newtheorem{coro}{Corollaire}
-\newtheorem{lem}{Lemme}
+\newtheorem{coro}{Corollary}
+\newtheorem{lem}{Lemma}
 
 %\usepackage{epic,eepic}
 %\usepackage{pstricks, pst-tree}
@@ -781,7 +781,8 @@ $$
 $$
 By the Central Limit Theorem,
 $$
-\overline{z}_K \overset{\mathcal{D}}{\rightarrow} N(\mu, \sigma^2)
+\sqrt{K}\,(\overline{z}_K - \mu) \overset{\mathcal{D}}{\rightarrow} N(0, \sigma^2),
+\quad \text{i.e., } \overline{z}_K \approx N\left(\mu, \frac{\sigma^2}{K}\right).
 $$
 \item
 Each $(x_{t,k}, t = 1,\ldots,H)$ is feasible but not necessarily
@@ -793,24 +794,27 @@ optimal, so $\overline{z}_K$ is an estimate of an upper bound.
 \begin{frame}
 \frametitle{Bounds and termination criterion}
 
+{\small
 After solving $NLSD(1, 1)$ in a forward pass we can compute a lower bound $z_{LB}$
 as the objective function value of $NLDS(1, 1)$.
 
 \mbox{}
 
-Terminates if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \sigma, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \sigma)$, where $\Phi(\cdot)$ is the cumulative distribution of a Normal(0,1), and $\alpha$ is a confidence level set but the user. Typically, $\alpha = 0.05$.
+Terminates if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K}, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K})$, where $\Phi(\cdot)$ is the cumulative distribution of a Normal(0,1), and $\alpha$ is a confidence level set by the user. Typically, $\alpha = 0.05$.
 
 \mbox{}
 
 How to ensure $1\%$ optimality gap with $95\%$ confidence?
 Choose $K$ such that $\Phi^{-1}(1-\alpha/2) \approx 0.01 \overline{z}_K$. Using the empirical standard deviation
 $$
-\hat{s} = \frac{1}{K-1} \sqrt{\sum_{k=1}^K (\overline{z}_K-z_k)^2},
+\hat{s} = \sqrt{\frac{1}{K-1} \sum_{k=1}^K (z_k - \overline{z}_K)^2},
 $$
 this leads to
 $$
 K = \left( \frac{\Phi^{-1}(1-\alpha/2)\hat{s}}{0.01 \overline{z}_K}\right)^2.
 $$
+ 
+}
 
 \end{frame}
 

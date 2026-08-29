@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 \usepackage{../sty/mathlist}
 
@@ -825,7 +825,7 @@ If we strengthen our assumptions, we can also show that, almost surely, there ex
 We first consider the case where $S$ is deterministic and assume that, for a given sampling process $\overline{\xi}$, $z_n^*(\overline{\xi})$ is a local minimizer of $\hat{g}_n(z)$ over $S$.
 In other terms,
 \[
-\exists\, \delta_n(\overline{\xi}) \text{ t.q. } \forall z \in
+\exists\, \delta_n(\overline{\xi}) \text{ s.t. } \forall z \in
 B \left( z_n^*(\overline{\xi}), \delta_n(\overline{\xi}) \right) \cap
 S,\ \hat{g}_n \left( z_n^*(\overline{\xi}) \right) \leq \hat{g}_n(z).
 \]
@@ -1226,7 +1226,7 @@ with a decreasing difference as $N$ grows.
 \frametitle{Out-of-sample validation: example}
 
 \begin{center}
-\includegraphics[width=\textwidth]{instance_landing.pdf}
+\includegraphics[width=0.68\textwidth]{instance_landing.pdf}
 \end{center}
 \begin{small}
 \textit{Ahmed Khassiba (2020), ``Two-stage stochastic programming for aircraft arrival scheduling under uncertainty'', Ph.D. thesis.}

@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -12,7 +12,6 @@
 \usepackage{../sty/mathlist}
 
 %\usepackage[frenchb]{babel}
-\usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,amsthm}
 
 \newtheorem{theo}{Theorem}
@@ -53,7 +52,7 @@
 \begin{frame}
 \frametitle{Two-stage linear program with recourse}
 
-{\red Suggested reading: Section~3.2, Kall et Wallace}
+{\red Suggested reading: Section~3.2, Kall and Wallace}
 
 \mbox{}
 
@@ -211,8 +210,6 @@ The problem becomes
 & x \geq 0,\ y \geq 0.
 \end{align*}
 
-\mbox{}
-
 The problem can be reformulated as
 \begin{align*}
 \min_x\ & c^Tx + f(x) \\
@@ -239,7 +236,7 @@ is finite and $f(x)$ can be uniformly bounded from below on $K_1$, say by $\thet
 If we explicitly know $f(x)$, we can write
 \begin{align*}
 \min_x\ & c^Tx + f(x) & \\
-\mbox{t.q. } & Ax = b, \\
+\mbox{s.t. } & Ax = b, \\
 & \theta - f(x) \geq 0, \\
 & x \geq 0.
 \end{align*}
@@ -312,11 +309,11 @@ $\exists\, u \in \RR^m$ such that $u^T A \geq 0$ and $u^T b < 0$;
 
 Therefore, if $y$ is not feasible, $\exists\, u$ such that
 \[
-W^Tu \geq 0 \mbox{ et } (h - T\hat{x})^T u < 0.
+W^Tu \geq 0 \mbox{ and } (h - T\hat{x})^T u < 0.
 \]
 or, by setting $\sigma = -u$,
 \[
-W^T\sigma \leq 0 \mbox{ et } (h - T\hat{x})^T \sigma > 0.
+W^T\sigma \leq 0 \mbox{ and } (h - T\hat{x})^T \sigma > 0.
 \]
 
 \end{frame}
@@ -437,7 +434,7 @@ If $\Xi$ is finite, but is not a singleton?
 
 We can introduce feasibility and optimality cuts for all the recourse functions
 \[
-Q_{s}(x) = \min \left\lbrace (q_{s}^T y_{s} \,|\, Wy_{s} = h_{s}-T_{s}x,\ y_{s} \geq 0 \right\rbrace,
+Q_{s}(x) = \min \left\lbrace q_{s}^T y_{s} \,|\, Wy_{s} = h_{s}-T_{s}x,\ y_{s} \geq 0 \right\rbrace,
 \]
 $s = 1,\ldots,S$.
 We obtain a {\sl \red multi-cut} dual decomposition method
@@ -451,11 +448,11 @@ Alternatively, we can combine cuts corresponding to blocks $s = 1,\ldots,S$ with
 \begin{frame}
 \frametitle{Single-cut algorithm}
 	
-For $S$, we can proceed as before, by remplacing $\mathcal{Q}(x)$ by $\theta$: singe-cut.
+For $S$, we can proceed as before, by replacing $\mathcal{Q}(x)$ with $\theta$: single-cut.
 This leads to the {\red master program}
 \begin{align*}
 	\min c^Tx & + \theta \\
-	\mbox{t.q. } Ax & = b, \\
+	\mbox{s.t. } Ax & = b, \\
 	\theta &\geq \mathcal{Q}(x),\\
 	x & \geq 0,\ \theta \in \RR.
 \end{align*}
@@ -509,8 +506,8 @@ The {\blue feasibility cuts} aim to keep the solutions of the master program in 
 Recall that from Farkas lemma, we have
 \begin{multline*}
 \lbrace y \in \RR^p_+ \,|\, Wy = h-T\hat{x} \rbrace = \emptyset \\
-\Rightarrow \exists\, \sigma \in \RR^m \mbox{ t.q. } W^T\sigma \leq 0
-\mbox{ et } (h-T\hat{x})^T\sigma > 0.
+\Rightarrow \exists\, \sigma \in \RR^m \mbox{ s.t. } W^T\sigma \leq 0
+\mbox{ and } (h-T\hat{x})^T\sigma > 0.
 \end{multline*}
 
 \mbox{}
@@ -554,8 +551,6 @@ Similar to the two-phase method in linear programming.
 The first phase looks for a feasible solution by solving an artificial program.
 We do the same scenario by scenario, but what we look for is an infeasible scenario!
 
-\mbox{}
-
 For $s = 1,\ldots,S$, solve the linear program
 \begin{align*}
 \min\ & w = e^Tv^+ + e^Tv^- \\
@@ -564,8 +559,6 @@ For $s = 1,\ldots,S$, solve the linear program
 \end{align*}
 where $e^T = (1,\ldots,1)$, until, for some $s'$, %the optimal value
 $w_* > 0$.
-
-\mbox{}
 
 As $v^+, v^- \geq 0$, $w_* \geq 0$;
 \begin{itemize}
@@ -700,7 +693,7 @@ Is it possible to limit the expansion?
 	& y_2 + v_6^+ - v_6^- = 8.0 \\
 	& y \geq 0,\ v \geq 0.
 	\end{align*}
-	The optimal value is $w^* = 11.2$, associated to $v^+_3 = 4.6$ and $v^+_5 = 6.4$, and the dual vector (obtained with glpk)
+	The optimal value is $w^* = 11.2$, associated to $v^+_3 = 4.8$ and $v^+_5 = 6.4$, and the dual vector (obtained with glpk)
 	\[
 	\sigma^{\nu} = \begin{pmatrix} -1 & -1 & 1 & 0 & 1 & 0 \end{pmatrix}
 	\]
@@ -710,13 +703,14 @@ Is it possible to limit the expansion?
 \begin{frame}
 	\frametitle{Feasibility cut (cont'd)}
 	
+	\small
 	We define the feasibility cut
 	\[
-	D_1 x \geq d_1,
+	D_4 x \geq d_4,
 	\]
 	with
 	\[
-	D_1 = (\sigma^{\nu})^T T
+	D_4 = (\sigma^{\nu})^T T
 	= \begin{pmatrix} -1 & -1 & 1 & 0 & 1 & 0 \end{pmatrix}
 	\begin{pmatrix}
 	-1 &  0 \\
@@ -730,7 +724,7 @@ Is it possible to limit the expansion?
 	\]
 	and
 	\[
-	d_1 = (\sigma^{\nu})^T h_1
+	d_4 = (\sigma^{\nu})^T h_4
 	= \begin{pmatrix} -1 & -1 & 1 & 0 & 1 & 0 \end{pmatrix}
 	\begin{pmatrix} 0 \\ 0 \\ 4.8 \\ 6.0 \\ 6.4 \\ 8.0 \end{pmatrix} = 11.2
 	\]
@@ -760,7 +754,7 @@ Is it possible to limit the expansion?
 	\[
 	\sigma^{\nu} = \begin{pmatrix} -3/11 & -1/11 & 1 & 0 & 1 & 0 \end{pmatrix}^T
 	\]
-	$d_1$ does not change, but $D_1$ become $(3/11 \ 1/11)$.
+	$d_4$ does not change, but $D_4$ becomes $(3/11 \ 1/11)$.
 	This solution makes the first two dual constraints active. In other terms, this solution corresponds to a different dual basis.
 	
 \end{frame}
@@ -1085,7 +1079,7 @@ If for all $s$, $w = 0$, go to Step 3.
 Compute $\mathcal{Q}(x^{\nu})$, by solving each second-stage problem: for $s = 1,\ldots,S$, solve
 \begin{align*}
 \min\ & q^T_sy \\
-\mbox{t.q. } & Wy = h_s-T_sx^{\nu},\\
+\mbox{s.t. } & Wy = h_s-T_sx^{\nu},\\
 & y \geq 0.
 \end{align*}
 Stop if $\theta^{\nu} \geq \mathcal{Q}(x^{\nu})$: $x^{\nu}$ is an optimal solution.
@@ -1127,7 +1121,7 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 	
 	\mbox{}
 	
-	We can however show that the optimality cuts are support hyperplans of $\mathcal{Q}(x)$, by means of subgradients, and the feasibility cuts adequately define the feasible points in $K_2$.
+	We can however show that the optimality cuts are supporting hyperplanes of $\mathcal{Q}(x)$, by means of subgradients, and the feasibility cuts adequately define the feasible points in $K_2$.
 	
 	
 \end{frame}
@@ -1141,7 +1135,7 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 \end{definition}
 
 \begin{definition}[Subdifferential]
-	The set of all subgradients of $f$ at $x$ is called the {\red subdifferenntial} of $f$ at $x$ and is denoted by $\partial f(x)$.
+	The set of all subgradients of $f$ at $x$ is called the {\red subdifferential} of $f$ at $x$ and is denoted by $\partial f(x)$.
 \end{definition}
 
 \mbox{}
@@ -1157,7 +1151,7 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 	Recall that, by duality,
 	\[
 	Q(\hat{x}, \xi_s) =
-	\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)x) \,|\, \pi^TW \leq q(\xi_s)^T \right\rbrace.
+	\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)\hat{x}) \,|\, \pi^TW \leq q(\xi_s)^T \right\rbrace.
 	\]
 	Therefore, if $x \in \cK_1 \cap \cK_2$, $\exists\ \hat{\pi}$ such that
 	\[
@@ -1178,14 +1172,14 @@ If $\xi$ is a random vector with finite moments of order 2, the	$L$-shaped algor
 	
 	\mbox{}
 	
-	Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
+	Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(\hat{x})$.
 	
 \end{frame}
 
 \begin{frame}
 \frametitle{Optimality cuts: example}
 	
-{\red Inspired by Birge et Louveaux}
+{\red Inspired by Birge and Louveaux}
 	
 We consider the problem
 \begin{align*}
@@ -1194,14 +1188,14 @@ We consider the problem
 \end{align*}
 Assume that $c = 0$, so that the program can be reduced to the second stage, with a second-stage problem defined as
 \begin{align*}
-\min y^++y^- \mbox{ t.q. } y^+-y^- = \xi - x,\ y^+ \geq 0,\ y^- \geq 0.
+\min y^++y^- \mbox{ s.t. } y^+-y^- = \xi - x,\ y^+ \geq 0,\ y^- \geq 0.
 \end{align*}
 It is possible to analytically compute $Q(x,\xi)$, that can be expressed as:
 \[
 Q(x,\xi) =
 \begin{cases}
-\xi - x,\quad \mbox{si } x \leq \xi,\\
-x - \xi,\quad \mbox{si } x \geq \xi.
+\xi - x,\quad \text{if } x \leq \xi,\\
+x - \xi,\quad \text{if } x \geq \xi.
 \end{cases}
 \]
 	
@@ -1214,7 +1208,7 @@ What about $\mathcal{Q}(x)$?
 	
 \mbox{}
 	
-Assume that the three realizations have the same probability.
+Assume that $\bsxi$ takes the values $1$, $2$ and $4$ with probabilities $p_1 = p_2 = p_3 = 1/3$.
 	
 \mbox{}
 	
@@ -1253,35 +1247,35 @@ The sequence of iterates for the $L$-shaped method is as follows.
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, no cut}
 	
-	\includegraphics[width=0.9\textwidth]{all.eps}
+	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{all.eps}
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq 7/3-x$}
 	
-	\includegraphics[width=0.9\textwidth]{coupe_1.eps}
+	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_1.eps}
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq x-7/3$}
 	
-	\includegraphics[width=0.9\textwidth]{coupe_2.eps}
+	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_2.eps}
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq (x+1)/3$}
 	
-	\includegraphics[width=0.9\textwidth]{coupe_3.eps}
+	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_3.eps}
 	
 \end{frame}
 
 \begin{frame}
 \frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq (5-x)/3$}
 	
-\includegraphics[width=0.9\textwidth]{coupe_4.eps}
+\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_4.eps}
 	
 \end{frame}
 
@@ -1320,7 +1314,7 @@ Recall that, by {\blue duality},
 Q(\hat{x}, \xi_s) =
 \max_{\pi} \lbrace \pi^T(h(\xi_s)-T(\xi_s)\hat{x}) \,|\, \pi^TW \leq q(\xi_s)^T) \rbrace.
 \]
-Therefore, $\exists\ \hat{\pi}$ t.q.
+Therefore, $\exists\ \hat{\pi}$ s.t.
 $Q(\hat{x}, \xi_s) = \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s)\hat{x}$.
 With respect to the dual variables, we have
 \[
@@ -1337,7 +1331,7 @@ In other terms, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
 
 \mbox{}
 
-Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(x)$.
+Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(\hat{x})$.
 
 \end{frame}
 
@@ -1348,9 +1342,9 @@ Similarly, by taking the expectation, $- \sum_s p_s T(\xi_s)^T\hat{\pi}_s \in \p
 \item[Step 0]
 With $\theta_s^0$ a lower bound for $Q(x, \xi_s)$, define
 \begin{align*}
-\mathcal{B}_0 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
+\mathcal{B}_0 &= \lbrace \RR^n_+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_{|S|}\rbrace \,|\, Ax = b \rbrace, \\
-\mathcal{B}_1 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
+\mathcal{B}_1 &= \lbrace \RR^n_+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_{|S|}\rbrace \,|\, \theta_s \geq \theta_s^0,\
 \forall s \in S \rbrace.
 \end{align*}
@@ -1381,7 +1375,7 @@ If $\mathcal{Q}(x^{\nu}) = \infty$, there is a realization $\xi_k$ for which $Q(
 \[
 \mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace
 (x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \,|\, \sigma^T(h(\xi_k) -
-T(\xi_k)x) \geq 0\rbrace.
+T(\xi_k)x) \leq 0\rbrace.
 \]
 Note: this inequality is the same than in the simple-cut version.\\
 Return to Step 1.
@@ -1445,16 +1439,16 @@ Return to Step 1.
 Let $\theta_k^0$ be a lower bound for $\mathcal{Q}_{[\mathcal{S}_k]}(x)$.
 Set
 \begin{align*}
-\mathcal{B}_0 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
+\mathcal{B}_0 &= \lbrace \RR^n_+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_C \rbrace \,|\, Ax = b \rbrace, \\
-\mathcal{B}_1 &= \lbrace \RR_n^+ \times \lbrace \theta_1,
+\mathcal{B}_1 &= \lbrace \RR^n_+ \times \lbrace \theta_1,
 \theta_2,\ldots, \theta_C \rbrace \,|\, \theta_k \geq \theta_k^0 \rbrace.
 \end{align*}
 Set $\nu = 0$.
 \item[Step 1]
 Increment $\nu$ and solve the {\blue master problem}
 \[
-\min c^Tx + \sum_{k = 1}^C \theta_k \mbox{ t.q. } (x, \theta_1,
+\min c^Tx + \sum_{k = 1}^C \theta_k \mbox{ s.t. } (x, \theta_1,
 \theta_2,\ldots,  \theta_C) \in \mathcal{B}_0 \cap \mathcal{B}_1.
 \]
 Let $(x^{\nu}, \theta_1^{\nu}, \theta_2^{\nu},\ldots,
@@ -1510,7 +1504,7 @@ For each $k$ such that  $\mathcal{Q}_{[\mathcal{S}_k]}(x) >
 \begin{frame}
 \frametitle{Example}
 
-{\red Birge and Louveaux, Section~5.1, Exercice 5, page 200}
+{\red Birge and Louveaux, Section~5.1, Exercise 5, page 200}
 
 \mbox{}
 
@@ -1598,10 +1592,10 @@ Start from $x = -2$. We have the following sequence of iterates
 \]
 \item[Iteration 3] $x^3 = 12/7$, $\theta^3 = -37/14$, new cut:
 \[
-\theta \geq= 0.
+\theta \geq 0.
 \]
-\item[Iteration 4] $x^4 \in [-2/5, 7]$, $\theta^4$.
-If $x^4$ is chose as any value in $[0,2]$, stop.
+\item[Iteration 4] $x^4 \in [-2/5, 7]$, $\theta^4 = 0$.
+If $x^4$ is chosen as any value in $[0,2]$, stop.
 \end{description}
 
 \end{frame}
@@ -1613,11 +1607,11 @@ The multicut approach would give the following sequence.
 \begin{description}
 \item[Iteration 1] $x^1 = -2$, $\theta^1$ and $\theta^2$ are omitted;
 we add the cuts $\theta_1 \geq -0.5 - 0.5x,\ \theta_2 \geq -3/4x$.
-Note: $\theta_1 \geq \frac{1}{2} (-x-1)$ and $\theta_1 \geq \frac{1}{2} (-1.5x)$
+Note: $\theta_1 \geq \frac{1}{2} (-x-1)$ and $\theta_2 \geq \frac{1}{2} (-1.5x)$
 \item[Iteration 2] $x^2 = 20$, $\theta_1^2 = -10.5$, $\theta_2^2 =
 -15$; new cuts: $\theta_1 \geq 0$, $\theta_2 \geq 0.5x - 3.5$.
 \item[Iteration 3] $x^3 = 2.8$, $\theta_1^3 = 0$, $\theta_2^3 = -2.1$;
-new cut: $\theta_2^3 \geq 1/7(x-2)$.
+new cut: $\theta_2 \geq 1/7(x-2)$.
 \item[Iteration 4] $x^4 = 0.32$, $\theta_1^4 = 0$, $\theta_2^4 =
 -0.24$; new cut: $\theta_2 \geq 0$.
 \item[Iteration 5] $x^5 = 0$, $\theta_1^5 = \theta_2^5 = 0$. Stop.
@@ -1625,7 +1619,7 @@ new cut: $\theta_2^3 \geq 1/7(x-2)$.
 
 \mbox{}
 
-This example shows the the multicut approach can sometimes take more iterations than the single cut version.
+This example shows that the multicut approach can sometimes take more iterations than the single cut version.
 
 \end{frame}
 
@@ -1697,7 +1691,7 @@ We speak of {\blue regularized decomposition method}.
 \frametitle{Trust-region approach}
 
 The principle is also to penalize the step length.
-At iteration $k$, we require $\| x-x_k \|_k \leq \Delta_k$, where $\| \cdot \|_k$ designs an usual norm (typically 2 or $\infty$).
+At iteration $k$, we require $\| x-x_k \|_k \leq \Delta_k$, where $\| \cdot \|_k$ denotes a standard norm (typically 2 or $\infty$).
 
 \begin{itemize}
 \item
@@ -1717,6 +1711,7 @@ In both case, we see the introduction of {\blue nonlinear programming} concepts.
 \begin{frame}
 \frametitle{Summary}
 
+\footnotesize
 Let $m(x)$ be the ``model'' used as first-stage problem.
 \begin{itemize}
 \item
@@ -1843,7 +1838,7 @@ An efficient implementation is proposed in Ruszczy\'nski (1986).
 \begin{frame}
 \frametitle{Example: regularized $L$-shaped}
 
-Consider again {\red Birge and Louveaux, Section~5.1, Exercice 5, page 200}.
+Consider again {\red Birge and Louveaux, Section~5.1, Exercise 5, page 200}.
 
 Take $a^1 = -0.5$ as starting point.
 This point corresponds to the solution of the expected value problem. i.e the problem obtained by replacing $\bsxi$ by $E[\xi]$.

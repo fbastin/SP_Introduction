@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -49,12 +49,12 @@
 	\frametitle{Formalization}
 	
 	Uncertainty: representation by means of {\red random elements}.
-	The realizations are denoted by $\omega$, and they are drawn form the sample space $\Omega$.
+	The realizations are denoted by $\omega$, and they are drawn from the sample space $\Omega$.
 	
 	\mbox{}
 	
-	A {\red event} $A$ is a subset of $\Omega$; the collection of random of random events is denoted by $\mathcal{A}$.
-	The event $A \in \mathcal{A}$ occurs if the output of the experiment is an element from $A$.
+	An {\red event} $A$ is a subset of $\Omega$; the collection of events is denoted by $\mathcal{A}$.
+	The event $A \in \mathcal{A}$ occurs if the outcome of the experiment is an element of $A$.
 	
 \end{frame}
 
@@ -139,7 +139,7 @@
 	\min\ & c^Tx+q^T_+s(\bsxi)+q^T_-t(\bsxi) \\
 	\mbox{s.t. } & Ax = b, \\
 	& T(\bsxi)x + s(\bsxi)-t(\bsxi) = h(\bsxi), \\
-	& x \in X.
+	& x \in X, \quad s(\bsxi) \geq 0, \quad t(\bsxi) \geq 0.
 	\end{align*}
 	
 	\mbox{}
@@ -228,7 +228,7 @@ where {\it a.e.} stands for ``almost every''.
 	\min_{x,\ y(\bsxi)}\ & E_{\bsxi} [ c^T x + q^T y(\bsxi) ] \\
 	\mbox{s.t. } & Ax = b & \mbox{\textcolor{blue}{first-stage constraints}} \\
 	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi &
-	\mbox{\textcolor{blue}{second-stage contraints}} \\
+	\mbox{\textcolor{blue}{second-stage constraints}} \\
 	& x \in X,\ y(\xi) \in Y\ \text{ for a.e. } \xi.
 	\end{align*}
 	
@@ -249,15 +249,15 @@ where {\it a.e.} stands for ``almost every''.
 	Develop along the $S$ scenarios.
 	\begin{align*}
 	\min_{x, y_1, \ldots, y_S}\ & c^T x + p_1 q^T y_1 + p_2 q^T y_2 + \ldots
-	p_S q^Ty_S \\
+	+ p_S q^Ty_S \\
 	\mbox{s.t. } & \\
 	& \begin{matrix} Ax & & & & & = b\\
 	T_1 x & + W y_1 & & & & = h_1 \\
 	T_2 x & & + W y_2 & & & = h_2 \\
 	\vdots & & & \ddots & \\
-	T_S x & & & & + W y_s & = h_s
+	T_S x & & & & + W y_S & = h_S
 	\end{matrix} \\
-	& x \in X,\ y_1 \in Y,\ y_2 \in Y,\ldots, y_s \in Y.
+	& x \in X,\ y_1 \in Y,\ y_2 \in Y,\ldots, y_S \in Y.
 	\end{align*}
 	
 \end{frame}
@@ -294,10 +294,10 @@ where {\it a.e.} stands for ``almost every''.
 	\begin{itemize}
 		\item
 		Consider the following problem (source: Linderoth).
-		A Telecom company want to expand its network in order to meet an unknown (random) demand.
+		A Telecom company wants to expand its network in order to meet an unknown (random) demand.
 		\item
 		There are 86 unknown demands.
-		Each demand is independant and take a value in a set of 7 values.
+		Each demand is independent and takes a value in a set of 7 values.
 		Consequently
 		\[
 		S = |\Omega| = 7^{86} \approx 4.77\times10^{72}.
@@ -323,7 +323,7 @@ where {\it a.e.} stands for ``almost every''.
 	& \bsxi_2x_1 + x_2 \geq 4 \\
 	& x_1, x_2 \geq 0,
 	\end{align*}
-	where $\bsxi_1 \sim U[1,4]$, $\bsxi_2[1/3,1]$.
+	where $\bsxi_1 \sim U[1,4]$, $\bsxi_2 \sim U[1/3,1]$.
 	
 	\mbox{}
 	
@@ -338,7 +338,7 @@ where {\it a.e.} stands for ``almost every''.
 	\begin{align*}
 	\min_x\ & x_1+x_2 + \sum_{s \in S} p_s \lambda (y_{1s} + y_{2s})\\
 	\mbox{s.t. } & \xi_{1s}x_1 + x_2 + y_{1s} \geq 7 \\
-	& \xi_{2s}x_1 + x_2 + y_{1s} \geq 4 \\
+	& \xi_{2s}x_1 + x_2 + y_{2s} \geq 4 \\
 	& x_1, x_2 \geq 0,\\
 	& y_{1s}, y_{2s} \geq 0.
 	\end{align*}
@@ -449,7 +449,7 @@ It is a nonlinear program over $\RR^n$. Properties?
 
 Set $X = \RR^n_+$.
 \[
-\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\xi)^Ty \ |\ Wy = h(\bsxi) - T(\bsxi)x \rbrace \right] \right\rbrace 
+\min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi} \left[ \min_{y \in \RR^p_+} \lbrace q(\bsxi)^Ty \ |\ Wy = h(\bsxi) - T(\bsxi)x \rbrace \right] \right\rbrace 
 \]
 \[
 \min_{x \in \RR^n_+ \,|\, Ax = b} \left\lbrace c^Tx + \EE_{\bsxi}
@@ -562,7 +562,7 @@ with
 $$
 P\left[ \bsxi = 2^n \right] = \frac{1}{2^{n+1}},\ n = 0,1,2,\ldots
 $$
-Note that $P\left[ \bsxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n \in \NN_+ \rbrace$, and
+Note that $P\left[ \bsxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n \in \NN \rbrace$, and
 $$
 \sum_{n=0}^{+\infty} P\left[ \bsxi = 2^n \right] = \sum_{n=0}^{+\infty} 2^{-n-1} = \frac{1}{2} \frac{1}{1-\frac{1}{2}} = 1.
 $$
@@ -574,8 +574,8 @@ $$
 
 Given $x \in \RR^2$, we have
 \begin{align*}
-\calQ(x) &= \EE_{\bsxi} \left[ \min_{y \geq 0} 2y_1+y_2 \,\bigg|\, y_1 + y_2 \geq 1 - x_1,\ y_1 \geq \xi - x_1 - x_2 \right] \\
-&\geq \EE_{\bsxi} \left[ \min_{y_1 \geq 0} 2y_1 \,\bigg|\, y_1 \geq \xi - x_1 - x_2 \right] \\
+\calQ(x) &= \EE_{\bsxi} \left[ \min_{y \geq 0} 2y_1+y_2 \,\bigg|\, y_1 + y_2 \geq 1 - x_1,\ y_1 \geq \bsxi - x_1 - x_2 \right] \\
+&\geq \EE_{\bsxi} \left[ \min_{y_1 \geq 0} 2y_1 \,\bigg|\, y_1 \geq \bsxi - x_1 - x_2 \right] \\
 & = 2 \EE_{\bsxi} \left[ \max \{ 0, \bsxi - x_1 - x_2 \}\right] \\
 & = 2 \sum_{\xi \in \Xi} P[\bsxi = \xi] \max \{ 0, \xi - x_1 - x_2 \} \\
 & = 2 \sum_{n = 0}^{+\infty} 2^{-n-1} \max \{ 0, 2^n - x_1 - x_2 \} \\
@@ -815,7 +815,7 @@ $$
 
 \mbox{}
 
-By componing these two cases, we conclude that  $\mathcal{Q}$ is not finite.
+By combining these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 \end{proof}
 
 \end{frame}
@@ -828,16 +828,12 @@ By componing these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 {\bf $(\Leftarrow)$}
 Assume $\forall\, i$, $P[\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0] = 1$.
 %with probability one, $\forall i$.
-Any feasible solution satisfies
-\begin{align*}
-& y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x := z(\xi(\omega)), \\
-& y^+(\xi(\omega)) \geq 0,\ y^-(\xi(\omega)) \geq 0.
-\end{align*}
+Any feasible solution satisfies $y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x := z(\xi(\omega))$, with $y^+(\xi(\omega)) \geq 0$ and $y^-(\xi(\omega)) \geq 0$.
 
 Thus,
 \begin{align*}
-Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\omega)) \\
-&= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-(y_i^+(\xi(\omega))-z_i(\xi(\omega))) \\
+Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\omega))) \\
+&= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-(y_i^+(\xi(\omega))-z_i(\xi(\omega)))) \\
 &= \sum_{i=1}^{m} ((q_i^+ + q_i^-)y_i^+(\xi(\omega))-q_i^-z_i(\xi(\omega)))
 \end{align*}
 
@@ -853,7 +849,7 @@ Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\om
 
 Therefore, a.s.
 $$
-\min Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega))),
+\min Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega)),
 $$
 so, a.s., $\exists$ a lower bound on $Q(x,\xi(\omega))$, and since the program is feasible, it admits an optimal solution.
 
@@ -878,7 +874,7 @@ where $a^+ = \max\{0, a\}$.
 
 From previous results, $\calQ(x) < \infty$, and
 $$
-\calQ(x) \geq \EE[-(q^-)^Tz(\xi(\omega)))].
+\calQ(x) \geq \EE[-(q^-)^Tz(\xi(\omega))].
 $$
 \end{proof}
 
@@ -887,7 +883,7 @@ $$
 \begin{frame}
 \frametitle{Exercise}
 	
-%(Birge et Louveaux, page 87)
+%(Birge and Louveaux, page 87)
 Consider the second stage program
 \[
 Q(x, \xi) = \min_y \lbrace y \ |\ \xi y = 1-x, y \geq 0 \rbrace.
@@ -910,8 +906,8 @@ is not properly defined on $\Xi = [0,1]$; this also means that
 \[
 W =
 \begin{cases}
-0 & \mbox{ si } \xi = 0; \\
-1 & \mbox{ si } \xi \ne 0.
+0 & \text{ if } \xi = 0; \\
+1 & \text{ if } \xi \ne 0.
 \end{cases}
 \]
 	
@@ -1018,7 +1014,7 @@ Q(x,\xi) = v(\xi, h(\xi)-T(\xi)x).
 Therefore {\red $Q(x, \xi)$ if convex} w.r.t. $x$, given $\xi$.
 More generally
 \begin{theo}
-If $A$ if a linear transformation from $\RR^n$ to $\RR^n$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{def}{=} f(Ax)$ is a convex function on $\RR^n$.
+If $A$ is a linear transformation from $\RR^n$ to $\RR^m$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{def}{=} f(Ax)$ is a convex function on $\RR^n$.
 \end{theo}
 \end{frame}
 
@@ -1030,11 +1026,11 @@ We have the following result (Birge and Louveaux, Chapter~3, Theorem~5).
 For a stochastic program with fixed recourse, $Q(x,\xi)$ is
 \begin{enumerate}[(a)]
 \item
-a piecewise convex linear function in $(h,T)$,
+a piecewise-linear convex function in $(h,T)$,
 \item
 a piecewise concave linear function in $q$,
 \item
-a piecewise convex linear function in $x$, for all $x$ in $K = K_1 \cap K_2$.
+a piecewise-linear convex function in $x$, for all $x$ in $K = K_1 \cap K_2$.
 \end{enumerate}
 \end{theo}
 
@@ -1149,8 +1145,8 @@ or
 
 Consequently,
 \[
-Q(x,\xi) = \begin{cases} \xi-x & \mbox{ si } x \leq \xi, \\
-	x - \xi & \mbox{ si } x \geq \xi. \end{cases}
+Q(x,\xi) = \begin{cases} \xi-x & \text{ if } x \leq \xi, \\
+	x - \xi & \text{ if } x \geq \xi. \end{cases}
 \]
 
 \end{frame}
@@ -1205,7 +1201,7 @@ Assume that $\bsxi$ can take the realizations $1$, $2$, $4$.
 
 \begin{center}
 \begin{minipage}{0.9\textwidth}
-\includegraphics[width=\textwidth]{recourse_1.pdf}
+\includegraphics[width=0.85\textwidth]{recourse_1.pdf}
 \end{minipage}
 \end{center}
 
@@ -1216,7 +1212,7 @@ Assume that $\bsxi$ can take the realizations $1$, $2$, $4$.
 
 \begin{center}
 \begin{minipage}{0.9\textwidth}
-\includegraphics[width=\textwidth]{recourse_2.pdf}
+\includegraphics[width=0.85\textwidth]{recourse_2.pdf}
 \end{minipage}
 \end{center}
 
@@ -1227,7 +1223,7 @@ Assume that $\bsxi$ can take the realizations $1$, $2$, $4$.
 
 \begin{center}
 \begin{minipage}{0.9\textwidth}
-\includegraphics[width=\textwidth]{recourse_4.pdf}
+\includegraphics[width=0.85\textwidth]{recourse_4.pdf}
 \end{minipage}
 \end{center}
 
@@ -1261,7 +1257,7 @@ $4 \leq x$: $\mathcal{Q}(x) = x-7/3$;
 \begin{frame}
 \frametitle{Graphically}
 
-\includegraphics[width=0.9\textwidth]{recourse_all.pdf}
+\includegraphics[width=0.62\textwidth]{recourse_all.pdf}
 
 \end{frame}
 
@@ -1346,7 +1342,7 @@ $(1/h) \int_{\Xi \backslash N_{\delta}} \rho_j (\hat{x}, \xi; h) dP \overset{h \
 \begin{frame}
 \frametitle{Differentiability of the recourse: discrete case}
 
-But how to prove $(1/p) \int_{\Xi
+But how to prove $(1/h) \int_{\Xi
   \backslash N_{\delta}} \rho_j (\hat{x}, \xi; h) dP \overset{h
   \rightarrow 0}{\rightarrow } 0$?
 
@@ -1404,7 +1400,7 @@ The result follows by taking the expectation.
 \begin{frame}
 \frametitle{In a more standard form}
 
-Inspired from Birge et Louveaux, Section~3.4.
+Inspired from Birge and Louveaux, Section~3.4.
 
 \mbox{}
 
@@ -1443,7 +1439,7 @@ Reintroduce $K_1$, $K_2(\omega)$ and $K_2$.
 K_1 & = \lbrace x \ |\ g_i^1(x) \leq 0,\ i =
 1,\ldots,\overline{m}_1, \\
 & \quad \qquad g_i^1(x) = 0,\ i = \overline{m}_1+1,\ldots,m_1 \rbrace, \\
-K_2(\omega) & = \lbrace x \ |\ \exists\, y(\omega) \mbox{ t.q. }
+K_2(\omega) & = \lbrace x \ |\ \exists\, y(\omega) \mbox{ s.t. }
  t_i^2(x, \omega) + g_i^2(y(\omega), \omega) \leq 0,\ i
 = 1,\ldots,\overline{m}_2,\\
 & \quad \qquad t_i^2(x, \omega) + g_i^2(y(\omega), \omega) = 0, \ i =

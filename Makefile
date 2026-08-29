@@ -11,25 +11,43 @@ export TEXINPUTS := .//:./$(SLIDES_DIR)//:./$(BACKGROUND_DIR)//:./$(STY_DIR)//:.
 
 PDFLATEX = pdflatex -interaction=nonstopmode -shell-escape
 
-SLIDES_SRC = $(wildcard $(SLIDES_DIR)/*.tex)
-SLIDES_PDF = $(patsubst $(SLIDES_DIR)/%.tex,$(PDF_DIR)/%.pdf,$(SLIDES_SRC))
+# Filenames contain spaces (e.g. "01. Introduction.tex"), which GNU make
+# cannot handle in wildcard lists: word-splitting ignores escaped spaces.
+# The `slides` target therefore loops over the sources in the shell and
+# delegates each PDF to the pattern rule below.
+SLIDES_GLOB = $(SLIDES_DIR)/*.tex
 
 STANDALONE_BACKGROUND = $(BACKGROUND_DIR)/lp_background.tex $(BACKGROUND_DIR)/kkt_background.tex $(BACKGROUND_DIR)/plan.tex
 BACKGROUND_PDF = $(patsubst $(BACKGROUND_DIR)/%.tex,$(PDF_DIR)/%.pdf,$(STANDALONE_BACKGROUND))
 
-.PHONY: all slides background clean help
+.PHONY: all slides background graphs clean help
 
 all: slides background
 
-slides: $(SLIDES_PDF)
+# epstopdf does not resolve inputs through TEXINPUTS on all installations:
+# pre-convert every EPS figure next to its source so that pdflatex finds
+# the <name>-eps-converted-to.pdf files via kpathsea (no shell-escape needed).
+graphs:
+	cd $(IMGS_DIR) && for f in *.eps; do \
+		[ -f "$${f%.eps}-eps-converted-to.pdf" ] || \
+		epstopdf --outfile="$${f%.eps}-eps-converted-to.pdf" "$$f"; \
+	done
+
+slides: graphs
+	@mkdir -p $(PDF_DIR)
+	@for f in $(SLIDES_GLOB); do \
+		b=$$(basename "$$f" .tex); \
+		$(MAKE) --no-print-directory "$(PDF_DIR)/$$b.pdf" || exit 1; \
+	done
 
 background: $(BACKGROUND_PDF)
 
 $(PDF_DIR)/%.pdf: $(SLIDES_DIR)/%.tex
 	@mkdir -p $(PDF_DIR)
-	cd $(SLIDES_DIR) && $(PDFLATEX) "$(notdir $<)"
-	cd $(SLIDES_DIR) && $(PDFLATEX) "$(notdir $<)"
-	mv $(SLIDES_DIR)/$(notdir $@) $@
+	jn=$$(printf '%s' '$*' | tr -d ' '); \
+	(cd $(SLIDES_DIR) && $(PDFLATEX) -jobname="$$jn" "$*.tex") && \
+	(cd $(SLIDES_DIR) && $(PDFLATEX) -jobname="$$jn" "$*.tex") && \
+	mv "$(SLIDES_DIR)/$$jn.pdf" "$@"
 
 $(PDF_DIR)/%.pdf: $(BACKGROUND_DIR)/%.tex
 	@mkdir -p $(PDF_DIR)

@@ -1,4 +1,4 @@
-\documentclass[t,usepdftitle=false]{beamer}
+\documentclass[t,usepdftitle=false,aspectratio=169]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
@@ -165,17 +165,17 @@ Event: action, schedule, cancel.
 
 \begin{footnotesize}
 \begin{center}
-\begin{tikzpicture}[scale=0.09, node distance = 0.8cm, auto]
+\begin{tikzpicture}[scale=0.06, node distance = 0.6cm, auto]
     % Place nodes
     \node [block] (init) {Initialization};
-    \node [text width=2.2cm, cloud, left of=init, node distance=3.7cm] (clock) {Set simulation clock to 0};
-    \node [text width=2.5cm, cloud, right of=init, node distance=3.7cm] (system) {Plan first event(s)};
-    \node [text width=2.1cm, cloud, below of=init, node distance=2.0cm] (premier) {Pull the first event};
-    \node [text width=2.1cm, block, below of=premier, node distance=2.0cm] (event) {Handle current event};
-    \node [text width=2.1cm, block, below of=event, node distance=2.0cm] (schedule) {Plan resulting events};
-    \node [block, left of=schedule, node distance=4.0cm] (update) {Pull next event and advance clock};
-    \node [text width=2.1cm, decision, below of=schedule, node distance=4.0cm] (decide) {Liste d'événements vide ou événement de fin?};
-    \node [block, below of=decide, node distance=4.5cm] (stop) {Stop};
+    \node [text width=2.0cm, cloud, left of=init, node distance=3.2cm] (clock) {Set simulation clock to 0};
+    \node [text width=2.5cm, cloud, right of=init, node distance=3.2cm] (system) {Plan first event(s)};
+    \node [text width=1.9cm, cloud, below of=init, node distance=1.2cm] (premier) {Pull the first event};
+    \node [text width=1.9cm, block, below of=premier, node distance=1.2cm] (event) {Handle current event};
+    \node [text width=1.9cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
+    \node [block, left of=schedule, node distance=3.5cm] (update) {Pull next event and advance clock};
+    \node [text width=1.9cm, decision, below of=schedule, node distance=1.6cm] (decide) {Liste d'événements vide ou événement de fin?};
+    \node [block, below of=decide, node distance=1.4cm] (stop) {Stop};
     % Draw edges
     \path [line] (init) -- (premier);
     \path [line] (premier) -- (event);
@@ -195,22 +195,22 @@ Event: action, schedule, cancel.
 \begin{frame}
 
 \tikzstyle{decision} = [diamond, draw, fill=blue!20,
-    text width=2.5cm, text badly centered, node distance=2.5cm, inner sep=0pt]
+    text width=2.0cm, text badly centered, node distance=1.2cm, inner sep=0pt]
 \tikzstyle{block} = [rectangle, draw, fill=blue!20,
     text width=2.5cm, text centered, rounded corners, minimum height=4em]
 \tikzstyle{line} = [draw, very thick, color=black!50, -latex']
-\tikzstyle{cloud} = [draw, ellipse,fill=yellow!20, node distance=2.5cm,
+\tikzstyle{cloud} = [draw, ellipse,fill=yellow!20, node distance=1.2cm,
     minimum height=2em]
 
 \begin{footnotesize}
 \begin{center}
-\begin{tikzpicture}[scale=0.09, node distance = 1cm, auto]
+\begin{tikzpicture}[scale=0.06, node distance = 0.7cm, auto]
     % Place nodes
-    \node [text width=3cm, block, below of=premier, node distance=2cm] (event) {Handle current event};
-    \node [text width=3cm, block, below of=event, node distance=2cm] (schedule) {Plan resulting events};
-    \node [block, left of=schedule, node distance=4.5cm] (update) {Pull next event and advance clock};
-    \node [text width=1.9cm, decision, below of=schedule, node distance=2.5cm] (decide) {End event or empty event list?};
-    \node [block, below of=decide, node distance=2.5cm] (stop) {Stop and print report};
+    \node [text width=2.4cm, block, below of=premier, node distance=1.2cm] (event) {Handle current event};
+    \node [text width=2.4cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
+    \node [block, left of=schedule, node distance=4.0cm] (update) {Pull next event and advance clock};
+    \node [text width=1.5cm, decision, below of=schedule, node distance=1.5cm] (decide) {End event or empty event list?};
+    \node [block, below of=decide, node distance=1.3cm] (stop) {Stop and print report};
     % Draw edges
     \path [line] (event) -- (schedule);
     \path [line] (schedule) -- (decide);
@@ -226,7 +226,9 @@ Event: action, schedule, cancel.
 \begin{frame}
 \frametitle{Queueing systems}
 
-\includegraphics[width=\textwidth]{queue-labels.png}
+\begin{center}
+\includegraphics[width=0.78\textwidth]{queue-labels.png}
+\end{center}
 
 \end{frame}
 
@@ -700,8 +702,6 @@ We assume $S_i$ and $A_i$ mutually independent.
 		\item We can estimate it using the \emph{same \(n\) simulations} as \(\bar X_n\).
 	\end{enumerate}
 	
-	\mbox{}
-	
 	With (b), we obtain the estimator (slightly biased):
 	\[
 	\bar X_{\rm{c},e,n} = \bar X_n - {1\over n-1} \left[\sum_{i=1}^n
@@ -797,15 +797,9 @@ We assume $S_i$ and $A_i$ mutually independent.
 	\end{align*}
 	where \(\sigma^2_t = Var[X_i\mid B_i=b_t]\).
 	
-	\mbox{}
-	
 	The variance is reduced if the \(\sigma_t^2\) are less than \(Var[X_i]\).
 	
-	\mbox{}
-	
 	If the \(B_i\) are normally generated: \emph{post-stratification}.
-	
-	\mbox{}
 	
 	To estimate \(\mu\) through stratification, we can also 
 	\emph{fix the \(N_t = n_t\) in advance}, meaning we choose 
