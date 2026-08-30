@@ -234,7 +234,7 @@ Purchase (T) & - & - & - \\
 
 \mbox{}
 
-Production can however increase or decrease by 20\% to 25\%, depending on the weather.
+Production can however increase or decrease by 20\%, depending on the weather.
 %The production is however dependant on the weather, and can .
 Simplified setting:
 \begin{itemize}
@@ -381,7 +381,7 @@ Decision under {\red perfect information}:
 if the farmer could know the scenario in advance, or wait to observe the realization of the random variables (r.v.) ({\red wait-and-see} approach),
 the average annual profit would be \$115406.
 \item
-The difference with the optimal decision under uncertainty is called {\blue expected value of perfect information (EVPI)}: profit loss due to uncertainty. 
+The difference with the optimal decision under uncertainty is called {\blue expected value of perfect information (EVPI)}: profit loss due to uncertainty (here, \$7016). 
 \end{itemize}
 
 \end{frame}
@@ -421,7 +421,7 @@ Source: Birge and Louveaux, Section~1.1.
 	\item
 	The newsvendor can turn back the unsold newspapers at the end of the day, and obtain a price $r$ for each of them
 	\item
-	Knowing the probability distribution $F(t) = P(\bsxi \leq t)$, how many newspapers should the newsvendor buys in order to maximize his revenue?
+	Knowing the probability distribution $F(t) = P(\bsxi \leq t)$, how many newspapers should the newsvendor buy in order to maximize his revenue?
 \end{itemize}
 
 \end{frame}
@@ -436,7 +436,7 @@ With the previous definitions, the newsvendor would like to solve the following 
 \max_{x \geq 0} -cx + \mathcal{Q}(x),
 \]
 \item
-$\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buyss $x$ newspapers:
+$\mathcal{Q}(x)$ is the expected sale amount if the newsvendor buys $x$ newspapers:
 \[
 \mathcal{Q}(x) = \EE_{\bsxi} [ Q(x, \bsxi)].
 \]
@@ -466,10 +466,10 @@ q\xi + r(x - \xi) & \mbox{if } x \geq \xi.
 \]
 Therefore,
 \begin{align*}
-\mathcal{Q}(x) & = E_{\bsxi} [ Q(x, \bsxi) ] =
-\int_{-\infty}^{\infty} Q(x, \xi) dF(\xi) 
-\\ & = \int_{-\infty}^x(q\xi + r(x - \xi))dF(\xi) + \int^{\infty}_x
-qxdF(\xi).
+\mathcal{Q}(x) & = \EE_{\bsxi} [ Q(x, \bsxi) ] =
+\int_{-\infty}^{\infty} Q(x, \xi) \, dF(\xi) 
+\\ & = \int_{-\infty}^x(q\xi + r(x - \xi)) \, dF(\xi) + \int^{\infty}_x
+qx \, dF(\xi).
 \end{align*}
 \end{itemize}
 
@@ -480,10 +480,10 @@ qxdF(\xi).
 
 Therefore, we have
 \begin{align*}
-\mathcal{Q}(x) & = (q-r) \int_{-\infty}^x \xi dF(\xi) + rx
-\int_{-\infty}^x dF(\xi) + qx \int_x^{\infty} dF(\xi) \\
-& = (q-r) \int_{-\infty}^x \xi dF(\xi) + rx F(x) + qx (1-F(x)) \\
-& = (q-r) \left[ \int_{-\infty}^x \xi dF(\xi) - x F(x) \right] + qx. \\
+\mathcal{Q}(x) & = (q-r) \int_{-\infty}^x \xi \, dF(\xi) + rx
+\int_{-\infty}^x \, dF(\xi) + qx \int_x^{\infty} \, dF(\xi) \\
+& = (q-r) \int_{-\infty}^x \xi \, dF(\xi) + rx F(x) + qx (1-F(x)) \\
+& = (q-r) \left[ \int_{-\infty}^x \xi \, dF(\xi) - x F(x) \right] + qx. \\
 \end{align*}
 
 \end{frame}
@@ -498,14 +498,14 @@ tF(t) = 0$.
 
 We can then integrate by parts to obtain:
 \begin{align*}
-\int_{-\infty}^x \xi dF(\xi) &= \xi F(\xi) |_{-\infty}^x -
-\int_{-\infty}^x F(\xi) d\xi \\
-&=  xF(x) - \int_{-\infty}^x F(\xi) d\xi.
+\int_{-\infty}^x \xi \, dF(\xi) &= \xi F(\xi) |_{-\infty}^x -
+\int_{-\infty}^x F(\xi) \, d\xi \\
+&=  xF(x) - \int_{-\infty}^x F(\xi) \, d\xi.
 \end{align*}
 
 Thus,
 \[
-\mathcal{Q}(x) = qx - (q - r)\int_{-\infty}^x F(\xi)d\xi.
+\mathcal{Q}(x) = qx - (q - r)\int_{-\infty}^x F(\xi) \, d\xi.
 \]
 
 \end{frame}
@@ -567,7 +567,7 @@ quantile(d, 0.1/0.23)
 \begin{frame}
 \frametitle{Marginal revenue}
 
-{\sl Other interpretation}, more intuitive: assume that the vendor has bought $t$ newspapers.
+{\textsl{Other interpretation}}, more intuitive: assume that the vendor has bought $t$ newspapers.
 What is the expected marginal revenue if he buys an additional newspaper?
 From an economic point of view, we would like this marginal revenue to be equal to 0.
 
