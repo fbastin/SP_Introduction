@@ -1,8 +1,8 @@
 # Philox4x32-10 counter-based generator (Salmon, Moraes, Dror & Shaw, SC 2011)
-# Following the slides "Random Numbers":
-#   R = E_K(C), a stateless bijective map from a counter C = (c_1,...,c_N)
-#   with N = 4 32-bit words and a key K = (k_0,k_1); M = N/2 subkeys.
-#   The sequence follows by incrementing the counter: C, C+1, C+2, ...
+# Optimized implementation for native performance (Julia Random API)
+
+import Random
+import RandomDataStreams
 
 const M0 = UInt32(0xD2511F53)   # Philox multipliers
 const M1 = UInt32(0xCD9E8D57)
@@ -11,11 +11,7 @@ const W1 = UInt32(0xBB67AE85)
 const ROUNDS = 10               # Philox4x32-10
 
 # one Philox round: bijection on (x0,x1,x2,x3) with the current subkeys (k0,k1)
-#   y0 = hi1 xor x1 xor k0      y2 = hi0 xor x3 xor k1
-#   y1 = lo1                    y3 = lo0
-# where (hi_j, lo_j) are the high/low 32-bit halves of M_j * x_j.
-# The subkeys advance by the Weyl sequence between rounds: (k0,k1) += (W0,W1).
-function philox_round(x::NTuple{4,UInt32}, k::NTuple{2,UInt32})
+@inline function philox_round(x::NTuple{4,UInt32}, k::NTuple{2,UInt32})
     m0 = widemul(x[1], M0)
     m1 = widemul(x[3], M1)
     hi0, lo0 = (m0 >>> 32) % UInt32, m0 % UInt32
@@ -33,42 +29,74 @@ function philox(C::NTuple{4,UInt32}, K::NTuple{2,UInt32})
     return x
 end
 
-# counter-based stream: the state is just the counter (no internal transition)
-mutable struct PhiloxRNG
-    ctr::Vector{UInt32}          # position in the stream
-    key::NTuple{2,UInt32}        # identifies the stream
+# Counter-based stream integrated into the Julia ecosystem (AbstractRNG).
+# Optimized state:
+# - ctr is a native UInt128 (incrementing is extremely fast without carry loops)
+# - buffer stores the 4 generated values to avoid wasting bits.
+mutable struct PhiloxRNG <: RandomDataStreams.AbstractStreamableRNG
+    ctr::UInt128
+    key::NTuple{2,UInt32}
+    buffer::NTuple{4,UInt32}
+    idx::Int
 end
 
-# incrementing the counter = jumping ahead by one block
-function inc!(c::AbstractVector{UInt32})
-    for i in eachindex(c)
-        c[i] += UInt32(1)
-        c[i] != 0 && return c
+# Default constructor
+function PhiloxRNG(seed_key::NTuple{2,UInt32} = (UInt32(0), UInt32(0)), start_ctr::UInt128 = UInt128(0))
+    # idx = 5 forces the generation of a block on the very first call to rand()
+    PhiloxRNG(start_ctr, seed_key, (UInt32(0), UInt32(0), UInt32(0), UInt32(0)), 5)
+end
+
+# Extracts the 4 UInt32 from the 128-bit counter
+@inline function _ctr_to_tuple(c::UInt128)
+    return (
+        (c & 0xFFFFFFFF) % UInt32,
+        ((c >> 32) & 0xFFFFFFFF) % UInt32,
+        ((c >> 64) & 0xFFFFFFFF) % UInt32,
+        ((c >> 96) & 0xFFFFFFFF) % UInt32
+    )
+end
+
+# Random Interface: Generation of a native UInt32
+function Random.rand(rng::PhiloxRNG, ::Type{UInt32})
+    if rng.idx > 4
+        rng.buffer = philox(_ctr_to_tuple(rng.ctr), rng.key)
+        rng.ctr += 1
+        rng.idx = 1
     end
-    return c
+    
+    val = rng.buffer[rng.idx]
+    rng.idx += 1
+    return val
 end
 
-# next block of four 32-bit uniforms, then move the counter forward
-function next_block!(rng::PhiloxRNG)
-    block = philox(Tuple(rng.ctr), rng.key)
-    inc!(rng.ctr)
-    return block
+# Random Interface: Generation of a UInt64 (combines 2 UInt32 from the buffer)
+function Random.rand(rng::PhiloxRNG, ::Type{UInt64})
+    lo = Random.rand(rng, UInt32)
+    hi = Random.rand(rng, UInt32)
+    return (UInt64(hi) << 32) | UInt64(lo)
 end
+
+# Signals to Julia that this generator can directly provide 52 high-quality bits
+# (necessary for quickly generating Float64).
+Random.rng_native_52(::PhiloxRNG) = UInt64
+
+
+# =========================================================================
+# Demonstration of CBRNG properties (Jump ahead, reproducibility, etc.)
+# =========================================================================
 
 hex4(u::UInt32) = string(u, base = 16, pad = 8)
-u01(x::UInt32) = x / 2.0^32     # output function: map to (0,1)
 
 println("Block E_K(0) with K = (0,0) [hex]:")
 block = philox((UInt32(0), UInt32(0), UInt32(0), UInt32(0)),
                (UInt32(0), UInt32(0)))
 println("  ", join(map(hex4, block), " "), "\n")
 
-rng = PhiloxRNG(UInt32[0, 0, 0, 0], (UInt32(0), UInt32(0)))
 
-# C, C+1, C+2, ... yields successive blocks
 println("Blocks at counters 0, 1, ..., 4 [hex]:")
 for i in 0:4
-    println("  C = $i -> ", join(map(hex4, next_block!(rng)), " "))
+    blk = philox(_ctr_to_tuple(UInt128(i)), (UInt32(0), UInt32(0)))
+    println("  C = $i -> ", join(map(hex4, blk), " "))
 end
 
 # same (counter, key) always yields identical bits: reproducibility
@@ -84,19 +112,17 @@ println("  philox(0, K=(1,0))  -> ", join(map(hex4,
                (UInt32(1), UInt32(0)))), " "))
 
 # moving the counter forward is the whole "transition": E_K(C + 10^6)
+# Very simple with a UInt128!
 println("\nJump ahead: E_K(C + 10^6) achieved by incrementing the counter only:")
-C = Vector{UInt32}(UInt32[0, 0, 0, 0])
-for _ in 1:1_000_000
-    inc!(C)
-end
-println("  E_K(10^6) = ", join(map(hex4, philox(Tuple(C), (UInt32(0), UInt32(0)))), " "), "\n")
+C_128 = UInt128(1_000_000)
+println("  E_K(10^6) = ", join(map(hex4, philox(_ctr_to_tuple(C_128), (UInt32(0), UInt32(0)))), " "), "\n")
 
-# moment / uniformity check on 10^5 (uniform) draws
-rng = PhiloxRNG(UInt32[0, 0, 0, 0], (UInt32(7), UInt32(3)))
+# moment / uniformity check on 10^5 (uniform) draws using Standard Julia Random API
+rng = PhiloxRNG((UInt32(7), UInt32(3)))
 n = 100_000
-s = sum((blk = next_block!(rng);
-         u01(blk[1]) + u01(blk[2]) + u01(blk[3]) + u01(blk[4])) for _ in 1:n) / (4n)
-println("Mean of $n draws: ", s, "   (expect ~0.5)")
+# We use rand(rng) directly: it returns a Float64 in [0, 1)!
+s = sum(rand(rng) for _ in 1:n) / n
+println("Mean of $n draws via rand(rng): ", s, "   (expect ~0.5)")
 
 # reference vectors from the Random123 C implementation (v[0] = least significant)
 refs = [
@@ -113,3 +139,73 @@ expected = [
 ]
 println("\nMatches random123 reference vectors: ",
         all(philox(c, k) == e for ((c, k), e) in zip(refs, expected)))
+
+println("\n--- Examples of integration with Julia ---")
+rng2 = PhiloxRNG()
+println("rand(rng2)             = ", rand(rng2))
+println("rand(rng2, 5)          = ", rand(rng2, 5))
+println("rand(rng2, 1:100, 3)   = ", rand(rng2, 1:100, 3))
+
+# =========================================================================
+# RandomDataStreams.jl API integration
+# =========================================================================
+
+mutable struct PhiloxGen <: RandomDataStreams.AbstractRNGStream
+    next_key_hi::UInt32
+    next_key_lo::UInt32
+end
+PhiloxGen() = PhiloxGen(0, 0)
+
+# Generate the next independent stream (new key)
+function RandomDataStreams.next_stream!(gen::PhiloxGen)
+    key = (gen.next_key_hi, gen.next_key_lo)
+    if gen.next_key_lo == typemax(UInt32)
+        gen.next_key_lo = 0
+        gen.next_key_hi += 1
+    else
+        gen.next_key_lo += 1
+    end
+    return PhiloxRNG(key, UInt128(0))
+end
+
+# In Philox, a substream can be defined by a large jump in the counter, e.g., 2^64
+function RandomDataStreams.next_substream!(rng::PhiloxRNG)
+    sub_idx = (rng.ctr >> 64) + 1
+    rng.ctr = UInt128(sub_idx) << 64
+    rng.idx = 5 # force buffer flush
+    return rng
+end
+
+function RandomDataStreams.reset_substream!(rng::PhiloxRNG)
+    sub_idx = (rng.ctr >> 64)
+    rng.ctr = UInt128(sub_idx) << 64
+    rng.idx = 5
+    return rng
+end
+
+function RandomDataStreams.reset_stream!(rng::PhiloxRNG)
+    rng.ctr = 0
+    rng.idx = 5
+    return rng
+end
+
+function RandomDataStreams.get_state(rng::PhiloxRNG)
+    return (rng.ctr, rng.key, rng.buffer, rng.idx)
+end
+
+# advance_state!(rng, e, c) jumps by 2^e + c if e > 0, -2^(-e) + c if e < 0, or c if e == 0
+function RandomDataStreams.advance_state!(rng::PhiloxRNG, e::Integer, c::Integer)
+    n = if e == 0
+        BigInt(c)
+    elseif e > 0
+        BigInt(2)^BigInt(e) + BigInt(c)
+    else
+        -BigInt(2)^BigInt(-e) + BigInt(c)
+    end
+    
+    # Counter arithmetic modulo 2^128
+    mask128 = (BigInt(1) << 128) - 1
+    rng.ctr = UInt128((BigInt(rng.ctr) + n) & mask128)
+    rng.idx = 5
+    return rng
+end

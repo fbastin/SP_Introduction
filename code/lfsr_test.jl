@@ -1,6 +1,4 @@
 # Linear Feedback Shift Register (LFSR) / Tausworthe generator
-# Optimized implementation using integer words (UInt64)
-# rather than an array of bits to be significantly faster.
 
 struct LFSR
     k::Int      # register length / degree
@@ -12,39 +10,32 @@ struct LFSR
 end
 
 function LFSR(k::Int, r::Int, w::Int, nu::Int)
-    @assert k <= 64 "k must be <= 64 to use the UInt64 state"
+    @assert k <= 64 "k must be <= 64"
     mask_k = UInt64(1) << (k - 1)
     mask_r = UInt64(1) << (r - 1)
     LFSR(k, r, w, nu, mask_k, mask_r)
 end
 
-# The state is stored in a single integer (UInt64), which is much more efficient
-# than a Vector of UInt8.
 mutable struct LFSRState
     state::UInt64
 end
 
-# Advance the register by one bit using fast bitwise operations
 function step!(s::LFSRState, lfsr::LFSR)
-    # Equivalent to reg[r] ⊻ reg[k] in the old array-based implementation
     feed = ((s.state & lfsr.mask_r) == 0 ? UInt64(0) : UInt64(1)) ⊻ 
            ((s.state & lfsr.mask_k) == 0 ? UInt64(0) : UInt64(1))
     
-    # Left shift (the most recent bit is at position 0)
     s.state = ((s.state << 1) | feed) & ((UInt64(1) << lfsr.k) - 1)
     return feed
 end
 
-# Generate a number in (0,1)
 function next_u!(s::LFSRState, lfsr::LFSR)
     acc = UInt64(0)
     for l in 0:(lfsr.w - 1)
         bit = UInt64(0)
         for _ in 1:lfsr.nu
-            bit = s.state & UInt64(1)
+            bit = s.state & 1
             step!(s, lfsr)
         end
-        # Accumulate the bits directly into an integer instead of floats
         acc = (acc << 1) | bit
     end
     return Float64(acc) / Float64(UInt64(1) << lfsr.w)
@@ -63,6 +54,8 @@ end
 
 function output_period(lfsr::LFSR, seed::UInt64)
     s = LFSRState(seed)
+    # copy state for u0
+    # fixed
     u0 = next_u!(s, lfsr)
     
     n = 1
@@ -74,11 +67,9 @@ function output_period(lfsr::LFSR, seed::UInt64)
     return -1
 end
 
-# --- Classic LFSR Demonstration ---
-lfsr = LFSR(9, 5, 16, 1)                 # Primitive polynomial z^9 + z^4 + 1
-s = LFSRState(UInt64(1))                 # Seed (equivalent to reg[1]=1)
+lfsr = LFSR(9, 5, 16, 1)
+s = LFSRState(UInt64(1))
 
-println("--- Optimized Classic LFSR ---")
 println("First 10 outputs:")
 for _ in 1:10
     println(next_u!(s, lfsr))
@@ -95,21 +86,10 @@ for nu in 1:7
             p < 0 ? "n/a" : string(511 ÷ gcd(nu, 511)), ")")
 end
 
-n = 100_000
 s = LFSRState(UInt64(1))
+n = 100_000
 mean_val = sum(next_u!(s, lfsr) for _ in 1:n) / n
 println("\nMean of $n draws: ", mean_val, " (expect ~0.5)")
-
-
-# =====================================================================
-# REAL PRACTICAL IMPLEMENTATION: Combined Tausworthe LFSR (Taus88)
-# =====================================================================
-# In a professional setting, we never advance "bit by bit". 
-# LFSRs are combined to obtain a very long period,
-# and we proceed via "block shifts" that directly generate
-# 32 or 64 random bits in just a few elementary operations.
-#
-# Taus88 (P. L'Ecuyer, 1996) combines 3 LFSRs for a period of ~2^88.
 
 mutable struct Taus88
     s1::UInt32
@@ -117,30 +97,21 @@ mutable struct Taus88
     s3::UInt32
 end
 
-function Taus88(seed1::Integer, seed2::Integer, seed3::Integer)
-    # Seeds must be reasonably large (>= 128)
-    Taus88(UInt32(max(seed1, 128)), UInt32(max(seed2, 128)), UInt32(max(seed3, 128)))
-end
-
 function next_u!(rng::Taus88)
-    # LFSR 1
     b1 = (((rng.s1 << 13) ⊻ rng.s1) >> 19)
     rng.s1 = (((rng.s1 & 0xFFFFFFFE) << 12) ⊻ b1)
     
-    # LFSR 2
     b2 = (((rng.s2 << 2)  ⊻ rng.s2) >> 25)
     rng.s2 = (((rng.s2 & 0xFFFFFFF8) << 4)  ⊻ b2)
     
-    # LFSR 3
     b3 = (((rng.s3 << 3)  ⊻ rng.s3) >> 11)
     rng.s3 = (((rng.s3 & 0xFFFFFFF0) << 17) ⊻ b3)
     
-    # XOR the 3 states to erase the correlations of the sub-sequences,
-    # and return the whole normalized on (0,1)
     return Float64(rng.s1 ⊻ rng.s2 ⊻ rng.s3) / 4294967296.0
 end
 
-println("\n--- Taus88 (Practical Combined Generator) ---")
+println("\n--- Taus88 ---")
 taus = Taus88(12345, 67890, 13579)
 mean_taus = sum(next_u!(taus) for _ in 1:n) / n
 println("Mean of $n draws (Taus88): ", mean_taus, " (expect ~0.5)")
+
