@@ -1070,28 +1070,38 @@ u2 = rand(rng)
 			F (x) = \sum_{x_i \leq x} p(x_i).
 		\end{align*}
 		
-		We have to generate $U$, search $I = \min \lbrace i | F (x_i)  \geq U
-		\rbrace$ and return $x_I$.
+		We have to generate $U \sim U(0,1)$, search 
+		\[
+		I = \min \lbrace i \mid F (x_i)  \geq U \rbrace
+		\]
+		and return $X = x_I$.
 		
-		Various algorithms perform this search. Their efficiency depends of
-		the distribution.
+		\vspace{0.4cm}
+		{\red Initialization}: store the values $x_i$ and the cumulative probabilities $F (x_i)$ in arrays, for $i = 1, \ldots, n$.
 		
-		{\red Initialization}: store the $x_i$ and $F (x_i)$ in arrays, for $i
-		= 1, \ldots, n$.
+		\vspace{0.2cm}
+		Various algorithms can perform this search. Their efficiency heavily depends on the distribution and the number of outcomes $n$.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Discrete Inversion: Search Algorithms}
+		
 		\begin{enumerate}
-			\item
-			\mbox{\blue Linear search} (time in $O(n)$): $U \leftarrow U (0, 1);
-			\quad i \leftarrow 1;$\\
-			while $F (x_i) < U$ do $i \leftarrow i + 1;$ return $x_i$.
-			\item
-			\mbox{\blue Binary search} (time in $O(\log(n)))$:\\
-			$U \leftarrow U (0, 1);\quad L \leftarrow 0;\quad R \leftarrow n;$\\
-			while $L < R - 1$\\
-			$\quad$ $m \leftarrow \lfloor (L + R)/2 \rfloor;$\\
-			$\quad$ if $F (x_m) < U$ then $L \leftarrow m$ otherwise $R \leftarrow
-			m$;\\
-			%$\quad$ (* Invariant: l'indice $I$ est dans $\lbrace L + 1,\ldots, R\rbrace$. *)\\
-			return $x_R$.
+			\item \textbf{\blue Linear search} (time in $\mathcal{O}(n)$): \\
+			\texttt{generate} $U \sim U (0, 1)$; \\
+			$i \leftarrow 1$; \\
+			\texttt{while} $F (x_i) < U$ \texttt{do} $i \leftarrow i + 1$; \\
+			\texttt{return} $x_i$.
+
+			\vspace{0.5cm}
+			
+			\item \textbf{\blue Binary search} (time in $\mathcal{O}(\log(n))$): \\
+			\texttt{generate} $U \sim U (0, 1)$; \\
+			$L \leftarrow 0$; $R \leftarrow n$; \\
+			\texttt{while} $L < R - 1$ \texttt{do} \\
+			\quad $m \leftarrow \lfloor (L + R)/2 \rfloor$; \\
+			\quad \texttt{if} $F (x_m) < U$ \texttt{then} $L \leftarrow m$ \texttt{else} $R \leftarrow m$; \\
+			\texttt{return} $x_R$.
 		\end{enumerate}
 		
 	\end{frame}
