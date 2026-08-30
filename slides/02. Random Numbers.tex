@@ -56,7 +56,6 @@
 	\frame{\titlepage}
 	
 
-
 \begin{frame}
 	%\frametitle{Outline}
 	%
@@ -67,7 +66,6 @@
 	\url{https://xkcd.com/221/}
 \end{small}
 \end{center}
-
 
 %\begin{center}
 
@@ -387,7 +385,6 @@ end
 			\end{footnotesize}
 			
 		\end{frame}
-
 
 		
 \begin{frame}
@@ -726,6 +723,44 @@ architecture --- ideal for reproducible parallel Monte Carlo.
 \end{frame}
 
 \begin{frame}
+\frametitle{Counter-based generators: parallel streams}
+
+\begin{itemize}
+\item \textbf{Streams via keys:} The key identifies the stream, the counter the position. Jumping ahead is a simple integer addition.
+\item \textbf{Stateless \& Reproducible:} No internal state to update sequentially. Identical $(C,K)$ pairs yield identical bits everywhere (ideal for GPUs).
+\item \textbf{Stochastic optimization:} One independent stream per scenario.
+\end{itemize}
+
+\vspace{0.3cm}
+{\red Widespread adoption (Philox / Threefry):}
+\begin{itemize}
+	\item \textbf{Default in ML:} PyTorch (GPU), TensorFlow, JAX.
+	\item \textbf{Available in:} NumPy (\texttt{Generator}), NVIDIA cuRAND.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Counter-based vs conventional generators}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l|p{3.7cm}|p{3.7cm}}
+ & \textbf{Conventional} & \textbf{Counter-based} \\
+ & (MRG, PCG, xorshift) & (Philox, Threefry) \\
+\hline
+Stored state & full generator state & counter + key \\
+Workload & transition function & output function (rounds) \\
+Jump ahead & dedicated algorithms & addition on the counter \\
+Independent streams & dedicated machinery & distinct keys \\
+Draw order & sequential & position-indexed \\
+GPUs & serial dependency & stateless threads \\
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Philox: an encrypt-increment CBRNG}
 
 Introduced by {\blue Salmon, Moraes, Dror \& Shaw} (SC 2011), together with
@@ -866,44 +901,6 @@ switch stream: change the key $K$;
 \item
 no state to store or synchronize: natural for GPUs and parallel workers.
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Counter-based generators: parallel streams}
-
-\begin{itemize}
-\item \textbf{Streams via keys:} The key identifies the stream, the counter the position. Jumping ahead is a simple integer addition.
-\item \textbf{Stateless \& Reproducible:} No internal state to update sequentially. Identical $(C,K)$ pairs yield identical bits everywhere (ideal for GPUs).
-\item \textbf{Stochastic optimization:} One independent stream per scenario.
-\end{itemize}
-
-\vspace{0.3cm}
-{\red Widespread adoption (Philox / Threefry):}
-\begin{itemize}
-	\item \textbf{Default in ML:} PyTorch (GPU), TensorFlow, JAX.
-	\item \textbf{Available in:} NumPy (\texttt{Generator}), NVIDIA cuRAND.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Counter-based vs conventional generators}
-
-\begin{center}
-\footnotesize
-\begin{tabular}{l|p{3.7cm}|p{3.7cm}}
- & \textbf{Conventional} & \textbf{Counter-based} \\
- & (MRG, PCG, xorshift) & (Philox, Threefry) \\
-\hline
-Stored state & full generator state & counter + key \\
-Workload & transition function & output function (rounds) \\
-Jump ahead & dedicated algorithms & addition on the counter \\
-Independent streams & dedicated machinery & distinct keys \\
-Draw order & sequential & position-indexed \\
-GPUs & serial dependency & stateless threads \\
-\end{tabular}
-\end{center}
 
 \end{frame}
 
@@ -1325,7 +1322,6 @@ Drawing from $\calN(\bszero,\bsI)$: generate $d$ $\calN(0,1)$ independently.
 \textbf{Intuition:} Copulae allow us to completely decouple the \textit{marginal distributions} (what each variable looks like individually) from their \textit{dependence structure} (how they move together).
 
 \mbox{}
-
 
 A $d$-variate \textcolor{red}{copula} $C: [0, 1]^d \rightarrow [0, 1] $is the cdf of a random vector
 $(U_1,\ldots, U_d)$ with $U(0, 1)$ margins:
