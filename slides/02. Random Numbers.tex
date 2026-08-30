@@ -56,15 +56,7 @@
 	\frame{\titlepage}
 	
 
-\begin{frame}
-    \frametitle{Learning Objectives}
-    \begin{itemize}
-        \item \textbf{Understand the foundation:} How computers generate pseudo-random numbers uniformly distributed on $(0,1)$.
-        \item \textbf{Explore generator architectures:} From classic Linear Congruential Generators (LCG) to modern Counter-Based RNGs (CBRNG).
-        \item \textbf{Transform uniforms into target distributions:} Master the fundamental techniques (Inversion, Acceptance/Rejection) for drawing from arbitrary distributions.
-        \item \textbf{Address multivariate settings:} Introduce the concepts of Cholesky decomposition and Copulae to model dependent random variables.
-    \end{itemize}
-\end{frame}
+
 \begin{frame}
 	%\frametitle{Outline}
 	%
@@ -343,8 +335,9 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\begin{frame}
 		\frametitle{MRG32k3a}
 		
-		The following combined MRG was proposed by L'Ecuyer, and is amongst
-		the most popular and efficient known generators.
+		The following combined MRG was proposed by L'Ecuyer. It has been for a long time
+		amongst the most popular and efficient generators (e.g., used in R), although newer
+		families like xoshiro or CBRNGs are often preferred today for raw performance.
 		It combines 2 MRG's.
 		
 		$k=3$, \\
@@ -395,14 +388,7 @@ end
 			
 		\end{frame}
 
-\begin{frame}
-\frametitle{MRG32k3a: implementations}
 
-Note: more efficient implementations exist.
-
-See for instance \url{https://github.com/vigna/MRG32k3a}.
-
-\end{frame}
 		
 \begin{frame}
 		\frametitle{Random numbers generators on $\mathcal{F}_2$}
@@ -412,7 +398,7 @@ See for instance \url{https://github.com/vigna/MRG32k3a}.
 		
 		\mbox{}
 		
-		Recall the Galois field $\mathcal{F}_2$: the set $\lbrace 0,1 \rbrace$
+		Let us introduce the Galois field $\mathcal{F}_2$: it is simply the set $\lbrace 0,1 \rbrace$
 		with addition and multiplication computed modulo 2.
 		
 		\mbox{}
@@ -618,9 +604,9 @@ Most popular:
 But even these recent generators are not without flaws! See e.g.
 \begin{itemize}
 	\item 
-	\href{https://arxiv.org/abs/1910.06437}{It Is High Time We Let Go Of The Mersenne Twister}
+	\href{https://arxiv.org/abs/1910.06437}{\blue It Is High Time We Let Go Of The Mersenne Twister}
 	\item
-	\href{https://www.sciencedirect.com/science/article/abs/pii/S0377042721004131}{Unveiling patterns in xorshift128+ pseudorandom number generators}
+	\href{https://www.sciencedirect.com/science/article/abs/pii/S0377042721004131}{\blue Unveiling patterns in xorshift128+ pseudorandom number generators}
 \end{itemize}
 		
 \end{frame}
