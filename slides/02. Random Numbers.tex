@@ -55,6 +55,16 @@
 }
 	\frame{\titlepage}
 	
+
+\begin{frame}
+    \frametitle{Learning Objectives}
+    \begin{itemize}
+        \item \textbf{Understand the foundation:} How computers generate pseudo-random numbers uniformly distributed on $(0,1)$.
+        \item \textbf{Explore generator architectures:} From classic Linear Congruential Generators (LCG) to modern Counter-Based RNGs (CBRNG).
+        \item \textbf{Transform uniforms into target distributions:} Master the fundamental techniques (Inversion, Acceptance/Rejection) for drawing from arbitrary distributions.
+        \item \textbf{Address multivariate settings:} Introduce the concepts of Cholesky decomposition and Copulae to model dependent random variables.
+    \end{itemize}
+\end{frame}
 \begin{frame}
 	%\frametitle{Outline}
 	%
@@ -633,18 +643,40 @@ In summary, there are no strong evidence that one should favor a PCG over a MRG.
 \end{frame}
 
 \begin{frame}
-\frametitle{Counter-based generators}
+\frametitle{Counter-based generators (CBRNG)}
+
+Recall the general RNG framework introduced earlier:
+\begin{itemize}
+	\item {\blue Transition function}: $s_n = f(s_{n-1})$
+	\item {\blue Output function}: $u_n = g(s_n)$
+\end{itemize}
+
+\mbox{}
+
+In previously covered RNGs (LCG, MRG, LFSR, etc.):
+\begin{itemize}
+\item The transition function $f$ does most of the transformation (mixing the state).
+\item The output function $g$ is very simple (e.g., extracting the state as a fraction $u_n = s_n / m$).
+\end{itemize}
+
+\mbox{}
+
+{\blue Counter-based generators} (CBRNGs) take the exact opposite approach:
+\begin{itemize}
+\item The transition $f$ is trivial: $s_n = s_{n-1} + 1$ (the state is just a counter).
+\item The output function $g$ is a complex function (often based on cryptographic block ciphers) that ensures the output looks random.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{CBRNGs properties}
 
 \begin{itemize}
-\item In previously covered RNGs, the transition function does most of the transformation and the output function is very simple.
-\item
-Opposite for CBRNGs: the state is a counter, increased by 1, and the output function is complex.
-\item
-The most popular implementation, Philox, detailed next, is the default generator in TensorFlow.
-\item
-They pass demanding test suites such as TestU01's BigCrush, with sufficiently many rounds, and are efficient on both CPUs and GPUs.
-\item
-One strength: easy to jump ahead in the state space.
+\item Because the state is just a counter, it is {\blue trivially easy to jump ahead}. To compute the $n$-th number, we just evaluate the complex function on the $n$-th counter value, without generating the preceding values!
+\item This makes CBRNGs extremely suitable for {\blue parallel computing} (GPUs, massive multithreading).
+\item They pass demanding test suites such as TestU01's BigCrush, with sufficiently many rounds, and are efficient on both CPUs and GPUs.
+\item The most popular implementation, Philox, detailed next, is the default generator in TensorFlow, PyTorch, NumPy, and JAX.
 \end{itemize}
 
 \end{frame}
@@ -883,8 +915,10 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 		\begin{frame}[containsverbatim]
 	\frametitle{RandomDataStreams.jl}
 
-	\url{https://github.com/JLChartrand/RandomDataStreams.jl}\\
-	Documentation: \url{https://jlchartrand.github.io/RandomDataStreams.jl/dev/}
+	This package is now officially registered in Julia. You can add it via:
+	\begin{verbatim}
+] add RandomDataStreams
+	\end{verbatim}
 
 	\mbox{}
 
@@ -894,7 +928,13 @@ The MRG32k3a implementation proposes functions to generate independent streams a
 
 	Illustration (one independent stream per scenario, one substream per replication):
 \begin{semiverbatim}
-u = draw(stream = s, substream = r, position = i)
+using RandomDataStreams
+gen = MRG32k3aGen()
+rng = next_stream!(gen) # Independent stream for a scenario
+
+# For each replication:
+next_substream!(rng)    # Move to the next substream
+u = rand(rng)           # Draw random numbers
 \end{semiverbatim}
 
 \end{frame}
@@ -932,7 +972,15 @@ u = draw(stream = s, substream = r, position = i)
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Inversion}
+		\frametitle{Inversion: The Gold Standard}
+
+\begin{itemize}
+    \item \textbf{Why use inversion?} It guarantees a monotonic mapping from the uniform $U$ to the target $X$.
+    \item This monotonicity is strictly required by variance reduction techniques like \textit{Common Random Numbers} (CRN) or \textit{Antithetic Variates}.
+\end{itemize}
+
+\mbox{}
+
 		
 		Preferred method when applicable: compatible with variance reduction and copulae.
 		
@@ -1202,7 +1250,7 @@ $$
 $$
 Then,
 $$
-\bsX = \bsmu + L\calN(\bszero, \bsI)
+\bsX = \bsmu + L\bsZ, \quad \text{where } \bsZ \sim \calN(\bszero, \bsI)
 $$
 with $\Sigma = LL^T$, and $L$ is the Cholesky factor.
 
@@ -1213,6 +1261,11 @@ Drawing from $\calN(\bszero,\bsI)$: generate $d$ $\calN(0,1)$ independently.
 
 \begin{frame}
 \frametitle{Multivariate distributions: copulae}
+
+\textbf{Intuition:} Copulae allow us to completely decouple the \textit{marginal distributions} (what each variable looks like individually) from their \textit{dependence structure} (how they move together).
+
+\mbox{}
+
 
 A $d$-variate \textcolor{red}{copula} $C: [0, 1]^d \rightarrow [0, 1] $is the cdf of a random vector
 $(U_1,\ldots, U_d)$ with $U(0, 1)$ margins:

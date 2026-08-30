@@ -4,12 +4,12 @@
 
 ### Diapo « RandomDataStreams.jl »
 
-- [ ] Remplacer le pseudo-code illustratif (`u = draw(stream = s, substream = r, position = i)`) par l'API réelle du package, une fois la librairie enregistrée (dans les prochains jours).
+- [x] Remplacer le pseudo-code illustratif (`u = draw(stream = s, substream = r, position = i)`) par l'API réelle du package, une fois la librairie enregistrée (dans les prochains jours).
 - [ ] Ajuster la description de la diapo si les fonctionnalités évoluent (streams / substreams MRG32k3a).
 - [ ] Recompiler et vérifier la mise en page après mise à jour (`make slides` une fois le Makefile corrigé, sinon `pdflatex` direct).
 
 Liens :
-- Librairie : <https://github.com/JLChartrand/RandomDataStreams.jl>
+- Librairie : Officiellement enregistrée (ajoutable via `] add RandomDataStreams`)
 - Documentation : <https://jlchartrand.github.io/RandomDataStreams.jl/dev/>
 
 ---
@@ -41,7 +41,7 @@ Vérifié : les 12 slides + 3 notes background compilent sans erreur (15 PDF ré
 
 ### Priorité 3 — Langue et typos (~120 issues secondaires)
 
-- [ ] **Deck 12** — Diapo 25 entièrement en français (`~l.598-609`) + libellés du flowchart (`Liste d'événements…`, `oui`/`non`).
+- [x] **Deck 12** — Diapo 25 entièrement en français (`~l.598-609`) + libellés du flowchart (`Liste d'événements…`, `oui`/`non`).
 - [ ] Gallicismes récurrents tous decks : `t.q.` → `s.t.`, `si` → `if`, `et` → `and`, `plans` → `planes`, `module` → `modulus`, `Alors`, `journaux`, `Exercice`, `planification`, etc.
 - [ ] Typos mathématiques secondaires : index et dimensions (deck 03 `y_{1s}`→`y_{2s}`, deck 06 `x_{iT}`/`p'_s`, deck 08 `t_i²`→`b_i²`, deck 12 allocation de Neyman), `x_{x+1}` ×7 (deck 11), etc.
 - [ ] Syntaxe LaTeX : délimiteurs appariés, parenthèses en trop, macros dupliquées (`inputenc`, `\bu`, `\KK`).

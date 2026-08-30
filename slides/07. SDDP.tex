@@ -63,11 +63,11 @@
 \begin{frame}
 \frametitle{Context}
 
-Based on Anthony Papavisiliou's slides \url{https://ap-rg.eu/wp-content/uploads/2020/05/SDDP.pdf}.
+Based on Anthony Papavasiliou's slides \url{https://ap-rg.eu/wp-content/uploads/2020/05/SDDP.pdf}.
 
 \mbox{}
 
-Introduced by Perreira and Pinto, 1991.
+Introduced by Pereira and Pinto (1991), 1991.
 First designed to solve hydro-scheduling problems.
 
 \mbox{}
@@ -132,7 +132,7 @@ nodes
 \item
 Child nodes send cuts to their parents
 \item
-There are different sequence procedures that tell in which
+There are different sequencing protocols that determine in which
 order the problems corresponding to different nodes in the
 scenario tree are solved.
 \end{itemize}
@@ -506,7 +506,7 @@ Assume
 \item
 $H$ time steps, $M_t$ discrete outcomes in each stage.
 \item
-No infeasibility cuts.
+Complete recourse (no feasibility cuts needed).
 \end{itemize}
 
 \begin{center}
@@ -555,7 +555,7 @@ Backward pass:  $\sum_{t = 2}^{H-1} \prod_{j = 1}^t M_j$.
 		terminate (for large problems)
 	\end{itemize}
 	
-	Nested Decomposition lays the foundations for SDDP.
+	Nested decomposition lays the foundation for SDDP.
 	
 	\mbox{}
 	

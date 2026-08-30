@@ -68,7 +68,7 @@ A. M. Law, Simulation Modeling and Analysis, fifth edition, McGraw-Hill, USA, 20
 \begin{frame}
 \frametitle{Event approach}
 
-Assumption: system in which state variables can only change by a countable number of points in time.
+Assumption: system in which state variables can only change at a countable number of points in time.
 
 \mbox{}
 
@@ -80,7 +80,7 @@ ${\cS_i}$: system state immediately after ${e_i}$.
 
 \mbox{}
 
-simulation time: current value of ${t_i}$.
+Simulation time: current value of ${t_i}$.
 
 \mbox{}
 
@@ -142,7 +142,7 @@ Simulation clock.
 \item
 Event list.
 \item
-Random numbers generation functions.
+Random number generation functions.
 \item
 Statistical collectors.
 \item
@@ -174,16 +174,16 @@ Event: action, schedule, cancel.
     \node [text width=1.9cm, block, below of=premier, node distance=1.2cm] (event) {Handle current event};
     \node [text width=1.9cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
     \node [block, left of=schedule, node distance=3.5cm] (update) {Pull next event and advance clock};
-    \node [text width=1.9cm, decision, below of=schedule, node distance=1.6cm] (decide) {Liste d'événements vide ou événement de fin?};
+    \node [text width=1.9cm, decision, below of=schedule, node distance=1.6cm] (decide) {Empty event list or end event?};
     \node [block, below of=decide, node distance=1.4cm] (stop) {Stop};
     % Draw edges
     \path [line] (init) -- (premier);
     \path [line] (premier) -- (event);
     \path [line] (event) -- (schedule);
     \path [line] (schedule) -- (decide);
-    \path [line] (decide) -| node [near start, color=black] {non} (update);
+    \path [line] (decide) -| node [near start, color=black] {no} (update);
     \path [line] (update) |- (event);
-    \path [line] (decide) -- node [, color=black] {oui}(stop);
+    \path [line] (decide) -- node [, color=black] {yes}(stop);
     \path [line,dashed] (clock) -- (init);
     \path [line,dashed] (system) -- (init);
 \end{tikzpicture}
@@ -597,17 +597,17 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Example}
 	
-	Soit ${X_i} = G_i(s)$ pour le jour $i$, et 
+	Let ${X_i} = G_i(s)$ for day $i$, and 
 	\[
 	{\bar X_n} = {1\over n} \sum_{i=1}^n X_i.
 	\]
-	On a $E[\bar X_n] = \mu$ et $Var[\bar X_n] = Var[X_i]/n$.
+	We have $E[\bar X_n] = \mu$ and $Var[\bar X_n] = Var[X_i]/n$.
 	
 	\mbox{}
 	
-	Une expérience avec ${n = 1000}$ donne $\bar X_n = 1518.3$ et $S_n^2
+	An experiment with ${n = 1000}$ yields $\bar X_n = 1518.3$ and $S_n^2
 	= {21615}$.
-	La variance estimée de $\bar X_n$ est alors $\widehat{Var}[\bar X_n] = 21.6$.
+	The estimated variance of $\bar X_n$ is then $\widehat{Var}[\bar X_n] = 21.6$.
 	
 \end{frame}
 
@@ -722,7 +722,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 \end{frame}
 
 \begin{frame}
-	\frametitle{Control Variable (CV)}
+	\frametitle{Control Variate (CV)}
 	
 	By taking \(\beta=1\), we recover the indirect estimator:
 	\[
@@ -949,8 +949,8 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	We can simulate \(X_{1,i}\) and \(X_{2,i}\)
 	\begin{enumerate}[(i)]
-		\item with independent random variables (\emph{IRV}),
-		\item with common random variables (\emph{CRV}).
+		\item with independent random variables (\emph{IRN}),
+		\item with common random variables (\emph{CRN}).
 	\end{enumerate}
 	
 \end{frame}

@@ -59,9 +59,9 @@
 \begin{itemize}
 \item
 Assume that we invest in the market.
-We would to reach a nominal goal $G$ after $Y$ years.
+We would like to reach a nominal goal $G$ after $Y$ years.
 \item
-The portfolio is rebalanced each $v$ years, so there are $T = Y/v$ times where we have to decide what are the investments to do.\\
+The portfolio is rebalanced every $v$ years, so there are $T = Y/v$ times where we have to decide what are the investments to do.\\
 There are $T$ stages in our problem.
 \item
 We face a space of $N$ investment decisions (i.e. we have $N$ possible actions); we have a set $\mathcal{T} = \lbrace 1, 2,\ldots, T \rbrace$ of investment periods.
@@ -113,7 +113,7 @@ y, w & \geq 0.
 \item
 The investment returns can be viewed as random variables, as we do not know their realizations in advance.
 \item
-Imagine that for each action, at each time $t$, the are $R$ possible realizations.
+Imagine that for each action, at each time $t$, there are $R$ possible realizations.
 \item
 The scenarios are made of all the possible sequences of realizations.
 \end{itemize}
@@ -348,7 +348,7 @@ This vector corresponds to what should be our decision given the known realizati
 Index the nodes by $l = 1,2,\ldots,\mathcal{L}$.
 \item
 We have to know the ancestor of each node.
-Let $A(l)$ the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
+Let $A(l)$ be the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
 \end{itemize}
 
 \end{frame}
@@ -369,13 +369,13 @@ Let $A(l)$ the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
 \end{frame}
 
 \begin{frame}
-\frametitle{Multi-period production planification}
+\frametitle{Multi-period production planning}
 
 \begin{itemize}
 \item
 A firm produces various different goods.
 \item
-Ressources (for instances manual and machine work hours) are required.
+Resources (for instances manual and machine work hours) are required.
 We assume that these requirements are known for each product.
 \item
 The demand must be met at the end of each period, but this demand is not perfectly known.
@@ -423,7 +423,7 @@ $T$: number of periods, also seen as a set;
 \item
 $N$: products;
 \item
-$M$: ressources.
+$M$: resources.
 \end{itemize}
 \item
 {\red Variables}:
@@ -431,7 +431,7 @@ $M$: ressources.
 \item
 $x_{jt}$: production of product $j \in N$ during the period $t \in T$;
 \item
-$u_{it}$: additional amount of ressource $i \in M$ to buy during the period  $t \in T$;
+$u_{it}$: additional amount of resource $i \in M$ to buy during the period  $t \in T$;
 \item
 $z_{t-1,t}^+$, $z_{t-1,t}^-$: planned augmentation or reduction of the labor force;
 \item
@@ -453,9 +453,9 @@ $\omega_{jt}$: demand of product $j \in N$ during the period $t
 \item
 $U_{it}$: upper bound on $u_{it}$.
 \item
-$a_{ij}$: amount of ressource $i \in M$ required to produce one unit of the good $j \in N$.
+$a_{ij}$: amount of resource $i \in M$ required to produce one unit of the good $j \in N$.
 \item
-$b_{it}$: amount of ressource $i \in M$ available at time $t \in T$.
+$b_{it}$: amount of resource $i \in M$ available at time $t \in T$.
 \end{itemize}
 
 \end{frame}
@@ -570,7 +570,7 @@ with $Q_{T+1} \equiv 0$. The goal is to approximate $Q_t$ at each stage with a p
 
 \mbox{}
 
-Assume for simplicity the recourses are complete.
+Assume for simplicity the recourse is complete.
 
 \end{frame}
 
@@ -912,7 +912,7 @@ The stochastic dual dynamic programming algorithm aims to solve the problem on a
 
 \mbox{}
 
-The augmented Lagrangian approaches will still rely on the scenario tree, but will consider the relaxation on the nonanticipativity constraints rather than solve a succession a two-stage problems. This limit the number of subproblems to the number of scenarios and can handle non-Markovian processes. The drawback is that it can take many iterations to restore the nonanticativity.
+The augmented Lagrangian approaches will still rely on the scenario tree, but will consider the relaxation on the nonanticipativity constraints rather than solve a succession a two-stage problems. This limits the number of subproblems to the number of scenarios and can handle non-Markovian processes. The drawback is that it can take many iterations to restore non-anticipativity.
 
 \end{frame}
 

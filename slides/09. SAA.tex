@@ -83,7 +83,7 @@ If $\bxi$ cdf is continuous or discrete with a large number of possible realizat
 
 \mbox{}
 
-We have to use some approximations as the Monte Carlo (MC) methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_n$:
+We have to use some approximations such as the Monte Carlo (MC) methods: the original problem is replaced by successive approximations obtained by drawing $\xi_1,\ldots{}, \xi_n$:
 %The approximation for a sample of size $N$ is
 \[
 {\red \min_{z \in S} \hat{g}_n(z) = \frac{1}{n} \sum_{i = 1}^n
@@ -96,7 +96,7 @@ We sometimes refer to the original program as the {\blue true program}, or {\blu
 \begin{frame}
 \frametitle{Two-stage stochastic programming}
 
-This framework include the two-stage programs that we have analyzed, as
+This framework includes the two-stage programs that we have analyzed, as
 \begin{align*}
 \min_x\ & c^Tx + \EE[\cQ(x)] \\
 \mbox{s.t. } & Ax = b,\ x \geq 0
@@ -120,7 +120,7 @@ Let {\red $z_n^*$ be a first-order critical point} for the approximate problem, 
 
 \mbox{}
 
-$(\xi_1,\ldots,\xi_n)$ can be seen as the finite truncature of an infinite sequence $\overline{\xi} := \lbrace \xi_k \rbrace_{k =   1}^{\infty}$.
+$(\xi_1,\ldots,\xi_n)$ can be seen as the finite truncation of an infinite sequence $\overline{\xi} := \lbrace \xi_k \rbrace_{k =   1}^{\infty}$.
 
 \mbox{}
 
@@ -132,7 +132,7 @@ As $S$ is a compact set, the sequence of SAA solutions has a non-empty set of (f
 
 \mbox{}
 
-{\blue Under which conditions such a limit point is a first-order critical point for the true problem?}
+{\blue Under which conditions is such a limit point a first-order critical point for the true problem?}
 
 \end{frame}
 
@@ -154,7 +154,7 @@ later called the {\it sampling process}, where the random vectors $\bxi_k$, $k =
 \begin{frame}
 \frametitle{Probability space of infinite dimension}
 
-From the i.i.d. property and the Kolmogorov consistency theorem (see for instance Parthasarathy, {\sl Probability Measures on Metric   Spaces}, Academic Press, 1967, Chapiter~V, Theorem 5.1), we can build the probability space of infinite dimension
+From the i.i.d. property and the Kolmogorov consistency theorem (see for instance Parthasarathy, {\sl Probability Measures on Metric   Spaces}, Academic Press, 1967, Chapter~V, Theorem 5.1), we can build the probability space of infinite dimension
 \[
 \left( \Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi} \right),
 \]
@@ -170,7 +170,7 @@ for any set $B = \prod_{i=1}^j B_i \times \prod_{i=j+1}^{\infty} \Xi$, with $B_i
 \begin{frame}
 \frametitle{Probability space of infinite dimension (cont'd)}
 
-In other terms, the marginal measures defined on $\prod_{i = 1}^j (\Xi, \mathcal{F})$, with finite $j$, $j \geq 1$, correspond to the product measures $\prod_{i = 1}^j P$, as expected.
+In other words, the marginal measures defined on $\prod_{i = 1}^j (\Xi, \mathcal{F})$, with finite $j$, $j \geq 1$, correspond to the product measures $\prod_{i = 1}^j P$, as expected.
 
 \mbox{}
 
@@ -269,7 +269,7 @@ The random draws $\lbrace \xi_k \rbrace_{k= 1}^{\infty}$ are i.i.d.
 
 \noindent
 \textbf{A.1}
-For $P$-almost all $\xi$, the function $G(\cdot, \xi)$ is continuously ifferentiable on $S$.
+For $P$-almost all $\xi$, the function $G(\cdot, \xi)$ is continuously differentiable on $S$.
 
 \mbox{}
 
@@ -376,7 +376,7 @@ Each gradient component $\frac{\partial}{\partial [z]_l} G(z, \xi)$ ($l = 1,\ldo
 
 \begin{itemize}
 	\item 
-	\textbf{A.3} implies that $\EE_P[g(z)]$ is continuously differentiable on $S$, and
+	\textbf{A.3} implies that $\EE_P[g(z)]$ is continuously ddifferentiable on $S$, and
 	$\nabla_z g(z) = \EE_P\left[ \nabla_z G(z, \bxi) \right]$.
 	\item
 	Thus, $\EE_P [\nabla \hat{g}_n(z^*)] = \nabla g( z^*)$ (\textcolor{red}{unbiased estimator}).
@@ -446,7 +446,7 @@ almost surely, $\emptyset \neq S^*_n \subseteq \mathcal{S}$ for $n$ large enough
 %    non-empty and} S^*_N \subset \mathcal{S}] = 1
 %\] and
 \item
-$\hat{\phi}_n(z)$ converges to $\phi(z)$ almost surely uniformly of $\mathcal{S}$ as $n \rightarrow \infty$.
+$\hat{\phi}_n(z)$ converges to $\phi(z)$ almost surely uniformly on $\mathcal{S}$ as $n \rightarrow \infty$.
 \end{enumerate}
 Then $D(S^*_n, S^*) \rightarrow 0$ almost surely as $n \rightarrow \infty$.
 \label{th:svi}
@@ -474,7 +474,7 @@ where $\mathcal{N}_{\mathcal{A}}(x^*)$ is the normal cone to $\mathcal{A}$ at $x
 
 \mbox
  
-A subset $C$ of a vectorial space $V$ is a (linear) {\red cone}
+A subset $C$ of a vector space $V$ is a (linear) {\red cone}
 iff $\alpha x$ belongs to $C$ for any $x \in C$ and any strictly positive scalar $\alpha$.
 It is pointed if $\alpha$ can be equal to zero.
 
@@ -543,7 +543,7 @@ $\Gamma(\cdot) = \mathcal{N}_S(\cdot)$; $\phi(z^*)$ belongs to $\Gamma(z^*)$ iff
 \langle \phi(z^*), u-z^*\rangle \leq 0,\ \forall u \in S.
 \]
 \item
-We design such variational inequalities as \textcolor{red}{stochastic variational inequalities}.
+We refer to such variational inequalities as \textcolor{red}{stochastic variational inequalities}.
 \end{itemize}
 
 \end{frame}
@@ -560,7 +560,7 @@ The assumption (a) holds by definition of the normal cone.
 Then, under \textbf{A.0}--\textbf{A.3}, we have that $\phi(z) = -\nabla_z
 g(z)$, and that $\phi(z)$ is a continuous random vector on $S$, giving assumption (b).
 \item
-Assumption (d) follows from the ULLN, while \textbf{A.1} and the compacity of $S$ ensure assumption (c) by setting $\mathcal{S} = S$. 
+Assumption (d) follows from the ULLN, while \textbf{A.1} and the compactness of $S$ ensure assumption (c) by setting $\mathcal{S} = S$. 
 \end{itemize}
 
 The previous theorem therefore ensures the first-order criticality at the limit as $n\rightarrow\infty$, almost surely.
@@ -749,7 +749,7 @@ Let $\mathcal{Z}\left(\lbrace z^*_n(\overline{\xi})\rbrace\right)$ the set of ac
 %\]
 %be the multifunction associating to a sequence of real vectors its set of
 %accumulation points.
-The compacity of $V$ implies that for each $\overline{\xi}$, %the set
+The compactness of $V$ implies that for each $\overline{\xi}$, %the set
 $\mathcal{Z}\left(\lbrace z^*_n(\overline{\xi})\rbrace\right)$ is non-empty.
 
 \mbox{}
@@ -823,7 +823,7 @@ If we strengthen our assumptions, we can also show that, almost surely, there ex
 \mbox{}
 
 We first consider the case where $S$ is deterministic and assume that, for a given sampling process $\overline{\xi}$, $z_n^*(\overline{\xi})$ is a local minimizer of $\hat{g}_n(z)$ over $S$.
-In other terms,
+In other words,
 \[
 \exists\, \delta_n(\overline{\xi}) \text{ s.t. } \forall z \in
 B \left( z_n^*(\overline{\xi}), \delta_n(\overline{\xi}) \right) \cap
@@ -909,7 +909,7 @@ Assumption~\textbf{A.4} is somewhat artificial and it is therefore more interest
 
 \mbox{}
 
-At the difference of classical sensitivity analysis, we focus here on conditions under which a limit point of a sequence of approximate solutions is a solution of the true problem.
+Unlike classical sensitivity analysis, we focus here on conditions under which a limit point of a sequence of approximate solutions is a solution of the true problem.
 
 \mbox{}
 
@@ -988,13 +988,13 @@ The LICQ holds at $z^*$ if the set of active constraints gradients $\lbrace \nab
 Another useful concept for our needs is the strict complementarity condition.
 
 \begin{defi}
-Given $z^*$ and a vector $\lambda^*$ satisfying the KKT conditions, the strict complementarity condition holds if %exactly one of $[\lambda]_j^*$ and $c_j(z^*)$ is null for every index $j=1,\ldots,k$, i.e. we have that 
+Given $z^*$ and a vector $\lambda^*$ satisfying the KKT conditions, the strict complementarity condition holdss if %exactly one of $[\lambda]_j^*$ and $c_j(z^*)$ is null for every index $j=1,\ldots,k$, i.e. we have that 
 $[\lambda]_j^* > 0$ for each $j \in \lbrace 1,\ldots,k \rbrace \cap \mathcal{A}(z^*)$.
 \end{defi}
 
 \mbox{}
 
-Consider again a particular sampling process $\overline{\xi}$ dans $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, such that $\epsilon_n (z, \overline{\xi} ) \rightarrow 0$ as $n \rightarrow \infty$. 
+Consider again a particular sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, such that $\epsilon_n (z, \overline{\xi} ) \rightarrow 0$ as $n \rightarrow \infty$. 
 If the assumptions of the above lemma hold for some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \rightarrow z^*$, the gradient of the Lagrangian $\nabla L\left( z^*_{\ell} ( \overline{\xi} ), \lambda_{\ell}^* ( \overline{\xi} ) \right)$ converges to $\nabla \mathcal{L} ( z^*, \lambda^* )$, as $\ell$ tends to infinity, with $\lambda_{\ell}^*(\overline{\xi}) \rightarrow \lambda^*$.
 
 \end{frame}
@@ -1002,7 +1002,7 @@ If the assumptions of the above lemma hold for some subsequence $\lbrace z_{\ell
 \begin{frame}
 \frametitle{Strict complementarity (cont'd)}
 
-Assume that the strict complementarity condition holds at $z^*$ for the approximate problem.
+Assume that the strict complementarity condition holdss at $z^*$ for the approximate problem.
 Then, for $\ell$ large enough,
 $$
 [\lambda^*_{\ell}]_j(\overline{\xi}) > 0,\, \forall j \in \lbrace 1,\ldots,k \rbrace \cap \mathcal{A} ( z^* ) .
@@ -1017,7 +1017,7 @@ $\hat{c}_j \left( z^*_{\ell}(\overline{\xi}),
 c_j ( z^* )$ and, for $\ell$ large enough,
 %(which is true for almost every  $\overline{\xi}$)
 $\mathcal{A} \left( z^*_{\ell}(\overline{\xi}) \right) = \mathcal{A} (
-z^* )$, so the strict complementarity condition holds at $\left(
+z^* )$, so the strict complementarity condition holdss at $\left(
   z^*_{\ell}(\overline{\xi}), \lambda_{\ell}^*(\overline{\xi})
 \right)$ for the approximate problem.
 
@@ -1033,7 +1033,7 @@ z^* )$, so the strict complementarity condition holds at $\left(
 \begin{theo}[Second-order convergence]
 \label{th:soc}
 Assume that, for almost every sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, there exists some $z^* \in \mathcal{Z} \left(\lbrace
-  z^*_n(\overline{\xi})\rbrace\right) \cap \overset{o}{V}$ associated to an unique vector of Lagrange multipliers $\lambda^*$ and some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace  z_n^* \rbrace_{n = 1}^{\infty}$, such that $z^*_{\ell}(\overline{\xi}) \rightarrow z^*$, and
+  z^*_n(\overline{\xi})\rbrace\right) \cap \overset{o}{V}$ associated to a unique vector of Lagrange multipliers $\lambda^*$ and some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace  z_n^* \rbrace_{n = 1}^{\infty}$, such that $z^*_{\ell}(\overline{\xi}) \rightarrow z^*$, and
 \begin{enumerate}[(a)]
 \item
 $\epsilon_n \left( z^*_n(\overline{\xi}),\overline{\xi} \right)
@@ -1060,7 +1060,7 @@ We also assume that the strict complementarity condition and the LICQ hold at $(
 	
 \begin{small}
 \begin{theo}[Second-order convergence (cont'd)]
-Then, for amost every sampling process $\overline{\xi}$,
+Then, for almost every sampling process $\overline{\xi}$,
 \begin{enumerate}[(i)]
 \item
 the LICQ holds at $z^*_{\ell}( \overline{\xi} )$, for $\ell$ large enough,
@@ -1092,7 +1092,7 @@ then $( z^*, \lambda^* )$ almost surely satisfies the sufficient conditions for 
 \frametitle{A second-order convergence result (cont'd)}
 
 \begin{theo}[Second-order convergence (cont'd)]
-In other terms
+In other words
 \begin{multline*}
 \text{(iii)}\ w^T \nabla_{zz}^2 \mathcal{L} ( z^*, \lambda^* )
 w > 0,\\ \text{for all }w \in
@@ -1100,7 +1100,7 @@ w > 0,\\ \text{for all }w \in
   \right]_{j \in \mathcal{A} ( z^* )},
 \|w\|=1.
 \end{multline*}
-This is equivalents to say that $z^*$ is an isolated minimizer for the original problem.
+This is equivalent to saying that $z^*$ is an isolated minimizer for the original problem.
 \end{theo}
 
 \begin{proof}
@@ -1152,11 +1152,11 @@ is non-singular at $(z^*, \lambda^*)$.
 \frametitle{Second-order convergence: corollary}
 
 \begin{coro}
-Assume that, for almost every sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, there exist some $z^* \in \mathcal{Z} \left(\lbrace z^*_n(\overline{\xi})\rbrace\right) \cap \overset{o}{V}$ associated to an unique Lagrange multipliers vector $\lambda^*$ and some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace  z_n^* \rbrace_{n = 1}^{\infty}$, such that $z^*_{\ell}(\overline{\xi}) \rightarrow z^*$, that assumptions (a)--(d) of the second-order convergence theorem hold and that the strict complementarity condition hold at $( z^*, \lambda^* )$ for the original program.
+Assume that, for almost every sampling process $\overline{\xi}$ in $(\Xi_{\Pi}, \mathcal{F}_{\Pi}, P_{\Pi})$, there exist some $z^* \in \mathcal{Z} \left(\lbrace z^*_n(\overline{\xi})\rbrace\right) \cap \overset{o}{V}$ associated to a unique Lagrange multipliers vector $\lambda^*$ and some subsequence $\lbrace z_{\ell}^* \rbrace_{\ell = 1}^{\infty} \subseteq \lbrace  z_n^* \rbrace_{n = 1}^{\infty}$, such that $z^*_{\ell}(\overline{\xi}) \rightarrow z^*$, that assumptions (a)--(d) of the second-order convergence theorem hold and that the strict complementarity condition holds at $( z^*, \lambda^* )$ for the original program.
 
 \mbox{}
 
-Assume moreover that the Jacobian of the equality relations of the KKT conditions is not-singular at $( z^*, \lambda^* )$.
+Assume moreover that the Jacobian of the equality relations of the KKT conditions is non-singular at $( z^*, \lambda^* )$.
 Then there exists almost surely some $z^*$ in $\mathcal{Z} \left( \lbrace z_N^*(\overline{\bxi}) \rbrace \right) \cap \overset{o}{V}$, associated to some vector $\lambda^*$, that satisfies the sufficient second-order conditions of the original program.
 \end{coro}
 
@@ -1198,7 +1198,7 @@ $$
 
 \mbox{}
 
-In other terms, for $N$ finite, the optimal value estimator is biased, but asymptotically unbiased.
+In other words, for $N$ finite, the optimal value estimator is biased, but asymptotically unbiased.
 
 \end{frame}
 
@@ -1336,7 +1336,7 @@ with a decreasing difference as $N$ grows.
 	\frametitle{Application: call centers}
 	
 	Joint work with Thuy Anh Ta, Tien Mai, Wyean Chan, and Pierre L'Ecuyer.
-	The next slides are due Thuy Anh Ta.
+	The next slides are due to Thuy Anh Ta.
 	
 	\mbox{}
 	

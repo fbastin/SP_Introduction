@@ -125,7 +125,7 @@ Under assumptions 1 and 2, the recourse function $Q(x,\xi)$ is a convex function
 \end{theorem}
 
 \begin{theorem}
-If the recourse feasible set (i.e. in $y$, for given $\xi$) is bounded for any $x \in \RR^{n_1}$, then the function $Q(x,\xi)$ is lower semi-continuous in $x$ for all $\xi \in \Xi$.
+If the recourse feasible set (i.e. in $y$, for given $\xi$) is bounded for any $x \in \RR^{n_1}$, then the function $Q(x,\xi)$ is lower semi-continuous at $x$ for all $\xi \in \Xi$.
 \end{theorem}
 
 \end{frame}
@@ -133,7 +133,7 @@ If the recourse feasible set (i.e. in $y$, for given $\xi$) is bounded for any $
 \begin{frame}
 \frametitle{Lower semi-continuity}
 
-We say that a function $f$ is {\blue lower semi-continuous in $x_0$} if for every $\varepsilon > 0$, $\exists$ a neighborhood $U$ of $x_0$ such that $f(x) > f(x_0) - \varepsilon$ for all $x \in U$.
+We say that a function $f$ is {\blue lower semi-continuous at $x_0$} if for every $\varepsilon > 0$, $\exists$ a neighborhood $U$ of $x_0$ such that $f(x) > f(x_0) - \varepsilon$ for all $x \in U$.
 Equivalently
 \[
 \liminf_{x \to x_{0}} f(x) \geq f(x_{0}),
@@ -146,7 +146,7 @@ where
 
 \mbox{}
 
-The function $f$ is {\blue lower semi-continuous} if it is lower semi-continuous in any point in its domain.
+The function $f$ is {\blue lower semi-continuous} if it is lower semi-continuous at any point in its domain.
 
 \end{frame}
 
@@ -181,7 +181,7 @@ The feasible set $K_2 = \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace$ is clos
 \end{corollary}
 
 \begin{corollary}
-If the recourse feasible set if bounded for any $x \in \RR^{n_1}$, $\mathcal{Q}$ is a lower semi-continuous function.
+If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $\mathcal{Q}$ is a lower semi-continuous function.
 \end{corollary}
 
 \end{frame}
@@ -219,19 +219,19 @@ $x^*$ is optimal iff there exists $\lambda^*$ such that $(x^*, \lambda^*)$ satis
 \begin{frame}
 	\frametitle{Relative interior}
 	
-	The {\red relative interior} of a set $S$, denoted by $ri(S)$, is defined as its interior within the affine envelop of $S$.
+	The {\red relative interior} of a set $S$, denoted by $ri(S)$, is defined as its interior within the affine hull of $S$.
 	In other words
 	\[
 	ri(S) = \lbrace x \in S \,|\, \exists\ \varepsilon > 0, (B_{\varepsilon}(x)
 	\cap \aff(S)) \subseteq S \rbrace,
 	\]
-	where $\aff(S)$ is the {\red affine envelop} of $S$, and $B_{\varepsilon}(x)$
+	where $\aff(S)$ is the {\red affine hull} of $S$, and $B_{\varepsilon}(x)$
 	is a ball of radius ${\varepsilon}$ centered at $x$.
 	Any metric can be used for the ball construction: all define the same relative interior.
 	
 	\mbox{}
 	
-	The {\red affine envelop} $\aff(S)$ of $S$ is the set of all affine combinations of elements of $S$, i.e.
+	The {\red affine hull} $\aff(S)$ of $S$ is the set of all affine combinations of elements of $S$, i.e.
 	\[
 	\operatorname{aff} (S)=\left\lbrace \sum_{i=1}^k \alpha_i x_i \,\bigg|\,
 	x_i\in S, \, \alpha_i\in \RR, \, \sum_{i=1}^k \alpha_i=1,
@@ -340,7 +340,7 @@ Set $\nu := \nu+1$ and check convergence. If we have not yet converged, return t
 \begin{itemize}
 \item
 Various strategies can be used to compute the step $\alpha^\nu$. Assume we compute the step to maximize $\theta(\pi^{\nu}+\alpha\hat{\pi})$ on $\alpha \geq 0$.
-Under the assumption of unicity of dual solution, we can show that this algorithm always produces an {\blue ascent direction} in $\theta$.
+Under the assumption of uniqueness of dual solution, we can show that this algorithm always produces an {\blue ascent direction} in $\theta$.
 \item
 Either the algorithm converges to an optimal solution, or, assuming a bounded set of optimal solutions, it produces an infinite sequence where all limit points are optimal.
 \item
@@ -607,7 +607,7 @@ the Lagrangian function is not separable with respect to the scenarios due to th
 \end{frame}
 
 \begin{frame}
-\frametitle{Progressing hedging: basic principle}
+\frametitle{Progressive hedging: basic principle}
 
 Alternatively,
 \begin{enumerate}
@@ -672,7 +672,7 @@ Otherwise, set $\nu = \nu+1$ and return to Step 1.
 
 \begin{itemize}
 \item
-Step 2 simply consists to take the expected value of $x^{\nu+1}$
+Step 2 simply consists of taking the expected value of $x^{\nu+1}$
 as $\hat{x}^{\nu+1}$.
 \item
 The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point rather than a dual ascent strategy.
@@ -811,9 +811,9 @@ The progressive hedging algorithm converges to an optimal solution $x^*, \pi^*$.
 \item
 De Silva and Abramson have tested the progressive hedging algorithm for linear problems in portfolio management, proposed by Mulvey and Vladimirou.
 \item
-The subproblems where solved by means of interior points methods.
+The subproblems were solved by means of interior points methods.
 \item
-Good speed-up convergence, but the algorithm remains sensitive to the choice of the penality parameter.
+Good speed-up convergence, but the algorithm remains sensitive to the choice of the penalty parameter.
 \end{itemize}
 
 \end{frame}

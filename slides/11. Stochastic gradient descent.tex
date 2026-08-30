@@ -68,7 +68,7 @@
 \begin{frame}
 \frametitle{Motivation}
 
-The recent years have seen a huge success of machine learning, and a renew interest in the stochastic gradient algorithm, and the development of various variants.
+The recent years have seen a huge success of machine learning, and a renewed interest in the stochastic gradient algorithm, and the development of numerous variants.
 
 \mbox{}
 
@@ -89,7 +89,7 @@ Introduced in 1951, initially as a root-finding problem.
 
 \mbox{}
 
-It can be easily extended to unconstrained optimization using first-order condition as a necessary condition to the problem
+It can be easily extended to unconstrained optimization using first-order condition as a necessary condition for the problem
 $$
 \min_{x \in \RR^d} \ f(x)
 $$
@@ -104,7 +104,7 @@ We therefore search for a zero of the gradient of $f(x)$.
 
 \mbox{}
 
-We can also restrain the feasible domain to $\Theta \subseteq \RR^d$:
+We can also restrict the feasible domain to $\Theta \subseteq \RR^d$:
 $$
 \min_{x \in \Theta} f(x) = \EE[Y(x,\xi)]
 $$
@@ -127,7 +127,7 @@ The problem to solve is
 $$
 \nabla_x \EE[Y(x,\xi)] = 0
 $$
-We assume here that we can exchange the expectation and derivation operators, i.e.
+We assume here that we can exchange the expectation and differentiation operators, i.e.
 $$
 \nabla_x \EE[Y(x,\xi)] = \EE[\nabla_x Y(x,\xi)]
 $$
@@ -137,7 +137,7 @@ $$
 \begin{frame}
 \frametitle{Stochastic approximation}
 
-Also know as as the \textcolor{red}{stochastic gradient descent (SGD) method}.
+Also known as the \textcolor{red}{stochastic gradient descent (SGD) method}.
 
 \mbox{}
 
@@ -346,7 +346,7 @@ Source: \url{https://en.wikipedia.org/wiki/Big_O_in_probability_notation}
 
 \mbox{}
 
-We would like to measure how fast we converge to the solution, knowning that we generate a sequence of realizations of random variables.
+We would like to measure how fast we converge to the solution, knowing that we generate a sequence of realizations of random variables.
 
 \mbox{}
 
@@ -404,7 +404,7 @@ Source: Kim, Pasupathy, and Henderson, ``A Guide to Sample Average Approximation
 
 \mbox{}
 
-If the number of iterations of completed in $c$ units of computer time, $n(c)$ grows roughly linearly in $c$
+If the number of iterations completed in $c$ units of computer time, $n(c)$ grows roughly linearly in $c$
 (as would be the case if, e.g., sample gradients are computed in constant time).
 
 \mbox{}
@@ -1022,7 +1022,7 @@ Implications of strong convexity:
         $\exists \epsilon > 0$ such that $f(x) > f(x^*) + \epsilon^*\| x-x^* \|_2,\ \forall\ x \in \calB(x^*,\epsilon)\setminus\{x^*\}$.\\
        Therefore, a strong local minimizer is a strict local minimizer: $\exists \epsilon > 0$ such that $f(x) > f(x^*),\ \forall\ x \in \calB(x^*,\epsilon)\setminus\{x^*\}$.
 	\item If $f(x)$ is locally strongly convex in $\calB(x^*)$, any local minimizer $x^*$ is a strong local minimizer.
-	\item But a strong local minimizer does not imply local strong convexity. Exemple: $f(x) = x^4$.
+	\item But a strong local minimizer does not imply local strong convexity. Example: $f(x) = x^4$.
 \end{itemize}
 
 \end{frame}

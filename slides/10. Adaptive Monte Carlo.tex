@@ -117,8 +117,8 @@ equipped with the sup-norm $\| \psi \| := \sup_{x \in S}| \psi |$
 
 \mbox{}
 
-$C(S)$ is a Banach space, i.e. a normed vectorial space, complete under the distance issued from its norm.
-A metric space $M$ is said complete or complete space if every Cauchy suite in $M$ has a limit in $M$ (i.e. it converges in $M$).
+$C(S)$ is a Banach space, i.e. a normed vector space, complete under the distance induced by its norm.
+A metric space $M$ is said complete or complete space if every Cauchy sequence in $M$ has a limit in $M$ (i.e. it converges in $M$).
 
 \mbox{}
 
@@ -206,7 +206,7 @@ $$
 \frametitle{External adaptive method}
 %\frametitle{Convergence of global solutions (cont'd)}
 
-What does interest us?
+What interests us?
 \[
 \textcolor{red}{\min_{x \in S}}\ \hat{g}_N(x) = \frac{1}{N} \sum_{i = 1}^N G (x, \xi_i).
 \]
@@ -215,14 +215,14 @@ What does interest us?
 \mbox{}
 
 %Alternatively,
-We can start with a small sample and extend if over the iterations:
+We can start with a small sample and extend it over the iterations:
 the adaptive sampling procedure can be \textcolor{blue}{external} to the algorithm, or \textcolor{blue}{internal}.
 %\\
 %Therefore, there are \textcolor{red}{several possible strategies}.
 
 \mbox{}
 
-An external approach is known as \textcolor{red}{retrospective approximation} consists to repeatedly apply the optimization algorithm with samples of increasing sizes.
+An external approach is known as \textcolor{red}{retrospective approximation} consists in repeatedly applying the optimization algorithm with samples of increasing sizes.
 
 \end{frame}
 
@@ -426,7 +426,7 @@ We will exploit this error estimation in the context of trust-region methods.
 \item
 Basic idea:if the model approximates the objective function well enough w.r.t. the accuracy of the objective function (which depends on the sample size), we presume that we could work with a less accurate approximation, and reduce the sample size.
 \item
-If the adequation of the model w.r.t. the accuracy of the objective function is poor, we can increase the sample size in an attempt to correct this deficiency.
+If the adequacy of the model w.r.t. the accuracy of the objective function is poor, we can increase the sample size in an attempt to correct this deficiency.
 \item
 We assume the assumptions developed for the consistency analysis hold.
 \end{itemize}
@@ -470,7 +470,7 @@ Compute a new adequate sample size $N^{+}$, and set $N^- = N_k$.
 Compute a step $s_k$ that sufficiently reduces $m_k^{N_k}$ and s.t. $x_k + s_k \in \mathcal{B}_k$.
 Set
 \[ \Delta m_k^{N_k} = m_k^{N_k}(x_k) - m_k^{N_k}(x_k+s_k). \]
-\item[Step 4. Comparaison of decreases]
+\item[Step 4. Comparison of decreases]
 Compute $\hat{g}_{N^+} (x_k + s_k)$ and %define
 \[
 \rho_k = \frac{\hat{g}_{N_k}(x_k) - \hat{g}_{N^+}(x_k+s_k)}
@@ -506,7 +506,7 @@ Otherwise, set $N_{\min}^{k+1} > N^k_{\min}$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithme: BTRDA (cont'd)}
+\frametitle{Algorithm: BTRDA (cont'd)}
 
 \begin{description}
 \item[Step 7. Trust region radius update]
@@ -525,7 +525,7 @@ In this algorithm the variable $t$ is used to count the number of successful ite
 
 \mbox{}
 
-Note: the algorithms BTR and BTRDA coincide if we fixe $N_k$ to $N_{\max}$ for all $k \geq 0$.
+Note: the algorithms BTR and BTRDA coincide if we fix $N_k$ to $N_{\max}$ for all $k \geq 0$.
 
 \end{frame}
 
@@ -600,9 +600,9 @@ If $\tau_1^k \geq \tau_2^k$,
 %the ratio between the current sample size and the potential next one is smaller than the ratio between $\Delta m_k$ and the estimated error.
 %If the sample size increases, the error decreases for a similar $\Delta m_j^{N_j}$ ($j \geq k$), and therefore $\tau_1^k$ increases.
 %We capitalize on $\tau_1^k$ by
-compute a sample size smaller than  $N^s$, such that an improvement of the order $\epsilon_\delta^{N_k}(z_k)$ would be reached in approximatively $\lceil \tau_1^k \rceil$ iterations if $\tau_1^j$ is similar to $\tau_1^k$ for $j$ close to $k$.
+compute a sample size smaller than  $N^s$, such that an improvement of the order $\epsilon_\delta^{N_k}(z_k)$ would be reached in approximately $\lceil \tau_1^k \rceil$ iterations if $\tau_1^j$ is similar to $\tau_1^k$ for $j$ close to $k$.
 \item
-If $\tau_1^k < \tau_2^k$, it can nevertheless be cheaper to continue to work with a smaller sample size, defined again as $\lceil \chi_1 N_{\max} \rceil$, as long as $\tau_1^k$ is greater to some threshold $\nu_1$ (for instance 0.2).
+If $\tau_1^k < \tau_2^k$, it can nevertheless be cheaper to continue to work with a smaller sample size, defined again as $\lceil \chi_1 N_{\max} \rceil$, as long as $\tau_1^k$ is greater than some threshold $\nu_1$ (for instance 0.2).
 %Below this threshold, we consider that the decrease is too small compared to the accuracy, and we possiblty increase the sample size.
 \end{itemize}
 \end{itemize}
@@ -617,7 +617,7 @@ If $N^+$ is not equal to $N_k$, the computation of
  \hat{g}_{N_k} (x_k) - \hat{g}_{N^+} ( x_k + s_k )
 \]
 is affected by the change in approximation variance.
-This can lead to $\rho_k < \eta_1$, even if the model $m_k^{N_k}$ gives a good predicition for the sample size $N^k$.
+This can lead to $\rho_k < \eta_1$, even if the model $m_k^{N_k}$ gives a good prediction for the sample size $N^k$.
 
 %\mbox{}
 
@@ -736,7 +736,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 			\begin{center}
 				$\boldsymbol{\beta} = \beta(\boldsymbol{\gamma}, \theta)$,
 			\end{center}
-			$\boldsymbol{\gamma}$: {\blue random vector}, e.g. vector of independant
+			$\boldsymbol{\gamma}$: {\blue random vector}, e.g. vector of independent
 			$N(0,1)$);\\
 			$\theta$: {\blue vector of parameters}, e.g. vector of means and std dev.
 			
@@ -837,7 +837,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 						{R \left( P_{ij_i} (\theta) \right)^2} }$
 				}
 			\end{center}
-			$\delta$: signification level; $\alpha_{0.9} \approx 1.65$.
+			$\delta$: significance level; $\alpha_{0.9} \approx 1.65$.
 			
 				Bias of simulation (Taylor expansion):
 				\begin{center}
@@ -926,7 +926,7 @@ and al.)\\
 	Common strategies:
 	\begin{itemize}
 		\item \textit{Independent Random Numbers} (IRN) (e.g. stochastic gradient descent)
-		\item Incremental \textit{Common Random Numbers} (CRN): take the first $N_K$ numbers from a predefined sequance of random draws: $\mathcal{N}_k = \{ \xi_1, \ldots, \xi_{N_k} \}$
+		\item Incremental \textit{Common Random Numbers} (CRN): take the first $N_K$ numbers from a predefined sequence of random draws: $\mathcal{N}_k = \{ \xi_1, \ldots, \xi_{N_k} \}$
 	\end{itemize}
 	
 \end{frame}
@@ -947,7 +947,7 @@ and al.)\\
 		$$
 		
 		\item $N_{k+1} < N_k$
-		$$\mathcal{N}_{k+1} = \mathcal{N}_k \backslash  \{\text{unformly randomly selected elements in } \mathcal{N}_k\}$$
+		$$\mathcal{N}_{k+1} = \mathcal{N}_k \backslash  \{\text{uniformly randomly selected elements in } \mathcal{N}_k\}$$
 	\end{enumerate}
 	
 	This heuristic reduces the risk to be trapped in a local minimizer or a saddle point.
