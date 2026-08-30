@@ -772,10 +772,10 @@ any $y$ has a unique predecessor. Bijectivity avoids collisions and gives a clea
 	\draw[->] (x2) -- (M1);
 	\draw[->] (x1.east) to[out=-5,in=180] (c0.west);
 	\draw[->] (x3.east) to[out=5,in=180] (c1.west);
-	\draw[->] (M0.east) to[out=-25,in=155] node[pos=0.5, above]{$\mathrm{hi}_0$} (c1.west);
-	\draw[->] (M0.south east) to[out=-60,in=170] node[pos=0.65, below]{$\mathrm{lo}_0$} (y3.west);
-	\draw[->] (M1.east) to[out=25,in=205] node[pos=0.5, below]{$\mathrm{hi}_1$} (c0.west);
-	\draw[->] (M1.south east) to[out=-35,in=180] node[pos=0.65, below]{$\mathrm{lo}_1$} (y1.west);
+	\draw[->] (M0.east) to[out=-25,in=155] node[pos=0.25, above, fill=white, inner sep=1.5pt]{$\mathrm{hi}_0$} (c1.west);
+	\draw[->] (M0.south east) to[out=-60,in=170] node[pos=0.8, below, fill=white, inner sep=1.5pt]{$\mathrm{lo}_0$} (y3.west);
+	\draw[->] (M1.east) to[out=25,in=205] node[pos=0.25, below, fill=white, inner sep=1.5pt]{$\mathrm{hi}_1$} (c0.west);
+	\draw[->] (M1.south east) to[out=-35,in=180] node[pos=0.8, below, fill=white, inner sep=1.5pt]{$\mathrm{lo}_1$} (y1.west);
 	\draw[->] (k0n) -- (c0.north);
 	\draw[->] (k1n) -- (c1.south);
 	\draw[->] (c0.east) -- (y0.west);
