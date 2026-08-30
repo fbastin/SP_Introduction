@@ -957,16 +957,18 @@ Historically, MRG32k3a was one of the few generators offering built-in functions
 
 	\end{frame}
 
-	\begin{frame}[containsverbatim]
+	\begin{frame}[fragile]
 	\frametitle{RandomDataStreams.jl}
 
 	A Julia package providing a unified framework for independent streams and substreams.
-	\begin{verbatim}
-] add RandomDataStreams
-	\end{verbatim}
-
+	
 	\vspace{0.2cm}
+	\textbf{Installation:} \texttt{] add RandomDataStreams}
+
+	\vspace{0.4cm}
 	{\blue Code example:} One stream per scenario, one substream per replication.
+	
+	\begin{footnotesize}
 	\begin{semiverbatim}
 using RandomDataStreams
 
@@ -980,6 +982,7 @@ u1 = rand(rng)
 next_substream!(rng)    # Fast jump to the next substream
 u2 = rand(rng)
 	\end{semiverbatim}
+	\end{footnotesize}
 
 	\end{frame}
 
