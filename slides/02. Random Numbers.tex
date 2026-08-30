@@ -997,41 +997,39 @@ u2 = rand(rng)
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Inversion: The Gold Standard}
+		\frametitle{Inversion Method: Principle}
 
-\begin{itemize}
-    \item \textbf{Why use inversion?} It guarantees a monotonic mapping from the uniform $U$ to the target $X$.
-    \item This monotonicity is strictly required by variance reduction techniques like \textit{Common Random Numbers} (CRN) or \textit{Antithetic Variates}.
-\end{itemize}
-
-\mbox{}
-
-		
-		Preferred method when applicable: compatible with variance reduction and copulae.
-		
-		\mbox{}
-		
-		Consider a random variable $X$ with cdf $F$.
-		Let $U \sim U (0, 1)$ and
+		Consider a random variable $X$ with cumulative distribution function $F$.
+		Let $U \sim U (0, 1)$ and define:
 		\[
 		X = F^{-1}(U) = \min \lbrace x : F (x)  \geq U \rbrace \quad \textrm{\textcolor{red}{(Generalized inverse)}}.
 		\]
-		Then
+		Then,
 		\[
 		P [X \leq x] = P [F^{-1}(U) \leq x] = P [U \leq F (x)] = F (x),
 		\]
-		i.e., $X$ has the desired distribution.
-		Indeed,
-		\begin{itemize}
-			\item
-			in the continuous case, $F(X) \sim U[0,1]$;
-			\item
-			in the discrete case, it is easy to prove that $\forall\, i$, $P[X = x_i] = p(x_i)$,
-			and we assume $x_1 < x_2 < \ldots < x_n$;
-			\item
-			The principle still works for mixed distributions.
-		\end{itemize}
+		i.e., $X$ precisely follows the desired distribution.
 		
+		\vspace{0.4cm}
+		This foundational principle applies universally:
+		\begin{itemize}
+			\item \textbf{Continuous case:} $F(X) \sim U[0,1]$;
+			\item \textbf{Discrete case:} ensures $P[X = x_i] = p(x_i)$ assuming ordered $x_i$;
+			\item \textbf{Mixed distributions:} works seamlessly.
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Inversion: The Gold Standard}
+
+		\begin{itemize}
+		    \item \textbf{Monotonic mapping:} Inversion guarantees a monotonic relationship between the uniform draw $U$ and the generated variable $X$.
+		    \vspace{0.3cm}
+		    \item \textbf{Variance Reduction:} This monotonicity is strictly required by variance reduction techniques like \textit{Common Random Numbers} (CRN) or \textit{Antithetic Variates}, which break down with other generation methods (like acceptance-rejection).
+		    \vspace{0.3cm}
+		    \item \textbf{Copulae:} It is the preferred method when building dependent joint distributions using copulae.
+		\end{itemize}
+
 	\end{frame}
 	
 	\begin{frame}
