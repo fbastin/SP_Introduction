@@ -616,14 +616,13 @@ But even these recent generators are not without flaws! See e.g.
 
 \begin{itemize}
 \item
-One of the main opponent of the xorshift family is Melissa O'Neil, who proposes the PCGs generators:
-\url{https://www.pcg-random.org/}.
+Melissa O'Neil introduced the PCG family (\url{https://www.pcg-random.org/}), which applies permutation functions to the output of an LCG.
 \item
-PCG combines a linear congruential generator and permutation functions.
+Vigna (author of xorshift/xoshiro) strongly criticizes PCG (\url{https://pcg.di.unimi.it/pcg.php}). He argues that PCG's mechanism for generating independent streams (varying the LCG increment) lacks the rigorous guarantees of MRGs or CBRNGs.
 \item
-However, Vigna (the author of xorshift generators) has a lot of criticisms regarding PCG: \url{https://pcg.di.unimi.it/pcg.php}.
+Vigna also claims PCG is ``not competitive'' in speed compared to xoshiro. 
 \item
-In summary, there are no strong evidence that one should favor a PCG over a MRG. According to Vigna, ``there is technically no sensible reason to use a PCG generator: those without flaws are not competitive.''
+However, this performance claim is debated: practical benchmarks (e.g., Julia's \texttt{RandomNumbers.jl}, or its adoption in NumPy) often show PCG to be extremely fast and competitive with xoshiro.
 \end{itemize}
 
 \end{frame}
