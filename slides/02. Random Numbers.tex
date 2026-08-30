@@ -396,14 +396,41 @@ end
 		MRGs work on integers. An alternative is to build generators directly
 		on {\blue bits}, with {\blue linear recurrences in}\, $\mathcal{F}_2$.
 		
-		\mbox{}
+		\vspace{0.2cm}
 		
 		Let us introduce the Galois field $\mathcal{F}_2$: it is simply the set $\lbrace 0,1 \rbrace$
 		with addition and multiplication computed modulo 2.
 		
-		\mbox{}
+		\vspace{0.2cm}
+		\begin{columns}
+		\begin{column}{0.45\textwidth}
+		\centering
+		\textbf{Addition} ($\oplus$, XOR) \\
+		\vspace{0.1cm}
+		\begin{tabular}{c|cc}
+		$\oplus$ & 0 & 1 \\
+		\hline
+		0 & 0 & 1 \\
+		1 & 1 & 0
+		\end{tabular}
+		\end{column}
 		
-		All operations are then {\blue bitwise}: shifts, xors and masks,
+		\begin{column}{0.45\textwidth}
+		\centering
+		\textbf{Multiplication} ($\cdot$, AND) \\
+		\vspace{0.1cm}
+		\begin{tabular}{c|cc}
+		$\cdot$ & 0 & 1 \\
+		\hline
+		0 & 0 & 0 \\
+		1 & 0 & 1
+		\end{tabular}
+		\end{column}
+		\end{columns}
+		
+		\vspace{0.4cm}
+		
+		All operations are then {\blue bitwise} (shifts, xors, masks),
 		which makes these generators {\blue numerically very fast}.
 		
 	\end{frame}
