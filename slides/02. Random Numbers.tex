@@ -662,7 +662,7 @@ In previously covered RNGs (LCG, MRG, LFSR, etc.):
 \item Because the state is just a counter, it is {\blue trivially easy to jump ahead}. To compute the $n$-th number, we just evaluate the complex function on the $n$-th counter value, without generating the preceding values!
 \item This makes CBRNGs extremely suitable for {\blue parallel computing} (GPUs, massive multithreading).
 \item They pass demanding test suites such as TestU01's BigCrush, with sufficiently many rounds, and are efficient on both CPUs and GPUs.
-\item The most popular implementation, Philox, detailed next, is the default generator in TensorFlow, PyTorch, NumPy, and JAX.
+\item The most popular implementation, Philox, detailed next, is the default generator in TensorFlow and PyTorch (JAX uses Threefry, another CBRNG).
 \end{itemize}
 
 \end{frame}
@@ -706,8 +706,7 @@ Threefry and AES-based designs: the \textsl{Random123} library,
 
 \begin{itemize}
 \item
-{\blue Default variant} (PyTorch, TensorFlow, NumPy \texttt{Generator}, JAX,
-cuRAND):
+{\blue Default variant} (PyTorch, TensorFlow, cuRAND):
 \[
 \text{Philox}4\times32{-}10, \qquad N = 4,\ W = 32 \ \text{bits},\ r = 10 \ \text{rounds},
 \]
@@ -856,7 +855,7 @@ no state to store or synchronize: natural for GPUs and parallel workers.
 \begin{itemize}
 	\item NVIDIA cuRAND and PyTorch (GPU): Philox4$\times$32--10;
 	\item TensorFlow: Philox by default, Threefry optional;
-	\item NumPy \texttt{Generator}: Philox bit generator; JAX: Threefry.
+	\item NumPy \texttt{Generator}: PCG64 by default (Philox available); JAX: Threefry.
 	\item Modern ML leans on it: dropout masks and distributed training draw thread- or rank-independent numbers.
 \end{itemize}
 
