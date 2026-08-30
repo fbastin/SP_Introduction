@@ -846,18 +846,16 @@ no state to store or synchronize: natural for GPUs and parallel workers.
 \frametitle{Counter-based generators: parallel streams}
 
 \begin{itemize}
-\item The key identifies an independent stream, and the counter its position: jumping ahead amounts to integer addition.
-\item Stateless: no internal array to store or synchronize; the value at position $i$ does not depend on the draw order. Well-suited to GPUs and parallel Monte Carlo.
-\item Reproducibility: identical (counter, key) yields identical bits on all architectures.
-\item Natural fit for stochastic optimization: one stream per scenario or sample index.
+\item \textbf{Streams via keys:} The key identifies the stream, the counter the position. Jumping ahead is a simple integer addition.
+\item \textbf{Stateless \& Reproducible:} No internal state to update sequentially. Identical $(C,K)$ pairs yield identical bits everywhere (ideal for GPUs).
+\item \textbf{Stochastic optimization:} One independent stream per scenario.
 \end{itemize}
 
-{\red Adoption:}
+\vspace{0.3cm}
+{\red Widespread adoption (Philox / Threefry):}
 \begin{itemize}
-	\item NVIDIA cuRAND and PyTorch (GPU): Philox4$\times$32--10;
-	\item TensorFlow: Philox by default, Threefry optional;
-	\item NumPy \texttt{Generator}: PCG64 by default (Philox available); JAX: Threefry.
-	\item Modern ML leans on it: dropout masks and distributed training draw thread- or rank-independent numbers.
+	\item \textbf{Default in ML:} PyTorch (GPU), TensorFlow, JAX.
+	\item \textbf{Available in:} NumPy (\texttt{Generator}), NVIDIA cuRAND.
 \end{itemize}
 
 \end{frame}
