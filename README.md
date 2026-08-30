@@ -32,7 +32,6 @@ SP_Introduction/
 ├── background/                    # Background lectures & supplementary notes
 │   ├── lp_background.tex          # Linear Programming fundamentals
 │   ├── kkt_background.tex         # KKT optimality conditions
-│   ├── plan.tex                   # Course syllabus & outline
 │   ├── supp_material.tex          # Supplementary derivations
 │   ├── basis.tex                  # Probability theory background
 │   ├── d1.tex                     # Problem exercises
@@ -71,7 +70,6 @@ SP_Introduction/
 ### Background & Prerequisites
 - [`background/lp_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/lp_background.tex) — Linear Programming background
 - [`background/kkt_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/kkt_background.tex) — Karush-Kuhn-Tucker (KKT) optimality conditions
-- [`background/plan.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/plan.tex) — Course introduction & syllabus
 
 ---
 
