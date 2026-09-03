@@ -75,7 +75,7 @@
 		& \bsxi_2x_1 + x_2 \geq 4 \\
 		& x_1, x_2 \geq 0,
 	\end{align*}
-	where $\xi_1 \sim U[1,4]$, $\xi_2\sim U[1/3,1]$.
+	where $\bsxi_1 \sim U[1,4]$, $\bsxi_2 \sim U[1/3,1]$.
 \end{frame}
 
 \begin{frame}
@@ -88,7 +88,7 @@
 		What is the {\sl meaning} of solving this problem?
 		\item
 		Can we decide on $x$ {\sl after} having observed the realization of the r.v. $\bsxi$?\\
-		We then talk of an {\red wait-and-see} approach.
+		We then talk of a {\red wait-and-see} approach.
 		The problem is then easier to solve (we have here a simple linear program).
 		\item
 		But this approach is rarely appropriate!!! It usually fails to model the
@@ -113,7 +113,7 @@
 \begin{frame}
 	\frametitle{Remove the randomness?}
 	
-	A popular approach consists to look for reasonable values for $\bsxi_1$ and $\bsxi_2$.
+	A popular approach consists in looking for reasonable values for $\bsxi_1$ and $\bsxi_2$.
 	How?
 	
 	\mbox{}
@@ -163,7 +163,7 @@ where {\it a.e.} stands for ``almost every''.
 		\item
 		In general, we can react in a correct (and maybe optimal) way: we have a recourse to ``correct'' the first decision once the uncertainty is removed.
 		\item
-		A LP recourse structure is provided by 3 elements:
+		An LP recourse structure is provided by 3 elements:
 		\begin{itemize}
 			\item
 			a set $Y \subset \RR^p$ that describes the feasible set of recourse actions, for instance $Y = \lbrace y \in \RR^p \,|\, y \geq 0 \rbrace$;
@@ -179,7 +179,7 @@ where {\it a.e.} stands for ``almost every''.
 \begin{frame}
 	\frametitle{Recourse formulation}
 	
-	More general, consider the following program:
+	More generally, consider the following program:
 	\begin{align*}
 	\min\ & c^Tx+\EE_{\bsxi}[q^T(\bsxi)y(\bsxi)] \\
 	\mbox{s.t. } & Ax = b, \\
@@ -235,7 +235,7 @@ where {\it a.e.} stands for ``almost every''.
 	\mbox{}
 	
 	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
-	\omega_2,\ldots,\omega_S \rbrace \subseteq \RR^r$.
+	\omega_2,\ldots,\omega_S \rbrace$, with support $\Xi = \bsxi(\Omega) \subseteq \RR^r$.
 	\begin{align*}
 	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots, S \\
 	T_s & = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s)) 
@@ -366,7 +366,7 @@ where {\it a.e.} stands for ``almost every''.
 	\end{align*}
 	and
 	\begin{align*}
-	Q(x, \xi) &= \min_y q_1y_1 + q_2y_2 \\
+	Q(x, \xi) &= \min_y q_1y_1 + q_2y_2 \qquad (q_1 = q_2 = \lambda \text{ above}) \\
 	\mbox{s.t. } & \xi_1 x_1 + x_2 + y_1 \geq 7, \\
 	& \xi_2 x_1 + x_2 + y_2 \geq 4.
 	\end{align*}
@@ -413,7 +413,7 @@ Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\
 
 {\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \RR^m \rightarrow \RR$:
 \[
-v(\xi, z) \overset{def}{=} \min_{y \in Y} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
+v(\xi, z) \overset{\mathrm{def}}{=} \min_{y \in Y} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
 \]
 
 \mbox{}
@@ -428,7 +428,7 @@ Given a ``policy'' $x$ and a realization $\xi$, $z$ measures the deviation of th
 {\red Expected recourse function}:
 %, or the function of minimum expected recourse, $\mathcal{Q}: \RR^n \rightarrow \RR$, for any policy $x \in \RR^n$:
 \[
-\mathcal{Q}(x) \overset{def}{=} \EE_{\bsxi}[Q(x,\bsxi)],
+\mathcal{Q}(x) \overset{\mathrm{def}}{=} \EE_{\bsxi}[Q(x,\bsxi)],
 \]
 %describes the recourse cost expectation,
 with
@@ -742,7 +742,7 @@ where $y \in \RR^{2m}$, $y^+, y^- \in \RR^m$, for $z \in \RR^m$, we can solve
 $$
 Wy = z,\ y \geq 0,
 $$
-by chosing $y^+ = \max\{z,0\}$,  $y^- = \max\{-z,0\}$.
+by choosing $y^+ = \max\{z,0\}$,  $y^- = \max\{-z,0\}$.
 
 \end{frame}
 
@@ -767,7 +767,7 @@ measure the absolute violations in the stochastic constraints.
 	\item 
 Since the recourse is complete, it is feasible for any first-stage decision $x$.
 \item
-The following results establishes conditions to have a finite recourse (i.e. $| \calQ(x) | < \infty$).
+The following result establishes conditions to have a finite recourse (i.e. $| \calQ(x) | < \infty$).
 \end{itemize}
 
 \begin{theo}
@@ -976,7 +976,7 @@ The difference comes from the fact that a point is not in $K_2^P$ as soon as it 
 \frametitle{Recourse function}
 
 Let $y^*_1$ and $y^*_2$ be two optimal solutions of $v(\xi, z)$, associated to $z = z_1$ and $z = z_2$, respectively.
-Then, the convex combination $y_{\alpha} \overset{def}{=} \alpha y_1^*+(1-\alpha)y_2^*$, $\alpha \in [0,1]$, is feasible with respect to $z_{\alpha} = \alpha z_1 + (1-\alpha) z_2$, as $\alpha y_1^*+(1-\alpha)y_2^* \geq 0$, and
+Then, the convex combination $y_{\alpha} \overset{\mathrm{def}}{=} \alpha y_1^*+(1-\alpha)y_2^*$, $\alpha \in [0,1]$, is feasible with respect to $z_{\alpha} = \alpha z_1 + (1-\alpha) z_2$, as $\alpha y_1^*+(1-\alpha)y_2^* \geq 0$, and
 $$
 W(\alpha y_1^*+(1-\alpha)y_2^*)
 = \alpha W y_1^* + (1-\alpha) W y_2^*
@@ -1016,7 +1016,7 @@ Q(x,\xi) = v(\xi, h(\xi)-T(\xi)x).
 Therefore {\red $Q(x, \xi)$ is convex} w.r.t. $x$, given $\xi$.
 More generally
 \begin{theo}
-If $A$ is a linear transformation from $\RR^n$ to $\RR^m$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{def}{=} f(Ax)$ is a convex function on $\RR^n$.
+If $A$ is a linear transformation from $\RR^n$ to $\RR^m$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{\mathrm{def}}{=} f(Ax)$ is a convex function on $\RR^n$.
 \end{theo}
 \end{frame}
 
@@ -1105,12 +1105,12 @@ y = \begin{pmatrix} y^+ \\ y^- \end{pmatrix} \quad q = \begin{pmatrix}
 
 \mbox{}
 
-Relying on the fundamental theorem of linear programming, we are looking from an optimal basis solution, implying that $y^+ = 0$ or $y^- = 0$.
+Relying on the fundamental theorem of linear programming, we are looking for an optimal basic solution, implying that $y^+ = 0$ or $y^- = 0$.
 
 \end{frame}
 
 \begin{frame}
-\frametitle{An example\ldots}
+\frametitle{An example\ldots (cont'd)}
 
 We immediately see that
 $$
@@ -1270,7 +1270,7 @@ We note that $\mathcal{Q}(x)$ is convex and piecewise linear.
 As $\mathcal{Q}(x)$ is a finite weighted sum of piecewise linear functions when the support of $\bsxi$ is finite, we have the following result.
 
 \begin{theo}
-For a stochastic program with fixed recourses where $\bsxi$ has finite second-order moments,
+For a stochastic program with fixed recourse where $\bsxi$ has finite second-order moments,
 \begin{enumerate}[(a)]
 \item
 $\mathcal{Q}(x)$ is a convex Lipschitz function and is finite over $K_2$;
@@ -1433,7 +1433,7 @@ We say that the recourse is additive (why?).
 \frametitle{In a more standard form (cont'd)}
 
 The functions $f^2(\cdot, \omega)$, $t_i^2(\cdot, \omega)$, and $g_i^2(\cdot, \omega)$ are continuous for any given $\omega$, and measurable w.r.t. $\omega$ for any given first argument.
-This allows to prove that $Q(x,\omega)$ is measurable, and therefore that $\mathcal{Q}(x)$ is well defined.
+This allows one to prove that $Q(x,\omega)$ is measurable, and therefore that $\mathcal{Q}(x)$ is well defined.
 
 \mbox{}
 
@@ -1457,11 +1457,11 @@ K_2^s & = \lbrace x \ |\ \mathcal{Q}(x) < \infty \rbrace.
 \frametitle{Remarks}
 
 The formulation is not yet totally general.
-We will consider more general forms when we will discuss sampling techniques.
+We will consider more general forms when we discuss sampling techniques.
 
 \mbox{}
 
-Here, there is no more fixed recourse, but the first-stage decision $x$ acts separately in the constraints.
+Here, there is no longer a fixed recourse, but the first-stage decision $x$ acts separately in the constraints.
 Goal: extend the previous results.
 
 \mbox{}
