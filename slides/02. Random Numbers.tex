@@ -176,7 +176,7 @@ If $c = 0$, the generator is often called a multiplicative congruential generato
 	\begin{frame}
 		\frametitle{Linear congruential generators: full period?}
 		
-		Full period: $m$ is $c \ne 0$, $m-1$ otherwise (if $c = 0$, 0 is a
+		Full period: $m$ if $c \ne 0$, $m-1$ otherwise (if $c = 0$, 0 is a
 		fixed point for the recurrence).
 		Consider the case $c \ne 0$.
 		
@@ -264,8 +264,9 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 	\begin{frame}
 		\frametitle{Period of MRGs}
 		
-		It can be shown that for $k > 1$, it is sufficient to have at least
-		two non-zero coefficients, including $a_k$, in order to get the maximal period.
+		It can be shown that, for $k > 1$, the maximal period can already be
+		reached with only {\blue two} non-zero coefficients, including $a_k$ ---
+		provided they are suitably chosen.
 		
 		\mbox{}
 		
@@ -491,11 +492,11 @@ end
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{LFSR: a tiny example ($k = 4$, taps $r = 1$ and $r = 4$)}
+		\frametitle{LFSR: a tiny example ($k = 4$, taps $r = 1$ and $k = 4$)}
 		
 		Seed $0001$, recurrence $x_n = x_{n-1} \oplus x_{n-4}$:
 		\begin{center}
-			\small
+			\footnotesize
 			\setlength{\tabcolsep}{4pt}
 			\begin{tabular}{r|cccc|c}
 				step & \multicolumn{4}{c|}{register} & new bit\\
@@ -503,8 +504,12 @@ end
 				\hline
 				0 & 0 & 0 & 0 & 1 & \text{--}\\
 				1 & 1 & 0 & 0 & 0 & 1\\
+				2 & 1 & 1 & 0 & 0 & 1\\
 				3 & 1 & 1 & 1 & 0 & 1\\
+				4 & 1 & 1 & 1 & 1 & 1\\
+				$\vdots$ & & & & & \\
 				7 & 0 & 1 & 0 & 1 & 0\\
+				8 & 1 & 0 & 1 & 0 & 1\\
 				9 & 1 & 1 & 0 & 1 & 1\\
 				$\vdots$ & & & & & $\vdots$
 			\end{tabular}
@@ -544,7 +549,8 @@ end
 			$X^\nu$ shifts the register by $\nu$ bits in one step: this is the spacing
 			$\nu$ used when assembling output words.
 			\item
-			For {\blue Tausworthe} generators, $B = I$ (no output transformation).
+			For {\blue Tausworthe} generators, $B$ simply reads the first $w$ bits of the
+			state (the first $w$ rows of the identity); no further output transformation.
 		\end{itemize}
 		
 	\end{frame}
@@ -635,9 +641,9 @@ But even these recent generators are not without flaws! See e.g.
 
 \begin{itemize}
 \item
-Melissa O'Neil introduced the PCG family (\url{https://www.pcg-random.org/}), which applies permutation functions to the output of an LCG.
+Melissa O'Neill introduced the PCG family (\url{https://www.pcg-random.org/}), which applies permutation functions to the output of an LCG.
 \item
-Vigna (author of xorshift/xoshiro) strongly criticizes PCG (\url{https://pcg.di.unimi.it/pcg.php}). He argues that PCG's mechanism for generating independent streams (varying the LCG increment) lacks the rigorous guarantees of MRGs or CBRNGs.
+Vigna (author of xorshift128+ and xoshiro) strongly criticizes PCG (\url{https://pcg.di.unimi.it/pcg.php}). He argues that PCG's mechanism for generating independent streams (varying the LCG increment) lacks the rigorous guarantees of MRGs or CBRNGs.
 \item
 Vigna also claims PCG is ``not competitive'' in speed compared to xoshiro. 
 \item
@@ -680,7 +686,7 @@ In previously covered RNGs (LCG, MRG, LFSR, etc.):
 \item Because the state is just a counter, it is {\blue trivially easy to jump ahead}. To compute the $n$-th number, we just evaluate the complex function on the $n$-th counter value, without generating the preceding values!
 \item This makes CBRNGs extremely suitable for {\blue parallel computing} (GPUs, massive multithreading).
 \item They pass demanding test suites such as TestU01's BigCrush, with sufficiently many rounds, and are efficient on both CPUs and GPUs.
-\item The most popular implementation, Philox, detailed next, is the default generator in TensorFlow and PyTorch (JAX uses Threefry, another CBRNG).
+\item The most popular implementation, Philox, detailed next, is the default generator in TensorFlow and on PyTorch's GPU backend (JAX uses Threefry, another CBRNG).
 \end{itemize}
 
 \end{frame}
@@ -845,7 +851,7 @@ any $y$ has a unique predecessor. Bijectivity avoids collisions and gives a clea
 \begin{align*}
 (y_0,\, y_1,\, y_2,\, y_3) &= (\mathrm{hi}_1 \oplus x_1 \oplus k_0,\; \mathrm{lo}_1,\; \mathrm{hi}_0 \oplus x_3 \oplus k_1,\; \mathrm{lo}_0),
 \end{align*}
-where $(\mathrm{hi}_j, \mathrm{lo}_j)$ are the high/low 32-bit halves of $M_j x_j$.
+where $(\mathrm{hi}_j, \mathrm{lo}_j)$ are the high/low 32-bit halves of $M_j x_{2j}$.
 
 \end{frame}
 
@@ -1134,9 +1140,9 @@ u2 = rand(rng)
 		Assume that $F$ is a convex combination of several cumulative
 		distribution functions:
 		\[
-		F (x) = \sum_{j = 0}^{\infty} p_j F_j (x),
+		F (x) = \sum_{j = 1}^{\infty} p_j F_j (x),
 		\]
-		and that it is easier to invert $F_j$, $j = 0,\ldots,\infty$ than $F$.
+		and that it is easier to invert each $F_j$, $j = 1, 2, \ldots$, than $F$.
 		
 		\mbox{}
 		
@@ -1239,7 +1245,7 @@ u2 = rand(rng)
 		\]
 		We change the cartesian coordinates $(X,Y)$ by the polar coordinates $(R, \Theta)$:\\
 		\[
-		R^2 = X^2 + Y^2 ; Y = R \sin \Theta.
+		R^2 = X^2 + Y^2, \quad X = R \cos \Theta, \quad Y = R \sin \Theta.
 		\]
 		
 		It gives an elegant approach, but incompatible with variance reduction techniques and can be slower than inversion.
@@ -1373,14 +1379,18 @@ $$
 
 Any bivariate copula $C$ verifies
 $$
-\max(F_X(x) + F_Y(y) - 1, 0) \leq C(x, y) \leq \min(F_X(x), F_Y(y))
+\max(u + v - 1, 0) \leq C(u, v) \leq \min(u, v), \quad (u,v) \in [0,1]^2,
+$$
+equivalently, for the joint cdf $H(x,y) = C(F_X(x), F_Y(y))$,
+$$
+\max(F_X(x) + F_Y(y) - 1, 0) \leq H(x, y) \leq \min(F_X(x), F_Y(y)).
 $$
 
 \mbox{}
 
 \textcolor{blue}{Upper bound proof}
 	\begin{align*}
-		C(x, y) &= P[X \leq x \cap Y \leq y] \\
+		H(x, y) &= P[X \leq x \cap Y \leq y] \\
 		&\leq \min\left(P[X \leq x], P[Y \leq y]\right) = \min(F_X(x), F_Y(y))
 	\end{align*}
 	since $\lbrace X \leq x \rbrace \cap \lbrace Y \leq y \rbrace \subseteq \lbrace X \leq x \rbrace$ and $\subseteq \lbrace Y \leq y \rbrace$.
@@ -1392,13 +1402,13 @@ $$
 
 \textcolor{blue}{Lower bound proof}
 \begin{align*}
-1 - C(x,y) &= P[X > x \cup Y > y] \\
+1 - H(x,y) &= P[X > x \cup Y > y] \\
 & \leq P[X > x] + P[Y > y] \\
 & = 1 - F_X(x) + 1 - F_Y(y)
 \end{align*}
 Thus,
 $$
-C(x,y) \geq F_X(x) + F_Y(y) - 1.
+H(x,y) \geq F_X(x) + F_Y(y) - 1.
 $$
 
 \mbox{}
