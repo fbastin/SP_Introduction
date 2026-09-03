@@ -102,8 +102,8 @@
 		\[
 		s_n = f(s_{n-1}).
 		\]
-		We will furthermore assume that $f$ is periodic for all $n$ greater of
-		equal to some known $\tau$ (often equal to 0), with period $\rho$:
+		We will furthermore assume that $f$ is periodic for all $n$ greater than
+		or equal to some known $\tau$ (often equal to 0), with period $\rho$:
 		$$
 		s_{n+\rho} = s_n,\ \forall\, n\ge\tau.
 		$$
@@ -162,10 +162,10 @@ Recursive formula:
 $$
 x_i = f(x_{i-1}) = (ax_{i-1}+c) \mod m,
 $$
-where $\mod$ is the modulo operator.\\
-Given two numbers, a (the dividend) and n (the divisor),
+where $\mod$ is the modulo operator: given a dividend $p$ and a divisor
+$q > 0$,
 $$
-a \mod n = a - n\left\lfloor \frac{a}{n} \right\rfloor.
+p \mod q = p - q\left\lfloor \frac{p}{q} \right\rfloor.
 $$
 \item
 If $c = 0$, the generator is often called a multiplicative congruential generator, or ``{\red Lehmer RNG}''
@@ -190,7 +190,7 @@ If $c = 0$, the generator is often called a multiplicative congruential generato
 				\item
 				if $q$ is a prime number that divides $m$, then $q$ divides $a-1$;
 				\item
-				if 4 divides $m$, then 4 divides a-1.
+				if 4 divides $m$, then 4 divides $a-1$.
 			\end{enumerate}
 		\end{theorem}
 		``{\red Standard minimal}'' (Park and Miller, 1988):
@@ -253,7 +253,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		\[
 		s_n = (x_{n-k+1},\dots,x_n)^T.
 		\]
-		State space: $\mathcal{Z}_m^k$, of cardinality $m^k$.
+		State space: $\ZZ_m^k$, of cardinality $m^k$.
 		
 		\mbox{}
 		
@@ -293,7 +293,7 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		\[
 		x_n = (\pm x_{n-r} \pm x_{n-k}) \mod m.
 		\]
-		It can be shown the vectors $(u_n, u_{n+k-r}, u_{n+k})$ are all
+		It can be shown that the vectors $(u_n, u_{n+k-r}, u_{n+k})$ are all
 		contained in two planes! We therefore know without additional tests
 		that the numbers cannot be considered as random.
 		
@@ -389,14 +389,14 @@ end
 
 		
 \begin{frame}
-		\frametitle{Random numbers generators on $\mathcal{F}_2$}
+		\frametitle{Random numbers generators on $\FF_2$}
 		
 		MRGs work on integers. An alternative is to build generators directly
-		on {\blue bits}, with {\blue linear recurrences in}\, $\mathcal{F}_2$.
+		on {\blue bits}, with {\blue linear recurrences in}\, $\FF_2$.
 		
 		\vspace{0.2cm}
 		
-		Let us introduce the Galois field $\mathcal{F}_2$: it is simply the set $\lbrace 0,1 \rbrace$
+		Let us introduce the Galois field $\FF_2$: it is simply the set $\lbrace 0,1 \rbrace$
 		with addition and multiplication computed modulo 2.
 		
 		\vspace{0.2cm}
@@ -434,7 +434,7 @@ end
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Generators on $\mathcal{F}_2$: state and output}
+		\frametitle{Generators on $\FF_2$: state and output}
 		
 		We construct two sequences of bit vectors, the {\blue state} and the
 		{\blue output}, with linear recurrences ($k$-bit state, $w$-bit output):
@@ -442,7 +442,7 @@ end
 			\boldsymbol{x}_n &= {X} \boldsymbol{x}_{n-1} & \quad \mbox{(state vector, $k$ bits)},\\
 			\boldsymbol{y}_n &= {B} \boldsymbol{x}_{n}  & \quad \mbox{(output vector, $w$ bits)},
 		\end{align*}
-		where $X$ and $B$ are binary matrices and all arithmetic is in $\mathcal{F}_2$.
+		where $X$ and $B$ are binary matrices and all arithmetic is in $\FF_2$.
 		
 		\mbox{}
 		
@@ -527,7 +527,7 @@ end
 	\begin{frame}
 		\frametitle{LFSR: matrix form}
 		
-		The recurrence is a linear recurrence over $\mathcal{F}_2$ on the state vector
+		The recurrence is a linear recurrence over $\FF_2$ on the state vector
 		(we assume $a_k \ne 0$):
 		\[
 			\boldsymbol{x}_n = X\, \boldsymbol{x}_{n-1},
@@ -595,12 +595,12 @@ end
 		\[
 			Q(z) = z^k - a_r z^{k-r} - a_k,
 		\]
-		which, in $\mathcal{F}_2$, brings us back to the xor recurrence
+		which, in $\FF_2$, brings us back to the xor recurrence
 		$x_n = x_{n-r} \oplus x_{n-k}$ of the LFSR.
 		
 		\vfill
 		
-		{\red Caveat.} Linearity in $\mathcal{F}_2$ is a strong structural flaw: plain
+		{\red Caveat.} Linearity in $\FF_2$ is a strong structural flaw: plain
 		LFSRs/Tausworthe are {\blue not good on their own}, and are combined, or replaced
 		by MT19937 and xoshiro (next slide).
 		
@@ -1074,7 +1074,7 @@ u2 = rand(rng)
 		\mbox{}
 		
 		{\red Example}: normal law.\\
-		If $Z \sim N (0, 1)$, then $X =  \sigma Z + \mu : N (\mu, \sigma^2)$.
+		If $Z \sim N (0, 1)$, then $X =  \sigma Z + \mu \sim N (\mu, \sigma^2)$.
 		
 		It is therefore sufficient to be able to generate a $N (0, 1)$, of
 		density $f (x) = (2 \pi)^{-1/2} e^{-x^2 /2}$.
@@ -1085,7 +1085,7 @@ u2 = rand(rng)
 		\mbox{}
 		
 		Chi-square, gamma, beta, etc.: it is much more complicated since the
-		form of $F^{-1}$ depends of the distribution parameters.
+		form of $F^{-1}$ depends on the distribution parameters.
 		
 	\end{frame}
 	
@@ -1146,13 +1146,13 @@ u2 = rand(rng)
 		
 		\mbox{}
 		
-		Generate $J = j$ with the probability $p_j$, than generate $X$
+		Generate $J = j$ with the probability $p_j$, then generate $X$
 		following $F_J$.
 		
 		\mbox{}
 		
 		The method therefore requires two uniforms for each random variable,
-		and exploit the decomposition
+		and exploits the decomposition
 		\[
 		P[ X \leq x ] = \sum_{j = 1}^{\infty} P[ X \leq x | J = j] P[J = j] = \sum_{j = 1}^{\infty} F_j(x)p_j.
 		\]
@@ -1183,8 +1183,8 @@ u2 = rand(rng)
 		
 		We consider the case where $X$ is continuous (the discrete case is
 		analogous).
-		Let $f(x)$ be the density of $X$, and let $t$ be a "hat" function that
-		majors $f$, i.e. $f (x) \leq t(x)\ \forall\, x$.
+		Let $f(x)$ be the density of $X$, and let $t$ be a ``hat'' function that
+		dominates $f$, i.e. $f (x) \leq t(x)\ \forall\, x$.
 		
 	\end{frame}
 	
@@ -1200,7 +1200,7 @@ u2 = rand(rng)
 			\item
 			it is easy to generate random variables of density $r$;
 			\item
-			$a$ is small (close 1), or in other terms, $t(x)$ is close to $f(x)$.
+			$a$ is small (close to 1), or in other terms, $t(x)$ is close to $f(x)$.
 		\end{enumerate}
 		The choice of $t$ may be automatized.
 		
@@ -1212,7 +1212,7 @@ u2 = rand(rng)
 				\item
 				generate $Y$ of density $r(x)$;
 				\item
-				generate $U: U (0, 1)$ independently of $Y$;
+				generate $U \sim U (0, 1)$ independently of $Y$;
 				\item
 				until $U \leq f (Y )/t(Y )$;
 				\item
@@ -1228,7 +1228,7 @@ u2 = rand(rng)
 	\begin{frame}
 		\frametitle{Particular cases}
 		
-		Sometimes, we can benefit of mathematical transformations.\\
+		Sometimes, we can benefit from mathematical transformations.\\
 		The main weakness is that they are seldom compatible with variance
 		reduction techniques.
 		
@@ -1327,7 +1327,7 @@ Drawing from $\calN(\bszero,\bsI)$: generate $d$ $\calN(0,1)$ independently.
 
 \mbox{}
 
-A $d$-variate \textcolor{red}{copula} $C: [0, 1]^d \rightarrow [0, 1] $is the cdf of a random vector
+A $d$-variate \textcolor{red}{copula} $C: [0, 1]^d \rightarrow [0, 1]$ is the cdf of a random vector
 $(U_1,\ldots, U_d)$ with $U(0, 1)$ margins:
 $$
 C(u) = P[U_1 \leq u_1,\ldots, U_d \leq u_d]
@@ -1413,7 +1413,7 @@ $$
 
 \mbox{}
 
-\textcolor{red}{Note:} this can be viewed as a particular of the Bonferroni inequality
+\textcolor{red}{Note:} this can be viewed as a particular case of the Bonferroni inequality
 $$
 P \left[ \cap_{i = 1}^d A_i \right] \geq 1-d+\sum_{i = 1}^d P [A_i].
 $$
