@@ -91,9 +91,9 @@
 		We then talk of an {\red wait-and-see} approach.
 		The problem is then easier to solve (we have here a simple linear program).
 		\item
-		But this approach is rarely appropriate!!! We usually have to decide on $x$ {\red before} we know the realizations of $\bsxi$!
-		\item
-		Usually, the ``wait-and-see'' approach is not appropriate to model the reality behavior: we have to decide on $x$ before we know the realizations from $\bsxi$.
+		But this approach is rarely appropriate!!! It usually fails to model the
+		real behaviour of the decision process: we have to decide on $x$
+		{\red before} we know the realizations of $\bsxi$.
 		%		\item
 		%It the example, we have to decide what to do before we know the realizations $\omega_1$, $\omega_2$.
 		\item
@@ -237,7 +237,7 @@ where {\it a.e.} stands for ``almost every''.
 	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
 	\omega_2,\ldots,\omega_S \rbrace \subseteq \RR^r$.
 	\begin{align*}
-	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots . . . , S \\
+	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots, S \\
 	T_s & = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s)) 
 	\end{align*}
 	
@@ -277,7 +277,8 @@ where {\it a.e.} stands for ``almost every''.
 			\item
 			$n+pS$ variables;
 			\item
-			$m_1+mS$ constraints.
+			$m_1+mS$ constraints, with $A \in \RR^{m_1 \times n}$ and
+			$W \in \RR^{m \times p}$.
 		\end{itemize}
 		\item
 		\textcolor{blue}{Advantage}: the linear program matrix has a special structure (stairway shape).\\
@@ -294,7 +295,7 @@ where {\it a.e.} stands for ``almost every''.
 	\begin{itemize}
 		\item
 		Consider the following problem (source: Linderoth).
-		A Telecom company wantss to expand its network in order to meet an unknown (random) demand.
+		A Telecom company wants to expand its network in order to meet an unknown (random) demand.
 		\item
 		There are 86 unknown demands.
 		Each demand is independent and takes a value in a set of 7 values.
@@ -302,7 +303,8 @@ where {\it a.e.} stands for ``almost every''.
 		\[
 		S = |\Omega| = 7^{86} \approx 4.77\times10^{72}.
 		\]
-		\ldots number of subatomic particles in the universe!
+		For comparison, the observable universe is estimated to hold some
+		$10^{80}$ atoms.
 		\item
 		It can be even worse\ldots\\
 		If $\Omega$ is not finite, but holds an infinite number of elements?
@@ -336,11 +338,11 @@ where {\it a.e.} stands for ``almost every''.
 	
 	Assume for now that $\Omega$ is finite, with $S$ scenarios.
 	\begin{align*}
-	\min_x\ & x_1+x_2 + \sum_{s \in S} p_s \lambda (y_{1s} + y_{2s})\\
-	\mbox{s.t. } & \xi_{1s}x_1 + x_2 + y_{1s} \geq 7 \\
-	& \xi_{2s}x_1 + x_2 + y_{2s} \geq 4 \\
+	\min_{x,\, y}\ & x_1+x_2 + \sum_{s = 1}^{S} p_s \lambda (y_{1s} + y_{2s})\\
+	\mbox{s.t. } & \xi_{1s}x_1 + x_2 + y_{1s} \geq 7, & s = 1,\ldots,S \\
+	& \xi_{2s}x_1 + x_2 + y_{2s} \geq 4, & s = 1,\ldots,S \\
 	& x_1, x_2 \geq 0,\\
-	& y_{1s}, y_{2s} \geq 0.
+	& y_{1s}, y_{2s} \geq 0, & s = 1,\ldots,S.
 	\end{align*}
 	
 	A difficulty is therefore to decide how to construct the deterministic equivalent.
@@ -349,7 +351,7 @@ where {\it a.e.} stands for ``almost every''.
 	\mbox{}
 	
 	How to construct the scenarios?
-	We can proceed with Monte Carlo sampling, with $p_s = 1/N$, $\forall s$.
+	We can proceed with Monte Carlo sampling, with $p_s = 1/S$, $\forall s$.
 	We will explore this approach in more details later.
 	
 \end{frame}
@@ -385,7 +387,7 @@ T(\xi)x + Wy(\xi) &= h(\xi) \qquad \text{for a.e. } \xi \in \Xi, \\
 x & \in X, \\
 y(\xi) & \in Y,
 \end{align*}
-where $\bsxi$ is a random vector defined on the random space 
+where $\bsxi$ is a random vector defined on the probability space 
 $(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bsxi$.
 
 \end{frame}
@@ -562,7 +564,7 @@ with
 $$
 P\left[ \bsxi = 2^n \right] = \frac{1}{2^{n+1}},\ n = 0,1,2,\ldots
 $$
-Note that $P\left[ \bsxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n \in \NN \rbrace$, and
+Note that $P\left[ \bsxi = 2^n \right] \in (0,1),\ n = 0,1,2,\ldots$, $\Xi = \lbrace 2^n,\ n = 0, 1, 2, \ldots \rbrace$, and
 $$
 \sum_{n=0}^{+\infty} P\left[ \bsxi = 2^n \right] = \sum_{n=0}^{+\infty} 2^{-n-1} = \frac{1}{2} \frac{1}{1-\frac{1}{2}} = 1.
 $$
@@ -681,7 +683,7 @@ We have that $\forall \xi, Q(x, \xi) = 0$, and therefore $\calQ(x) = 0$.
 \begin{theo}
 If $\bsxi$ has finite second order moments, then
 $$
-P[ \xi \ |\ Q(x,\xi) < \infty] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
+P\left[ \lbrace \xi \ |\ Q(x,\xi) < \infty \rbrace \right] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
 $$
 and consequently
 $$
@@ -904,10 +906,10 @@ y = 1/\xi - x/\xi,
 \]
 is not properly defined on $\Xi = [0,1]$; this also means that
 \[
-W =
+\text{pos}\,W =
 \begin{cases}
-0 & \text{ if } \xi = 0; \\
-1 & \text{ if } \xi \ne 0.
+\lbrace 0 \rbrace & \text{ if } \xi = 0; \\
+\RR_+ & \text{ if } \xi \ne 0.
 \end{cases}
 \]
 	
@@ -982,8 +984,8 @@ W(\alpha y_1^*+(1-\alpha)y_2^*)
 $$
 Moreover,
 \begin{align*}
-v(\xi, z_{\alpha}) & = q(\xi)^Ty_{\alpha}^* \leq
-q(\xi)^T(\alpha y_1^*+(1-\alpha)y_2^*) \\
+v(\xi, z_{\alpha}) & = q(\xi)^Ty^*(z_{\alpha}) \leq
+q(\xi)^T y_{\alpha} = q(\xi)^T(\alpha y_1^*+(1-\alpha)y_2^*) \\
 & = \alpha q(\xi)^T y_1^*+(1-\alpha)q(\xi)^Ty_2^* \\
 & = \alpha v(\xi, z_1) + (1-\alpha) v(\xi, z_2).
 \end{align*}
@@ -1011,7 +1013,7 @@ Q(x,\xi) = v(\xi, h(\xi)-T(\xi)x).
 &= Q(\lambda x_1 + (1-\lambda)x_2, \xi).
 \end{align*}
 
-Therefore {\red $Q(x, \xi)$ if convex} w.r.t. $x$, given $\xi$.
+Therefore {\red $Q(x, \xi)$ is convex} w.r.t. $x$, given $\xi$.
 More generally
 \begin{theo}
 If $A$ is a linear transformation from $\RR^n$ to $\RR^m$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{def}{=} f(Ax)$ is a convex function on $\RR^n$.
@@ -1028,7 +1030,7 @@ For a stochastic program with fixed recourse, $Q(x,\xi)$ is
 \item
 a piecewise-linear convex function in $(h,T)$,
 \item
-a piecewise concave linear function in $q$,
+a piecewise-linear concave function in $q$,
 \item
 a piecewise-linear convex function in $x$, for all $x$ in $K = K_1 \cap K_2$.
 \end{enumerate}
@@ -1051,12 +1053,12 @@ The piecewise linearity follows from the fact that the number of different optim
 {\red Convexity of the recourse?}
 
 \[
-\mathcal{Q}(x) = E_{\bsxi} [Q(x,\xi)].
+\mathcal{Q}(x) = \EE_{\bsxi} [Q(x,\bsxi)].
 \]
-Suppose for now that $\xi$ has a finite support, i.e. $\Xi = \lbrace \xi_1 ,
-\xi_2,\ldots, \xi_m \rbrace$. Then
+Suppose for now that $\bsxi$ has a finite support, i.e. $\Xi = \lbrace \xi_1 ,
+\xi_2,\ldots, \xi_S \rbrace$. Then
 \[
-\mathcal{Q}(x) = \sum_{i = 1}^{m} P[\bsxi = \xi_i] Q(x,\xi_i).
+\mathcal{Q}(x) = \sum_{s = 1}^{S} P[\bsxi = \xi_s] Q(x,\xi_s).
 \]
 \end{frame}
 
@@ -1295,7 +1297,7 @@ The recourse function is partially differentiable with respect to $x_j$ at $(\ha
 In other terms, there exists a function $\frac{\partial Q(x,\xi)}{\partial x_j}$ such that
 \[
 \frac{Q(\hat{x}+he_j,\hat{\xi}) - Q(\hat{x},\hat{\xi})}{h} =
-\frac{\partial Q(x,\xi)}{\partial x_j} + \frac{\rho_j (\hat{x},
+\frac{\partial Q(\hat{x},\hat{\xi})}{\partial x_j} + \frac{\rho_j (\hat{x},
   \hat{\xi}; h)}{h},
 \]
 with
@@ -1328,7 +1330,7 @@ What about the differentiability of $\mathcal{Q}(x)$?
 where $N_{\delta}$ is measurable and $P[N_{\delta}] = 0$.
 Therefore, we have
 \begin{theo}
-If $Q(x,\xi)$ if partially differentiable almost everywhere, if its partial derivative 
+If $Q(x,\xi)$ is partially differentiable almost everywhere, if its partial derivative 
 $\frac{\partial Q(\hat{x},\xi)}{\partial x_j}$ is integrable and if the residual satisfies
 $(1/h) \int_{\Xi \backslash N_{\delta}} \rho_j (\hat{x}, \xi; h) dP \overset{h \rightarrow 0}{\rightarrow } 0$, then $\frac{\partial \mathcal{Q}(\hat{x})}{\partial x_j}$ exists and
 \[
@@ -1349,7 +1351,9 @@ But how to prove $(1/h) \int_{\Xi
 \mbox{}
 
 If we stay in the linear framework with fixed recourse, and vectors $\bsxi$ with finite second-order moments, we have seen that for $\bsxi$ with finite support, $\mathcal{Q}(x)$ is piecewise linear.
-Therefore $\mathcal{Q}(x)$ is not differentiable.
+Therefore $\mathcal{Q}(x)$ is not differentiable {\red everywhere}: it is
+differentiable except at the finitely many kinks, where we will have to work
+with subgradients.
 
 \end{frame}
 
@@ -1433,7 +1437,7 @@ This allows to prove that $Q(x,\omega)$ is measurable, and therefore that $\math
 
 \mbox{}
 
-Reintroduce $K_1$, $K_2(\omega)$ and $K_2$.
+Reintroduce $K_1$, $K_2(\omega)$ and $K_2^s$.
 
 \begin{align*}
 K_1 & = \lbrace x \ |\ g_i^1(x) \leq 0,\ i =
@@ -1444,7 +1448,7 @@ K_2(\omega) & = \lbrace x \ |\ \exists\, y(\omega) \mbox{ s.t. }
 = 1,\ldots,\overline{m}_2,\\
 & \quad \qquad t_i^2(x, \omega) + g_i^2(y(\omega), \omega) = 0, \ i =
 \overline{m}_2+1,\ldots,m_2 \rbrace, \\
-K_2 & = \lbrace x \ |\ \mathcal{Q}(x) < \infty \rbrace.
+K_2^s & = \lbrace x \ |\ \mathcal{Q}(x) < \infty \rbrace.
 \end{align*}
 
 \end{frame}
