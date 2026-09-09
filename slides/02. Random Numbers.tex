@@ -176,8 +176,9 @@ If $c = 0$, the generator is often called a multiplicative congruential generato
 	\begin{frame}
 		\frametitle{Linear congruential generators: full period?}
 		
-		Full period: $m$ if $c \ne 0$, $m-1$ otherwise (if $c = 0$, 0 is a
-		fixed point for the recurrence).
+		Full period: $m$ if $c \ne 0$; if $c = 0$, then 0 is a fixed point of the
+		recurrence and the best possible period is $m-1$, reached only when $m$ is
+		prime (for $m = 2^k$ it drops to $m/4$).
 		Consider the case $c \ne 0$.
 		
 		\begin{theorem}[Period]
@@ -209,12 +210,12 @@ If $c = 0$, the generator is often called a multiplicative congruential generato
 			\begin{verbatim}
 function getlcg(seed::Integer, a::Integer,
                  c::Integer, m::Integer)
-    state = seed
-    am_mil = 1.0/m
+    state = Ref{typeof(seed)}(seed)
+    invm = 1.0/m
     return function lcgrand()
-        state = mod(a * state + c, m)
-        # produce a number in (0,1)
-        return state*am_mil
+        state[] = mod(a * state[] + c, m)
+        # in (0,1) when c = 0 and m is prime
+        return state[]*invm
     end
 end
 
@@ -229,7 +230,8 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		\begin{center}
 			\includegraphics[width=0.65\linewidth]{lcg.png}
 			
-			10000 generated points on the unit square.
+			The $5000$ successive pairs $(u_{2i-1}, u_{2i})$ built from $10\,000$
+			generated numbers.
 		\end{center}
 		
 	\end{frame}
@@ -335,27 +337,42 @@ stdmin = getlcg(1234, 16807, 0, 2^31-1)
 		\frametitle{MRG32k3a}
 		
 		The following combined MRG was proposed by L'Ecuyer. It has been for a long time
-		amongst the most popular and efficient generators (e.g., used in R), although newer
-		families like xoshiro or CBRNGs are often preferred today for raw performance.
-		It combines 2 MRG's.
+		amongst the most popular and efficient generators (available in R as
+		\texttt{L'Ecuyer-CMRG}, the default of the \texttt{parallel} package, and as
+		MATLAB's \texttt{mrg32k3a}), although newer families like xoshiro or CBRNGs are
+		often preferred today for raw performance.
 		
-		$k=3$, \\
-		$m_1 = 2^{32} -209$, $a_{11} = 0$, $a_{12} = 1403580$, $a_{13} = -810728$,\\
-		$m_2 = 2^{32}-22853$, $a_{21} = 527612$, $a_{22} = 0$, $a_{23} = -1370589$.\\
+		\medskip
 		
-		\mbox{}
+		It combines 2 MRG's, both with $k=3$:
+		\[
+		\begin{array}{ll}
+		m_1 = 2^{32}-209, & a_{11} = 0,\quad a_{12} = 1403580,\quad a_{13} = -810728,\\[2pt]
+		m_2 = 2^{32}-22853, & a_{21} = 527612,\quad a_{22} = 0,\quad a_{23} = -1370589.
+		\end{array}
+		\]
+		
+		\medskip
 		
 		Combination: $z_n = (x_{1,n} - x_{2,n}) \bmod m_1$.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{MRG32k3a: the equivalent MRG}
 		
-		\mbox{}
+		The combination behaves like a single MRG of order $k = 3$, modulo
+		$m = m_1 m_2$. Its coefficients follow from the Chinese remainder theorem
+		($a_j \equiv a_{1,j} \bmod m_1$ and $a_j \equiv a_{2,j} \bmod m_2$):
+		\[
+		\begin{array}{rl}
+		m   &= 18446645023178547541,\\[2pt]
+		a_1 &= 18169668471252892557,\\[2pt]
+		a_2 &= 3186860506199273833,\\[2pt]
+		a_3 &= 8738613264398222622.
+		\end{array}
+		\]
 		
-		Corresponding MRG: $k=3$,\\
-		$m = m_1 m_2 = 18446645023178547541$, \\
-		$a_{1} = 18169668471252892557$,\\
-		$a_{2} = 3186860506199273833$,\\ 
-		$a_{3} = 8738613264398222622$.
-		
-		\mbox{}
+		\medskip
 		
 		Period $\rho = (m_1^3-1)(m_2^3-1)/2 \approx 2^{191}$.
 	\end{frame}
@@ -567,11 +584,15 @@ end
 		
 		\vfill
 		
-		{\blue Example} (previous LFSR, $w = 3$, $\nu = 1$): the output bit stream is
+		{\blue Example} (previous LFSR, $w = 3$, $\nu = 3$): the bit stream
+		$111101011001000$ is cut into consecutive blocks
 		\[
 			\underbrace{1\,1\,1}_{\tfrac78}\ \ \underbrace{1\,0\,1}_{\tfrac58}\ \ \underbrace{0\,1\,1}_{\tfrac38}\ \ \underbrace{0\,0\,1}_{\tfrac18}\ \ \underbrace{0\,0\,0}_{0}
 		\]
 		so the uniforms are $u = .111,\ .101,\ .011,\ .001,\ .000,\ \ldots$
+
+		{\red But} only $5$ distinct values appear: here $\gcd(\nu, 2^k-1) = \gcd(3,15) = 3$,
+		so the output period collapses to $15/3 = 5$ --- see the next slide.
 		
 	\end{frame}
 	
@@ -968,10 +989,10 @@ Historically, MRG32k3a was one of the few generators offering built-in functions
 
 	A Julia package providing a unified framework for independent streams and substreams.
 	
-	\vspace{0.2cm}
+	\vspace{0.15cm}
 	\textbf{Installation:} \texttt{] add RandomDataStreams}
 
-	\vspace{0.4cm}
+	\vspace{0.2cm}
 	{\blue Code example:} One stream per scenario, one substream per replication.
 	
 	\begin{footnotesize}
@@ -1053,7 +1074,7 @@ u2 = rand(rng)
 		\begin{itemize}
 		    \item \textbf{Monotonic mapping:} Inversion guarantees a monotonic relationship between the uniform draw $U$ and the generated variable $X$.
 		    \vspace{0.3cm}
-		    \item \textbf{Variance Reduction:} This monotonicity is strictly required by variance reduction techniques like \textit{Common Random Numbers} (CRN) or \textit{Antithetic Variates}, which break down with other generation methods (like acceptance-rejection).
+		    \item \textbf{Variance Reduction:} This monotonicity is what makes variance reduction techniques like \textit{Common Random Numbers} (CRN) or \textit{Antithetic Variates} reliable: it guarantees the sign of the induced correlation. Methods consuming a random number of uniforms, such as acceptance-rejection, lose that guarantee and may even destroy the synchronization between runs.
 		    \vspace{0.3cm}
 		    \item \textbf{Copulae:} It is the preferred method when building dependent joint distributions using copulae.
 		\end{itemize}
@@ -1264,6 +1285,8 @@ Set
 R &= \sqrt{-2 \log (U_1)} \\
 \theta &= 2 \pi U_2
 \end{align*}
+(in an implementation, make sure that $U_1 \in (0,1]$: most libraries return
+uniforms in $[0,1)$, where $U_1 = 0$ would give $R = \infty$.)
 \item
 Set
 \begin{align*}
@@ -1425,13 +1448,17 @@ $$
 
 $$
 	C \left( F_1(x_1), \ldots, F_d(x_d) \right)
-	= \Phi_{\Sigma} \left( \Phi^{-1} \left( F_1(x_1) \right),\ldots, \Phi^{-1}\left( F_d(x_d) \right) \right),
+	= \Phi_{R} \left( \Phi^{-1} \left( F_1(x_1) \right),\ldots, \Phi^{-1}\left( F_d(x_d) \right) \right),
 $$
 where
 \begin{itemize}
 	\item $\Phi$ is the cdf of a $\calN(0,1)$,
-	\item $\Phi_{\Sigma}$ is the cdf of a $d$-dimensional $\calN(\bszero,\Sigma)$.
+	\item $\Phi_{R}$ is the cdf of a $d$-dimensional $\calN(\bszero,R)$.
 \end{itemize}
+
+Here $R$ must be a {\blue correlation} matrix (unit diagonal), not an arbitrary
+covariance: otherwise the margins of $\Phi_{R}$ are not $\calN(0,1)$ and $C$ is
+not a copula.
 
 \end{frame}
 
