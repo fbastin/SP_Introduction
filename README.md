@@ -44,6 +44,8 @@ SP_Introduction/
 ├── imgs/                          # Figure, diagram, and plot assets (EPS, PNG, PDF, JPG)
 └── code/                          # Associated code, notebooks, and scripts
     ├── chance constrained toy example.ipynb  # Jupyter notebook for chance-constrained LP
+    ├── SDDP_from_scratch.ipynb               # Step-by-step SDDP implementation (lecture 07)
+    ├── SDDP_hydro.ipynb                      # Hydro-thermal examples with SDDP.jl
     ├── cp.plot                               # Gnuplot script
     └── hello.jl                              # Julia sample script
 ```
