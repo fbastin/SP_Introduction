@@ -17,7 +17,9 @@ PDFLATEX = pdflatex -interaction=nonstopmode -shell-escape
 # delegates each PDF to the pattern rule below.
 SLIDES_GLOB = $(SLIDES_DIR)/*.tex
 
-STANDALONE_BACKGROUND = $(BACKGROUND_DIR)/lp_background.tex $(BACKGROUND_DIR)/kkt_background.tex $(BACKGROUND_DIR)/plan.tex
+# `plan.tex` does not exist yet: wildcard keeps only the sources actually present,
+# so `make background` works now and picks it up automatically if it is added later.
+STANDALONE_BACKGROUND = $(wildcard $(BACKGROUND_DIR)/lp_background.tex $(BACKGROUND_DIR)/kkt_background.tex $(BACKGROUND_DIR)/plan.tex)
 BACKGROUND_PDF = $(patsubst $(BACKGROUND_DIR)/%.tex,$(PDF_DIR)/%.pdf,$(STANDALONE_BACKGROUND))
 
 .PHONY: all slides background graphs clean help
