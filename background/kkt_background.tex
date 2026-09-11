@@ -1,19 +1,15 @@
-\documentclass[usepdftitle=false]{beamer}
+\documentclass[usepdftitle=false,aspectratio=169]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
 \usepackage{xcolor}
 \setbeamertemplate{footline}[frame number]
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \texorpdfstring{\url{fabian.bastin@umontreal.ca}}{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 \date{}
-\title[Linear programming]{KKT conditions\\Background material}
+\title[KKT conditions]{KKT conditions\\Background material}
 
-\usepackage{enumerate}
 %\usepackage[francais]{babel}
-
-\usepackage{easybmat}
-\usepackage{graphicx}
 
 \newtheorem{defn}{Definition}
 \newtheorem{lem}{Lemma}
@@ -25,8 +21,6 @@
 
 \input{../sty/macros}
 
-\setbeamertemplate{footline}[frame number]
-
 \begin{document}
 \frame{\titlepage}
 
@@ -37,20 +31,21 @@
 
 Consider the problem
 \begin{align*}
-	\min_{x \in \mathbb{R}^n} \ & f(x) \\
+	\min_{x \in \calX} \ & f(x) \\
 	\mbox{subject to } & g_i(x) \leq 0,\ i = 1,\ldots,m, \\
-	& h_j(x) = 0,\ j = 1,\ldots,r.
+	& h_j(x) = 0,\ j = 1,\ldots,r,
 \end{align*}
+where $\calX \subseteq \RR^n$ is the {\red ground set} on which $f$, $g$ and $h$ are defined (often $\calX = \RR^n$; it may also hold the constraints we prefer not to dualize).
 
-The feasible set is
+The {\red feasible set} is
 $$
-\calX = \{ x \,|\, g_i(x) \leq 0, i = 1,\ldots,m, h_j(x) = 0, j = 1,\ldots,r \}.
+\calF = \{ x \in \calX \,|\, g_i(x) \leq 0,\ i = 1,\ldots,m,\ h_j(x) = 0,\ j = 1,\ldots,r \}.
 $$
 
-$x^*$ is a global minimizer of $f(\cdot)$ if $\forall x \in \calX$, $f(x^*) \leq f(x)$.
+$x^*$ is a global minimizer if $\forall x \in \calF$, $f(x^*) \leq f(x)$.
 
-$x^*$ is a local minimizer of $f(\cdot)$ if
-$\exists \epsilon > 0$ such that $\forall x \in \calB(x^*, \epsilon) \cap \calX$, $f(x^*) \leq f(x).$
+$x^*$ is a local minimizer if
+$\exists \epsilon > 0$ such that $\forall x \in \calB(x^*, \epsilon) \cap \calF$, $f(x^*) \leq f(x).$
 
 \end{frame}
 
@@ -64,8 +59,9 @@ We define the Lagrangian as
 	$$
 and the dual Lagrangian function
 	$$
-	\calL(\lambda, \mu) = \min_{x \in \mathbb{R}^n} L(x, \lambda, \mu).
+	\calL(\lambda, \mu) = \inf_{x \in \calX} L(x, \lambda, \mu),
 	$$
+the infimum being taken over the ground set, and possibly equal to $-\infty$.
 	
 \end{frame}
 
@@ -75,18 +71,18 @@ and the dual Lagrangian function
 Consider the mathematical program
 \begin{align*}
 \min_{x \in \calX} \ & f(x) \\
-\mbox{subject to } & g_i(x) = 0,\ i = 1,\ldots,m,
+\mbox{subject to } & h_j(x) = 0,\ j = 1,\ldots,r,
 \end{align*}
-where $\calX \subset \RR^n$, $f: \RR^n \rightarrow \RR$, $g_i: \RR^n \rightarrow \RR$, $i = 1,\ldots,m$.
+where $\calX \subset \RR^n$, $f: \RR^n \rightarrow \RR$, $h_j: \RR^n \rightarrow \RR$, $j = 1,\ldots,r$.
 
 \mbox{}
 
-The {\red Lagrangian} of this problem is obtained by associating a Lagrange multiplier  $\lambda_i$ to each constraint function $g_i$:
+The {\red Lagrangian} of this problem is obtained by associating a Lagrange multiplier $\mu_j$ to each constraint function $h_j$:
 $$
-L(x, \lambda) = f(x) + \sum_{i = 1}^{m} \lambda_i g_i(x).
+L(x, \mu) = f(x) + \sum_{j = 1}^{r} \mu_j h_j(x).
 $$
 
-We can obtain very general conditions under which $x^*$ is an optimal solution to the optimization problem, while only basic assumptions are made over $\calX$ and the functions $f$ and $g_i$, $i = 1,\ldots,m$.
+We can obtain very general conditions under which $x^*$ is an optimal solution to the optimization problem, while only basic assumptions are made over $\calX$ and the functions $f$ and $h_j$, $j = 1,\ldots,r$.
 
 \end{frame}
 
@@ -97,10 +93,10 @@ We can obtain very general conditions under which $x^*$ is an optimal solution t
 Assume that the Lagrangian associated to the problem
 \begin{align*}
 \min_{x \in \calX} \ & f(x) \\
-\mbox{s.t. } & g_i(x) = 0,\ i = 1,\ldots,m,
+\mbox{s.t. } & h_j(x) = 0,\ j = 1,\ldots,r,
 \end{align*}
-has a local minimizer $x^* \in \calX$ when the multiplier vector $\lambda$ is equal to $\lambda^*$.
-If $g_i(x^*) = 0$, $i = 1,\ldots,m$, then $x^*$ if a local minimizer of $f(x)$.
+has a local minimizer $x^* \in \calX$ when the multiplier vector $\mu$ is equal to $\mu^*$.
+If $h_j(x^*) = 0$, $j = 1,\ldots,r$, then $x^*$ is a local minimizer of the constrained problem.
 \end{thm}
 
 \end{frame}
@@ -109,18 +105,18 @@ If $g_i(x^*) = 0$, $i = 1,\ldots,m$, then $x^*$ if a local minimizer of $f(x)$.
 \frametitle{Optimality}
 
 \begin{proof}
-Assume by contradiction that $x^*$ is not a local minimizer of $f(x)$.
-Then $\forall \epsilon > 0$, $\exists\, \overline{x} \in \calB(x^*, \epsilon)$ such that $g_i(\overline{x}) = 0$, $i = 1,\ldots,m$, and $f(\overline{x}) < f(x^*)$.
+Assume by contradiction that $x^*$ is not a local minimizer of the constrained problem.
+Then $\forall \epsilon > 0$, $\exists\, \overline{x} \in \calX \cap \calB(x^*, \epsilon)$ such that $h_j(\overline{x}) = 0$, $j = 1,\ldots,r$, and $f(\overline{x}) < f(x^*)$.
 	
-Thus, $\forall \lambda$,
+Thus, $\forall \mu$,
 	$$
-	\sum_{i = 1}^{m} \lambda_i g_i(x^*) = \sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) = 0,
+	\sum_{j = 1}^{r} \mu_j h_j(x^*) = \sum_{j = 1}^{r} \mu_j h_j(\overline{x}) = 0,
 	$$
 and
 $$
-f(\overline{x}) + \sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) < f(x^*) + \sum_{i = 1}^{m} \lambda_i g_i(x^*).
+f(\overline{x}) + \sum_{j = 1}^{r} \mu_j h_j(\overline{x}) < f(x^*) + \sum_{j = 1}^{r} \mu_j h_j(x^*).
 $$
-Taking $\lambda = \lambda^*$, the previous inequality contradicts that $x^*$ is a local minimizer of the Lagrangian when $\lambda = \lambda^*$.
+Taking $\mu = \mu^*$, the previous inequality contradicts that $x^*$ is a local minimizer of the Lagrangian when $\mu = \mu^*$.
 \end{proof}
 
 \end{frame}
@@ -128,12 +124,7 @@ Taking $\lambda = \lambda^*$, the previous inequality contradicts that $x^*$ is 
 \begin{frame}
 \frametitle{Lagrange multipliers: inequality constraints}
 
-Consider the mathematical program
-\begin{align*}
-\min_{x \in \calX} \ & f(x) \\
-\mbox{subject to } & g_i(x) \leq 0,\ i = 1,\ldots,m.
-\end{align*}
-where $\calX \subset \RR^n$, $f: \RR^n \rightarrow \RR$, $g_i: \RR^n \rightarrow \RR$, $i = 1,\ldots,m$.
+Same setting, with inequality constraints: $\calX \subset \RR^n$, $f: \RR^n \rightarrow \RR$, $g_i: \RR^n \rightarrow \RR$, $i = 1,\ldots,m$.
 
 \mbox{}
 
@@ -143,8 +134,8 @@ Assume that the Lagrangian associated to the problem
 \min_{x \in \calX} \ & f(x) \\
 \mbox{s.t. } & g_i(x) \leq 0,\ i = 1,\ldots,m,
 \end{align*}
-has a local minimum $x^* \in \calX$ when the multipliers vector $\lambda$ is equal to $\lambda^*$.
-If $g_i(x^*) \leq 0$, $\lambda^*_i \geq 0$, and $\lambda^*_i g_i(x^*) = 0$, $i = 1,\ldots,m$, then $x^*$ is a local minimum of $f(x)$.
+has a local minimizer $x^* \in \calX$ when the multiplier vector $\lambda$ is equal to $\lambda^*$.
+If $g_i(x^*) \leq 0$, $\lambda^*_i \geq 0$, and $\lambda^*_i g_i(x^*) = 0$, $i = 1,\ldots,m$, then $x^*$ is a local minimizer of the constrained problem.
 \end{thm}
 
 \end{frame}
@@ -153,8 +144,8 @@ If $g_i(x^*) \leq 0$, $\lambda^*_i \geq 0$, and $\lambda^*_i g_i(x^*) = 0$, $i =
 \frametitle{Lagrange multipliers: inequality constraints}
 	
 \begin{proof}
-	As previously, assume by contradiction that $x^*$ is not a local minimizer of $f(x)$.
-Then $\forall \epsilon > 0$, $\exists\, \overline{x} \in \calB(x^*, \epsilon)$ such that $g_i(\overline{x}) \leq 0$, $i = 1,\ldots,m$ and $f(\overline{x}) < f(x^*)$.
+	As previously, assume by contradiction that $x^*$ is not a local minimizer of the constrained problem.
+Then $\forall \epsilon > 0$, $\exists\, \overline{x} \in \calX \cap \calB(x^*, \epsilon)$ such that $g_i(\overline{x}) \leq 0$, $i = 1,\ldots,m$, and $f(\overline{x}) < f(x^*)$.
 Therefore, for $\lambda = \lambda^* \geq 0$,
 $$
 \sum_{i = 1}^{m} \lambda_i g_i(\overline{x}) \leq 0 \mbox{ and }
@@ -186,6 +177,57 @@ The dual problem is always convex, i.e. $\calL$ is always concave (even if the p
 The primal and dual (global) optimal values, $f^*$ and $\calL^*$, always satisfy the weak duality: $f^* \geq \calL^*$.
 \item {\blue Strong duality}: under some conditions (constraint qualifications), $f^* = \calL^*$.
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Saddle point}
+
+Since
+$$
+\max_{\lambda \geq 0,\ \mu} L(x, \lambda, \mu) =
+\begin{cases}
+f(x) & \mbox{if } x \in \calF, \\
++\infty & \mbox{otherwise,}
+\end{cases}
+$$
+the primal problem reads $\min_{x \in \calX} \max_{\lambda \geq 0,\ \mu} L(x,\lambda,\mu)$, and the dual problem
+$\max_{\lambda \geq 0,\ \mu} \min_{x \in \calX} L(x,\lambda,\mu)$: weak duality is nothing but $\max \min \leq \min \max$.
+
+\begin{defn}[Saddle point]
+$(x^*, \lambda^*, \mu^*)$, with $\lambda^* \geq 0$, is a saddle point of $L$ if
+$$
+L(x^*, \lambda, \mu) \leq L(x^*, \lambda^*, \mu^*) \leq L(x, \lambda^*, \mu^*)
+\quad \forall\, x \in \calX,\ \forall\, \lambda \geq 0,\ \forall\, \mu.
+$$
+\end{defn}
+
+$(x^*, \lambda^*, \mu^*)$ is a saddle point if and only if $x^*$ is primal optimal, $(\lambda^*, \mu^*)$ is dual optimal, and the duality gap is null.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Working with the dual function}
+\small
+
+$\calL$ is concave, being an infimum of functions that are affine in $(\lambda, \mu)$, but it is usually {\red not differentiable}.
+A supergradient is however immediate.
+
+\begin{thm}
+Let $\overline{x} \in \arg\min_{x \in \calX} L(x, \lambda, \mu)$. Then, for all $(\lambda', \mu')$,
+$$
+\calL(\lambda', \mu') \leq \calL(\lambda, \mu) + g(\overline{x})^T(\lambda'-\lambda) + h(\overline{x})^T(\mu'-\mu).
+$$
+\end{thm}
+\begin{proof}
+$\calL(\lambda', \mu') \leq L(\overline{x}, \lambda', \mu')
+= L(\overline{x}, \lambda, \mu) + g(\overline{x})^T(\lambda'-\lambda) + h(\overline{x})^T(\mu'-\mu)$,
+and $L(\overline{x}, \lambda, \mu) = \calL(\lambda, \mu)$ by definition of $\overline{x}$.
+\end{proof}
+
+The constraint values at the Lagrangian minimizer thus give a supergradient, the search direction of the {\red dual ascent} methods:
+$\lambda^{\nu+1} = \max \lbrace \lambda^{\nu} + \alpha^{\nu} g(\overline{x}^{\nu}), 0 \rbrace$, the maximum projecting on $\lambda \geq 0$.
+As $\calL$ is non-smooth, such a direction is not necessarily an ascent one: the step $\alpha^{\nu}$ must be chosen accordingly.
 
 \end{frame}
 
@@ -269,11 +311,11 @@ The inequality can be strict.
 \begin{frame}
 	\frametitle{Necessary conditions}
 	
-	Let $x^*$ be a minimizer of $f(\cdot)$ in $\calB(x^*,\epsilon)$, $\epsilon > 0$, and $(\lambda^*, \mu^*)$ be a dual solution if $x$ is restricted to $\calB(x^*,\epsilon)$, with a zero duality gap (the strong duality holds). Then
+	Let $x^*$ be a minimizer of $f$ over $\calF \cap \calB(x^*,\epsilon)$, $\epsilon > 0$, and $(\lambda^*, \mu^*)$ be a dual solution if $x$ is restricted to $\calB(x^*,\epsilon)$, with a zero duality gap (the strong duality holds). Then
 	\begin{align*}
 		f(x^*) &= \calL_{\calB(x^*, \epsilon)}(\lambda^*, \mu^*) \\
-		&= \min_{x \in \calB(x^*,\epsilon)} \left( f(x) + \sum_{i = 1}^m \lambda_i^* g_i(x) + \sum_{i = 1}^r \mu_i^* h_i(x) \right) \\
-		& \leq f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{i = 1}^r \mu_i^* h_i(x^*) \\
+		&= \min_{x \in \calB(x^*,\epsilon)} \left( f(x) + \sum_{i = 1}^m \lambda_i^* g_i(x) + \sum_{j = 1}^r \mu_j^* h_j(x) \right) \\
+		& \leq f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{j = 1}^r \mu_j^* h_j(x^*) \\
 		& \leq f(x^*)
 	\end{align*}
 	Thus, $x^*$ is a minimizer of $L(x, \lambda^*, \mu^*)$ in $\calB(x^*,\epsilon)$, and $\nabla_x L(x^*, \lambda^*, \mu^*) = 0$.
@@ -314,11 +356,12 @@ We have obtained the stationarity conditions.
 The strong duality assumption often plays a key role. How to ensure that it holds?
 \begin{itemize}
 \item
-Linear programming. It always holds.
+{\red Linear programming}: it always holds, as soon as one of the two programs has a finite optimal value.
 \item
-Convex programming. Slater condition: $\exists x$ such that $g_i(x) < 0$, $i = 1,\ldots,m$ et $h_i(x) = 0$, $i = 1,\ldots,r$.
+{\red Convex programming}: the program is convex when $\calX$ is convex, $f$ and the $g_i$ are convex, and the $h_j$ are affine.
+The {\red Slater condition} is then sufficient: there exists a feasible $x$ in the relative interior of $\calX$ with $g_i(x) < 0$ for every non-affine $g_i$.
 \item
-Nonconvex programming. Constraint qualification hypothesis. The most common, while the most restrictive, is the linear independence constraint qualification (LICQ).
+{\red Nonconvex programming}: a constraint qualification is required. The most common, and the most demanding, is the linear independence constraint qualification (LICQ).
 \end{itemize}
 
 \end{frame}
@@ -331,9 +374,9 @@ If $x^*$ is a local solution of
 \begin{align*}
 \min_{x \in \calX} \ & f(x) \\
 \mbox{s.t. } & g_i(x) \leq 0,\ i = 1,\ldots,m \\
-& h_i(x) = 0,\ i = 1,\ldots,r,
+& h_j(x) = 0,\ j = 1,\ldots,r,
 \end{align*}
-where $f$, $g_i$ et $h_i$, $i = 1,\ldots,m$, $\in C^1$, and a constraint qualification condition holds at $x^*$, then
+where $f$, the $g_i$, $i = 1,\ldots,m$, and the $h_j$, $j = 1,\ldots,r$, are $C^1$, and a constraint qualification condition holds at $x^*$, then
 $\exists (\lambda^*, \mu^*)$ such that the KKT conditions hold at $(x^*,\lambda^*, \mu^*)$.
 \end{thm}
 
@@ -345,24 +388,85 @@ See Nocedal \& Wright, ``Numerical Optimization'', Section 12.4.
 
 \begin{frame}
 	\frametitle{Sufficiency of KKT conditions}
+	\small
 	
-	If $\exists\, x^*$, $(\lambda^*, \mu^*)$ satisfying the KKT conditions, then
+	Let $(x^*, \lambda^*, \mu^*)$ satisfy the KKT conditions.
+	Primal feasibility and complementarity give
 	$$
-	L(\lambda^*, \mu^*) = f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{i = 1}^r \mu_i^* h_i(x^*) = f(x^*)
+	L(x^*, \lambda^*, \mu^*) = f(x^*) + \sum_{i = 1}^m \lambda_i^* g_i(x^*) + \sum_{j = 1}^r \mu_j^* h_j(x^*) = f(x^*).
 	$$
-	Thus, the duality gap is null ({\red strong duality}).
-		
+	
 	\mbox{}
 	
-	In the convex case, this implies that $x^*$ and $(\lambda^*, \mu^*)$ are global primal and dual optimal solutions, respectively.
+	{\red In the convex case}, $L(\cdot, \lambda^*, \mu^*)$ is convex, so stationarity makes $x^*$ a {\it global} minimizer of the Lagrangian over $\calX$:
+	$$
+	\calL(\lambda^*, \mu^*) = L(x^*, \lambda^*, \mu^*) = f(x^*).
+	$$
+	The duality gap is null ({\red strong duality}) and $x^*$, $(\lambda^*, \mu^*)$ are globally optimal for the primal and the dual, respectively.
 
 	\mbox{}
 
-	In the nonconvex case, $x^*$ is a local minimizer, not necessarily global, or a saddle point.
+	{\red In the nonconvex case}, stationarity only makes $x^*$ a critical point of $L(\cdot, \lambda^*, \mu^*)$: it may be a local minimizer, a saddle point, or even a maximizer, and $\calL(\lambda^*, \mu^*) < f(x^*)$ remains possible.
+	The KKT conditions are then necessary, under a constraint qualification, but not sufficient --- not even locally, as the next slide shows.
 	% donner un exemple du dernier cas
 	
 	%Si $x^*$ n'est pas un minimum global, la fonction dual lagrangienne n'est pas non plus minimisée globalement. Si on considère le minimum global de la fonction duale lagrangienne, le saut de dualité n'est pas nul.
 	
+\end{frame}
+
+\begin{frame}
+\frametitle{KKT and the local duality gap}
+\small
+
+The necessary conditions were obtained from the {\red local} strong duality. Does the converse hold: do the KKT conditions restore a null gap on a small enough ball?
+
+\mbox{}
+
+As $L(x^*, \lambda^*, \mu^*) = f(x^*)$, the local gap vanishes on $\calB(x^*, \epsilon)$ {\red if and only if} $x^*$ \emph{minimizes} $L(\cdot, \lambda^*, \mu^*)$ on that ball. The KKT conditions only provide {\red stationarity}, which is strictly weaker.
+A constraint qualification cannot help: it is what makes the conditions {\it necessary} at a local solution, and says nothing about what they imply.
+
+\begin{block}{Counterexample}
+$\min_{x \in \RR^2} x_1^2 - x_2^2$ subject to $h(x) = x_2 = 0$.
+The feasible set is the axis $x_2 = 0$, on which $f = x_1^2$: $x^* = (0,0)$ is the unique global solution, and $L(x,\mu) = x_1^2 - x_2^2 + \mu x_2$ is stationary at $x^*$ for $\mu^* = 0$.
+Regularity is not at fault: $\nabla h = (0,1) \neq 0$, so {\red LICQ holds}, and on the critical cone $\lbrace d \,|\, d_2 = 0 \rbrace$, which is not trivial, $\nabla^2_{xx}L = \operatorname{diag}(2,-2)$ is positive definite --- the {\red second-order sufficient conditions hold} too.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{KKT and the local duality gap (cont'd)}
+
+Yet $L(\cdot, \mu^*) = x_1^2 - x_2^2$ has a {\red saddle point} at $x^*$, so for {\it every} $\epsilon > 0$
+$$
+\calL_{\calB(x^*, \epsilon)}(\mu^*) = \min_{\|x\| \leq \epsilon} \left( x_1^2-x_2^2 \right) = -\epsilon^2 < 0 = f(x^*).
+$$
+The gap does tend to $0$ with $\epsilon$, which makes the mistake tempting, but it vanishes on no neighbourhood.
+And the failure has nothing to do with the optimality of $x^*$, which is global: it comes from the behaviour of the Lagrangian itself.
+
+\mbox{}
+
+A sufficient condition is $\nabla^2_{xx} L \succ 0$ on the {\red whole} space, and not only on the critical cone: above, $\operatorname{diag}(2,-2)$ is positive definite on the cone but indefinite on $\RR^2$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Restoring a local zero gap}
+
+The {\red augmented Lagrangian} is precisely the standard remedy:
+$$
+L_{\rho}(x, \lambda, \mu) = L(x, \lambda, \mu) + \frac{\rho}{2}\|h(x)\|^2,
+$$
+whose Hessian at $x^*$ is $\nabla^2_{xx}L + \rho\, \nabla h(x^*)\nabla h(x^*)^T$.
+Under LICQ and the second-order conditions, it becomes positive definite for $\rho$ large enough, so $x^*$ locally minimizes $L_{\rho}$ and the local gap vanishes.
+
+\mbox{}
+
+On the previous counterexample, $L_{\rho}(x, 0) = x_1^2 + (\rho/2 - 1)x_2^2$, of Hessian $\operatorname{diag}(2, \rho-2)$: the gap is positive for $\rho \leq 2$ and null as soon as $\rho > 2$.
+
+\mbox{}
+
+This is the motivation for the augmented Lagrangian methods, and in stochastic programming for {\red progressive hedging}, where the penalty is placed on the nonanticipativity constraints.
+
 \end{frame}
 
 \begin{frame}
@@ -377,7 +481,7 @@ The active set $\calA(x)$ of the optimization problem
 \end{align*}
 in a feasible point $x$ is the index set of the equality constraints and the active inequality constraints at that point:
 $$
-\calA(x) = \calE U \{ i \,|\, g_i(x) = 0 \}
+\calA(x) = \calE \cup \lbrace i \in \calI \,|\, g_i(x) = 0 \rbrace
 $$
 \end{defn}
 
@@ -389,7 +493,7 @@ $$
 The most popular constraint qualification is the LICQ.
 
 \begin{defn}[LICQ]
-Given the point $x$ and the active set $\calA(x)$, the linear independence constraint qualification (LICQ) holds if the gradients of the active constraints, $\{\nabla_x c_i(x), i \in \calA(x)\}$, are linearly independent.
+Given a feasible point $x$ and its active set $\calA(x)$, the linear independence constraint qualification (LICQ) holds at $x$ if the gradients of the active constraints, $\lbrace \nabla_x h_i(x),\ i \in \calE \rbrace \cup \lbrace \nabla_x g_i(x),\ i \in \calA(x) \cap \calI \rbrace$, are linearly independent.
 \end{defn}
 
 \end{frame}

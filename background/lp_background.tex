@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
@@ -9,10 +9,7 @@
 %\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
 %\usepackage[pst]{xcolor}
 %\usepackage{xxcolor}
-\usepackage{../sty/mathlist}
-
 %\usepackage[frenchb]{babel}
-\usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,amsthm}
 
 \newtheorem{theo}{Theorem}
@@ -23,29 +20,15 @@
 
 \usepackage{times}
 
-%\usepackage{pst-tree}
-
-\usepackage{ulem}
-
-\usepackage{listings}
-%\topmargin=-0.6in
-\lstloadlanguages{C++}
-\lstset{language=C++}
-%%}
-
 \setbeamercovered{dynamic}
 
 \def\bxi{\boldsymbol\xi}
 \def\bomega{\boldsymbol\omega}
-\def\bxi{\boldsymbol\xi}
-
-\def\rit{\mathcal{R}}
 
 \def\cF{\mathcal{F}}
 \def\cK{\mathcal{K}}
 \def\cB{\mathcal{B}}
 \def\cQ{\mathcal{Q}}
-\def\RR{\mathcal{R}}
 
 \def\bb{\boldsymbol{b}}
 \def\bc{\boldsymbol{c}}
@@ -56,7 +39,7 @@
 
 \def\RR{\mathbb{R}}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
+\author[Fabian Bastin]{Fabian Bastin \\ \texorpdfstring{\url{fabian.bastin@umontreal.ca}}{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 \title[Linear programming]{Linear programming\\Background material}
 
@@ -69,9 +52,9 @@
 
 Linear program, standard form:
 \begin{align*}
-\min_x c^Tx \\
-\mbox{s.t. } Ax &= b,\\
-x &\geq 0,
+\min_x\ & c^Tx \\
+\mbox{s.t. } & Ax = b,\\
+& x \geq 0,
 \end{align*}
 with $x, c \in \RR^n$, $b \in \RR^m$, $A \in \RR^{m \times n}$.
 
@@ -88,7 +71,7 @@ Consider for instance the program
 \[
 \min_x c^Tx \mbox{ s.t. } Ax \geq b.
 \]
-Note that there is no bound constraints on $x$.
+Note that there is no sign constraint on $x$.
 
 \mbox{}
 
@@ -147,9 +130,9 @@ Without loss of generality, suppose that the first $m$ columns are independent, 
 	
 	\mbox{}
 	
-	\textcolor{blue}{\it Basic solution}: $\bx = (\bx_b \ 0)$, with $\bB\bx_b = \bb$.\\
-	\textcolor{blue}{\it Degenerated basic solution}: some components of $\bx_b$ are equal to zero. \\
-	\textcolor{blue}{\it Feasible basic solution}: basic solution such that $\bA\bx = \bb$ and $\bx \geq 0$.
+	\textcolor{blue}{\it Basic solution}: $\bx = (\bx_B \ 0)$, with $\bB\bx_B = \bb$.\\
+	\textcolor{blue}{\it Degenerate basic solution}: some components of $\bx_B$ are equal to zero. \\
+	\textcolor{blue}{\it Feasible basic solution}: basic solution such that $\bx_B \geq 0$.
 
 \end{frame}
 
@@ -165,8 +148,32 @@ Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\
 	\end{itemize}
 
 \end{frame}
+
 \begin{frame}
-	\frametitle{Duality}
+\frametitle{Extreme points and extreme rays}
+
+Let $P = \lbrace x \,|\, Ax = b,\ x \geq 0 \rbrace$ be non-empty.
+\begin{itemize}
+	\item
+	The {\red extreme points} (vertices) of $P$ are exactly its feasible basic solutions.
+	There is therefore a {\red finite} number of them, at most $\binom{n}{m}$.
+	\item
+	The {\red recession cone} of $P$ is $\lbrace d \,|\, Ad = 0,\ d \geq 0 \rbrace$, and it has finitely many {\red extreme rays}.
+	\item
+	{\red Resolution theorem}: every $x \in P$ is the sum of a convex combination of the extreme points and of a non-negative combination of the extreme rays.
+\end{itemize}
+
+\mbox{}
+
+Consequently a linear program over $P$ either attains its optimum at an extreme point, or is unbounded along an extreme ray $r$ such that $c^Tr < 0$.
+
+\mbox{}
+
+A polyhedron admits an extreme point as soon as it contains no line, which $x \geq 0$ guarantees here.
+
+\end{frame}
+\begin{frame}
+	\frametitle{Duality: symmetric form}
 
 \begin{itemize}
 	\item 
@@ -188,31 +195,14 @@ Consider an LP under standard form, with $\bA \in \RR^{m \times n}$, and rank($\
 \tag{D}\label{eq:dual}
 \end{equation}
 \item
-$A \in \RR^{m \times n}$, $c, x, \in \RR^n$, $\lambda, b \in \RR^m$.
+$A \in \RR^{m \times n}$, $c, x \in \RR^n$, $\lambda, b \in \RR^m$: $x$ gathers the {\red primal} variables, $\lambda$ the {\red dual} ones.
+\item
+Dualizing (D) gives (P) back: the dual of the dual is the primal.
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Duality}
-
-\begin{itemize}
-	\item 
-	$x$: primal variables
-	\item
-	$\lambda$: dual variables
-\item 	
-	Dual of the dual:
-	\begin{align*}
-		\min_x \ & c^T x \\
-		\mbox{s.t. } & Ax \geq b \\
-		& x \geq 0
-	\end{align*}
-\end{itemize}
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Duality: standard form}
+	\frametitle{Duality: from the standard form}
 	
 	The program
 	\begin{align*}
@@ -231,7 +221,7 @@ $A \in \RR^{m \times n}$, $c, x, \in \RR^n$, $\lambda, b \in \RR^m$.
 \end{frame}
 
 \begin{frame}
-	\frametitle{Duality: standard form}
+	\frametitle{Duality: asymmetric form}
 	
 The dual problem can then be written as
 	\begin{align*}
@@ -246,7 +236,7 @@ The dual problem can then be written as
 		\mbox{s.t. } & \lambda^T A \leq c^T \\
 	\end{align*}
 	
-Asymmetric from $\lambda \in \RR^m$.
+Asymmetric form: $\lambda \in \RR^m$ is unrestricted in sign.
 	
 \end{frame}
 
@@ -321,21 +311,22 @@ Asymmetric from $\lambda \in \RR^m$.
 
 \mbox{}
 
-If a program is unfeasible, this does not imply that its dual is unbounded. It can also be unfeasible.
+If a program is infeasible, this does not imply that its dual is unbounded: it can be infeasible as well.
+``Bounded'' below means that the program is feasible and has a finite optimal value.
 
 \mbox{}
 
 \begin{center}
 	\begin{tabular}{|c||c|c|c|}
 		\hline
-		Primal / Dual & Bounded & Unbounded & Unfeasible \\
+		Primal / Dual & Bounded & Unbounded & Infeasible \\
 		\hline
 		\hline
 		Bounded & possible & impossible & impossible \\
 		\hline
 		Unbounded & impossible & impossible & possible \\
 		\hline
-		Unfeasible & impossible & possible & possible \\
+		Infeasible & impossible & possible & possible \\
 		\hline
 	\end{tabular}
 \end{center}
@@ -343,7 +334,30 @@ If a program is unfeasible, this does not imply that its dual is unbounded. It c
 \end{frame}
 
 \begin{frame}
-\frametitle{Optimality et duality}
+\frametitle{Polyhedral cones and Farkas' lemma}
+
+{\red Positive hull}, or cone generated by the columns of $A$:
+\[
+\text{pos}\,A = \lbrace z \,|\, z = Ax,\ x \geq 0 \rbrace.
+\]
+It is exactly the set of right-hand sides $z$ for which $Ax = z$, $x \geq 0$, admits a solution.
+
+\begin{block}{Farkas' lemma}
+Let $A \in \RR^{m \times n}$ and $b \in \RR^m$. Exactly one of the following holds:
+\begin{itemize}
+	\item
+	$\exists\, x \geq 0$ such that $Ax = b$, i.e. $b \in \text{pos}\,A$;
+	\item
+	$\exists\, u \in \RR^m$ such that $A^Tu \geq 0$ and $b^Tu < 0$.
+\end{itemize}
+\end{block}
+
+The second vector is a {\red certificate of infeasibility}: it defines a hyperplane separating $b$ from $\text{pos}\,A$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Optimality and duality}
 
 The optimality can be deduced from KKT conditions.
 
@@ -389,6 +403,34 @@ or, equivalently,
 \[
 \max_\pi b^T\pi, \mbox{ s.t. } A^T\pi +s = c,\ s \geq 0.
 \]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The value function of a linear program}
+
+Consider the optimal value as a function of the right-hand side,
+\[
+z(b) \overset{\mathrm{def}}{=} \min_x \lbrace c^Tx \,|\, Ax = b,\ x \geq 0 \rbrace,
+\]
+with $z(b) = +\infty$ when the program is infeasible: $\operatorname{dom} z = \text{pos}\,A$.
+
+\mbox{}
+
+By duality, $z(b) = \max_{\pi} \lbrace \pi^Tb \,|\, A^T\pi \leq c \rbrace$, where the feasible set {\red does not depend on $b$}.
+Denoting by $\pi^1, \ldots, \pi^r$ its extreme points, for any $b \in \operatorname{dom} z$,
+\[
+z(b) = \max_{i = 1,\ldots,r} (\pi^i)^Tb.
+\]
+
+\begin{itemize}
+	\item
+	$z$ is {\red convex and piecewise linear} in $b$, with finitely many pieces;
+	\item
+	any optimal dual solution $\pi^*$ is a {\red subgradient}: $z(b') \geq z(b) + (\pi^*)^T(b'-b)$;
+	\item
+	as a function of the costs $c$, $z$ is a minimum of linear functions, hence {\red concave and piecewise linear}.
+\end{itemize}
 
 \end{frame}
 
