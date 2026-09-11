@@ -1298,6 +1298,71 @@ Y &= R \sin(\theta)
 \end{frame}
 
 \begin{frame}
+\frametitle{What \texttt{randn()} really does: the ziggurat}
+
+Neither inversion nor Box-Muller: most libraries (Julia, R, NumPy) draw normal variates with
+the {\blue ziggurat} method (Marsaglia and Tsang, 2000).
+
+\vspace{0.2cm}
+
+{\red Idea}: cover the density with 256 layers of \emph{equal area}, precomputed once in three
+tables. Draw a single 52-bit word and cut it into pieces:
+\begin{itemize}
+\item 1 bit for the sign, 8 bits for the index of the layer, the rest for the position inside it;
+\item if the point falls in the rectangular part of the layer, accept it --- one table lookup, one
+multiplication, and \emph{no} transcendental function.
+\end{itemize}
+
+The fast path is taken in $98.5\%$ of the draws: in a tight loop, a normal variate costs barely
+more than the uniform it consumes, some five times less than inversion.
+
+\vspace{0.2cm}
+
+{\red Price}: acceptance-rejection again ($1.02$ uniforms per variate, at random), hence neither
+monotone nor synchronized --- no CRN, no antithetic variates, no QMC. And, unlike inversion, it
+reads the \emph{individual bits} of the generator.
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{When the bits are not what the algorithm assumes}
+
+The ziggurat asks for 52 \emph{independent} bits: the generator's own when it is
+\texttt{UInt64}-native, and otherwise the \emph{mantissa} of a float:
+
+\begin{footnotesize}
+\begin{semiverbatim}
+_rand52(r, ::Type\{Float64\}) = reinterpret(UInt64, rand(r, CloseOpen12()))
+\end{semiverbatim}
+\end{footnotesize}
+
+\vspace{-0.1cm}
+MRG32k3a is \texttt{Float64}-native and returns a multiple of $1/m_1$, $m_1 = 2^{32}-209$: some 32
+random bits, stretched over a 52-bit mantissa. On $10^6$ draws (\texttt{RandomDataStreams} v0.2.0):
+
+\begin{center}
+\begin{footnotesize}
+\begin{tabular}{lcc}
+\hline
+ & MRG32k3a stream & Xoshiro256++ stream \\
+\hline
+$P(\mbox{lowest bit} = 1)$ & {\red $0.334$} & $0.500$ \\
+\texttt{randn}: mean / std & {\red $+0.340$ / $0.940$} & $+0.000$ / $1.000$ \\
+\hline
+\end{tabular}
+\end{footnotesize}
+\end{center}
+
+That bit is the \emph{sign}: magnitudes are right, two draws out of three are positive.
+\texttt{rand(rng, Normal())} and \texttt{MvNormal} inherit it, inversion does not, and SmallCrush
+cannot see it --- it tests the uniforms, which are sound.
+
+{\blue Rule of thumb}: draw normals from a \texttt{UInt64}-native stream (xoshiro, PCG, Philox), or
+by inversion --- a bit-level method is a tacit contract with the generator, unenforced.
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Multivariate distributions}
 
 What if we want to draw from $\bsX: \Omega \rightarrow \calX \subseteq \RR^d$?
@@ -1481,6 +1546,7 @@ not a copula.
     \item \textbf{Philox \& CBRNGs:} Salmon et al. (2011). \textit{Parallel Random Numbers: As Easy as 1, 2, 3}. \url{https://doi.org/10.1145/2063384.2063405}
     \item \textbf{PCG family:} O'Neill, M. E. (2014). \url{https://www.pcg-random.org/}
     \item \textbf{xoshiro / xorshift:} Blackman, D. \& Vigna, S. (2021). \textit{Scrambled Linear Pseudorandom Number Generators}. \url{https://prng.di.unimi.it/}
+    \item \textbf{Ziggurat:} Marsaglia, G. \& Tsang, W. W. (2000). \textit{The Ziggurat Method for Generating Random Variables}. \url{https://doi.org/10.18637/jss.v005.i08}
     \item \textbf{Non-uniform generation:} Devroye, L. (1986). \textit{Non-Uniform Random Variate Generation}. \url{http://luc.devroye.org/rnbookindex.html}
 \end{itemize}
 
