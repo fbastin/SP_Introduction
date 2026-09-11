@@ -12,7 +12,6 @@
 \input{../sty/macros}
 
 %\usepackage[frenchb]{babel}
-\usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,amsthm}
 
 \newtheorem{theo}{Theorem}
@@ -21,21 +20,18 @@
 
 \usepackage{times}
 
-\usepackage{ulem}
-
-\usepackage{listings}
-%\topmargin=-0.6in
-\lstloadlanguages{C++}
-\lstset{language=C++}
-%%}
-
 \setbeamercovered{dynamic}
 
 \def\bomega{\boldsymbol\omega}
 
-\def\cQ{\mathcal{Q}}
+\newcommand{\WS}{\mathrm{WS}}
+\newcommand{\RP}{\mathrm{RP}}
+\newcommand{\EV}{\mathrm{EV}}
+\newcommand{\EEV}{\mathrm{EEV}}
+\newcommand{\EVPI}{\mathrm{EVPI}}
+\newcommand{\VSS}{\mathrm{VSS}}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
+\author[Fabian Bastin]{Fabian Bastin \\ \texorpdfstring{\url{fabian.bastin@umontreal.ca}}{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 \title[Two-stage SP]{Stochastic optimization\\Two-stage stochastic programming with recourse}
 
@@ -60,8 +56,9 @@
 
 \begin{frame}
 	\frametitle{A random linear program}
+	\small
 	
-	Consider the linear program (LP), parametrized by the random variable (r.v.) $\bsxi: \Omega \rightarrow \RR^2$:
+	Consider the linear program (LP), parametrized by the random vector (r.v.) $\bsxi: \Omega \rightarrow \RR^r$:
 	\begin{align*}
 		\min_x\ & c^T x \\
 		\mbox{s.t. } & Ax = b \\
@@ -156,7 +153,7 @@
 	\min\ & c^Tx+\EE_{\bsxi}[q^T_+s(\bsxi)+q^T_-t(\bsxi)] \\
 	\mbox{s.t. } & Ax = b, \\
 	& T(\xi)x + s(\xi)-t(\xi) = h(\xi),\ \text{ for a.e. } \xi \\
-	& x \in X,
+	& x \in X, \quad s(\xi) \geq 0,\ t(\xi) \geq 0,\ \text{ for a.e. } \xi,
 	\end{align*}
 where {\it a.e.} stands for ``almost every''.
 	\begin{itemize}
@@ -225,7 +222,7 @@ where {\it a.e.} stands for ``almost every''.
 	\frametitle{Expression in terms of $y$'s}
 	
 	\begin{align*}
-	\min_{x,\ y(\bsxi)}\ & E_{\bsxi} [ c^T x + q^T y(\bsxi) ] \\
+	\min_{x,\ y(\bsxi)}\ & \EE_{\bsxi} [ c^T x + q^T y(\bsxi) ] \\
 	\mbox{s.t. } & Ax = b & \mbox{\textcolor{blue}{first-stage constraints}} \\
 	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi &
 	\mbox{\textcolor{blue}{second-stage constraints}} \\
@@ -237,7 +234,7 @@ where {\it a.e.} stands for ``almost every''.
 	Consider the (discrete) case where $\Omega = \lbrace \omega_1,\
 	\omega_2,\ldots,\omega_S \rbrace$, with support $\Xi = \bsxi(\Omega) \subseteq \RR^r$.
 	\begin{align*}
-	P(\omega = \omega_s) & = p_s,\ s = 1, 2,\ldots, S \\
+	P[\lbrace \omega_s \rbrace] & = p_s,\ s = 1, 2,\ldots, S \\
 	T_s & = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s)) 
 	\end{align*}
 	
@@ -290,7 +287,7 @@ where {\it a.e.} stands for ``almost every''.
 \begin{frame}
 	\frametitle{Large scale,\ldots and?}
 	
-	Assume that we have $r$ random variables ($\Omega \subset
+	Assume that we have $r$ random variables ($\Xi \subseteq
 	\RR^r$).
 	\begin{itemize}
 		\item
@@ -366,9 +363,10 @@ where {\it a.e.} stands for ``almost every''.
 	\end{align*}
 	and
 	\begin{align*}
-	Q(x, \xi) &= \min_y q_1y_1 + q_2y_2 \qquad (q_1 = q_2 = \lambda \text{ above}) \\
+	Q(x, \xi) = \min_y\ & q_1y_1 + q_2y_2 \qquad (q_1 = q_2 = \lambda \text{ above}) \\
 	\mbox{s.t. } & \xi_1 x_1 + x_2 + y_1 \geq 7, \\
-	& \xi_2 x_1 + x_2 + y_2 \geq 4.
+	& \xi_2 x_1 + x_2 + y_2 \geq 4, \\
+	& y_1, y_2 \geq 0.
 	\end{align*}
 	
 \end{frame}
@@ -378,14 +376,14 @@ where {\it a.e.} stands for ``almost every''.
 
 We go a bit further by considering the problem
 \[
-\min c^Tx + E_{\bsxi}[q(\bsxi)^Ty(\bsxi)]
+\min c^Tx + \EE_{\bsxi}[q(\bsxi)^Ty(\bsxi)]
 \]
 subject to the constraints
 \begin{align*}
 Ax &= b, \\
 T(\xi)x + Wy(\xi) &= h(\xi) \qquad \text{for a.e. } \xi \in \Xi, \\
 x & \in X, \\
-y(\xi) & \in Y,
+y(\xi) & \in Y \qquad \text{for a.e. } \xi \in \Xi,
 \end{align*}
 where $\bsxi$ is a random vector defined on the probability space 
 $(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bsxi$.
@@ -394,7 +392,6 @@ $(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bsxi$.
 
 \begin{frame}
 \frametitle{Reformulation(s)}
-
 
 The problem becomes
 \[
@@ -409,14 +406,14 @@ with
 Q(x, \xi) = \min_{y \in Y} \left\lbrace q(\xi)^Ty: Wy = h(\xi) - T(\xi)x \right\rbrace.
 \]
 
-\mbox{}
+\smallskip
 
-{\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \RR^m \rightarrow \RR$:
+{\red Second-stage function}, or {\red recourse function}, $v: \Xi \times \RR^m \rightarrow \overline{\RR} = \RR \cup \lbrace \pm\infty \rbrace$:
 \[
 v(\xi, z) \overset{\mathrm{def}}{=} \min_{y \in Y} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace.
 \]
 
-\mbox{}
+\smallskip
 
 Given a ``policy'' $x$ and a realization $\xi$, $z$ measures the deviation of the first stage, i.e. $z = h(\xi) - T(\xi)x$, $v(\xi, z)$ is the minimum cost to ``correct'' the decision. % in order to satisfy the constraints again.
 
@@ -503,6 +500,7 @@ See Walkup, D. W. and Wets, R. J.-B., {\it Stochastic programs with recourse}, S
 $$
 \text{pos}W = \lbrace z \,|\, z = Wy,\ y \in \RR^p_+ \rbrace
 $$
+(positive hulls and Farkas' lemma are recalled in the linear programming background notes)
 
 \mbox{}
 
@@ -670,10 +668,11 @@ $$
 $\EE[\bsxi]$ not finite does not necessarily imply that $\calQ(x) = +\infty$. Consider
 \begin{align*}
 \min_y \ & y_1 - y_2 \\
-\text{s.t. } & y_1 \geq \xi \\
-& y_2 \leq \xi.
+\text{s.t. } & y_1 \geq \xi, \\
+& y_2 \leq \xi, \\
+& y_1,\ y_2 \geq 0.
 \end{align*}
-We have that $\forall \xi, Q(x, \xi) = 0$, and therefore $\calQ(x) = 0$.
+The optimum is attained at $y_1 = y_2 = \xi$, so $Q(x, \xi) = 0$ for all $\xi$ (and all $x$), and therefore $\calQ(x) = 0$.
 
 \end{frame}
 
@@ -681,9 +680,9 @@ We have that $\forall \xi, Q(x, \xi) = 0$, and therefore $\calQ(x) = 0$.
 \frametitle{$K_2 = K_2^s$}
 
 \begin{theo}
-If $\bsxi$ has finite second order moments, then
+For a stochastic program with fixed recourse, where $\bsxi$ has finite second-order moments,
 $$
-P\left[ \lbrace \xi \ |\ Q(x,\xi) < \infty \rbrace \right] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
+P\left[ Q(x,\bsxi) < \infty \right] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
 $$
 and consequently
 $$
@@ -710,14 +709,22 @@ Define {\red possibility interpretation} of the second-stage feasibility as
 K_2^P = \cap_{\xi \in \Xi} K_2(\xi).
 \]
 \item
-Clearly $K_2 = K_2^P$ if $\bsxi$ has a finite support.
+Clearly $K_2 = K_2^P$ if $\bsxi$ has a finite support, every scenario having a positive probability.
 Is it still the case when $\bsxi$ follows a continuous distribution?
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}
+\frametitle{Elementary feasible set (cont'd)}
+
 \begin{theo}
-For a stochastic program with fixed recourse, where $\bsxi$ has finite second order moments,
-$$K_2 = K_2^s = K_2^p.$$
+For a stochastic program with fixed recourse, where $\bsxi$ has finite second-order moments,
+$$K_2 = K_2^s = K_2^P.$$
 \end{theo}
+
+With a fixed recourse, $x \in K_2(\xi) \iff h(\xi)-T(\xi)x \in \text{pos}W$, a {\red closed} cone: the set of favourable $\xi$ is then closed, and having probability one forces it to contain the whole support.
+The exercise below shows what happens when the recourse is not fixed.
 
 \end{frame}
 
@@ -755,8 +762,8 @@ Q(x,\xi) & = \min_y q^+(\xi)^Ty^+ + q^-(\xi)^Ty^- \\
 \mbox{s.t. } & y^+ - y^- = h(\xi)-T(\xi)x,\\
 & y^+,\ y^- \geq 0.
 \end{align*}
-That is, for $q^+(\xi) + q^-(\xi) \geq 0$, the recourse variables $y^+$ and $y^-$ can be chosen to %(non negatively)
-measure the absolute violations in the stochastic constraints.
+That is, for $q^+(\xi) + q^-(\xi) \geq 0$, at most one of $y_i^+$ and $y_i^-$ is positive at the optimum, so they %(non negatively)
+measure the positive and negative parts of the discrepancy $h(\xi)-T(\xi)x$.
 
 \end{frame}
 
@@ -824,6 +831,7 @@ By combining these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 
 \begin{frame}
 \frametitle{Simple recourse (cont'd)}
+\small
 	
 \begin{proof}
 
@@ -845,13 +853,14 @@ Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\om
 
 \begin{frame}
 \frametitle{Simple recourse (cont'd)}
+\small
 
 \begin{proof}
 {\bf $(\Leftarrow)$}
 
 Therefore, a.s.
 $$
-\min Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega)),
+Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega)),
 $$
 so, a.s., $\exists$ a lower bound on $Q(x,\xi(\omega))$, and since the program is feasible, it admits an optimal solution.
 
@@ -876,7 +885,7 @@ where $a^+ = \max\{0, a\}$.
 
 From previous results, $\calQ(x) < \infty$, and
 $$
-\calQ(x) \geq \EE[-(q^-)^Tz(\xi(\omega))].
+\calQ(x) \geq \EE_{\bsxi}\left[-(q^-)^Tz(\bsxi)\right].
 $$
 \end{proof}
 
@@ -933,7 +942,7 @@ K_2(\xi) = \lbrace x\,|\, x \leq 1 \rbrace.
 
 The value and optimal solutions are
 \[
-Q^*(x,\xi) = (1-x)/\xi,\quad y^*= (1-x)/\xi.
+Q(x,\xi) = (1-x)/\xi,\quad y^*= (1-x)/\xi.
 \]
 	
 {\red 2. $\xi=0$} There exists no $y$ such that $0.y = 1-x$, except if $x = 1$, so
@@ -964,7 +973,7 @@ Consequently $K_2^P \subset K_2 = \lbrace x \leq 1 \rbrace$.
 
 \mbox{}
 
-The difference comes from the fact that a point is not in $K_2^P$ as soon as it is not feasible for a given value of $\xi$, but $K_2$ does not consider unfeasible situations that occur with a null probability.
+The difference comes from the fact that a point is not in $K_2^P$ as soon as it is not feasible for a given value of $\xi$, but $K_2$ does not consider infeasible situations that occur with a null probability.
 	
 %	\mbox{}
 	
@@ -1023,6 +1032,8 @@ If $A$ is a linear transformation from $\RR^n$ to $\RR^m$, and $f(x)$ is a conve
 \begin{frame}
 \frametitle{Convexity of second-stage function}
 
+$Q(x,\xi)$ is the value function of a linear program, seen as a function of its right-hand side $h(\xi)-T(\xi)x$ and of its costs: the properties below are those recalled in the linear programming background notes.
+
 We have the following result (Birge and Louveaux, Chapter~3, Theorem~5).
 \begin{theo}
 For a stochastic program with fixed recourse, $Q(x,\xi)$ is
@@ -1042,7 +1053,7 @@ a piecewise-linear convex function in $x$, for all $x$ in $K = K_1 \cap K_2$.
 \frametitle{Convexity of second-stage function (cont'd)}
 
 \begin{proof}
-In order to show convexity in (a) and (c), it is sufficient to prove that $v(\xi, z) = \min \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace$ is convex, which has already been done.
+In order to show convexity in (a) and (c), it is sufficient to prove that $v(\xi, z) = \min_{y \in Y} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace$ is convex, which has already been done.
 We can proceed similarly to show concavity w.r.t. $q$.
 
 The piecewise linearity follows from the fact that the number of different optimal bases for a linear program is finite.
@@ -1096,7 +1107,7 @@ Consider the second-stage function $Q(x,\xi)$ defined as:
 \begin{align*}
 \min y^++y^- \mbox{ s.t. } y^+-y^- = \xi - x,\ y^+ \geq 0,\ y^- \geq 0.
 \end{align*}
-In other terms:
+In other words:
 \[
 y = \begin{pmatrix} y^+ \\ y^- \end{pmatrix} \quad q = \begin{pmatrix}
     1 \\ 1 \end{pmatrix}, W = \begin{pmatrix} 1 & -1 \end{pmatrix}
@@ -1123,7 +1134,7 @@ and
 $$
 y^- = \begin{cases}
 	-\xi + x & \text{ if } \xi - x < 0, \\
-	0 & \text{otherwise,}
+	0 & \text{otherwise.}
 \end{cases}
 $$
 
@@ -1267,13 +1278,14 @@ $4 \leq x$: $\mathcal{Q}(x) = x-7/3$;
 \frametitle{Properties of $\mathcal{Q}(x)$}
 
 We note that $\mathcal{Q}(x)$ is convex and piecewise linear.
-As $\mathcal{Q}(x)$ is a finite weighted sum of piecewise linear functions when the support of $\bsxi$ is finite, we have the following result.
+When the support of $\bsxi$ is finite this is immediate: $\mathcal{Q}$ is a non-negative weighted sum of the $Q(\cdot,\xi_s)$, each of which has just been shown to be convex and piecewise linear.
+The general statement is the following.
 
 \begin{theo}
 For a stochastic program with fixed recourse where $\bsxi$ has finite second-order moments,
 \begin{enumerate}[(a)]
 \item
-$\mathcal{Q}(x)$ is a convex Lipschitz function and is finite over $K_2$;
+$\mathcal{Q}(x)$ is convex, and finite and Lipschitz continuous on $K_2$;
 \item
 when $\bsxi$ has a finite support, $\mathcal{Q}(x)$ is piecewise linear.
 \end{enumerate}
@@ -1294,7 +1306,7 @@ Is $\mathcal{Q}(x)$ also differentiable?
 \mbox{}
 
 The recourse function is partially differentiable with respect to $x_j$ at $(\hat{x}, \hat{\xi})$ if the directional derivative exists for the direction $e_j$.
-In other terms, there exists a function $\frac{\partial Q(x,\xi)}{\partial x_j}$ such that
+In other words, there exists a function $\frac{\partial Q(x,\xi)}{\partial x_j}$ such that
 \[
 \frac{Q(\hat{x}+he_j,\hat{\xi}) - Q(\hat{x},\hat{\xi})}{h} =
 \frac{\partial Q(\hat{x},\hat{\xi})}{\partial x_j} + \frac{\rho_j (\hat{x},
@@ -1315,6 +1327,7 @@ We will assume from now that $\nabla_x Q(x, \xi) = \left( \frac{\partial
 
 \begin{frame}
 \frametitle{Differentiability of the recourse (cont'd)}
+\small
 
 What about the differentiability of $\mathcal{Q}(x)$?
 
@@ -1367,7 +1380,7 @@ It is possible to show that (the proof is quite technical)
 \mbox{}
 
 \begin{theo}
-For a stochastic program with fixed recourse where $\bsxi$ has finite second-order moments, if $\bsxi$ is continuous, $\mathcal{Q}(x)$ is differentiable over $K_2$.
+For a stochastic program with fixed recourse where $\bsxi$ has finite second-order moments, if $\bsxi$ has an absolutely continuous distribution, then $\mathcal{Q}(x)$ is differentiable on the interior of $K_2$.
 \end{theo}
 
 \mbox{}
@@ -1377,12 +1390,211 @@ Intuitively, the function $\mathcal{Q}(x)$ is ``smoothed'' by the superposition 
 \end{frame}
 
 \begin{frame}
+\frametitle{The value of information}
+
+Uncertainty has a cost.
+Two natural questions:
+\begin{itemize}
+\item
+how much would we gain if the uncertainty could be removed {\red before} deciding?
+\item
+how much do we lose if we simply replace $\bsxi$ by its mean?
+\end{itemize}
+
+\mbox{}
+
+Write the total cost attached to a first-stage decision $x$ and a realization $\xi$ as
+\[
+z(x,\xi) \overset{\mathrm{def}}{=} c^Tx + Q(x,\xi).
+\]
+The problem studied so far is the {\red recourse problem}
+\[
+\RP \overset{\mathrm{def}}{=} \min_{x \in K_1 \cap K_2} \EE_{\bsxi}[z(x,\bsxi)] = \min_{x \in K_1 \cap K_2} \lbrace c^Tx + \calQ(x) \rbrace,
+\]
+and we denote by $x^*$ one of its optimal solutions.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Wait-and-see}
+
+If $\bsxi$ could be observed {\red before} deciding on $x$, we would solve one deterministic program per realization, and the expected cost would be the {\red wait-and-see} value
+\[
+\WS \overset{\mathrm{def}}{=} \EE_{\bsxi} \left[ \min_{x \in K_1 \cap K_2(\bsxi)} z(x,\bsxi) \right].
+\]
+Note the position of the expectation: in $\RP$, a {\blue single} $x$ has to serve all the realizations, while in $\WS$ the decision may depend on $\xi$.
+
+\mbox{}
+
+The {\red expected value of perfect information} is
+\[
+\EVPI \overset{\mathrm{def}}{=} \RP - \WS.
+\]
+It measures the maximum price a decision maker should be ready to pay for a perfect forecast of $\bsxi$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$\EVPI \geq 0$}
+
+\begin{theo}
+$\WS \leq \RP$, and therefore $\EVPI \geq 0$.
+\end{theo}
+
+\begin{proof}
+Let $x$ be any feasible first-stage decision, i.e. $x \in K_1 \cap K_2$.
+For almost every realization $\xi$, $x$ is feasible for the second stage, so
+\[
+\min_{x' \in K_1 \cap K_2(\xi)} z(x',\xi) \leq z(x,\xi).
+\]
+Taking the expectation preserves the inequality:
+\[
+\WS \leq \EE_{\bsxi}[z(x,\bsxi)].
+\]
+The left-hand side does not depend on $x$: minimizing the right-hand side over all feasible $x$ gives $\WS \leq \RP$.
+\end{proof}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The expected value problem}
+
+A cheaper alternative is to ignore the randomness and to solve a single deterministic program built on $\overline{\xi} \overset{\mathrm{def}}{=} \EE[\bsxi]$: the {\red expected value (EV) problem}
+\[
+\EV \overset{\mathrm{def}}{=} \min_{x \in K_1 \cap K_2(\overline{\xi})} z(x,\overline{\xi}),
+\]
+whose optimal solution is denoted $\overline{x}(\overline{\xi})$.
+
+\mbox{}
+
+$\overline{x}(\overline{\xi})$ is a legitimate first-stage decision, but it has been computed while ignoring the variability of $\bsxi$.
+Its true expected cost is the {\red expected result of using the EV solution}
+\[
+\EEV \overset{\mathrm{def}}{=} \EE_{\bsxi}\left[ z(\overline{x}(\overline{\xi}),\bsxi) \right],
+\]
+and the {\red value of the stochastic solution} is
+\[
+\VSS \overset{\mathrm{def}}{=} \EEV - \RP.
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$\VSS \geq 0$}
+
+\begin{theo}
+$\RP \leq \EEV$, and therefore $\VSS \geq 0$.
+\end{theo}
+
+\begin{proof}
+By construction $\overline{x}(\overline{\xi}) \in K_1$; if it does not belong to $K_2$, then $\calQ(\overline{x}(\overline{\xi})) = +\infty$, so $\EEV = +\infty$ and the result is immediate.
+Otherwise, $\overline{x}(\overline{\xi})$ is a particular feasible point of the recourse problem, so
+\[
+\RP = \min_{x \in K_1 \cap K_2} \EE_{\bsxi}[z(x,\bsxi)] \leq \EE_{\bsxi}\left[z(\overline{x}(\overline{\xi}),\bsxi)\right] = \EEV.
+\]
+\end{proof}
+
+$\VSS$ measures what is gained by modelling the uncertainty explicitly, rather than replacing it by its mean.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{A chain of bounds}
+
+\begin{theo}
+If only the right-hand side $h(\bsxi)$ is random, $W$, $T$ and $q$ being fixed, and $h$ depends affinely on $\xi$, then $\EV \leq \WS$.
+\end{theo}
+\begin{proof}
+Set $\psi(\xi) \overset{\mathrm{def}}{=} \min_{x \in K_1 \cap K_2(\xi)} z(x,\xi)$.
+As $W$, $T$ and $q$ are fixed, $\psi(\xi)$ is the optimal value of a linear program whose only varying data is the right-hand side; such a value function is convex (background notes), here in $h(\xi)$, hence in $\xi$.
+Jensen's inequality then gives
+\[
+\EV = \psi(\EE[\bsxi]) \leq \EE_{\bsxi}[\psi(\bsxi)] = \WS.
+\]
+\end{proof}
+If $T$ is random, $\psi$ is no longer an optimal value with respect to the right-hand side only, and the argument does not apply.
+Collecting the results:
+\[
+\EV \leq \WS \leq \RP \leq \EEV.
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Example}
+
+Take again $Q(x,\xi) = |x-\xi|$ with $\bsxi$ uniform over $\lbrace 1, 2, 4 \rbrace$, and assume that the first stage has no direct cost ($c = 0$), so that $z(x,\xi) = Q(x,\xi)$ and, as computed previously,
+\[
+\calQ(x) = \begin{cases}
+7/3 - x & \text{ if } x \leq 1, \\
+5/3 - x/3 & \text{ if } 1 \leq x \leq 2, \\
+x/3 + 1/3 & \text{ if } 2 \leq x \leq 4, \\
+x - 7/3 & \text{ if } x \geq 4.
+\end{cases}
+\]
+\begin{itemize}
+\item
+{\blue $\RP$}: the slope of $\calQ$ changes sign at $x^* = 2$, the median of the scenarios, so
+$
+\RP = \calQ(2) = 1.
+$
+\item
+{\blue $\WS$}: for each realization, $\min_x |x-\xi| = 0$, attained at $x = \xi$. Hence
+$
+\WS = 0$, and $\EVPI = 1.
+$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example (cont'd)}
+
+\begin{itemize}
+\item
+{\blue $\EV$}: $\overline{\xi} = \EE[\bsxi] = (1+2+4)/3 = 7/3$, and $\min_x |x-7/3| = 0$ at $\overline{x}(\overline{\xi}) = 7/3$, so $\EV = 0$.
+\item
+{\blue $\EEV$}: the mean-value decision is now confronted with the three scenarios,
+\[
+\EEV = \calQ(7/3) = \frac{1}{3}\left( \frac{4}{3}+\frac{1}{3}+\frac{5}{3} \right) = \frac{10}{9},
+\]
+so that
+\[
+\VSS = \EEV - \RP = \frac{10}{9}-1 = \frac{1}{9}.
+\]
+\end{itemize}
+We indeed have $\EV = 0 \leq \WS = 0 \leq \RP = 1 \leq \EEV = 10/9$.
+Here perfect information is worth much more than a better use of the distribution: $\EVPI = 1 \gg \VSS = 1/9$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Remarks}
+
+\begin{itemize}
+\item
+There is no general ordering between $\EVPI$ and $\VSS$: either one can be the larger.
+\item
+$\EEV$, and therefore $\VSS$, can be infinite: the mean-value decision $\overline{x}(\overline{\xi})$ may be infeasible for some scenarios.
+A relatively complete recourse rules this out.
+\item
+The definitions above are written for a minimization problem.
+For a maximization, $\EVPI = \WS - \RP$ and $\VSS = \RP - \EEV$.
+For the farmer problem of the first chapter, $\WS = \$115406$, $\RP = \$108390$ and $\EEV = \$107240$, so $\EVPI = \$7016$ and $\VSS = \$1150$.
+\item
+Computing $\WS$ requires one deterministic program per realization, and $\EEV$ requires the recourse cost of $\overline{x}(\overline{\xi})$ over the whole support: both are out of reach as soon as the support is large, and are then estimated by sampling.
+\end{itemize}
+
+See Birge and Louveaux, Chapter~4.
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Two-stage non-linear problems}
 
 Now consider the general program
 \[
-\min_{x \in X} E_{\bsxi} [ f_0(x, \bsxi) ] = \min_{x \in X}
-E_{\bsxi} [g_0(x,\bsxi) + Q(x, \bsxi)].
+\min_{x \in X} \EE_{\bsxi} [ f_0(x, \bsxi) ] = \min_{x \in X}
+\EE_{\bsxi} [g_0(x,\bsxi) + Q(x, \bsxi)].
 \]
 
 \begin{theo}
@@ -1414,7 +1626,7 @@ We consider the problem
 \mbox{s.t. } & g_i^1(x) \leq 0,\ i = 1,\ldots,\overline{m}_1, \\
 & g_i^1(x) = 0,\ i = \overline{m}_1+1,\ldots,m_1,
 \end{align*}
-where $\mathcal{Q}(x) = E_{\omega}[Q(x,\omega)]$ and
+where $\mathcal{Q}(x) = \EE_{\omega}[Q(x,\omega)]$ and
 \begin{align*}
 Q(x,\omega) &= \inf f^2(y(\omega), \omega), \\
 \mbox{s.t. } & t_i^2(x, \omega) + g_i^2(y(\omega), \omega) \leq 0,\ i
