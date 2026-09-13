@@ -76,35 +76,37 @@ We have studied their properties. But how do we solve them?
 \begin{itemize}
 \item
 First-stage feasible set:
-\[
+$
 K_1 = \lbrace x \in \RR^n_+ \mid Ax = b \rbrace.
-\]
+$
 \item
-Second-stage feasible set:
-\[
-K_2 = K_2^s = \lbrace x \mid \mathcal{Q}(x) < \infty \rbrace.
-\]
+{\red Weak} second-stage feasible set:
+$
+K_2 = \lbrace x \mid Q(x,\bsxi) < \infty \text{ a.s.} \rbrace.
+$
+\item
+{\red Strong} second-stage feasible set:
+$
+K_2^s = \lbrace x \mid \mathcal{Q}(x) < \infty \rbrace.
+$
 \end{itemize}
+These two sets differ in general, but coincide in the framework retained here:
+\begin{theo}
+For a stochastic program with fixed recourse, where $\bsxi$ has finite second-order moments, $K_2 = K_2^s$.
+\end{theo}
 We can therefore rewrite the problem as
 \[
 \min_x \lbrace c^Tx + \mathcal{Q}(x) \mid x \in K_1 \cap K_2 \rbrace.
 \]
-
-%\mbox{}
-
-%For simplicity, we will assume for now that the recourse is relatively complete.
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Deterministic equivalent}
 
-Assume now that the support of $\bsxi$ is finite, and that we have $S$ scenarios.
-The probability of scenario $s$ is $p_s$.
-
-\mbox{}
-
+Assume now that the support of $\bsxi$ is finite, with $S$ scenarios, scenario $s$ having probability $p_s$ and recourse action $y_s$.
 The deterministic equivalent is
+\vspace*{-2mm}
 \begin{align*}
 \min_{x \geq 0, y_1 \geq 0, \ldots, y_S \geq 0}\ & c^T x + \sum_{s=1}^S p_s q_s^T y_s \\
 \text{s.t. } & \\
@@ -115,28 +117,9 @@ T_2 x & & + W y_2 & & & = h_2 \\
 T_S x & & & & + W y_S & = h_S
 \end{matrix}
 \end{align*}
+A linear program,\ldots but a very large one: $n+pS$ variables and $m_1+m_2S$ constraints.
 
-\end{frame}
-
-\begin{frame}
-\frametitle{Properties of the deterministic equivalent}
-
-\begin{itemize}
-\item
-$y_s \overset{\mathrm{def}}{=} y(\omega_s)$ is the recourse action to take if scenario $s$ occurs.
-\item
-We obtain a linear program,\ldots but very large:
-\begin{itemize}
-\item
-$n + pS$ variables;
-\item
-$m_1 + m_2 S$ constraints.
-\end{itemize}
-\item
-The constraints have a very specific structure (staircase).
-\item
-{\red Idea}: use decomposition techniques.
-\end{itemize}
+{\red Idea}: exploit its structure, and use decomposition techniques.
 
 \end{frame}
 
@@ -1202,34 +1185,6 @@ The sequence of iterates for the $L$-shaped method is as follows.
 	Rule of thumb: the multi-cut approach is more efficient when the number of realizations $S$ is not significantly greater than the number of first-stage constraints.
 	\end{itemize}
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Reminder: subgradients}
-
-Recall that, by {\blue duality},
-\[
-Q(\hat{x}, \xi_s) =
-\max_{\pi} \lbrace \pi^T(h(\xi_s)-T(\xi_s)\hat{x}) \mid \pi^TW \leq q(\xi_s)^T \rbrace.
-\]
-Therefore, $\exists\, \hat{\pi}$ s.t.
-$Q(\hat{x}, \xi_s) = \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s)\hat{x}$.
-For any $x \in K_2(\xi_s)$, by weak duality,
-\[
-Q(x, \xi_s) \geq \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s) x,
-\]
-and therefore
-\[
-Q(x, \xi_s) \geq Q(\hat{x}, \xi_s) - \hat{\pi}^TT(\xi_s) (x-\hat{x}),
-\quad \forall x \in K_2(\xi_s).
-\]
-
-In other words, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
-
-\mbox{}
-
-Similarly, by taking the expectation, $- \sum_{s=1}^S p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(\hat{x})$.
 
 \end{frame}
 
