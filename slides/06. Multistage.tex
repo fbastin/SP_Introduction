@@ -1,5 +1,3 @@
-% Compile with xelatex --shell-escape
-
 \documentclass[aspectratio=169]{beamer}
 %\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
@@ -20,8 +18,8 @@
 %\usepackage{colortbl}
 %\usepackage[english]{babel}
 
-\usepackage{pstricks, pst-tree}
-\usepackage{auto-pst-pdf}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 
 \usepackage{times}
 
@@ -40,6 +38,118 @@
 \def\bu{\boldsymbol{u}}
 \def\bz{\boldsymbol{z}}
 \def\bomega{\boldsymbol\omega}
+
+%% ---------------------------------------------------------------------------
+%% Scenario-tree pictures, in TikZ (no PSTricks, no auto-pst-pdf).
+%% ---------------------------------------------------------------------------
+
+% SDDP tree. #1 = level drawn in red (0 = none, 1, 2 or 3); #2-#8 = node
+% labels ($x_1$; second stage; third stage), each empty for no label.
+% Places a label under a tree node, unless it is empty.
+\newcommand{\sddplbl}[2]{\ifx&#2&\else\node[lbl,below=1pt of #1]{#2};\fi}
+
+\newcommand{\sddptree}[8]{%
+  \ifnum#1=1 \def\cA{red}\else\def\cA{black}\fi
+  \ifnum#1=2 \def\cB{red}\else\def\cB{black}\fi
+  \ifnum#1=3 \def\cC{red}\else\def\cC{black}\fi
+  \begin{tikzpicture}[scale=0.93,
+      nd/.style={circle,draw,line width=1pt,minimum size=5.5mm,inner sep=0pt},
+      lf/.style={circle,fill,inner sep=1.3pt},
+      lbl/.style={font=\footnotesize,inner sep=2pt,fill=white},
+      link/.style={densely dotted,line width=0.7pt}]
+    % nodes
+    \node[nd,draw=\cA] (s0)  at (0,0)     {};
+    \node[nd,draw=\cA] (s1a) at (3,1.6)   {};
+    \node[nd,draw=\cA] (s1b) at (3,-1.6)  {};
+    \node[nd,draw=\cB] (s2a) at (6,2.4)   {};
+    \node[nd,draw=\cB] (s2b) at (6,0.8)   {};
+    \node[nd,draw=\cB] (s2c) at (6,-0.8)  {};
+    \node[nd,draw=\cB] (s2d) at (6,-2.4)  {};
+    \node[lf,fill=\cC] (l1) at (8.4,2.82) {};
+    \node[lf,fill=\cC] (l2) at (8.4,1.98) {};
+    \node[lf,fill=\cC] (l3) at (8.4,1.22) {};
+    \node[lf,fill=\cC] (l4) at (8.4,0.38) {};
+    \node[lf,fill=\cC] (l5) at (8.4,-0.38){};
+    \node[lf,fill=\cC] (l6) at (8.4,-1.22){};
+    \node[lf,fill=\cC] (l7) at (8.4,-1.98){};
+    \node[lf,fill=\cC] (l8) at (8.4,-2.82){};
+    % edges
+    \draw[\cA] (s0)  -- (s1a);  \draw[\cA] (s0)  -- (s1b);
+    \draw[\cB] (s1a) -- (s2a);  \draw[\cB] (s1a) -- (s2b);
+    \draw[\cB] (s1b) -- (s2c);  \draw[\cB] (s1b) -- (s2d);
+    \draw[\cC,dashed] (s2a) -- (l1);  \draw[\cC,dashed] (s2a) -- (l2);
+    \draw[\cC,dashed] (s2b) -- (l3);  \draw[\cC,dashed] (s2b) -- (l4);
+    \draw[\cC,dashed] (s2c) -- (l5);  \draw[\cC,dashed] (s2c) -- (l6);
+    \draw[\cC,dashed] (s2d) -- (l7);  \draw[\cC,dashed] (s2d) -- (l8);
+    % nonanticipativity links between siblings
+    \draw[link] (s1a) -- (s1b);
+    \draw[link] (s2a) -- (s2b);  \draw[link] (s2c) -- (s2d);
+    \draw[link] (l1) -- (l2);    \draw[link] (l3) -- (l4);
+    \draw[link] (l5) -- (l6);    \draw[link] (l7) -- (l8);
+    % node labels (skipped when empty)
+    \sddplbl{s0}{#2}
+    \sddplbl{s1a}{#3}\sddplbl{s1b}{#4}
+    \sddplbl{s2a}{#5}\sddplbl{s2b}{#6}
+    \sddplbl{s2c}{#7}\sddplbl{s2d}{#8}
+    % stage identifiers
+    \node[font=\footnotesize] at (0,-3.9)   {First stage};
+    \node[font=\footnotesize] at (3,-3.9)   {Second stage};
+    \node[font=\footnotesize] at (6,-3.9)   {Third stage};
+    \node[font=\footnotesize] at (8.4,-3.9) {\ldots};
+  \end{tikzpicture}}
+
+% Full scenario tree: one root, four second-stage nodes, sixteen leaves.
+\newcommand{\fullscenariotree}{%
+  \begin{tikzpicture}[scale=1,
+      nd/.style={circle,draw,line width=0.6pt,minimum size=2.6mm,inner sep=0pt}]
+    \node[nd] (r) at (0,0) {};
+    \foreach \i/\gx in {1/-4.5,2/-1.5,3/1.5,4/4.5} {
+      \node[nd] (g\i) at (\gx,-1.15) {};
+      \draw[line width=0.6pt] (r) -- (g\i);
+      \foreach \j/\dx in {1/-0.9,2/-0.3,3/0.3,4/0.9} {
+        \pgfmathtruncatemacro{\num}{4*(\i-1)+\j}
+        \node[nd] (t\num) at (\gx+\dx,-2.3) {};
+        \draw[line width=0.6pt] (g\i) -- (t\num);
+        \node[font=\tiny\bfseries,text=blue,below=1pt of t\num] {$\num$};
+      }
+    }
+  \end{tikzpicture}}
+
+% Nonanticipativity: the same tree bundled into three stage-two groups.
+\newcommand{\bundletree}{%
+  \begin{tikzpicture}[scale=1,
+      nd/.style={circle,draw,line width=0.6pt,minimum size=3mm,inner sep=0pt},
+      lbl/.style={font=\scriptsize\bfseries,right=3pt}]
+    \node[nd] (r) at (0,0) {};
+    \foreach \i/\gy in {1/1.15,2/0,3/-1.15} { \node[nd] (g\i) at (1.1,\gy) {}; \draw[line width=0.6pt] (r) -- (g\i); }
+    \foreach \k/\gi/\ly in {1/1/1.6,2/1/1.15,3/1/0.7,4/2/0,5/3/-0.9,6/3/-1.4} {
+      \node[nd] (s\k) at (2.2,\ly) {};
+      \draw[line width=0.6pt] (g\gi) -- (s\k);
+      \node[lbl] at (s\k.east) {scenario \k};
+    }
+  \end{tikzpicture}}
+
+% Nonanticipativity, nodal view: six scenarios x three periods, with the
+% doubled bars marking the variables that must be bundled together.
+\newcommand{\nodalbundles}{%
+  \begin{tikzpicture}[scale=0.78,
+      nd/.style={circle,draw,line width=1pt,minimum size=4.2mm,inner sep=0pt}]
+    \foreach \r in {0,1,2,3,4,5} {
+      \foreach \c/\x in {a/0,b/2,c/4} { \node[nd] (n\r\c) at (\x,\r) {}; }
+      \draw[line width=0.7pt] (n\r a) -- (n\r b);
+      \draw[line width=0.7pt] (n\r b) -- (n\r c);
+    }
+    % left column: every consecutive pair is bundled
+    \foreach \r/\rr in {5/4,4/3,3/2,2/1,1/0} {
+      \draw[line width=0.7pt] (-0.04,\r-0.24) -- (-0.04,\rr+0.24);
+      \draw[line width=0.7pt] ( 0.04,\r-0.24) -- ( 0.04,\rr+0.24);
+    }
+    % middle column: only within a stage-two group
+    \foreach \r/\rr in {5/4,4/3,1/0} {
+      \draw[line width=0.7pt] (1.96,\r-0.24) -- (1.96,\rr+0.24);
+      \draw[line width=0.7pt] (2.04,\r-0.24) -- (2.04,\rr+0.24);
+    }
+  \end{tikzpicture}}
 
 \title[Multi-stage problems]{Stochastic programming\\Multi-stage problems}
 
@@ -178,32 +288,7 @@ y_{\red s}, w_{\red s} & \geq 0 \quad {\red \forall s \in S}.
 Conceptually, the sequence of events can be arranged in a tree.
 There is one leaf per scenario.
 \begin{center}
-%\begin{footnotesize}
-\scalebox{0.45}{
-\pstree[treemode=D,treesep=0.12]{\TC}{
- \pstree{\TC}
-  {\TC~[tnpos=b]{\quad\bf{\large {\blue $1$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $2$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $3$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $4$}}}}
- \pstree{\TC}
-  {\TC~[tnpos=b]{\quad\bf{\large {\blue $5$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $6$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $7$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $8$}}}}
- \pstree{\TC}
-  {\TC~[tnpos=b]{\quad\bf{\large {\blue $9$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $10$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $11$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $12$}}}}
- \pstree{\TC}
-  {\TC~[tnpos=b]{\quad\bf{\large {\blue $13$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $14$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $15$}}}
-   \TC~[tnpos=b]{\quad\bf{\large {\blue $16$}}}}
-}
-}
-%\end{footnotesize}
+\fullscenariotree
 \end{center}
 
 The scenarios can have different probabilities, the variables can be correlated,\ldots
@@ -261,76 +346,13 @@ There are many formulations of these conditions!
 	\end{itemize}
 	\begin{minipage}{0.45\textwidth}
 		\begin{center}
-			%\begin{footnotesize}
-			\hspace*{1cm} \scalebox{0.55}{
-				\pstree[treemode=R,levelsep=0.3]{\TC}{
-					\pstree{\TC}
-					{\TC~[tnpos=r]{\quad\bf scenario 1}
-						\TC~[tnpos=r]{\quad\bf scenario 2}
-						\TC~[tnpos=r]{\quad\bf scenario 3}}
-					\pstree{\TC}
-					{\TC~[tnpos=r]{\quad\bf scenario 4}}
-					\pstree{\TC}
-					{\TC~[tnpos=r]{\quad\bf scenario 5}
-						\TC~[tnpos=r]{\quad\bf scenario 6}}
-				}
-			}
-			%\end{footnotesize}
+			\bundletree
 		\end{center}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.45\textwidth}
-		%\setlength{\unitlength}{0.69mm}
 		\begin{center}
-			\scalebox{0.7}{
-				\begin{pspicture}(4,0)(3,5)
-				\pscircle[linewidth=1pt](0,5){0.2}
-				\psline(0.21,5)(1.79,5)
-				\pscircle[linewidth=1pt](2,5){0.2}
-				\psline(2.21,5)(3.79,5)
-				\pscircle[linewidth=1pt](4,5){0.2}
-				\psline(-0.04,4.76)(-0.04,4.24)
-				\psline(0.04,4.76)(0.04,4.24)
-				\psline(1.96,4.76)(1.96,4.24)
-				\psline(2.04,4.76)(2.04,4.24)
-				\pscircle[linewidth=1pt](0,4){0.2}
-				\psline(0.21,4)(1.79,4)
-				\pscircle[linewidth=1pt](2,4){0.2}
-				\psline(2.21,4)(3.79,4)
-				\pscircle[linewidth=1pt](4,4){0.2}
-				\psline(-0.04,3.76)(-0.04,3.24)
-				\psline(0.04,3.76)(0.04,3.24)
-				\psline(1.96,3.76)(1.96,3.24)
-				\psline(2.04,3.76)(2.04,3.24)
-				\pscircle[linewidth=1pt](0,3){0.2}
-				\psline(0.21,3)(1.79,3)
-				\pscircle[linewidth=1pt](2,3){0.2}
-				\psline(2.21,3)(3.79,3)
-				\pscircle[linewidth=1pt](4,3){0.2}
-				\psline(-0.04,2.76)(-0.04,2.24)
-				\psline(0.04,2.76)(0.04,2.24)
-				\pscircle[linewidth=1pt](0,2){0.2}
-				\psline(0.21,2)(1.79,2)
-				\pscircle[linewidth=1pt](2,2){0.2}
-				\psline(2.21,2)(3.79,2)
-				\pscircle[linewidth=1pt](4,2){0.2}
-				\psline(-0.04,1.76)(-0.04,1.24)
-				\psline(0.04,1.76)(0.04,1.24)
-				\pscircle[linewidth=1pt](0,1){0.2}
-				\psline(0.21,1)(1.79,1)
-				\pscircle[linewidth=1pt](2,1){0.2}
-				\psline(2.21,1)(3.79,1)
-				\pscircle[linewidth=1pt](4,1){0.2}
-				\psline(-0.04,0.76)(-0.04,0.24)
-				\psline(0.04,0.76)(0.04,0.24)
-				\psline(1.96,0.76)(1.96,0.24)
-				\psline(2.04,0.76)(2.04,0.24)
-				\pscircle[linewidth=1pt](0,0){0.2}
-				\psline(0.21,0)(1.79,0)
-				\pscircle[linewidth=1pt](2.0,0){0.2}
-				\psline(2.21,0)(3.79,0)
-				\pscircle[linewidth=1pt](4.0,0){0.2}
-				\end{pspicture}}
+			\nodalbundles
 		\end{center}
 	\end{minipage}
    	
@@ -624,37 +646,7 @@ These $(\alpha_t, \beta_t)$ pairs define the Benders cuts for the parent stage.
 	\frametitle{Illustration}
 	
 	\begin{center}
-		\psset{treemode=R, levelsep=3cm}
-		\pstree[thislevelsep=0,edge=\ncline]
-		{\Tn} % root
-		{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
-				\pstree{\TC[name=s1a]}{
-					\pstree[linestyle=dashed]{\TC[name=s2a]}
-					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[name=s2b]}
-					{\Tdot[name=s4c] \Tdot[name=s4d]}
-				}
-				\pstree{\TC[name=s1b]}{
-					\pstree[linestyle=dashed]{\TC[name=s2c]}
-					{\Tdot[name=s4e] \Tdot[name=s4f]}            
-					\pstree[linestyle=dashed]{\TC[name=s2d]}
-					{\Tdot[name=s4g] \Tdot[name=s4h]}
-				}
-			}
-			% We add the stage identifiers.
-			\pstree[edge = none]{\Tr{First stage}}{
-				\pstree{\Tr{Second stage}}{
-					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
-				}
-			}
-		}
-		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
-		
+		\sddptree{0}{$x_1$}{}{}{}{}{}{}
 	\end{center}
 	
 \end{frame}
@@ -663,37 +655,7 @@ These $(\alpha_t, \beta_t)$ pairs define the Benders cuts for the parent stage.
 	\frametitle{Step 1: forward pass}
 	
 	\begin{center}
-		\psset{treemode=R, levelsep=3cm}
-		\pstree[thislevelsep=0,edge=\ncline,linecolor=red]
-		{\Tn} % root
-		{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
-				\pstree[linecolor=black]{\TC[name=s1a]}{
-					\pstree[linestyle=dashed]{\TC[name=s2a]}
-					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[name=s2b]}
-					{\Tdot[name=s4c] \Tdot[name=s4d]}
-				}
-				\pstree[linecolor=black]{\TC[name=s1b]}{
-					\pstree[linestyle=dashed]{\TC[name=s2c]}
-					{\Tdot[name=s4e] \Tdot[name=s4f]}            
-					\pstree[linestyle=dashed]{\TC[name=s2d]}
-					{\Tdot[name=s4g] \Tdot[name=s4h]}
-				}
-			}
-			% We add the stage identifiers.
-			\pstree[edge = none]{\Tr{First stage}}{
-				\pstree{\Tr{Second stage}}{
-					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
-				}
-			}
-		}
-		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
-		
+		\sddptree{1}{$x_1$}{}{}{}{}{}{}
 	\end{center}
 	
 \end{frame}
@@ -716,37 +678,7 @@ Solve
 	\frametitle{Step 2: forward pass}
 	
 	\begin{center}
-		\psset{treemode=R, levelsep=3cm}
-		\pstree[thislevelsep=0,edge=\ncline]
-		{\Tn} % root
-		{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
-				\pstree[linecolor=red]{\TC[name=s1a]~[tnpos=b]{$x_{2,1}$}}{
-					\pstree[linestyle=dashed, linecolor=black]{\TC[name=s2a]}
-					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed, linecolor=black]{\TC[name=s2b]}
-					{\Tdot[name=s4c] \Tdot[name=s4d]}
-				}
-				\pstree[linecolor=red]{\TC[name=s1b]~[tnpos=b]{$x_{2,s_{n_2}}$}}{
-					\pstree[linestyle=dashed, linecolor=black]{\TC[name=s2c]}
-					{\Tdot[name=s4e] \Tdot[name=s4f]}            
-					\pstree[linestyle=dashed, linecolor=black]{\TC[name=s2d]}
-					{\Tdot[name=s4g] \Tdot[name=s4h]}
-				}
-			}
-			% We add the stage identifiers.
-			\pstree[edge = none]{\Tr{First stage}}{
-				\pstree{\Tr{Second stage}}{
-					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
-				}
-			}
-		}
-		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
-		
+		\sddptree{2}{$x_1$}{$x_{2,1}$}{$x_{2,s_{n_2}}$}{}{}{}{}
 	\end{center}
 	
 \end{frame}
@@ -770,37 +702,7 @@ Solve
 	\frametitle{Step 3: forward pass}
 	
 	\begin{center}
-		\psset{treemode=R, levelsep=2.8cm}
-		\pstree[thislevelsep=0,edge=\ncline]
-		{\Tn} % root
-		{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
-				\pstree{\TC[name=s1a]~[tnpos=b]{$x_{2,1}$}}{
-					\pstree[linestyle=dashed, linecolor=red]{\TC[name=s2a]~[tnpos=b]{$x_{3,1}$}}
-					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed, linecolor=red]{\TC[name=s2b]~[tnpos=b]{$x_{3,s_i}$}}
-					{\Tdot[name=s4c] \Tdot[name=s4d]}
-				}
-				\pstree{\TC~[tnpos=b, name=s1b]{$x_{2,s_1}$}}{
-					\pstree[linestyle=dashed, linecolor=red]{\TC[name=s2c]~[tnpos=b]{$x_{3,s_m}$}}
-					{\Tdot[name=s4e] \Tdot[name=s4f]}            
-					\pstree[linestyle=dashed, linecolor=red]{\TC[name=s2d]~[tnpos=b]{$x_{3,s_{n_3}}$}}
-					{\Tdot[name=s4g] \Tdot[name=s4h]}
-				}
-			}
-			% We add the stage identifiers.
-			\pstree[edge = none]{\Tr{First stage}}{
-				\pstree{\Tr{Second stage}}{
-					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
-				}
-			}
-		}
-		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
-		
+		\sddptree{3}{$x_1$}{$x_{2,1}$}{$x_{2,s_1}$}{$x_{3,1}$}{$x_{3,s_i}$}{$x_{3,s_m}$}{$x_{3,s_{n_3}}$}
 	\end{center}
 	
 \end{frame}
@@ -816,37 +718,7 @@ The newly formed cuts are added to the Step 2 program and we solve again the pro
 	\frametitle{Step 2: backward pass}
 	
 	\begin{center}
-		\psset{treemode=R, levelsep=3cm}
-		\pstree[thislevelsep=0,edge=\ncline]
-		{\Tn} % root
-		{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
-				\pstree[linecolor=red]{\TC[name=s1a]~[tnpos=b]{$x_{2,1}$}}{
-					\pstree[linestyle=dashed, linecolor=black]{\TC[name=s2a]}
-					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed, linecolor=black]{\TC[name=s2b]}
-					{\Tdot[name=s4c] \Tdot[name=s4d]}
-				}
-				\pstree[linecolor=red]{\TC[name=s1b]~[tnpos=b]{$x_{2,s_{n_2}}$}}{
-					\pstree[linestyle=dashed, linecolor=black]{\TC[name=s2c]}
-					{\Tdot[name=s4e] \Tdot[name=s4f]}            
-					\pstree[linestyle=dashed, linecolor=black]{\TC[name=s2d]}
-					{\Tdot[name=s4g] \Tdot[name=s4h]}
-				}
-			}
-			% We add the stage identifiers.
-			\pstree[edge = none]{\Tr{First stage}}{
-				\pstree{\Tr{Second stage}}{
-					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
-				}
-			}
-		}
-		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
-		
+		\sddptree{2}{$x_1$}{$x_{2,1}$}{$x_{2,s_{n_2}}$}{}{}{}{}
 	\end{center}
 	
 \end{frame}
@@ -866,37 +738,7 @@ This forms a new master program for the first stage, that is solved again in the
 	\frametitle{Step 1: backward pass}
 	
 	\begin{center}
-		\psset{treemode=R, levelsep=3cm}
-		\pstree[thislevelsep=0,edge=\ncline,linecolor=red]
-		{\Tn} % root
-		{\pstree{\TC~[tnpos=b, name=s0]{$x_1$}}{
-				\pstree[linecolor=black]{\TC[name=s1a]}{
-					\pstree[linestyle=dashed]{\TC[name=s2a]}
-					{\Tdot[name=s4a] \Tdot[name=s4b]}            \pstree[linestyle=dashed]{\TC[name=s2b]}
-					{\Tdot[name=s4c] \Tdot[name=s4d]}
-				}
-				\pstree[linecolor=black]{\TC[name=s1b]}{
-					\pstree[linestyle=dashed]{\TC[name=s2c]}
-					{\Tdot[name=s4e] \Tdot[name=s4f]}            
-					\pstree[linestyle=dashed]{\TC[name=s2d]}
-					{\Tdot[name=s4g] \Tdot[name=s4h]}
-				}
-			}
-			% We add the stage identifiers.
-			\pstree[edge = none]{\Tr{First stage}}{
-				\pstree{\Tr{Second stage}}{
-					\pstree{\Tr{Third stage}}{\Tr{\ldots}}
-				}
-			}
-		}
-		\ncline[linestyle=dotted,nodesep=2pt]{s1a}{s1b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2a}{s2b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s2c}{s2d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4a}{s4b}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4c}{s4d}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4e}{s4f}
-		\ncline[linestyle=dotted,nodesep=2pt]{s4g}{s4h}
-		
+		\sddptree{1}{$x_1$}{}{}{}{}{}{}
 	\end{center}
 
 \end{frame}

@@ -16,10 +16,10 @@
 \newtheorem{lem}{Lemma}
 
 \usepackage{epic,eepic}
-\usepackage{pstricks, pst-tree}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 
 \usepackage{epstopdf}
-\usepackage{auto-pst-pdf}
 
 \usepackage{times}
 
@@ -43,6 +43,38 @@
 \def\cS{\mathcal{S}}
 \def\cX{\mathcal{X}}
 
+
+%% ---------------------------------------------------------------------------
+%% Nonanticipativity pictures, in TikZ (no PSTricks, no auto-pst-pdf).
+%% ---------------------------------------------------------------------------
+
+% One root branching directly into the four scenarios.
+\newcommand{\scenariofan}{%
+  \begin{tikzpicture}[
+      nd/.style={circle,draw,line width=0.9pt,minimum size=4.2mm,inner sep=0pt}]
+    \node[nd] (r) at (0,0) {};
+    \foreach \k/\y in {1/1.35,2/0.45,3/-0.45,4/-1.35} {
+      \node[nd] (s\k) at (1.6,\y) {};
+      \draw[line width=0.7pt] (r) -- (s\k);
+      \node[font=\small\bfseries,right=4pt] at (s\k.east) {scenario \k};
+    }
+  \end{tikzpicture}}
+
+% The same four scenarios as two periods of decision variables, the doubled
+% bars marking the first-period copies that nonanticipativity ties together.
+\newcommand{\scenariobundles}{%
+  \begin{tikzpicture}[
+      nd/.style={circle,draw,line width=1pt,minimum size=4.6mm,inner sep=0pt}]
+    \foreach \r in {0,1,2,3} {
+      \node[nd] (a\r) at (0,\r) {};
+      \node[nd] (b\r) at (2,\r) {};
+      \draw[line width=0.7pt] (a\r) -- (b\r);
+    }
+    \foreach \r/\rr in {3/2,2/1,1/0} {
+      \draw[line width=0.7pt] (-0.04,\r-0.26) -- (-0.04,\rr+0.26);
+      \draw[line width=0.7pt] ( 0.04,\r-0.26) -- ( 0.04,\rr+0.26);
+    }
+  \end{tikzpicture}}
 
 \title[Stochastic Lagrangian]{Stochastic programming\\Lagrangian methods}
 
@@ -376,41 +408,13 @@ Denote $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection o
 
 \begin{minipage}{0.45\textwidth}
 \begin{center}
-\hspace*{1cm} \scalebox{0.65}{
-\pstree[treemode=R]{\TC}{
-  \TC~[tnpos=r]{\quad\bf scenario 1}
-  \TC~[tnpos=r]{\quad\bf scenario 2}
-  \TC~[tnpos=r]{\quad\bf scenario 3}
-  \TC~[tnpos=r]{\quad\bf scenario 4}
- }
-}
+\scenariofan
 \end{center}
 \end{minipage}
 \hfill
 \begin{minipage}{0.45\textwidth}
-%\setlength{\unitlength}{0.69mm}
 \begin{center}
-\scalebox{0.7}{
-\begin{pspicture}(3,2)(3,6.5)
-\pscircle[linewidth=1pt](0,6){0.2}
-\psline(0.21,6)(1.79,6)
-\pscircle[linewidth=1pt](2,6){0.2}
-\psline(-0.04,5.76)(-0.04,5.24)
-\psline(0.04,5.76)(0.04,5.24)
-\pscircle[linewidth=1pt](0,5){0.2}
-\psline(0.21,5)(1.79,5)
-\pscircle[linewidth=1pt](2,5){0.2}
-\psline(-0.04,4.76)(-0.04,4.24)
-\psline(0.04,4.76)(0.04,4.24)
-\pscircle[linewidth=1pt](0,4){0.2}
-\psline(0.21,4)(1.79,4)
-\pscircle[linewidth=1pt](2,4){0.2}
-\psline(-0.04,3.76)(-0.04,3.24)
-\psline(0.04,3.76)(0.04,3.24)
-\pscircle[linewidth=1pt](0,3){0.2}
-\psline(0.21,3)(1.79,3)
-\pscircle[linewidth=1pt](2,3){0.2}
-\end{pspicture}}
+\scenariobundles
 \end{center}
 \end{minipage}
 

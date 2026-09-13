@@ -9,7 +9,9 @@ IMGS_DIR = imgs
 # Search paths for LaTeX
 export TEXINPUTS := .//:./$(SLIDES_DIR)//:./$(BACKGROUND_DIR)//:./$(STY_DIR)//:./$(IMGS_DIR)//:../sty//:../imgs//:$(TEXINPUTS)
 
-PDFLATEX = pdflatex -interaction=nonstopmode -shell-escape
+# No -shell-escape: PSTricks/auto-pst-pdf are gone (pictures are TikZ now) and
+# the `graphs` target pre-converts every EPS figure.
+PDFLATEX = pdflatex -interaction=nonstopmode
 
 # Filenames contain spaces (e.g. "01. Introduction.tex"), which GNU make
 # cannot handle in wildcard lists: word-splitting ignores escaped spaces.
