@@ -14,6 +14,9 @@
 *.dvi
 *.ps
 
+# Compiled decks belong in pdf/ only; never in slides/
+slides/*.pdf
+
 # OS / Editor temporary files
 .DS_Store
 *.swp
