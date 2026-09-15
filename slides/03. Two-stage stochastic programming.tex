@@ -14,6 +14,9 @@
 %\usepackage[frenchb]{babel}
 \usepackage{amsmath,amssymb,amsthm}
 
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,decorations.pathreplacing}
+
 \newtheorem{theo}{Theorem}
 
 
@@ -75,6 +78,41 @@
 \end{frame}
 
 \begin{frame}
+\frametitle{The randomness, seen in the decision space}
+
+Each realization tilts the two constraints: the frontier of the feasible set, and with it the best $x$, moves.
+
+\begin{center}
+\begin{tikzpicture}[x=1.08cm,y=0.45cm,>=latex,font=\footnotesize]
+  \draw[->] (0,0) -- (6.5,0) node[right]{$x_1$};
+  \draw[->] (0,0) -- (0,8.4) node[above]{$x_2$};
+  \foreach \i in {1,...,6} \draw (\i,0) -- (\i,-0.2) node[below]{$\i$};
+  \foreach \j in {2,4,6} \draw (0,\j) -- (-0.06,\j) node[left]{$\j$};
+  % frontier of the feasible set (the two binding constraints), per realization
+  \draw[blue,line width=1pt]                (0,7) -- (1,3) -- (4,0);
+  \draw[teal,line width=1pt,densely dashed] (0,7) -- (1.636,2.909) -- (6,0);
+  \draw[red,line width=1pt,densely dotted]  (0,7) -- (4.5,2.5) -- (6,2);
+  % optimal vertex for each realization
+  \fill[blue] (1,3) circle (2.2pt);
+  \fill[teal] (1.636,2.909) circle (2.2pt);
+  \fill[red]  (4.5,2.5) circle (2.2pt);
+  % the blue optimum is infeasible under the red realization
+  \draw[<->,red,thick] (1,3.2) -- (1,5.9);
+  \draw[red,thin] (1.05,4.6) -- (1.85,5.6);
+  \node[red,right,inner sep=1pt] at (1.85,5.7) {shortfall $=3$};
+  % legend
+  \draw[blue,line width=1pt]                (3.2,8.1)--(3.8,8.1) node[right,black]{$\xi=(4,1)$};
+  \draw[teal,line width=1pt,densely dashed] (3.2,7.2)--(3.8,7.2) node[right,black]{$\xi=(5/2,2/3)$ (mean)};
+  \draw[red,line width=1pt,densely dotted]  (3.2,6.3)--(3.8,6.3) node[right,black]{$\xi=(1,1/3)$};
+\end{tikzpicture}
+\end{center}
+
+The three dots are the three optimal $x$: the one chosen for $\xi=(4,1)$ misses the first constraint by 3 units when $\xi=(1,1/3)$ occurs.
+
+\end{frame}
+
+
+\begin{frame}
 	\frametitle{What to do?}
 	
 	\begin{itemize}
@@ -105,6 +143,41 @@
 	\end{itemize}
 	
 \end{frame}
+
+\begin{frame}
+\frametitle{When is the decision taken?}
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,>=latex,font=\footnotesize,
+    dec/.style={draw,rounded corners=2pt,fill=blue!8,inner sep=3pt,minimum height=5.5mm},
+    rec/.style={draw,rounded corners=2pt,fill=red!8,inner sep=3pt,minimum height=5.5mm},
+    ev/.style={draw,fill=black!8,inner sep=3pt,minimum height=5.5mm}]
+  % --- here and now
+  \node[align=right,font=\scriptsize\bfseries] at (-1.4,0) {Here and now\\(two-stage)};
+  \node[dec] (x)  at (0.7,0)    {decide $x$};
+  \node[ev]  (o)  at (4.4,0)    {$\bsxi$ observed};
+  \node[rec] (y1) at (7.0,0.85) {$y(\xi_1)$};
+  \node[rec] (y2) at (7.0,0.2)  {$y(\xi_2)$};
+  \node               at (7.0,-0.35) {$\vdots$};
+  \node[rec] (yS) at (7.0,-0.9) {$y(\xi_S)$};
+  \draw[->] (x) -- node[pos=0.38,above=1pt,font=\scriptsize]{no information yet} (o);
+  \draw[->] (o) -- (y1);  \draw[->] (o) -- (y2);  \draw[->] (o) -- (yS);
+  \node[right,font=\scriptsize,align=left] at (7.9,0) {a single $x$ for\\all scenarios};
+  % --- wait and see
+  \node[align=right,font=\scriptsize\bfseries] at (-1.4,-2.7) {Wait and see};
+  \node[ev]  (o2) at (0.7,-2.7)   {$\bsxi$ observed};
+  \node[dec] (x1) at (3.8,-1.85)  {decide $x(\xi_1)$};
+  \node[dec] (x2) at (3.8,-2.5)   {decide $x(\xi_2)$};
+  \node                at (3.8,-3.05) {$\vdots$};
+  \node[dec] (xS) at (3.8,-3.6)   {decide $x(\xi_S)$};
+  \draw[->] (o2) -- (x1);  \draw[->] (o2) -- (x2);  \draw[->] (o2) -- (xS);
+  \node[right,font=\scriptsize,align=left] at (5.6,-2.7) {one $x$ per scenario:\\not implementable,\\but a lower bound};
+  \draw[->,gray] (-0.4,-4.3) -- (7.6,-4.3) node[right,black,font=\scriptsize]{time};
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
 
 \begin{frame}
 	\frametitle{Remove the randomness?}
@@ -282,6 +355,48 @@ where {\it a.e.} stands for ``almost every''.
 	\end{itemize}
 	
 \end{frame}
+
+\begin{frame}
+\frametitle{The staircase structure}
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,
+   blk/.style={draw,minimum height=6.5mm,inner sep=1pt}]
+  % variable names
+  \node at (0.75,0.45) {$x$};
+  \node at (2.1,0.45) {$y_1$};  \node at (3.2,0.45) {$y_2$};
+  \node at (4.3,0.45) {$\cdots$}; \node at (5.4,0.45) {$y_S$};
+  % blocks
+  \node[blk,minimum width=1.5cm,fill=blue!10] at (0.75,-0.35) {$A$};
+  \node[blk,minimum width=1.5cm,fill=blue!10] at (0.75,-1.15) {$T_1$};
+  \node[blk,minimum width=1.5cm,fill=blue!10] at (0.75,-1.95) {$T_2$};
+  \node                                        at (0.75,-2.7)  {$\vdots$};
+  \node[blk,minimum width=1.5cm,fill=blue!10] at (0.75,-3.45) {$T_S$};
+  \node[blk,minimum width=1cm,fill=red!10]    at (2.1,-1.15) {$W$};
+  \node[blk,minimum width=1cm,fill=red!10]    at (3.2,-1.95) {$W$};
+  \node                                        at (4.3,-2.7)  {$\ddots$};
+  \node[blk,minimum width=1cm,fill=red!10]    at (5.4,-3.45) {$W$};
+  % brackets
+  \draw (-0.15,0.05) -- (-0.3,0.05) -- (-0.3,-3.85) -- (-0.15,-3.85);
+  \draw (6.05,0.05) -- (6.2,0.05) -- (6.2,-3.85) -- (6.05,-3.85);
+  % right-hand side
+  \node at (6.6,-1.9) {$=$};
+  \draw (6.9,0.05) -- (6.8,0.05) -- (6.8,-3.85) -- (6.9,-3.85);
+  \node at (7.15,-0.35) {$b$};   \node at (7.15,-1.15) {$h_1$};
+  \node at (7.15,-1.95) {$h_2$}; \node at (7.15,-2.7)  {$\vdots$};
+  \node at (7.15,-3.45) {$h_S$};
+  \draw (7.45,0.05) -- (7.55,0.05) -- (7.55,-3.85) -- (7.45,-3.85);
+  % the coupling column
+  \draw[red,thick,dashed,rounded corners=2pt] (-0.05,-0.75) rectangle (1.55,-3.85);
+  \node[red,right,align=left,font=\scriptsize] at (1.75,-4.25)
+     {the only coupling between scenarios:\\the first-stage decision $x$};
+\end{tikzpicture}
+\end{center}
+
+Delete that first column and the problem falls apart into $S$ independent small programs: this is what the decomposition methods of the next chapter exploit.
+
+\end{frame}
+
 
 \begin{frame}
 	\frametitle{Large scale,\ldots and?}
@@ -512,6 +627,42 @@ K_2 &= \lbrace x \in \RR^n \,|\, Q(x,\xi) < +\infty \text{ a.s.} \rbrace \\
 \end{frame}
 
 \begin{frame}
+\frametitle{pos$\,W$, graphically}
+
+$\mathrm{pos}\,W$ is the cone spanned by the columns of $W$ with non-negative weights: the set of right-hand sides $z$ that the recourse can absorb.
+
+\begin{center}
+\begin{tikzpicture}[x=0.82cm,y=0.82cm,>=latex,font=\footnotesize]
+  % ---------------- panel A: pointed cone
+  \fill[blue!12] (0,0) -- (2.4,1.2) -- (2.4,2.4) -- (-1.2,2.4) -- cycle;
+  \draw[->,gray] (-2.2,0) -- (2.6,0) node[right,black]{$z_1$};
+  \draw[->,gray] (0,-1.7) -- (0,2.7) node[above right,black,inner sep=1pt]{$z_2$};
+  \draw[->,blue,line width=1pt] (0,0) -- (2.4,1.2) node[right,black,inner sep=2pt]{$W_{\cdot 1}$};
+  \draw[->,blue,line width=1pt] (0,0) -- (-1.2,2.4) node[left,black,inner sep=2pt]{$W_{\cdot 2}$};
+  \fill (1,2) circle (1.8pt) node[right,inner sep=3pt]{$z$};
+  \fill (1.4,-1.0) circle (1.8pt) node[right,inner sep=3pt]{$z'$};
+  \node[align=center,font=\scriptsize] at (0.2,-2.6)
+     {$z \in \mathrm{pos}\,W$: $Q(x,\xi)$ finite\\
+      $z' \notin \mathrm{pos}\,W$: $Q(x,\xi) = +\infty$};
+  % ---------------- panel B: whole plane
+  \begin{scope}[xshift=7cm]
+    \fill[red!12] (-2.2,-1.7) rectangle (2.6,2.7);
+    \draw[->,gray] (-2.2,0) -- (2.6,0) node[right,black]{$z_1$};
+    \draw[->,gray] (0,-1.7) -- (0,2.7) node[above right,black,inner sep=1pt]{$z_2$};
+    \draw[->,red,line width=1pt] (0,0) -- (2.2,2.2);
+    \draw[->,red,line width=1pt] (0,0) -- (2.4,0);
+    \draw[->,red,line width=1pt] (0,0) -- (-2.0,0);
+    \draw[->,red,line width=1pt] (0,0) -- (0,-1.5);
+    \node[align=center,font=\scriptsize] at (0.2,-2.6)
+      {$\mathrm{pos}\,W = \RR^2$: {\red complete recourse},\\every $z$ is absorbed};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}
 \frametitle{Relatively complete recourse}
 
 A problem is said to have a {\red relatively complete recourse} if $K_1
@@ -546,6 +697,47 @@ $\forall x$, $T(\xi)$, $h(\xi)$, $Q(x,\xi) < \infty$ with $z = h(\xi)-T(\xi)x$.
 \end{itemize}
 
 \end{frame}
+
+\begin{frame}
+\frametitle{$K_1$, $K_2$, and the two notions of completeness}
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize]
+  % (a)
+  \draw[gray] (0,0) rectangle (3.6,2.4);
+  \node[gray,above right,font=\scriptsize] at (0,2.4) {$\RR^n$};
+  \begin{scope}
+    \clip (1.3,1.2) ellipse (1.0 and 0.8);
+    \fill[green!35] (2.4,1.2) ellipse (1.05 and 0.85);
+  \end{scope}
+  \draw[blue,thick] (1.3,1.2) ellipse (1.0 and 0.8);
+  \draw[red,thick]  (2.4,1.2) ellipse (1.05 and 0.85);
+  \node[blue] at (0.72,1.2) {$K_1$};  \node[red] at (3.1,1.2) {$K_2$};
+  \node[align=center,font=\scriptsize] at (1.8,-0.65) {(a) in general\\feasible set $=K_1\cap K_2$};
+  % (b)
+  \begin{scope}[xshift=4.4cm]
+    \draw[gray] (0,0) rectangle (3.6,2.4);
+    \draw[red,thick,fill=red!8]    (1.8,1.2) ellipse (1.5 and 1.0);
+    \draw[blue,thick,fill=green!35] (1.6,1.2) ellipse (0.75 and 0.6);
+    \node[blue] at (1.6,1.2) {$K_1$};  \node[red] at (2.85,1.2) {$K_2$};
+    \node[align=center,font=\scriptsize] at (1.8,-0.65) {(b) relatively complete\\$K_1 \subseteq K_2$};
+  \end{scope}
+  % (c)
+  \begin{scope}[xshift=8.8cm]
+    \draw[red,thick,fill=red!8] (0,0) rectangle (3.6,2.4);
+    \draw[blue,thick,fill=green!35] (1.8,1.2) ellipse (0.9 and 0.7);
+    \node[blue] at (1.8,1.2) {$K_1$};  \node[red] at (3.1,1.9) {$K_2$};
+    \node[align=center,font=\scriptsize] at (1.8,-0.65) {(c) complete\\$\mathrm{pos}W=\RR^m$, so $K_2=\RR^n$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\smallskip
+
+Completeness is read off $W$ alone; relative completeness also depends on $A$, $b$ and on the support of $\bsxi$, and is the property that really matters: it is what forbids a first-stage decision to be caught infeasible in the second stage.
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{$K_2 \ne K_2^s$}
@@ -765,6 +957,33 @@ That is, for $q^+(\xi) + q^-(\xi) \geq 0$, at most one of $y_i^+$ and $y_i^-$ is
 measure the positive and negative parts of the discrepancy $h(\xi)-T(\xi)x$.
 
 \end{frame}
+
+\begin{frame}
+\frametitle{Simple recourse, graphically}
+
+With $m = 1$, write $z = h(\xi)-T(\xi)x$ for the discrepancy left by the first stage.
+
+\begin{center}
+\begin{tikzpicture}[x=0.95cm,y=0.5cm,>=latex,font=\footnotesize]
+  \fill[black!8] (-3.6,3.6) -- (0,0) -- (2.4,3.6) -- (2.4,5.3) -- (-3.6,5.3) -- cycle;
+  \draw[->] (-4.2,0) -- (3.2,0) node[right]{$z$};
+  \draw[->] (0,-0.5) -- (0,5.9) node[above]{$Q(x,\xi)$};
+  \draw[blue,line width=1.2pt] (-3.6,3.6) -- (0,0) -- (2.4,3.6);
+  \node[blue,left,font=\scriptsize]  at (-3.7,3.5) {slope $-q^-$};
+  \node[blue,right,font=\scriptsize] at (2.5,3.5)  {slope $q^+$};
+  \node[font=\scriptsize,align=center] at (-2.1,-1.3) {$z<0$: surplus,\\$y^-=-z$};
+  \node[font=\scriptsize,align=center] at (1.7,-1.3)  {$z>0$: shortage,\\$y^+=z$};
+  \fill (-2.0,2.0) circle (1.6pt);
+  \draw[->,red,thick] (-2.0,2.2) -- (-2.0,3.6);
+  \node[red,align=center,font=\scriptsize,fill=black!8,inner sep=2pt] at (-0.6,4.5)
+     {any other feasible $(y^+,y^-)$ lies above:\\raising both by $u$ costs $(q^++q^-)u$ more};
+\end{tikzpicture}
+\end{center}
+
+The V points upwards exactly when $q^+ + q^- \geq 0$; otherwise inflating $y^+$ and $y^-$ together is profitable and $Q(x,\xi) = -\infty$.
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Simple recourse (cont'd)}
@@ -1274,6 +1493,39 @@ $4 \leq x$: $\mathcal{Q}(x) = x-7/3$;
 \end{frame}
 
 \begin{frame}
+\frametitle{Where the kinks come from}
+
+\begin{center}
+\begin{tikzpicture}[x=1.35cm,y=0.85cm,>=latex,font=\footnotesize]
+  \draw[->] (0,0) -- (6.4,0) node[right]{$x$};
+  \draw[->] (0,0) -- (0,3.2);
+  \foreach \i in {1,...,5} \draw (\i,0) -- (\i,-0.1) node[below]{$\i$};
+  \foreach \j in {1,2,3} \draw (0,\j) -- (-0.05,\j) node[left]{$\j$};
+  % the three scaled scenario costs
+  \draw[gray,densely dashed] (0,0.333) -- (1,0) -- (5,1.333);
+  \draw[gray,densely dashed] (0,0.667) -- (2,0) -- (5,1.0);
+  \draw[gray,densely dashed] (0,1.333) -- (4,0) -- (5,0.333);
+  % the expected recourse
+  \draw[blue,line width=1.2pt] (0,2.333) -- (1,1.333) -- (2,1) -- (4,1.667) -- (5,2.667);
+  \foreach \p/\q in {1/1.333, 2/1, 4/1.667} {
+     \fill[blue] (\p,\q) circle (1.8pt);
+     \draw[dotted] (\p,0) -- (\p,\q);
+  }
+  \node[below,font=\scriptsize] at (1,-0.4) {$\xi_1$};
+  \node[below,font=\scriptsize] at (2,-0.4) {$\xi_2$};
+  \node[below,font=\scriptsize] at (4,-0.4) {$\xi_3$};
+  \node[blue,right] at (5.05,2.7) {$\calQ(x)$};
+  \node[gray,right,font=\scriptsize] at (5.05,1.1) {$\frac13 Q(x,\xi_s)$};
+  \node[below,font=\scriptsize] at (2,-0.95) {$x^\ast=2$: the median};
+\end{tikzpicture}
+\end{center}
+
+Each scenario contributes one kink, at its own realization; $\calQ$ is their non-negative weighted sum, hence convex and piecewise linear, and its minimizer is here the median of the scenarios.
+
+\end{frame}
+
+
+\begin{frame}
 \frametitle{Properties of $\mathcal{Q}(x)$}
 
 We note that $\mathcal{Q}(x)$ is convex and piecewise linear.
@@ -1387,6 +1639,46 @@ For a stochastic program with fixed recourse where $\bsxi$ has finite second-ord
 Intuitively, the function $\mathcal{Q}(x)$ is ``smoothed'' by the superposition of an infinite number of functions $Q(x,\xi)$.
 
 \end{frame}
+
+\begin{frame}
+\frametitle{Smoothing by superposition}
+
+Same family $Q(x,\xi) = |x-\xi|$, with $\bsxi$ spread more and more finely over $[1,4]$.
+
+\begin{center}
+\begin{tikzpicture}[x=0.82cm,y=1.15cm,font=\footnotesize]
+ \foreach \dx/\cap in {0/{$S=3$}, 4.3/{$S=7$}, 8.6/{$\bsxi \sim U[1,4]$}} {
+  \begin{scope}[xshift=\dx cm]
+    \draw[->] (0.3,0) -- (4.9,0) node[right,font=\scriptsize]{$x$};
+    \draw[->] (0.3,0) -- (0.3,2.35);
+    \node[font=\scriptsize] at (2.5,-0.45) {\cap};
+  \end{scope}}
+  % S = 3: realizations 1, 2.5, 4
+  \draw[blue,line width=1pt] (0.5,2.0) -- (1,1.5) -- (2.5,1) -- (4,1.5) -- (4.5,2.0);
+  \foreach \p/\q in {1/1.5, 2.5/1, 4/1.5} \fill[blue] (\p,\q) circle (1.7pt);
+  % S = 7: realizations 1, 1.5, ..., 4
+  \begin{scope}[xshift=4.3cm]
+    \draw[blue,line width=1pt] (0.5,2.0) -- (1,1.5) -- (1.5,1.143) -- (2,0.929)
+       -- (2.5,0.857) -- (3,0.929) -- (3.5,1.143) -- (4,1.5) -- (4.5,2.0);
+    \foreach \p/\q in {1/1.5, 1.5/1.143, 2/0.929, 2.5/0.857, 3/0.929, 3.5/1.143, 4/1.5}
+       \fill[blue] (\p,\q) circle (1.7pt);
+  \end{scope}
+  % continuous
+  \begin{scope}[xshift=8.6cm]
+    \draw[blue,line width=1pt] (0.5,2.0) -- (1,1.5);
+    \draw[blue,line width=1pt] plot[domain=1:4,samples=40,smooth]
+        (\x,{((\x-1)*(\x-1)+(4-\x)*(4-\x))/6});
+    \draw[blue,line width=1pt] (4,1.5) -- (4.5,2.0);
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\smallskip
+
+The tails are identical; only the middle changes. With finitely many scenarios $\calQ$ keeps one kink per scenario; in the limit the kinks are averaged away and $\calQ$ becomes differentiable on the interior of $K_2$.
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{The value of information}
@@ -1517,6 +1809,41 @@ Collecting the results:
 \EV \leq \WS \leq \RP \leq \EEV.
 \]
 \end{frame}
+
+\begin{frame}
+\frametitle{The four values on one axis}
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,>=latex,font=\footnotesize]
+  \draw[->] (0,0) -- (9.2,0) node[right]{cost};
+  \foreach \p/\l in {1.0/\EV, 2.6/\WS, 5.6/\RP, 7.2/\EEV} {
+    \draw[line width=1pt] (\p,-0.14) -- (\p,0.14);
+    \node[below] at (\p,-0.2) {$\l$};}
+  \draw[decorate,decoration={brace,amplitude=4pt},red]
+     (5.6,0.25) -- (2.6,0.25) node[midway,above=4pt,red]{$\EVPI$};
+  \draw[decorate,decoration={brace,amplitude=4pt},blue]
+     (7.2,0.25) -- (5.6,0.25) node[midway,above=4pt,blue]{$\VSS$};
+  \draw[decorate,decoration={brace,amplitude=3pt,mirror},gray]
+     (1.0,-0.7) -- (2.6,-0.7);
+  \node[below,font=\scriptsize,align=center,gray] at (1.8,-0.85)
+     {holds only if $h(\bsxi)$ alone is random};
+  % --- the numerical example
+  \begin{scope}[yshift=-2.9cm]
+    \draw[->] (0,0) -- (9.2,0) node[right]{cost};
+    \foreach \p in {1.0, 5.6, 6.35} \draw[line width=1pt] (\p,-0.14) -- (\p,0.14);
+    \node[below] at (1.0,-0.2) {$\EV=\WS=0$};
+    \node[below] at (5.5,-0.2) {$\RP=1$};
+    \node[below right] at (6.4,-0.2) {$\EEV=10/9$};
+    \draw[decorate,decoration={brace,amplitude=4pt},red]
+       (5.6,0.25) -- (1.0,0.25) node[midway,above=4pt,red]{$\EVPI=1$};
+    \draw[decorate,decoration={brace,amplitude=4pt},blue]
+       (6.35,0.25) -- (5.6,0.25) node[midway,above=4pt,blue,xshift=10pt]{$\VSS=1/9$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Example}
