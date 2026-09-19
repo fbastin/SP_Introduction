@@ -251,6 +251,8 @@ Evaluate
 f(\hat{x}) &= \min_y \lbrace q^Ty \mid Wy = h-T\hat{x},\ y \geq 0 \rbrace \\
 &= \max_{\pi} \lbrace (h-T\hat{x})^T\pi \mid W^T\pi \leq q \rbrace. \quad \text{(duality)}
 \end{align*}
+{\footnotesize (this is the asymmetric dual, recalled in the linear programming background notes)}
+
 We have to consider two cases.
 \end{description}
 \end{frame}
@@ -263,7 +265,7 @@ If $f(\hat{x}) = +\infty$, then $\hat{x}$ is not feasible for the second-stage c
 
 \vspace{1mm}
 
-\begin{block}{Farkas' lemma}
+\begin{block}{Farkas' lemma (background notes)}
 Let $A \in \RR^{m \times n}$ and $b \in \RR^m$.
 Then, exactly one of the following two statements is true:
 \begin{itemize}
@@ -367,7 +369,7 @@ Return to Step 2 with the new solution $(\hat{x}, \hat{\theta})$.
 
 {\blue Stopping rule}: $f(\hat{x}) \leq \hat{\theta}$.
 
-Let $\{\pi^1, \ldots, \pi^r\}$ denote the extreme points of the dual polyhedron $\{\pi \mid W^T\pi \leq q\}$. Since $\hat{\theta}$ satisfies all $k$ optimality cuts added so far:
+Let $\{\pi^1, \ldots, \pi^r\}$ denote the extreme points of the dual polyhedron $\{\pi \mid W^T\pi \leq q\}$; a polyhedron has finitely many of them (background notes). Since $\hat{\theta}$ satisfies all $k$ optimality cuts added so far:
 \begin{align*}
 \hat{\theta} &\geq \max_{1 \leq i \leq k} (h-T\hat{x})^T\pi^i.
 \end{align*}
@@ -854,7 +856,7 @@ We know that $Q(x,\xi_j)$ is convex and piecewise linear, and since $\Xi$ is fin
 		\item
 		If $q$ depends on the realization $\xi$, given $\xi$, if the dual is feasible for some $x$, it is feasible for any value of $x$.
 		\item
-		From duality properties, if the primal is unbounded, then the dual is infeasible.
+		From duality properties, if the primal is unbounded, then the dual is infeasible (the possible primal--dual situations are tabulated in the background notes).
 		Assume that we know that our problem is bounded.
 	\end{itemize}
 	
@@ -1009,28 +1011,14 @@ When $\bsxi$ has finite support, the $L$-shaped algorithm converges in a finite 
 	
 	We can, however, show that the optimality cuts are supporting hyperplanes to the epigraph of $\mathcal{Q}(x)$ via subgradients, while the feasibility cuts define outer approximations of $K_2$.
 	
-\end{frame}
-
-\begin{frame}
-\frametitle{Subgradients}
+	\mbox{}
 	
-\begin{definition}[Subgradient]
-	A vector $\eta \in \RR^n$ is a {\red subgradient} of a convex function $f$ at $x$ iff
-\[ f(y) \geq f(x) + \eta^T(y-x),\ \forall y \in \RR^n.\]
-\end{definition}
-
-\begin{definition}[Subdifferential]
-	The set of all subgradients of $f$ at $x$ is called the {\red subdifferential} of $f$ at $x$ and is denoted by $\partial f(x)$.
-\end{definition}
-
-\mbox{}
-
-	The graph of the affine function $h(y) = f(x) + \eta^T(y-x)$ is a supporting hyperplane for the convex set $\operatorname{epi}(f) = \{ (z, \mu) \in \mathbb{R}^n \times \mathbb{R} \mid \mu \ge f(z) \} \subseteq \mathbb{R}^{n+1}$ at $(x, f(x))$.
-
+	The subgradient, the subdifferential $\partial f(x)$ and the supporting hyperplane used below are defined in the linear programming background notes, together with the underlying fact: an optimal dual solution is a subgradient of the value function of a linear program with respect to its right-hand side.
+	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Subgradients (cont'd)}
+	\frametitle{Subgradients and optimality cuts (cont'd)}
 	
 	Recall that, by duality,
 	\[

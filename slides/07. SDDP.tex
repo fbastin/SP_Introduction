@@ -142,7 +142,7 @@ W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t)x_{t-1} \right\}, \\
 \end{align*}
 
 {\small The expected cost-to-go is convex and piecewise linear in $x_t$: SDDP builds it
-from below, one supporting hyperplane at a time. Under stagewise independence, the
+from below, one supporting hyperplane at a time (background notes). Under stagewise independence, the
 conditioning disappears and a single $\QQ_{t+1}(x_t)$ serves the whole stage.}
 
 \end{frame}
@@ -330,7 +330,8 @@ If $NLSD(t, k)$ is infeasible, we compute $\pi_{t,k}$ and $\rho_{t,k} \geq 0$ su
 \pi_{t,k}^T W_t + \rho_{t,k}^TD_{t,k} &\leq 0.
 \end{align*}
 {\small Such a pair is a Farkas certificate of infeasibility, obtained from the dual ray
-returned by the solver.} The following is a valid feasibility cut for $NLSD(t - 1, a(k))$:
+returned by the solver (Farkas' lemma and the extreme rays carrying such certificates are
+recalled in the linear programming background notes).} The following is a valid feasibility cut for $NLSD(t - 1, a(k))$:
 $$
 D_{t-1, a(k)} x_{t-1,a(k)} \geq d_{t-1, a(k)},
 $$
@@ -367,8 +368,8 @@ conditional probabilities: $p(k, t\,|\,j, t - 1) = p_{k,t} / p_{j,t-1}$.
 \begin{frame}
 \frametitle{Optimality cuts: interpretation}
 
-By linear programming duality, the optimal value of $NLSD(t,k)$ evaluated at the trial
-solution $\hat{x}_{t-1}$ is
+By linear programming duality (background notes), the optimal value of $NLSD(t,k)$
+evaluated at the trial solution $\hat{x}_{t-1}$ is
 $$
 Q_{t,k}(\hat{x}_{t-1}) = \pi_{t,k}^T\left(h_{t,k} - T_{t-1,k}\hat{x}_{t-1}\right)
  + \rho_{t,k}^Td_{t,k} + \sigma_{t,k}^Te_{t,k},
