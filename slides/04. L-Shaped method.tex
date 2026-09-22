@@ -199,15 +199,12 @@ f(x) \overset{\mathrm{def}}{=} \min_y \lbrace q^Ty \mid Wy = h - Tx,\ y \geq 0 \
 \begin{frame}
 \frametitle{Problem reformulation}
 
-Assume moreover that the problem is feasible and $K_1 = \lbrace x \in \RR^n_+ \mid Ax = b \rbrace$ is bounded. This implies that
-\[
-\inf \lbrace c^Tx + f(x) \mid x \in K_1 \cap K_2 \rbrace
-\]
-is finite and $f(x)$ can be uniformly bounded from below on $K_1$, say by a constant $\theta_0$.
+Assume $K_1 \cap K_2 \ne \emptyset$, $K_1 = \lbrace x \in \RR^n_+ \mid Ax = b \rbrace$ bounded, and the {\red second-stage dual feasible}: some $\hat{\pi}$ satisfies $W^T\hat{\pi} \leq q$.
 
-\mbox{}
+Boundedness of $K_1$ alone would not suffice --- it does not prevent $f(x) = -\infty$. The dual assumption does, by weak duality: $f(x) \geq (h-Tx)^T\hat{\pi}$ for every $x$, and this affine function is bounded below on the bounded $K_1$.
+So $f$ admits a uniform lower bound $\theta_0$ on $K_1$, and $\inf \lbrace c^Tx + f(x) \mid x \in K_1 \cap K_2 \rbrace$ is finite.
 
-If we introduce the scalar variable $\theta$ to represent $f(x)$, we can write
+Introducing a scalar $\theta$ to represent $f(x)$:
 \begin{align*}
 \min_{x, \theta}\ & c^Tx + \theta \\
 \text{s.t. } & Ax = b, \\
@@ -329,7 +326,7 @@ f(x) &= \sup_{\pi} \left\lbrace (h-Tx)^T\pi \mid W^T\pi \leq q \right\rbrace \qu
 &= \hat{\pi}^T(h-Tx).
 \end{align*}
 
-Since we want $\theta$ to bound $f(x)$ from below, we require
+So every dual feasible $\hat{\pi}$ gives an affine {\red minorant} of $f$. The reformulation requires $\theta \geq f(x)$, hence in particular
 \[
 \theta \geq \hat{\pi}^T(h-Tx).
 \]
@@ -365,15 +362,38 @@ Return to Step 2 with the new solution $(\hat{x}, \hat{\theta})$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Convergence}
+\frametitle{Convergence: why the stopping test is correct}
+\small
 
 {\blue Stopping rule}: $f(\hat{x}) \leq \hat{\theta}$.
 
-Let $\{\pi^1, \ldots, \pi^r\}$ denote the extreme points of the dual polyhedron $\{\pi \mid W^T\pi \leq q\}$; a polyhedron has finitely many of them (background notes). Since $\hat{\theta}$ satisfies all $k$ optimality cuts added so far:
-\begin{align*}
-\hat{\theta} &\geq \max_{1 \leq i \leq k} (h-T\hat{x})^T\pi^i.
-\end{align*}
-When $f(\hat{x}) = \max_{1 \leq i \leq r} (h-T\hat{x})^T\pi^i \leq \hat{\theta}$, no further cutting plane can be generated: $\hat{\theta} = f(\hat{x})$ and the algorithm terminates at an optimal solution.
+Every cut added is {\red valid}: it is satisfied by every $(x,\theta)$ with $x \in K_1 \cap K_2$ and $\theta \geq f(x)$ --- that is how each was derived. So $\mathcal{B}_0 \cap \mathcal{B}_1$ {\red contains} the feasible set of the original problem, the master is a relaxation, and
+\[
+c^T\hat{x} + \hat{\theta} \ = \min_{\mathcal{B}_0 \cap \mathcal{B}_1} c^Tx + \theta
+\ \leq\ \min_{x \in K_1 \cap K_2} \lbrace c^Tx + f(x) \rbrace .
+\]
+Suppose now $f(\hat{x}) \leq \hat{\theta}$. Then $f(\hat{x}) < \infty$, so $\hat{x} \in K_1 \cap K_2$ and $(\hat{x}, f(\hat{x}))$ is feasible for the original problem:
+\[
+\min_{x \in K_1 \cap K_2} \lbrace c^Tx+f(x) \rbrace \ \leq\ c^T\hat{x} + f(\hat{x}) \ \leq\ c^T\hat{x} + \hat{\theta}.
+\]
+The two chains close on themselves: all the inequalities are equalities, $\hat{\theta} = f(\hat{x})$, and $\hat{x}$ is {\red optimal}.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convergence: why the method stops}
+\small
+
+Only {\red finitely many distinct cuts} can ever be produced.
+\begin{itemize}
+\item
+An optimality cut is built from a dual {\it basic} optimal solution, i.e. an extreme point of $\lbrace \pi \mid W^T\pi \leq q \rbrace$ --- pointed when rank$(W) = m$, and a polyhedron has finitely many extreme points (background notes).
+\item
+A feasibility cut is built from a basic optimal solution $\sigma^*$ of the phase-1 dual $\lbrace \sigma \mid W^T\sigma \leq 0,\ \|\sigma\|_{\infty} \leq 1 \rbrace$: again finitely many.
+\end{itemize}
+
+And no cut is produced {\red twice}: a cut generated at $(\hat{x}, \hat{\theta})$ is by construction violated there, whereas $(\hat{x}, \hat{\theta})$ satisfies every cut already in $\mathcal{B}_1$.
+Each non-terminating iteration therefore adds a cut that was not present before, and the stock is finite.
 
 \begin{block}{Proposition}
 If the two-stage stochastic program is solvable and $\lbrace x \mid Ax=b,\ x \geq 0 \rbrace$ is bounded, the dual decomposition method gives an optimal solution after a finite number of iterations.
@@ -513,7 +533,7 @@ As $v^+, v^- \geq 0$, $w^* \geq 0$:
 \item 
 if $w^* = 0$, then $v^{+*} = v^{-*} = 0$ and $Wy^* = h_s - T_sx^{\nu}$; in other words, the second-stage problem is feasible for $x^{\nu}$;
 \item
-if $w^* > 0$, then $v^{+*} \ne 0$ or $v^{-*} \ne 0$, so no feasible $y \geq 0$ exists with $Wy = h_s - T_sx^{\nu}$.
+if $w^* > 0$, no feasible $y \geq 0$ exists with $Wy = h_s - T_sx^{\nu}$: such a $y$ would make $(y, 0, 0)$ feasible with $w = 0$, contradicting the optimality of $w^* > 0$.
 \end{itemize}
 
 \end{frame}
@@ -604,10 +624,10 @@ Can we limit capacity expansion?
 	\frametitle{Example B\&L: master program}
 	
 	We now build the master program
-	\begin{align}
+	\begin{align*}
 	\min_{x, \theta}\ & 3x_1 + 2x_2 + \theta \\
 	\text{s.t. } & x \geq 0.
-	\end{align}
+	\end{align*}
 	Since there is currently no constraint on $\theta$, we simply ignore it.
 	The solution is then $x^* = (0,0)$, at which no scenario is feasible!
 	
@@ -881,19 +901,22 @@ where $\hat{\pi}_j$ is the dual optimal solution associated with $\xi_j$.
 	
 \mbox{}
 	
-The constraints in the dual problem are $\pi^T W \leq q(\xi_j)$, and are independent of $x$.
+The constraints of the $j$-th dual problem, $\pi^T W \leq q(\xi_j)^T$, do not involve $x$.
 	
 \end{frame}
 
 \begin{frame}
 \frametitle{Subproblems (cont'd)}
-	
-For any $x \in K_1 \cap K_2$, we have
+\small
+
+For any $x \in K_1 \cap K_2$, taking the $S$ duals together,
 \begin{align*}
-\mathcal{Q}(x) &= \max_{\pi} \sum_{j=1}^S p_j \pi_j^T(h(\xi_j) - T(\xi_j)x) \\
-& \geq \sum_{j=1}^S p_j(\hat{\pi}_j)^T(h(\xi_j) - T(\xi_j)x).
+\mathcal{Q}(x) &= \max_{\pi_1, \ldots, \pi_S} \left\lbrace \sum_{j=1}^S p_j \pi_j^T(h(\xi_j) - T(\xi_j)x)
+\ \middle|\ \pi_j^TW \leq q(\xi_j)^T,\ \forall j \right\rbrace \\
+& \geq \sum_{j=1}^S p_j(\hat{\pi}_j)^T(h(\xi_j) - T(\xi_j)x),
 \end{align*}
-	
+each $\hat{\pi}_j$ being feasible for its own dual, whose constraints do not involve $x$.
+
 The constraint $\theta \geq \mathcal{Q}(x)$ implies
 \[
 \theta \geq \sum_{j=1}^S p_j(\hat{\pi}_j)^T(h(\xi_j) - T(\xi_j)x) = \alpha + \beta^Tx,
@@ -1004,45 +1027,20 @@ When $\bsxi$ has finite support, the $L$-shaped algorithm converges in a finite 
 \begin{frame}
 	\frametitle{Subgradients and optimality cuts}
 	
-	We can also interpret the optimality cuts in terms of subgradients.
-	Recall that $\mathcal{Q}(x)$ is convex and piecewise linear, hence not differentiable everywhere (subgradients replace gradients at kinks).
+	The optimality cuts can also be read in terms of subgradients: they are supporting hyperplanes to the epigraph of $\mathcal{Q}$, while the feasibility cuts define outer approximations of $K_2$.
+	$\mathcal{Q}$ is convex and piecewise linear, hence not differentiable everywhere, and subgradients replace gradients at the kinks.
 	
 	\mbox{}
 	
-	We can, however, show that the optimality cuts are supporting hyperplanes to the epigraph of $\mathcal{Q}(x)$ via subgradients, while the feasibility cuts define outer approximations of $K_2$.
+	The background notes give the result we need: an optimal dual solution $\hat{\pi}$ of a linear program is a subgradient of its value function with respect to the right-hand side.
+	Here the right-hand side is $h(\xi_s)-T(\xi_s)x$, an affine function of $x$, so the chain rule transports the subgradient to
+	\[
+	-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s).
+	\]
 	
 	\mbox{}
 	
-	The subgradient, the subdifferential $\partial f(x)$ and the supporting hyperplane used below are defined in the linear programming background notes, together with the underlying fact: an optimal dual solution is a subgradient of the value function of a linear program with respect to its right-hand side.
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Subgradients and optimality cuts (cont'd)}
-	
-	Recall that, by duality,
-	\[
-	Q(\hat{x}, \xi_s) =
-	\max_{\pi} \left\lbrace \pi^T(h(\xi_s)-T(\xi_s)\hat{x}) \mid \pi^TW \leq q(\xi_s)^T \right\rbrace.
-	\]
-	Therefore, if $\hat{x} \in K_1 \cap K_2$, there exists an optimal dual solution $\hat{\pi}$ such that
-	\[
-	Q(\hat{x}, \xi_s) = \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s)\hat{x}.
-	\]
-	For any $x \in K_2(\xi_s)$, by weak duality,
-	\[
-	Q(x, \xi_s) \geq \hat{\pi}^Th(\xi_s)-\hat{\pi}^TT(\xi_s) x,
-	\]
-	and thus
-	\[
-	Q(x, \xi_s) \geq Q(\hat{x}, \xi_s) - \hat{\pi}^TT(\xi_s) (x-\hat{x}), \quad \forall x \in K_2(\xi_s).
-	\]
-	
-	In other words, $-T(\xi_s)^T\hat{\pi} \in \partial Q(\hat{x}, \xi_s)$.
-	
-	\mbox{}
-	
-	Similarly, by taking the expectation, $- \sum_{s=1}^S p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(\hat{x})$.
+	Taking the expectation, $- \sum_{s=1}^S p_s T(\xi_s)^T\hat{\pi}_s \in \partial \mathcal{Q}(\hat{x})$: {\red the optimality cut of the previous frames is exactly the supporting hyperplane built on that subgradient}.
 	
 \end{frame}
 
@@ -1155,7 +1153,7 @@ The sequence of iterates for the $L$-shaped method is as follows.
 \begin{itemize}
 	\item
 	Why do we build one cut only?
-	{\red Idea}: approximate {\blue each} $Q(x,\xi_s)$ by an auxiliary variable $\theta_s$, $s \in S$.
+	{\red Idea}: approximate {\blue each} $p_sQ(x,\xi_s)$ by an auxiliary variable $\theta_s$, $s = 1,\ldots,S$.
 	\item
 	We now introduce a cut by scenario
 	\[
@@ -1182,21 +1180,21 @@ The sequence of iterates for the $L$-shaped method is as follows.
 \item[Step 0]
 With $\theta_s^0$ a lower bound for $p_s Q(x, \xi_s)$, define
 \begin{align*}
-\mathcal{B}_0 &= \lbrace (x, \theta_1, \ldots, \theta_{|S|}) \in \RR^n_+ \times \RR^{|S|} \mid Ax = b \rbrace, \\
-\mathcal{B}_1 &= \lbrace (x, \theta_1, \ldots, \theta_{|S|}) \in \RR^n_+ \times \RR^{|S|} \mid \theta_s \geq \theta_s^0,\ \forall s \in S \rbrace.
+\mathcal{B}_0 &= \lbrace (x, \theta_1, \ldots, \theta_S) \in \RR^n_+ \times \RR^S \mid Ax = b \rbrace, \\
+\mathcal{B}_1 &= \lbrace (x, \theta_1, \ldots, \theta_S) \in \RR^n_+ \times \RR^S \mid \theta_s \geq \theta_s^0,\ s = 1,\ldots,S \rbrace.
 \end{align*}
 Set $\nu = 0$.
 \item[Step 1]
 Increment $\nu$.
 Solve the master problem
 \[
-\min \left\lbrace c^Tx+\sum_{s \in S} \theta_s \ \middle|\
-(x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \in \mathcal{B}_0 \cap \mathcal{B}_1 \right\rbrace.
+\min \left\lbrace c^Tx+\sum_{s = 1}^S \theta_s \ \middle|\
+(x,\theta_1,\theta_2,\ldots,\theta_S) \in \mathcal{B}_0 \cap \mathcal{B}_1 \right\rbrace.
 \]
 Record the solution $( x^{\nu}, \theta_1^{\nu}, \theta_2^{\nu},\ldots,
-\theta_{|S|}^{\nu} )$.
+\theta_S^{\nu} )$.
 \item[Step 2]
-Evaluate $\mathcal{Q}(x^{\nu}) = \sum_{s \in S} p_s Q(x^{\nu}, \xi_s)$.
+Evaluate $\mathcal{Q}(x^{\nu}) = \sum_{s = 1}^S p_s Q(x^{\nu}, \xi_s)$.
 		
 		$\mathcal{Q}(x^{\nu}) < \infty$?
 \end{description}
@@ -1211,7 +1209,7 @@ Evaluate $\mathcal{Q}(x^{\nu}) = \sum_{s \in S} p_s Q(x^{\nu}, \xi_s)$.
 If $\mathcal{Q}(x^{\nu}) = \infty$, there is a realization $\xi_k$ for which $Q(x^{\nu}, \xi_k) = \infty$, we add a feasibility cut and set
 \[
 \mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace
-(x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \mid \sigma^T(h(\xi_k) -
+(x,\theta_1,\theta_2,\ldots,\theta_S) \mid \sigma^T(h(\xi_k) -
 T(\xi_k)x) \leq 0\rbrace.
 \]
 Note: this inequality is the same as in the single-cut version.\\
@@ -1231,11 +1229,11 @@ u_s = -T(\xi_s)^T\hat{\pi}_s \in \partial Q(x^{\nu}, \xi_s).
 	
 \begin{itemize}
 \item
-If $p_s Q(x^{\nu}, \xi_s) \leq \theta_s$, $\forall\, s \in S$, stop: $x^{\nu}$ is optimal.
+If $p_s Q(x^{\nu}, \xi_s) \leq \theta_s^{\nu}$, $s = 1,\ldots,S$, stop: $x^{\nu}$ is optimal.
 \item
-If $p_s Q(x^{\nu}, \xi_s) > \theta_s$,
+If $p_s Q(x^{\nu}, \xi_s) > \theta_s^{\nu}$,
 \[
-\mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x,\theta_1,\theta_2,\ldots,\theta_{|S|}) \mid
+\mathcal{B}_1 := \mathcal{B}_1 \cap \lbrace (x,\theta_1,\theta_2,\ldots,\theta_S) \mid
 \theta_s \geq p_s Q(x^{\nu}, \xi_s) + p_s u_s^T(x-x^{\nu})\rbrace.
 \]
 		
@@ -1297,7 +1295,7 @@ Let $(x^{\nu}, \theta_1^{\nu}, \theta_2^{\nu},\ldots,
 
 \begin{itemize}
 \item
-Evaluate $\mathcal{Q}(x^{\nu}) = \sum_{s \in S} p_s Q(x^{\nu}, \xi_s)$.
+Evaluate $\mathcal{Q}(x^{\nu}) = \sum_{s = 1}^S p_s Q(x^{\nu}, \xi_s)$.
 \item
 If $\mathcal{Q}(x^{\nu}) = \infty$, there is some $\xi_k$ such that $Q(x^{\nu}, \xi_k) = \infty$.
 We add a {\red feasibility cut}:
@@ -1504,7 +1502,7 @@ pp. 207--250, 2003.
 
 At iteration $\nu$, we solve the program
 \[
-\min_{x, \theta} c^Tx + \sum_{k = 1}^C \theta_k + \frac{1}{2\rho} \| x-x_{\nu} \|^2.
+\min_{x, \theta} c^Tx + \sum_{k = 1}^C \theta_k + \frac{1}{2\rho} \| x-x^{\nu} \|^2.
 \]
 \begin{itemize}
 \item
@@ -1520,7 +1518,7 @@ We speak of the {\blue regularized decomposition method}.
 \frametitle{Trust-region approach}
 
 The principle is also to penalize the step length.
-At iteration $\nu$, we require $\| x-x_{\nu} \| \leq \Delta_{\nu}$, where $\| \cdot \|$ denotes a standard norm (typically 2 or $\infty$).
+At iteration $\nu$, we require $\| x-x^{\nu} \| \leq \Delta_{\nu}$, where $\| \cdot \|$ denotes a standard norm (typically 2 or $\infty$).
 
 \begin{itemize}
 \item
@@ -1673,9 +1671,7 @@ The second-stage program becomes
 & y \geq 0.
 \end{align*}
 
-\mbox{}
-
-{\blue Exercise}: check that $a^1 = -0.5$ is indeed the optimal value of this program (using the KKT/primal-dual conditions).
+{\blue Exercise}: check with the KKT/primal-dual conditions that $a^1 = -0.5$ is an optimal {\red solution} of this program --- its solution set is $[-1/2, 3/2]$, and $a^1$ is the left endpoint.
 \end{frame}
 
 \begin{frame}
@@ -1715,7 +1711,7 @@ As $\theta^{\nu} = \mathcal{Q}(a^{\nu})$, a solution is found.
 \begin{theorem}
 If the original problem has a solution, the algorithm stops after a finite number of iterations.
 Otherwise, it generates a sequence of feasible points $\lbrace a^{\nu} \rbrace$ such that
-$\mathcal{Q}(a^{\nu}) \rightarrow -\infty$, as $\nu \rightarrow \infty$.
+$c^Ta^{\nu} + \mathcal{Q}(a^{\nu}) \rightarrow -\infty$, as $\nu \rightarrow \infty$.
 \end{theorem}
 \begin{proof}
 See Birge and Louveaux, Section~5.2.
@@ -1759,16 +1755,18 @@ See Birge and Louveaux, Section~5.2.
 
 \begin{itemize}
 	\item The model $m(\cdot)$ is valid locally only.
-	\item Constrain the candidate iterate to stay in a trust region $\mathcal{B}_{\nu}$ centered at the current solution $x_{\nu}$:
+	\item Constrain the candidate iterate to stay in a trust region $\mathcal{T}_{\nu}$ centered at the current solution $x^{\nu}$:
 $$
-\mathcal{B}_{\nu} = \{ x \mid \| x-x_{\nu} \|_{\nu} \leq \Delta_{\nu} \},
+\mathcal{T}_{\nu} = \{ x \mid \| x-x^{\nu} \|_{\nu} \leq \Delta_{\nu} \},
 $$
 where $\Delta_{\nu}$ is the trust-region radius, and $\|\cdot\|_{\nu}$ is the norm used at iteration ${\nu}$.
+($\mathcal{B}_0$ and $\mathcal{B}_1$ keep their earlier meaning: the constraints of the master program.)
 \item
 In the context of linear programming, it is common to use the $\infty$-norm as
 $$
-\| x-x_{\nu} \|_{\infty} \leq \Delta_{\nu} \iff -\Delta_{\nu} \bse \leq x-x_{\nu} \leq \Delta_{\nu} \bse.
+\| x-x^{\nu} \|_{\infty} \leq \Delta_{\nu} \iff -\Delta_{\nu} e \leq x-x^{\nu} \leq \Delta_{\nu} e,
 $$
+where $e = (1,\ldots,1)^T$.
 \end{itemize}
 \end{frame}
 
@@ -1779,11 +1777,11 @@ $$
 	\item 
 The trust-region subproblem at iteration $\nu$ is now
 \begin{align*}
-	\min_{x,\theta} \ & m(x) := c^T x + \theta \\
+	\min_{x,\theta} \ & m(x,\theta) := c^T x + \theta \\
 	\text{s.t. } & Ax = b \\
 	& \text{feasibility cuts} \\
 	& \text{optimality cuts} \\
-	& \|x-x_{\nu}\|_{\infty} \leq \Delta_{\nu}\\
+	& \|x-x^{\nu}\|_{\infty} \leq \Delta_{\nu}\\
 	& x \geq 0.
 \end{align*}
 \item
@@ -1799,21 +1797,21 @@ Only accept the step if the model performs well.
 
 \begin{itemize}
 	\item 
-Let $x^*$ be the solution of the trust-region subproblem.
+Let $(x^*, \theta^*)$ be the solution of the trust-region subproblem, and $\theta^{\nu}$ the model value at the centre $x^{\nu}$.
 \item
 Set $0 < \eta_1 \leq \eta_2 < 1$. For instance, $\eta_1 = \eta_2 = 10^{-4}$.
 \item
-Compare the actual reduction to the predicted reduction:
+Compare the actual reduction to the predicted reduction ($\tau$, not to be confused with the proximal parameter $\rho$ above):
 \begin{align*}
-	\rho = \frac{c^T(x_{\nu}-x^*)+\mathcal{Q}(x_{\nu})-\mathcal{Q}(x^*)}{m(x_{\nu})-m(x^*)}
+	\tau = \frac{c^T(x^{\nu}-x^*)+\mathcal{Q}(x^{\nu})-\mathcal{Q}(x^*)}{m(x^{\nu},\theta^{\nu})-m(x^*,\theta^*)}
 \end{align*}
 \item
-\textcolor{blue}{Unsuccessful iteration}: if $\rho < \eta_1$, set $x_{{\nu}+1} = x_{\nu}$, $\Delta_{{\nu}+1} \leq \Delta_{\nu}$, add cuts.
+\textcolor{blue}{Unsuccessful iteration}: if $\tau < \eta_1$, set $x^{{\nu}+1} = x^{\nu}$, $\Delta_{{\nu}+1} \leq \Delta_{\nu}$, add cuts.
 Enforce $\Delta_{{\nu}+1} < \Delta_{\nu}$ if $\Delta_{\nu}$ has been kept the same for several consecutive unsuccessful iterations or if $\Delta_{\nu}$ is too large.
 \item
-\textcolor{blue}{Successful iteration}: if $\rho \geq \eta_1$, set $x_{{\nu}+1} = x^*$.
+\textcolor{blue}{Successful iteration}: if $\tau \geq \eta_1$, set $x^{{\nu}+1} = x^*$.
 \item
-\textcolor{blue}{Very successful iteration}: if $\rho \geq \eta_2$, set $\Delta_{{\nu}+1} = \min \{ \Delta_{\max}, \beta \Delta_{\nu} \}$, with $\beta > 1$.
+\textcolor{blue}{Very successful iteration}: if $\tau \geq \eta_2$, set $\Delta_{{\nu}+1} = \min \{ \Delta_{\max}, \gamma \Delta_{\nu} \}$, with $\gamma > 1$ (the optimality-cut coefficients $\beta_{\ell}$ are unrelated).
 \end{itemize}
 
 \end{frame}

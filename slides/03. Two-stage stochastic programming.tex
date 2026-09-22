@@ -37,7 +37,7 @@
 \date{}
 \title[Two-stage SP]{Stochastic optimization\\Two-stage stochastic programming with recourse}
 
-% manque la caractérisation de K_2 comme polyèdre. Voir Birge & Louveaux, chapitre 2
+% TODO: the characterisation of K_2 as a polyhedron is still missing. See Birge & Louveaux, Chapter 2.
 
 \begin{document}
 
@@ -75,6 +75,7 @@
 		& x_1, x_2 \geq 0,
 	\end{align*}
 	where $\bsxi_1 \sim U[1,4]$, $\bsxi_2 \sim U[1/3,1]$.
+	Slack variables bring the two inequalities back to the equality form above, with $X = \RR^2_+$.
 \end{frame}
 
 \begin{frame}
@@ -250,7 +251,7 @@ where {\it a.e.} stands for ``almost every''.
 	
 	More generally, consider the following program:
 	\begin{align*}
-	\min\ & c^Tx+\EE_{\bsxi}[q^T(\bsxi)y(\bsxi)] \\
+	\min\ & c^Tx+\EE_{\bsxi}[q(\bsxi)^Ty(\bsxi)] \\
 	\mbox{s.t. } & Ax = b, \\
 	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi \\
 	& x \in X, \\
@@ -294,7 +295,7 @@ where {\it a.e.} stands for ``almost every''.
 	\frametitle{Expression in terms of $y$'s}
 	
 	\begin{align*}
-	\min_{x,\ y(\bsxi)}\ & \EE_{\bsxi} [ c^T x + q^T y(\bsxi) ] \\
+	\min_{x,\ y(\bsxi)}\ & \EE_{\bsxi} [ c^T x + q(\bsxi)^T y(\bsxi) ] \\
 	\mbox{s.t. } & Ax = b & \mbox{\textcolor{blue}{first-stage constraints}} \\
 	& T(\xi)x + Wy(\xi) = h(\xi),\ \text{ for a.e. } \xi &
 	\mbox{\textcolor{blue}{second-stage constraints}} \\
@@ -307,7 +308,7 @@ where {\it a.e.} stands for ``almost every''.
 	\omega_2,\ldots,\omega_S \rbrace$, with support $\Xi = \bsxi(\Omega) \subseteq \RR^r$.
 	\begin{align*}
 	P[\lbrace \omega_s \rbrace] & = p_s,\ s = 1, 2,\ldots, S \\
-	T_s & = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s)) 
+	q_s & = q(\xi(\omega_s)),\ T_s = T (\xi(\omega_s)),\ h_s = h(\xi(\omega_s))
 	\end{align*}
 	
 \end{frame}
@@ -317,8 +318,8 @@ where {\it a.e.} stands for ``almost every''.
 	
 	Develop along the $S$ scenarios.
 	\begin{align*}
-	\min_{x, y_1, \ldots, y_S}\ & c^T x + p_1 q^T y_1 + p_2 q^T y_2 + \ldots
-	+ p_S q^Ty_S \\
+	\min_{x, y_1, \ldots, y_S}\ & c^T x + p_1 q_1^T y_1 + p_2 q_2^T y_2 + \ldots
+	+ p_S q_S^Ty_S \\
 	\mbox{s.t. } & \\
 	& \begin{matrix} Ax & & & & & = b\\
 	T_1 x & + W y_1 & & & & = h_1 \\
@@ -449,7 +450,7 @@ Delete that first column and the problem falls apart into $S$ independent small 
 	
 	Assume for now that $\Omega$ is finite, with $S$ scenarios.
 	\begin{align*}
-	\min_{x,\, y}\ & x_1+x_2 + \sum_{s = 1}^{S} p_s \lambda (y_{1s} + y_{2s})\\
+	\min_{x,\, y}\ & x_1+x_2 + \sum_{s = 1}^{S} p_s q (y_{1s} + y_{2s})\\
 	\mbox{s.t. } & \xi_{1s}x_1 + x_2 + y_{1s} \geq 7, & s = 1,\ldots,S \\
 	& \xi_{2s}x_1 + x_2 + y_{2s} \geq 4, & s = 1,\ldots,S \\
 	& x_1, x_2 \geq 0,\\
@@ -457,7 +458,7 @@ Delete that first column and the problem falls apart into $S$ independent small 
 	\end{align*}
 	
 	A difficulty is therefore to decide how to construct the deterministic equivalent.
-	How to choose $\lambda$?
+	How to choose $q$?
 	
 	\mbox{}
 	
@@ -477,7 +478,7 @@ Delete that first column and the problem falls apart into $S$ independent small 
 	\end{align*}
 	and
 	\begin{align*}
-	Q(x, \xi) = \min_y\ & q_1y_1 + q_2y_2 \qquad (q_1 = q_2 = \lambda \text{ above}) \\
+	Q(x, \xi) = \min_y\ & q_1y_1 + q_2y_2 \qquad (q_1 = q_2 = q \text{ above}) \\
 	\mbox{s.t. } & \xi_1 x_1 + x_2 + y_1 \geq 7, \\
 	& \xi_2 x_1 + x_2 + y_2 \geq 4, \\
 	& y_1, y_2 \geq 0.
@@ -1042,7 +1043,7 @@ $$
 
 \mbox{}
 
-By combining these two cases, we conclude that  $\mathcal{Q}$ is not finite.
+The two cases cover every $\omega \in \Omega_1$, so $Q(x,\xi(\omega)) = -\infty$ on a set of positive probability and $\mathcal{Q}(x) = -\infty$: the recourse is not finite.
 \end{proof}
 
 \end{frame}
@@ -1055,15 +1056,13 @@ By combining these two cases, we conclude that  $\mathcal{Q}$ is not finite.
 
 {\bf $(\Leftarrow)$}
 Assume $\forall\, i$, $P[\boldsymbol{q}_i^+ + \boldsymbol{q}_i^- \geq 0] = 1$.
-%with probability one, $\forall i$.
-Any feasible solution satisfies $y^+(\xi(\omega))-y^-(\xi(\omega))=h(\xi(\omega))-T(\xi(\omega))x := z(\xi(\omega))$, with $y^+(\xi(\omega)) \geq 0$ and $y^-(\xi(\omega)) \geq 0$.
-
-Thus,
+Write $z(\xi) = h(\xi)-T(\xi)x$. Any feasible $(y^+, y^-)$ satisfies $y^+-y^- = z(\xi)$, $y^+ \geq 0$, $y^- \geq 0$, so $y_i^- = y_i^+ - z_i(\xi)$ and its {\red objective value} is
 \begin{align*}
-Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\omega))) \\
-&= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-(y_i^+(\xi(\omega))-z_i(\xi(\omega)))) \\
-&= \sum_{i=1}^{m} ((q_i^+ + q_i^-)y_i^+(\xi(\omega))-q_i^-z_i(\xi(\omega)))
+\sum_{i=1}^{m} \left( q_i^+(\xi)y_i^+ + q_i^-(\xi)y_i^- \right)
+&= \sum_{i=1}^{m} \left( q_i^+(\xi)y_i^+ + q_i^-(\xi)\left(y_i^+-z_i(\xi)\right) \right) \\
+&= \sum_{i=1}^{m} \left( \left(q_i^+(\xi) + q_i^-(\xi)\right)y_i^+ - q_i^-(\xi)z_i(\xi) \right).
 \end{align*}
+This is the value at an arbitrary feasible point, not yet the optimal value $Q(x,\xi)$.
 
 \end{proof}
 
@@ -1076,18 +1075,18 @@ Q(x,\xi(\omega)) &= \sum_{i=1}^{m} (q_i^+y_i^+(\xi(\omega)) + q_i^-y_i^-(\xi(\om
 \begin{proof}
 {\bf $(\Leftarrow)$}
 
-Therefore, a.s.
+Almost surely $q_i^+(\xi) + q_i^-(\xi) \geq 0$, and $y_i^+ \geq 0$, so the first sum above is non-negative: {\red every} feasible point has an objective value at least $-q^-(\xi)^Tz(\xi)$. Taking the infimum,
 $$
-Q(x,\xi(\omega)) \geq -(q^-)^Tz(\xi(\omega)),
+Q(x,\xi) \geq -q^-(\xi)^Tz(\xi) \quad \text{a.s.}
 $$
-so, a.s., $\exists$ a lower bound on $Q(x,\xi(\omega))$, and since the program is feasible, it admits an optimal solution.
+The program is feasible and bounded below, so it admits an optimal solution.
 
 \mbox{}
 
-From the fundamental theorem of linear programming, we can choose as the optimal solution
+The objective being non-decreasing in each $y_i^+$, the infimum is attained at the smallest feasible $y_i^+$ (equivalently, at a basic solution, where at most one of $y_i^+$, $y_i^-$ is positive):
 \begin{align*}
-	y^+(\xi(\omega)) &= \left(h(\xi(\omega))-T(\xi(\omega))x\right)^+,\\
-	y^-(\xi(\omega)) &= \left(-h(\xi(\omega))+T(\xi(\omega))x\right)^+,
+	y^+(\xi) &= \left(h(\xi)-T(\xi)x\right)^+, &
+	y^-(\xi) &= \left(-h(\xi)+T(\xi)x\right)^+,
 \end{align*}
 where $a^+ = \max\{0, a\}$.
 
@@ -1101,10 +1100,19 @@ where $a^+ = \max\{0, a\}$.
 \begin{proof}
 {\bf $(\Leftarrow)$}
 
-From previous results, $\calQ(x) < \infty$, and
+At that optimum $Q(x,\xi) = \sum_{i=1}^m \left( q_i^+(\xi)z_i(\xi)^+ + q_i^-(\xi)(-z_i(\xi))^+ \right)$, hence
+$|Q(x,\xi)| \leq \|q(\xi)\| \, \|z(\xi)\|$.
+
+\mbox{}
+
+{\red This is where the finite second-order moments are used}: $z(\xi) = h(\xi)-T(\xi)x$ is affine in $\xi$, so $\EE[\|z(\bsxi)\|^2] < \infty$, and Cauchy--Schwarz gives
 $$
-\calQ(x) \geq \EE_{\bsxi}\left[-(q^-)^Tz(\bsxi)\right].
+\EE\left[ \|q(\bsxi)\| \, \|z(\bsxi)\| \right] \leq
+\left( \EE\left[\|q(\bsxi)\|^2\right] \right)^{1/2}
+\left( \EE\left[\|z(\bsxi)\|^2\right] \right)^{1/2} < \infty.
 $$
+Therefore $|\calQ(x)| < \infty$: the recourse is finite, and in particular
+$\calQ(x) \geq \EE_{\bsxi}\left[-q^-(\bsxi)^Tz(\bsxi)\right]$.
 \end{proof}
 
 \end{frame}
@@ -1189,18 +1197,13 @@ x \leq 1.
 \]
 Consequently $K_2^P \subset K_2 = \lbrace x \leq 1 \rbrace$.
 
-\mbox{}
-
 The difference comes from the fact that a point is not in $K_2^P$ as soon as it is not feasible for a given value of $\xi$, but $K_2$ does not consider infeasible situations that occur with a null probability.
-	
-%	\mbox{}
-	
-%	\underline{Rappel}: pour un programme stochastique avec un recours%	fixe (pas le cas ici!) où $\bsxi$ a des moments seconds finis, $K_2 = K_2^P$.
+	With a {\red fixed} recourse --- not the case here --- and finite second-order moments, we would have had $K_2 = K_2^P$.
 	
 \end{frame}
 
 \begin{frame}
-\frametitle{Recourse function}
+\frametitle{Convexity of $v(\xi, \cdot)$}
 
 Let $y^*_1$ and $y^*_2$ be two optimal solutions of $v(\xi, z)$, associated to $z = z_1$ and $z = z_2$, respectively.
 Then, the convex combination $y_{\alpha} \overset{\mathrm{def}}{=} \alpha y_1^*+(1-\alpha)y_2^*$, $\alpha \in [0,1]$, is feasible with respect to $z_{\alpha} = \alpha z_1 + (1-\alpha) z_2$, as $\alpha y_1^*+(1-\alpha)y_2^* \geq 0$, and
@@ -1209,14 +1212,14 @@ W(\alpha y_1^*+(1-\alpha)y_2^*)
 = \alpha W y_1^* + (1-\alpha) W y_2^*
 = \alpha z_1 + (1-\alpha) z_2 = z_{\alpha}.
 $$
-Moreover,
+Since $y_{\alpha}$ is feasible for $z_{\alpha}$, the definition of $v$ as an infimum gives directly
 \begin{align*}
-v(\xi, z_{\alpha}) & = q(\xi)^Ty^*(z_{\alpha}) \leq
-q(\xi)^T y_{\alpha} = q(\xi)^T(\alpha y_1^*+(1-\alpha)y_2^*) \\
+v(\xi, z_{\alpha}) & \leq q(\xi)^T y_{\alpha} = q(\xi)^T(\alpha y_1^*+(1-\alpha)y_2^*) \\
 & = \alpha q(\xi)^T y_1^*+(1-\alpha)q(\xi)^Ty_2^* \\
 & = \alpha v(\xi, z_1) + (1-\alpha) v(\xi, z_2).
 \end{align*}
 In other words, $v$ is a convex function w.r.t. $z \in \RR^m$.
+No optimal solution has to be assumed at $z_{\alpha}$: only feasibility of $y_{\alpha}$ is used.
 
 %\mbox{}
 
@@ -1224,27 +1227,6 @@ In other words, $v$ is a convex function w.r.t. $z \in \RR^m$.
 %\begin{theo}
 %If $f_1(x)$, $f_2(x)$,\ldots,$f_q(x)$ is an arbitrary collection of convex functions, then $M(x) = \max \lbrace f_1(x), f_2(x),\ldots,f_q(x) \rbrace$ is also a convex function.
 %\end{theo}
-\end{frame}
-
-\begin{frame}
-\frametitle{Convexity of $Q(x, \xi)$?}
-
-\[
-Q(x,\xi) = v(\xi, h(\xi)-T(\xi)x).
-\]
-\begin{align*}
-\lambda Q(x_1, \xi) &+ (1-\lambda) Q(x_2, \xi) \\
-&= \lambda v(\xi, h(\xi)-T(\xi)x_1) + (1-\lambda) v(\xi, h(\xi)-T(\xi)x_2) \\
-&\geq v(\xi, \lambda (h(\xi)-T(\xi)x_1) + (1-\lambda)(h(\xi)-T(\xi)x_2)) \\
-&= v(\xi, h(\xi)-T(\xi)(\lambda x_1 + (1-\lambda)x_2)) \\
-&= Q(\lambda x_1 + (1-\lambda)x_2, \xi).
-\end{align*}
-
-Therefore {\red $Q(x, \xi)$ is convex} w.r.t. $x$, given $\xi$.
-More generally
-\begin{theo}
-If $A$ is a linear transformation from $\RR^n$ to $\RR^m$, and $f(x)$ is a convex function on $\RR^m$, the composite function $(fA)(x) \overset{\mathrm{def}}{=} f(Ax)$ is a convex function on $\RR^n$.
-\end{theo}
 \end{frame}
 
 \begin{frame}
@@ -1265,41 +1247,19 @@ a piecewise-linear convex function in $x$, for all $x$ in $K = K_1 \cap K_2$.
 \end{enumerate}
 \end{theo}
 
-\end{frame}
+(a) and (c) follow from the convexity of $v(\xi, \cdot)$ just established, composed with the affine map $x \mapsto h(\xi)-T(\xi)x$; (b) is the concavity of the value function in the costs; the piecewise linearity comes from the finite number of optimal bases.
 
-\begin{frame}
-\frametitle{Convexity of second-stage function (cont'd)}
-
-\begin{proof}
-In order to show convexity in (a) and (c), it is sufficient to prove that $v(\xi, z) = \min_{y \in Y} \lbrace q(\xi)^Ty \ |\ Wy = z \rbrace$ is convex, which has already been done.
-We can proceed similarly to show concavity w.r.t. $q$.
-
-The piecewise linearity follows from the fact that the number of different optimal bases for a linear program is finite.
-\end{proof}
-
-\mbox{}
-
-{\red Convexity of the recourse?}
-
-\[
-\mathcal{Q}(x) = \EE_{\bsxi} [Q(x,\bsxi)].
-\]
-Suppose for now that $\bsxi$ has a finite support, i.e. $\Xi = \lbrace \xi_1 ,
-\xi_2,\ldots, \xi_S \rbrace$. Then
-\[
-\mathcal{Q}(x) = \sum_{s = 1}^{S} P[\bsxi = \xi_s] Q(x,\xi_s).
-\]
 \end{frame}
 
 \begin{frame}
 \frametitle{Convexity of the recourse}
 
-\begin{theo}
-If $f(x)$ is convex, and $\alpha \geq 0$, $g(x) = \alpha f(x)$ is convex.
-\end{theo}
+$\mathcal{Q}(x) = \EE_{\bsxi} [Q(x,\bsxi)]$. Suppose for now that $\bsxi$ has a finite support,
+$\Xi = \lbrace \xi_1, \xi_2,\ldots, \xi_S \rbrace$, so that
+$\mathcal{Q}(x) = \sum_{s = 1}^{S} P[\bsxi = \xi_s] Q(x,\xi_s)$.
 
 \begin{theo}
-If $f_k(x)$, $k = 1,2,\ldots,K$, are convex functions, then $g(x) = \sum_{k=1}^K f_k(x)$ is convex.
+A non-negative combination of convex functions is convex: if $f_1,\ldots,f_K$ are convex and $\alpha_1,\ldots,\alpha_K \geq 0$, then $\sum_{k=1}^K \alpha_k f_k$ is convex.
 \end{theo}
 
 $\mathcal{Q}(x)$ is therefore a convex function w.r.t. $x$.
@@ -1307,10 +1267,7 @@ $\mathcal{Q}(x)$ is therefore a convex function w.r.t. $x$.
 \mbox{}
 
 What is happening in the continuous case?
-
-\mbox{}
-
-We have the following result: if $g(x,y)$ is convex w.r.t. $x$, then $\int g(x,y)dy$ is convex w.r.t. $x$. Since
+The same argument applies verbatim to any measure: if $g(\cdot, t)$ is convex for every $t$, then $x \mapsto \int g(x,t)\,d\mu(t)$ is convex, an integral being a limit of non-negative combinations. Since
 \[
 \mathcal{Q}(x) = \int_{\Xi} Q(x,t) dF(t),
 \]
@@ -1359,40 +1316,23 @@ $$
 \end{frame}
 
 \begin{frame}
-\frametitle{Alternative approach}
+\frametitle{An example: the dual and the optimality conditions}
 
-Dual:
+Dual, with the slacks $s_1$, $s_2$ made explicit:
 \begin{align*}
-\max\ & (\xi-x)\pi \\
-\mbox{s.t. } & \pi \leq 1,\ -\pi \leq 1
-\end{align*}
-or
-\begin{align*}
-\max\ & (\xi-x)\pi \\
-\mbox{s.t. } & \pi + s_1 = 1 \\
-& -\pi + s_2 = 1 \\
-& s_1 \geq 0,\ s_2 \geq 0
+\max_{\pi}\ & (\xi-x)\pi \qquad \text{s.t. } \pi \leq 1,\ -\pi \leq 1 \\
+\Longleftrightarrow\ \max_{\pi}\ & (\xi-x)\pi \qquad \text{s.t. }
+\pi + s_1 = 1,\ -\pi + s_2 = 1,\ s_1, s_2 \geq 0.
 \end{align*}
 
-Consequently,
-\[
-Q(x,\xi) = \begin{cases} \xi-x & \text{ if } x \leq \xi, \\
-	x - \xi & \text{ if } x \geq \xi. \end{cases}
-\]
-
-\end{frame}
-
-\begin{frame}
-\frametitle{An example: optimality conditions}
-
-The recourse is simple, and the primal-dual/KKT conditions give
+The recourse is simple, and the primal-dual/KKT conditions of the background notes give
 \begin{align*}
 \begin{pmatrix} 1 \\ 1 \end{pmatrix} & = \begin{pmatrix} 1 \\
-  -1 \end{pmatrix} \pi + \begin{pmatrix} s_1 \\ s_2 \end{pmatrix} \\
-y^+ - y^- & = \xi - x \\
-y^+ &\geq 0,\  y^- \geq 0 \\
-s_1 &\geq 0,\ s_2 \geq 0 \\
-s_1y^+ & = 0,\ s_2y^- = 0.
+  -1 \end{pmatrix} \pi + \begin{pmatrix} s_1 \\ s_2 \end{pmatrix}
+  & \text{(dual feasibility)} \\
+y^+ - y^- & = \xi - x & \text{(primal feasibility)} \\
+y^+ &\geq 0,\  y^- \geq 0,\ s_1 \geq 0,\ s_2 \geq 0 \\
+s_1y^+ & = 0,\ s_2y^- = 0 & \text{(complementary slackness)}.
 \end{align*}
 
 \end{frame}
@@ -1421,6 +1361,13 @@ $x \geq \xi$: then,
 y^- = x-\xi,\quad y^+ = 0.
 \]
 \end{itemize}
+\item
+Consequently,
+\[
+Q(x,\xi) = \begin{cases} \xi-x & \text{ if } x \leq \xi, \\
+	x - \xi & \text{ if } x \geq \xi, \end{cases}
+\]
+that is, $Q(x,\xi) = |\xi - x|$.
 \end{itemize}
 
 \end{frame}
@@ -1486,13 +1433,6 @@ $4 \leq x$: $\mathcal{Q}(x) = x-7/3$;
 \end{frame}
 
 \begin{frame}
-\frametitle{Graphically}
-
-\includegraphics[width=0.62\textwidth]{recourse_all.pdf}
-
-\end{frame}
-
-\begin{frame}
 \frametitle{Where the kinks come from}
 
 \begin{center}
@@ -1528,8 +1468,8 @@ Each scenario contributes one kink, at its own realization; $\calQ$ is their non
 \begin{frame}
 \frametitle{Properties of $\mathcal{Q}(x)$}
 
-We note that $\mathcal{Q}(x)$ is convex and piecewise linear.
-When the support of $\bsxi$ is finite this is immediate: $\mathcal{Q}$ is a non-negative weighted sum of the $Q(\cdot,\xi_s)$, each of which has just been shown to be convex and piecewise linear.
+$\mathcal{Q}(x)$ is convex; it is moreover piecewise linear {\red when the support of $\bsxi$ is finite}, where it is a non-negative weighted sum of the $Q(\cdot,\xi_s)$, each of which has just been shown to be convex and piecewise linear.
+On a continuous support the piecewise linearity is lost, as the smoothing frame below shows.
 The general statement is the following.
 
 \begin{theo}
@@ -1608,16 +1548,15 @@ $(1/h) \int_{\Xi \backslash N_{\delta}} \rho_j (\hat{x}, \xi; h) dP \overset{h \
 \begin{frame}
 \frametitle{Differentiability of the recourse: discrete case}
 
-But how to prove $(1/h) \int_{\Xi
+The residual condition $(1/h) \int_{\Xi
   \backslash N_{\delta}} \rho_j (\hat{x}, \xi; h) dP \overset{h
-  \rightarrow 0}{\rightarrow } 0$?
+  \rightarrow 0}{\rightarrow } 0$ {\red cannot hold everywhere} here.
 
 \mbox{}
 
-If we stay in the linear framework with fixed recourse, and vectors $\bsxi$ with finite second-order moments, we have seen that for $\bsxi$ with finite support, $\mathcal{Q}(x)$ is piecewise linear.
-Therefore $\mathcal{Q}(x)$ is not differentiable {\red everywhere}: it is
-differentiable except at the finitely many kinks, where we will have to work
-with subgradients.
+Indeed, in the linear framework with fixed recourse, and for vectors $\bsxi$ with finite second-order moments, we have seen that $\mathcal{Q}(x)$ is piecewise linear when $\bsxi$ has a finite support.
+It is therefore differentiable {\red except} at its finitely many kinks --- and it is precisely at a kink that the residual condition fails.
+There, we will have to work with subgradients.
 
 \end{frame}
 
@@ -1916,6 +1855,7 @@ See Birge and Louveaux, Chapter~4.
 
 \begin{frame}
 \frametitle{Two-stage non-linear problems}
+\small
 
 Now consider the general program
 \[
@@ -1927,14 +1867,13 @@ Now consider the general program
 If $g_0(\cdot,\xi)$ and $ Q(\cdot, \xi)$ are convex with respect to $x$, $\forall\ \xi \in \Xi$, and if $X$ is a convex set, the aforementioned program is convex.
 \end{theo}
 \begin{proof}
-For $x$, $y \in X$, $\lambda \in (0,1)$ and $z = \lambda x +
-(1-\lambda) y$, we have
+For $x_1$, $x_2 \in X$, $\lambda \in (0,1)$ and $x_{\lambda} = \lambda x_1 + (1-\lambda) x_2$, convexity in $x$ gives
 \begin{multline*}
-g_0(z, \xi) + Q(z, \xi) \\
-\leq \lambda (g_0(x, \xi) + Q(x,
-\xi)) + (1-\lambda)(g_0(y, \xi) + Q(y, \xi)).
+g_0(x_{\lambda}, \xi) + Q(x_{\lambda}, \xi) \\
+\leq \lambda (g_0(x_1, \xi) + Q(x_1,
+\xi)) + (1-\lambda)(g_0(x_2, \xi) + Q(x_2, \xi)).
 \end{multline*}
-The result follows by taking the expectation.
+Expectation preserves it, so the objective is convex; $X$ being convex, so is the program.
 \end{proof}
 
 \end{frame}
