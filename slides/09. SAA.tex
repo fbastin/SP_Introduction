@@ -455,6 +455,7 @@ Then $D(S^*_n, S^*) \rightarrow 0$ almost surely as $n \rightarrow \infty$.
 
 \begin{frame}
 \frametitle{First-order optimality conditions}
+\small
 
 We denote the feasible set of a mathematical program by $\mathcal{A}$.
 We will suppose here that $\mathcal{A}$ is closed.
@@ -471,15 +472,17 @@ where $\mathcal{N}_{\mathcal{A}}(x^*)$ is the normal cone to $\mathcal{A}$ at $x
 
 {\blue Cone}
 
-\mbox
- 
+\mbox{}
+
 A subset $C$ of a vector space $V$ is a (linear) {\red cone}
-iff $\alpha x$ belongs to $C$ for any $x \in C$ and any strictly positive scalar $\alpha$.
-It is pointed if $\alpha$ can be equal to zero.
+iff $\alpha x$ belongs to $C$ for any $x \in C$ and any strictly positive scalar $\alpha$;
+allowing $\alpha = 0$ adds the apex, $0 \in C$.
+
+A {\red convex cone} is a cone closed under convex combinations, i.e. iff $\alpha x + \beta y \in C$, $\forall \alpha,\ \beta > 0$, with $\alpha + \beta = 1$.
 
 \mbox{}
 
-A {\red convex cone} is a cone closed under convex combinations, i.e. iff $\alpha x + \beta y \in C$, $\forall \alpha,\ \beta > 0$, with $\alpha + \beta = 1$.
+{\footnotesize Not to be confused with a {\red pointed} cone, one containing no line, $C \cap -C = \lbrace 0 \rbrace$ --- the property giving a polyhedron its extreme points, and the sense the background notes use.}
 
 \end{frame}
 
@@ -492,10 +495,12 @@ We first say that a vector $w \in \rit^n$ is tangent to $\mathcal{A}$ at $x \in 
 \mbox{}
 
 The {\red tangent cone $T_{\mathcal{A}}(x)$} is the collection of vectors tangent to ${\mathcal{A}}$ at $x$. \\
-The {\red normal cone $N_{\mathcal{A}}(x)$} is the orthogonal complement, i.e.
+The {\red normal cone $N_{\mathcal{A}}(x)$} is its {\red polar cone} (background notes), i.e.
 \[
 N_{\mathcal{A}}(x) = \lbrace v\ |\ v^Tw \leq 0,\ \forall w \in T_{\mathcal{A}}(x) \rbrace.
 \]
+
+{\footnotesize The definition above is that of the {\red Clarke} tangent cone; the Bouligand one requires only that {\it some} such sequences exist. The two coincide when $\mathcal{A}$ is convex, which is the only case used below.}
 
 \mbox{}
 
@@ -1179,8 +1184,6 @@ Then there exists almost surely some $z^*$ in $\mathcal{Z} \left( \lbrace z_N^*(
 \frametitle{Overfitting}
 
 Consider again a deterministic feasible set.
-
-\mbox{}
 
 Let $z^* \in \arg\min g(z)$ and $z^*_N  \in \arg\min \hat{g}_N (z)$  for a given sample $\lbrace \xi_1, \xi_2, \ldots, \xi_N \rbrace$. We have $\forall y \in S$
 $$
