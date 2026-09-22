@@ -42,15 +42,17 @@
 \frame{\titlepage}
 
 \begin{frame}
-	\frametitle{Formalization}
+	\frametitle{Setting and notation}
 	
-	Uncertainty: representation by means of {\red random elements}.
-	The realizations are denoted by $\omega$, and they are drawn from the sample space $\Omega$.
+	Uncertainty is represented by {\red random elements} on a probability space $(\Omega, \calF, P)$: a realization $\omega$ is drawn from the sample space $\Omega$, and an {\red event} is a member of the $\sigma$-algebra $\calF$.
 	
 	\mbox{}
 	
-	An {\red event} $A$ is a subset of $\Omega$; the collection of events is denoted by $\mathcal{A}$.
-	The event $A \in \mathcal{A}$ occurs if the outcome of the experiment is an element of $A$.
+	Throughout, {\red $\bsxi$} denotes a random vector, {\red $\xi$} one of its realizations, and {\red $\Xi$} its support --- the smallest closed set with $P[\bsxi \in \Xi] = 1$.
+	
+	\mbox{}
+	
+	{\footnotesize The {\red probability background notes} cover the whole setting used here, and in particular the four points this deck leans on without redefining them: the measurability that makes $\calQ(x)$ well defined, the closedness of the support, the meaning of ``finite second-order moments'', and the difference between ``almost surely'' and ``always''.}
 	
 \end{frame}
 
@@ -670,7 +672,6 @@ A problem is said to have a {\red relatively complete recourse} if $K_1
 \mbox{}
 
 {\blue Advantage}: the second-stage problem is feasible $\forall x$ feasible in the first stage, almost surely (i.e. with probability equal to 1).
-%Reminder: almost surely, or with probability one. An event $A$ is said to occur almost surely if $P[A] = 1$.
 
 
 
@@ -870,7 +871,7 @@ The optimum is attained at $y_1 = y_2 = \xi$, so $Q(x, \xi) = 0$ for all $\xi$ (
 \frametitle{$K_2 = K_2^s$}
 
 \begin{theo}
-For a stochastic program with fixed recourse, where $\bsxi$ has finite second-order moments,
+For a stochastic program with fixed recourse, where $\bsxi$ has finite second-order moments ($\EE[\|\bsxi\|^2] < \infty$; see the probability notes for why this is the hypothesis that recurs),
 $$
 P\left[ Q(x,\bsxi) < \infty \right] = 1 \Longrightarrow \mathcal{Q}(x) < \infty,
 $$
@@ -1758,8 +1759,7 @@ If only the right-hand side $h(\bsxi)$ is random, $W$, $T$ and $q$ being fixed, 
 \end{theo}
 \begin{proof}
 Set $\psi(\xi) \overset{\mathrm{def}}{=} \min_{x \in K_1 \cap K_2(\xi)} z(x,\xi)$.
-As $W$, $T$ and $q$ are fixed, $\psi(\xi)$ is the optimal value of a linear program whose only varying data is the right-hand side; such a value function is convex (background notes), here in $h(\xi)$, hence in $\xi$.
-Jensen's inequality then gives
+As $W$, $T$ and $q$ are fixed, $\psi(\xi)$ is the optimal value of a linear program whose only varying data is the right-hand side, so it is convex in $h(\xi)$ and hence in $\xi$ (LP notes). Jensen's inequality (probability notes) then gives
 \[
 \EV = \psi(\EE[\bsxi]) \leq \EE_{\bsxi}[\psi(\bsxi)] = \WS.
 \]

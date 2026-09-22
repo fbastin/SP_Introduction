@@ -1050,8 +1050,9 @@ u2 = rand(rng)
 		Consider a random variable $X$ with cumulative distribution function $F$.
 		Let $U \sim U (0, 1)$ and define:
 		\[
-		X = F^{-1}(U) = \min \lbrace x : F (x)  \geq U \rbrace \quad \textrm{\textcolor{red}{(Generalized inverse)}}.
+		X = F^{-1}(U) = \inf \lbrace x : F (x)  \geq U \rbrace \quad \textrm{\textcolor{red}{(Generalized inverse)}},
 		\]
+		the quantile function of the probability background notes.
 		Then,
 		\[
 		P [X \leq x] = P [F^{-1}(U) \leq x] = P [U \leq F (x)] = F (x),
