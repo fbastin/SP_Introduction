@@ -1,0 +1,54 @@
+\chapter{Monte Carlo approximations}
+
+\begin{enumerate}
+\item
+\begin{exercise}
+Montrez que $E_{\bxi}[ \min_{x \in \cX} z(x,\bxi) ] \leq \min_{x \in \cX} E_{\bxi}[ z(x,\bxi) ]$, en considérant un ensemble réalisable $\cX$ déterministe.
+Comment interpréter ce résultat par rapport à la programmation stochastique?
+\end{exercise}
+
+Considérons que les espérances sont bien définies et que les minimas existent, comme implicitement supposé dans l'énoncé.
+Dès lors, il existe $x^* \in \cX$ tel que
+$$
+\min_{x \in \cX} E_{\bxi}[ z(x,\bxi) ] = E_{\bxi}[ z(x^*,\bxi) ].
+$$
+Comme $x^* \in \cX$,
+$$
+\min_{x \in \cX} z(x,\bxi) \leq z(x^*,\bxi)
+$$
+et dès lors
+$$
+E_{\bxi} \left[\min_{x \in \cX} z(x,\bxi)\right] \leq E_{\bxi} [z(x^*,\bxi)].
+$$
+
+%Remarquons que les ensembles réalisables étant identiques, s'il existe $x$ tel que $E_{\bxi} [z(x,\bxi)] < +\infty$, alors $E_{\bxi}[ \inf_{x \in \cX} z(x,\bxi) ] < +\infty$ et inversement, $E_{\bxi}[ \inf_{x \in \cX} z(x,\bxi) ] = +\infty$ implique $E_{\bxi} [z(x,\bxi)] = +\infty$.
+Même si les minimas n'existent pas, l'énoncé reste valide en remplaçant les opérateurs de minimisation pas des infimums:
+$$
+E_{\bxi}\left[ \inf_{x \in \cX} z(x,\bxi) \right] \leq \inf_{x \in \cX} E_{\bxi}[ z(x,\bxi) ]
+$$
+En effet, 
+$$
+\inf_{x \in \cX} z(x,\bxi) \leq z(y,\bxi),\ \forall\, y \in \cX.
+$$
+Dès lors
+$$
+E_{\bxi}\left[ \inf_{x \in \cX} z(x,\bxi) \right] \leq E_{\bxi} [ z(y,\bxi) ],\ \forall\, y \in \cX,
+$$
+et donc l'énoncé est valide.
+
+Le résultat indique que la minimisation sous information parfaite donne donne un estimateur biaisé de la solution.
+Nous pouvons étendre le résultat à un échantillonnage Monte Carlo.
+Soit
+$$
+z_N(x) = \frac{1}{N} \sum_{n = 1}^{N} z(x,\xi_n).
+$$
+Nous avons
+\begin{align*}
+E_{\bxi}\left[ \min_{x \in \cX} z_N(x) \right]
+& = E_{\bxi}\left[ \min_{x \in \cX} \frac{1}{N} \sum_{n = 1}^{N} z(x,\bxi_n) \right] \\
+& = \frac{1}{N} \sum_{n = 1}^{N} E_{\bxi}\left[ \min_{x \in \cX} z(x,\bxi_n) \right] \\
+& \leq \frac{1}{N} \sum_{n = 1}^{N} \min_{x \in \cX} E_{\bxi}[ z(x,\bxi) ] \\
+& = \min_{x \in \cX} E_{\bxi}[ z(x,\bxi) ]
+\end{align*}
+
+\end{enumerate}

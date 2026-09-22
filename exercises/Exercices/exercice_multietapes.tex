@@ -1,0 +1,125 @@
+\documentclass[11pt]{article}
+
+\usepackage{amscd}                 %% Celui-ci provoque des erreurs!!!
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{pictex, color}
+\usepackage{amsmath, amssymb, amstext, amsthm}
+\usepackage{enumerate}
+
+\def\eqdef {\stackrel {\rm def}{=}}   % Egal par definition.
+\def\eqas  {\stackrel {\rm p.s.}{=}}  % Egal a.s.
+\def\toas  {\stackrel {\rm p.s.}{\to}}   % ---> conv. a.s.
+\def\tod   {~\Rightarrow~}               % ---> conv. en distribution.
+\def\eff {\mbox{\rm Eff}}
+\def\iid {\mbox{\rm i.i.d.{}}}
+\def\MSE {\mbox{\rm MSE}}
+\def\RE  {\mbox{\rm RE}}
+\def\rmis {{\rm is}}
+
+\def\cF {\mathcal{F}}
+\def\cH {\mathcal{H}}
+\def\cS {\mathcal{S}}
+
+\def\Var {\text{Var}}
+\def\Cov {\text{Cov}}
+\def\To {\Rightarrow}
+\def\RR {\mathcal{R}}
+\def\bA {\boldsymbol{A}}
+\def\bL {\boldsymbol{L}}
+\def\bI {\boldsymbol{I}}
+\def\bmu {\boldsymbol{\mu}}
+\def\bR {\boldsymbol{R}}
+\def\bSigma {\boldsymbol{\Sigma}}
+\def\bU {\boldsymbol{U}}
+\def\bY {\boldsymbol{Y}}
+\def\bX {\boldsymbol{X}}
+\def\bx {\boldsymbol{x}}
+\def\bxi {\boldsymbol{\xi}}
+\def\bZ {\boldsymbol{Z}}
+\def\bzero {\boldsymbol{0}}
+
+\def\rmu{{\rm u}}
+
+\def\dDUnif   {{\rm UniformeDiscr\`ete}}
+\def\dBer     {{\rm Bernoulli}}
+\def\dBinomial{{\rm Binomiale}}
+\def\dGeo     {{\rm Géométrique}}
+\def\dNegBinomial {{\rm BinomialeN\'egative}}
+\def\dPoisson {{\rm Poisson}}
+\def\dMultinomial {{\rm Multinomiale}}
+%
+\def\dUnif    {{\rm Uniforme}}
+\def\dNormal  {{\rm Normale}}
+\def\dLognormal {{\rm Lognormale}}
+\def\dExpon   {{\rm Exponentielle}}
+\def\dWeibull {{\rm Weibull}}
+\def\dGamma   {{\rm Gamma}}
+\def\dBeta    {{\rm Beta}}
+\def\dStudent {\mbox{\rm Student-t}}
+\def\dChiSquare {{\chi^2}}
+\def\dFisher  {\mbox{\rm F}}
+\def\dErlang  {{\rm Erlang}}
+\def\dPareto  {{\rm Pareto}}
+\def\dGumbel  {{\rm Gumbel}}
+\def\dPearson {\mbox{\rm Pearson}}
+\def\dPearsonV {\mbox{\rm Pearson-5}}
+\def\dPearsonVI{\mbox{\rm Pearson-6}}
+\def\dRayleigh {{\rm Rayleigh}}
+\def\dLogistic {{\rm Logistique}}
+\def\dCauchy   {{\rm Cauchy}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{prop}{Proposition}
+
+\newcounter {exercisecount}[section]
+\renewcommand{\theexercisecount}{\thesection.\arabic{exercisecount}}
+\newenvironment {exercise}{}{}%\nlni\begingroup\refstepcounter{exercisecount}%
+%\bf \theexercisecount\ \rm }{\xxxend}
+\newenvironment {solution}{}{}%\nlni\begingroup\refstepcounter{exercisecount}%
+
+\usepackage{verbatim}
+
+\begin{document}
+
+\begin{center}
+\Large
+Introduction à la programmation stochastique\\
+Exercices - $2^e$ partie
+\end{center}
+
+\mbox{}
+
+\hrule
+
+\mbox{}
+
+\mbox{}
+
+Considérons le programme stochastique multi-étapes stylisé suivant (Heitsch et al., 2006),
+cherchant à déterminer une stratégie optimale d'achat sous des coûts incertains $\bxi_t$,
+sur les périodes $t = 1,\ldots,T$. Les décisions de montants à acheter sont donnés par $x_t$,
+et nous souhaitons minimiser les coûts espérés de manière à atteindre un montant prescrit
+$a$ à l'horizon $T$:
+\begin{align*}
+ \min_{\bx_t}\ & E\left[ \sum_{t=0}^T \bxi_t \bx_t \right],\\
+\mbox{s.t. } & s_t-s_{t-1} = \bx_t,\ \forall t = 1,\ldots,T,\\
+& s_0 = 0,\ s_T = a,\ \bx_t \geq 0,\ s_t \geq 0,
+\end{align*}
+où $s_t$ est une variable d'état  contenant le montant au temps $t$.
+
+Nous considérons 3 étapes ($t = 0, 1, 2$), un arbre binaire, et $\xi_0 = 10$.
+La valeur monte de 1 avec une probabilité 0.6, et descent de 1 avec une probabilité 0.4.
+
+Doit-on ajouter des contraintes de nonanticipativité dans le problème ci-dessus?
+Représentez l'arbre de scénarios.
+
+\begin{thebibliography}{1}
+
+\bibitem{HeitRomiStru06}
+H.~Heitsch and W.~Römisch and C.~Strugarek, Stability of multistage stochastic
+  programs, {\em SIAM Journal on Optimization}, 17(2):511--525 (2006).
+
+\end{thebibliography}
+
+\end{document}
