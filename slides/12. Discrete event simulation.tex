@@ -165,6 +165,7 @@ Event: action, schedule, cancel.
 
 \begin{footnotesize}
 \begin{center}
+\scalebox{0.85}{%
 \begin{tikzpicture}[scale=0.06, node distance = 0.6cm, auto]
     % Place nodes
     \node [block] (init) {Initialization};
@@ -175,7 +176,7 @@ Event: action, schedule, cancel.
     \node [text width=1.9cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
     \node [block, left of=schedule, node distance=3.5cm] (update) {Pull next event and advance clock};
     \node [text width=1.9cm, decision, below of=schedule, node distance=1.6cm] (decide) {Empty event list or end event?};
-    \node [block, below of=decide, node distance=1.4cm] (stop) {Stop};
+    \node [block, below of=decide, node distance=2.1cm] (stop) {Stop};
     % Draw edges
     \path [line] (init) -- (premier);
     \path [line] (premier) -- (event);
@@ -183,10 +184,10 @@ Event: action, schedule, cancel.
     \path [line] (schedule) -- (decide);
     \path [line] (decide) -| node [near start, color=black] {no} (update);
     \path [line] (update) |- (event);
-    \path [line] (decide) -- node [, color=black] {yes}(stop);
+    \path [line] (decide) -- node [midway, right, color=black] {yes} (stop);
     \path [line,dashed] (clock) -- (init);
     \path [line,dashed] (system) -- (init);
-\end{tikzpicture}
+\end{tikzpicture}}
 \end{center}
 \end{footnotesize}
 
@@ -210,13 +211,13 @@ Event: action, schedule, cancel.
     \node [text width=2.4cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
     \node [block, left of=schedule, node distance=4.0cm] (update) {Pull next event and advance clock};
     \node [text width=1.5cm, decision, below of=schedule, node distance=1.5cm] (decide) {End event or empty event list?};
-    \node [block, below of=decide, node distance=1.3cm] (stop) {Stop and print report};
+    \node [block, below of=decide, node distance=2.1cm] (stop) {Stop and print report};
     % Draw edges
     \path [line] (event) -- (schedule);
     \path [line] (schedule) -- (decide);
     \path [line] (decide) -| node [near start, color=black] {no} (update);
     \path [line] (update) |- (event);
-    \path [line] (decide) -- node [, color=black] {yes}(stop);
+    \path [line] (decide) -- node [midway, right, color=black] {yes} (stop);
 \end{tikzpicture}
 \end{center}
 \end{footnotesize}
@@ -369,7 +370,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Queueing System Simulation}
 	
-	\begin{small}
+	\begin{footnotesize}
 		\begin{description}
 			\item[Arrival]
 			Generate $A$ according to $F$ and schedule another arrival 
@@ -393,7 +394,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 			\item[End of Simulation]
 			Print a report and terminate the program.
 		\end{description}
-	\end{small}
+	\end{footnotesize}
 \end{frame}
 
 \begin{frame}
@@ -709,8 +710,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	\bar X_{\rm{c},e,n} = \bar X_n - {1\over n-1} \left[\sum_{i=1}^n
 	(A_i-\bar A_n)(X_i-\bar X_n)\right] {\bar A_n - a\over Var[A_i]}.
 	\]
-	
-	\mbox{}
+	\vspace{-3mm}
 	
 	Conditional on \(B_i\), \(A_i \sim \text{Poisson}(1660 B_i)\). Thus, we have
 	\begin{align*}
