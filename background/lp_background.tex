@@ -399,13 +399,13 @@ A non-empty polyhedron has an extreme point {\red if and only if} it contains no
 {\red Dual} program
 \begin{equation}
 	\begin{aligned}
-	\max_{\lambda \geq 0} \ & \lambda^T b \\
-	\mbox{s.t. } & A^T \lambda \leq c
+	\max_{\pi \geq 0} \ & \pi^T b \\
+	\mbox{s.t. } & A^T \pi \leq c
 	\end{aligned}
 \tag{D}\label{eq:dual}
 \end{equation}
 \item
-$A \in \RR^{m \times n}$, $c, x \in \RR^n$, $\lambda, b \in \RR^m$: $x$ gathers the {\red primal} variables, $\lambda$ the {\red dual} ones.
+$A \in \RR^{m \times n}$, $c, x \in \RR^n$, $\pi, b \in \RR^m$: $x$ gathers the {\red primal} variables, $\pi$ the {\red dual} ones.
 \item
 Dualizing (D) gives (P) back: the dual of the dual is the primal.
 \end{itemize}
@@ -440,13 +440,13 @@ The dual problem can then be written as
 		& u \geq 0 \\
 		& v \geq 0
 	\end{align*}
-	or, with $\lambda = u - v$,
+	or, with $\pi = u - v$,
 	\begin{align*}
-		\max_{\lambda} \ & \lambda^T b \\
-		\mbox{s.t. } & \lambda^T A \leq c^T
+		\max_{\pi} \ & \pi^T b \\
+		\mbox{s.t. } & \pi^T A \leq c^T
 	\end{align*}
 	
-Asymmetric form: $\lambda \in \RR^m$ is unrestricted in sign.
+Asymmetric form: $\pi \in \RR^m$ is unrestricted in sign.
 	
 \end{frame}
 
@@ -486,17 +486,17 @@ Asymmetric form: $\lambda \in \RR^m$ is unrestricted in sign.
 	
 	\mbox{}
 	
-	If $x$ and $\lambda$ are feasible for the primal and the dual, respectively, then
+	If $x$ and $\pi$ are feasible for the primal and the dual, respectively, then
 	\[
-	c^T x \geq \lambda^T b
+	c^T x \geq \pi^T b
 	\]
 	
 	\begin{proof}
-		For any primal feasible $x$ and dual feasible $\lambda$, we have
+		For any primal feasible $x$ and dual feasible $\pi$, we have
 		\[
-		\lambda^T b \leq \lambda^TAx \leq c^Tx,
+		\pi^T b \leq \pi^TAx \leq c^Tx,
 		\]
-		the first inequality because $\lambda \geq 0$ and $Ax \geq b$ (an equality in the asymmetric form, where $Ax = b$), the second because $x \geq 0$ and $A^T\lambda \leq c$.
+		the first inequality because $\pi \geq 0$ and $Ax \geq b$ (an equality in the asymmetric form, where $Ax = b$), the second because $x \geq 0$ and $A^T\pi \leq c$.
 	\end{proof}
 	
 \end{frame}
@@ -504,11 +504,11 @@ Asymmetric form: $\lambda \in \RR^m$ is unrestricted in sign.
 \begin{frame}
 	\frametitle{Corollary}
 	
-	If $x_0$ and $\lambda_0$ are feasible for the primal and the dual, respectively, and if
+	If $x_0$ and $\pi_0$ are feasible for the primal and the dual, respectively, and if
 	\[
-	c^T x_0 = \lambda_0^T b,
+	c^T x_0 = \pi_0^T b,
 	\]
-	then $x_0$ and $\lambda_0$ are optimal for their respective problem.
+	then $x_0$ and $\pi_0$ are optimal for their respective problem.
 	
 	\mbox{}
 	
@@ -530,13 +530,13 @@ Asymmetric form: $\lambda \in \RR^m$ is unrestricted in sign.
   \fill[red] (4.3,0) circle (2.6pt);
   \draw[blue,line width=1pt] (4.3,0) circle (4.4pt);
   \draw[blue,line width=1pt,->] (3.9,0.55) -- (1.0,0.55);
-  \node[blue,above,font=\scriptsize] at (2.6,0.55) {$\lambda^Tb$, $\lambda$ dual feasible};
+  \node[blue,above,font=\scriptsize] at (2.6,0.55) {$\pi^Tb$, $\pi$ dual feasible};
   \draw[red,line width=1pt,->] (4.7,0.55) -- (7.6,0.55);
   \node[red,above,font=\scriptsize] at (6.1,0.55) {$c^Tx$, $x$ primal feasible};
   \draw[decorate,decoration={brace,mirror,amplitude=5pt},gray!80,line width=0.6pt] (2.1,-0.3) -- (6.5,-0.3);
-  \node[below,font=\scriptsize,gray] at (4.3,-0.45) {duality gap $c^Tx - \lambda^Tb \geq 0$ (weak duality)};
+  \node[below,font=\scriptsize,gray] at (4.3,-0.45) {duality gap $c^Tx - \pi^Tb \geq 0$ (weak duality)};
   \draw[dashed,gray] (4.3,0) -- (4.3,1.55);
-  \node[above,font=\scriptsize,align=center] at (4.3,1.5) {$c^Tx^* = \lambda^{*T}b$\\{\scriptsize (strong duality)}};
+  \node[above,font=\scriptsize,align=center] at (4.3,1.5) {$c^Tx^* = \pi^{*T}b$\\{\scriptsize (strong duality)}};
 \end{tikzpicture}
 \end{center}
 
