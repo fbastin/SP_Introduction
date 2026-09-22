@@ -33,7 +33,6 @@ SP_Introduction/
 │   ├── lp_background.tex          # Linear Programming fundamentals
 │   ├── kkt_background.tex         # KKT optimality conditions
 │   ├── probability_background.tex # Probability & statistics prerequisites
-│   ├── supp_material.tex          # Supplementary derivations
 │   └── first_order.tex            # Convex analysis & first-order conditions
 ├── exercises/                     # Exercise collection; the source builds two PDFs
 │   ├── exercises.tex              # 13 exercises, statements + solutions

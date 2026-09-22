@@ -630,6 +630,32 @@ One may always take $u$ on an extreme ray of $\lbrace u \,|\, A^Tu \geq 0 \rbrac
 \end{frame}
 
 \begin{frame}
+\frametitle{The polar cone}
+\small
+
+The {\red polar} of a cone $C \subseteq \RR^m$ is
+\[
+C^{\circ} \overset{\mathrm{def}}{=} \lbrace u \mid u^Tz \leq 0 \ \ \forall z \in C \rbrace,
+\]
+the directions making an obtuse angle with everything in $C$. For $C = \text{pos}\,A$ it is read off $A$:
+\[
+\lbrace u \mid A^Tu \leq 0 \rbrace
+= \lbrace u \mid y^TA^Tu \leq 0\ \forall y \geq 0 \rbrace
+= \lbrace u \mid u^T(Ay) \leq 0\ \forall y \geq 0 \rbrace
+= (\text{pos}\,A)^{\circ},
+\]
+the first equality because $A^Tu \leq 0$ componentwise is the same as $y^T(A^Tu) \leq 0$ for all $y \geq 0$.
+
+Farkas' lemma says $b \in \text{pos}\,A$ iff $A^Tu \geq 0 \Rightarrow b^Tu \geq 0$; replacing $u$ by $-u$, legitimate since it holds for every $u$, gives $A^Tu \leq 0 \Rightarrow b^Tu \leq 0$, that is
+\[
+b \in \text{pos}\,A \iff b^Tu \leq 0 \ \ \text{for every } u \in (\text{pos}\,A)^{\circ}.
+\]
+
+{\footnotesize So the polar collects the {\red certificates of infeasibility}: a single $u$ in it with $b^Tu > 0$ proves that $Ax = b$, $x \geq 0$ has no solution. In the recourse problems of the following decks, $\text{pos}\,W$ is the set of right-hand sides the second stage can absorb, and the elements of its polar are exactly what the decomposition methods turn into {\red feasibility cuts}.}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Optimality conditions for a linear program}
 
 Specialising the KKT conditions to a linear program, $x$ is optimal {\red if and only if} there are $\pi \in \RR^m$ and $s \in \RR^n$ with

@@ -37,8 +37,6 @@
 \date{}
 \title[Two-stage SP]{Stochastic optimization\\Two-stage stochastic programming with recourse}
 
-% TODO: the characterisation of K_2 as a polyhedron is still missing. See Birge & Louveaux, Chapter 2.
-
 \begin{document}
 
 \frame{\titlepage}
@@ -917,6 +915,30 @@ $$K_2 = K_2^s = K_2^P.$$
 
 With a fixed recourse, $x \in K_2(\xi) \iff h(\xi)-T(\xi)x \in \text{pos}W$, a {\red closed} cone: the set of favourable $\xi$ is then closed, and having probability one forces it to contain the whole support.
 The exercise below shows what happens when the recourse is not fixed.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$K_2$ is a polyhedron}
+\small
+
+\begin{theo}
+For a stochastic program with fixed recourse where $\bsxi$ has a {\red finite support}, $K_2$ is a polyhedron.
+\end{theo}
+
+$\text{pos}W$ is a polyhedral cone, so it is the intersection of finitely many half-spaces through the origin: writing $\sigma^1, \ldots, \sigma^r$ for the generators of its {\red polar cone} (background notes),
+\[
+z \in \text{pos}W \iff (\sigma^k)^Tz \leq 0,\ k = 1, \ldots, r.
+\]
+With a fixed recourse, $x \in K_2(\xi) \iff h(\xi)-T(\xi)x \in \text{pos}W$, hence
+\[
+K_2(\xi) = \lbrace x \,|\, (\sigma^k)^T\left(h(\xi)-T(\xi)x\right) \leq 0,\ k = 1,\ldots,r \rbrace,
+\]
+a polyhedron. When $\Xi = \lbrace \xi_1,\ldots,\xi_S \rbrace$ is finite, $K_2 = \cap_{s=1}^S K_2(\xi_s)$ is a finite intersection of polyhedra, hence a polyhedron.
+
+\mbox{}
+
+{\footnotesize Those inequalities are exactly the {\red feasibility cuts} of the next chapter, which never enumerates the $\sigma^k$ but discovers, one at a time, the few that the current iterate violates. On an infinite support the intersection is no longer finite and $K_2$, while still closed and convex, need not be polyhedral.}
 
 \end{frame}
 
