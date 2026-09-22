@@ -29,11 +29,10 @@ SP_Introduction/
 ├── pdf/                           # Compiled PDF slides and background notes
 │   ├── 01. Introduction.pdf
 │   └── ...
-├── background/                    # Background lectures & supplementary notes
-│   ├── lp_background.tex          # Linear Programming fundamentals
-│   ├── kkt_background.tex         # KKT optimality conditions
+├── background/                    # Background notes, built by `make background`
 │   ├── probability_background.tex # Probability & statistics prerequisites
-│   └── first_order.tex            # Convex analysis & first-order conditions
+│   ├── lp_background.tex          # Linear programming fundamentals
+│   └── kkt_background.tex         # KKT optimality conditions
 ├── exercises/                     # Exercise collection; the source builds two PDFs
 │   ├── exercises.tex              # 13 exercises, statements + solutions
 │   └── Exercices/                 # Superseded French originals (PSTricks, not built)
