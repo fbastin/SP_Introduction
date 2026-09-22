@@ -22,6 +22,62 @@
 \author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
 
+% ---------------------------------------------------------------------------
+% The event-driven simulation loop. The deck draws it twice -- once complete,
+% once reduced to the main loop -- so it is defined here and called, instead of
+% being copied. The reduced copy used to anchor its top node on `premier', a
+% node belonging to the complete chart on an earlier slide: TikZ node names are
+% global, so it compiled, but only for as long as the two frames kept that
+% order. Compiled on its own it failed with "No shape named `premier'".
+% ---------------------------------------------------------------------------
+\tikzset{
+  ev block/.style    = {rectangle, draw, fill=blue!20, text width=2.5cm,
+                        text centered, rounded corners, minimum height=3em},
+  ev decision/.style = {diamond, draw, fill=blue!20, text width=2.5cm,
+                        text badly centered, inner sep=0pt},
+  ev cloud/.style    = {draw, ellipse, fill=yellow!20, minimum height=2em},
+  ev line/.style     = {draw, very thick, color=black!50, -latex'},
+}
+
+% #1: the node or coordinate the loop hangs below.  #2: label of the last block.
+\newcommand{\eventloopbody}[2]{%
+    \node [ev block, text width=1.9cm, below of=#1, node distance=1.6cm] (event) {Handle current event};
+    \node [ev block, text width=1.9cm, below of=event, node distance=1.6cm] (schedule) {Plan resulting events};
+    \node [ev block, left of=schedule, node distance=3.5cm] (update) {Pull next event and advance clock};
+    % 1.6cm put the diamond inside the block above it, degenerating the arrow
+    % between them into a stub pointing the wrong way.
+    \node [ev decision, text width=1.9cm, below of=schedule, node distance=2.4cm] (decide) {Empty event list or end event?};
+    \node [ev block, below of=decide, node distance=2.1cm] (stop) {#2};
+    \path [ev line] (event) -- (schedule);
+    \path [ev line] (schedule) -- (decide);
+    \path [ev line] (decide) -| node [near start, color=black] {no} (update);
+    \path [ev line] (update) |- (event);
+    \path [ev line] (decide) -- node [midway, right, color=black] {yes} (stop);
+}
+
+% The complete chart: the initialization phase, then the loop.
+\newcommand{\eventflowfull}{%
+\begin{footnotesize}\begin{center}\scalebox{0.73}{%
+\begin{tikzpicture}[node distance=0.6cm, auto]
+    \node [ev block] (init) {Initialization};
+    \node [ev cloud, text width=2.0cm, left of=init, node distance=3.2cm] (clock) {Set simulation clock to 0};
+    \node [ev cloud, text width=2.5cm, right of=init, node distance=3.2cm] (system) {Plan first event(s)};
+    \node [ev cloud, text width=1.9cm, below of=init, node distance=1.2cm] (premier) {Pull the first event};
+    \eventloopbody{premier}{Stop}
+    \path [ev line] (init) -- (premier);
+    \path [ev line] (premier) -- (event);
+    \path [ev line, dashed] (clock) -- (init);
+    \path [ev line, dashed] (system) -- (init);
+\end{tikzpicture}}\end{center}\end{footnotesize}}
+
+% The main loop alone, self-contained: it hangs on its own coordinate.
+\newcommand{\eventflowloop}{%
+\begin{footnotesize}\begin{center}\scalebox{0.73}{%
+\begin{tikzpicture}[node distance=0.6cm, auto]
+    \coordinate (top);
+    \eventloopbody{top}{Stop and print report}
+\end{tikzpicture}}\end{center}\end{footnotesize}}
+
 \def\bu{\boldsymbol{u}}
 \def\bU{\boldsymbol{U}}
 \def\cS{\mathcal{S}}
@@ -155,72 +211,13 @@ Event: action, schedule, cancel.
 
 \begin{frame}
 
-\tikzstyle{decision} = [diamond, draw, fill=blue!20,
-    text width=2.5cm, text badly centered, node distance=1cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, draw, fill=blue!20,
-    text width=2.5cm, text centered, rounded corners, minimum height=4em]
-\tikzstyle{line} = [draw, very thick, color=black!50, -latex']
-\tikzstyle{cloud} = [draw, ellipse,fill=yellow!20, node distance=1cm,
-    minimum height=2em]
-
-\begin{footnotesize}
-\begin{center}
-\scalebox{0.85}{%
-\begin{tikzpicture}[scale=0.06, node distance = 0.6cm, auto]
-    % Place nodes
-    \node [block] (init) {Initialization};
-    \node [text width=2.0cm, cloud, left of=init, node distance=3.2cm] (clock) {Set simulation clock to 0};
-    \node [text width=2.5cm, cloud, right of=init, node distance=3.2cm] (system) {Plan first event(s)};
-    \node [text width=1.9cm, cloud, below of=init, node distance=1.2cm] (premier) {Pull the first event};
-    \node [text width=1.9cm, block, below of=premier, node distance=1.2cm] (event) {Handle current event};
-    \node [text width=1.9cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
-    \node [block, left of=schedule, node distance=3.5cm] (update) {Pull next event and advance clock};
-    \node [text width=1.9cm, decision, below of=schedule, node distance=1.6cm] (decide) {Empty event list or end event?};
-    \node [block, below of=decide, node distance=2.1cm] (stop) {Stop};
-    % Draw edges
-    \path [line] (init) -- (premier);
-    \path [line] (premier) -- (event);
-    \path [line] (event) -- (schedule);
-    \path [line] (schedule) -- (decide);
-    \path [line] (decide) -| node [near start, color=black] {no} (update);
-    \path [line] (update) |- (event);
-    \path [line] (decide) -- node [midway, right, color=black] {yes} (stop);
-    \path [line,dashed] (clock) -- (init);
-    \path [line,dashed] (system) -- (init);
-\end{tikzpicture}}
-\end{center}
-\end{footnotesize}
+\eventflowfull
 
 \end{frame}
 
 \begin{frame}
 
-\tikzstyle{decision} = [diamond, draw, fill=blue!20,
-    text width=2.0cm, text badly centered, node distance=1.2cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, draw, fill=blue!20,
-    text width=2.5cm, text centered, rounded corners, minimum height=4em]
-\tikzstyle{line} = [draw, very thick, color=black!50, -latex']
-\tikzstyle{cloud} = [draw, ellipse,fill=yellow!20, node distance=1.2cm,
-    minimum height=2em]
-
-\begin{footnotesize}
-\begin{center}
-\begin{tikzpicture}[scale=0.06, node distance = 0.7cm, auto]
-    % Place nodes
-    \node [text width=2.4cm, block, below of=premier, node distance=1.2cm] (event) {Handle current event};
-    \node [text width=2.4cm, block, below of=event, node distance=1.2cm] (schedule) {Plan resulting events};
-    \node [block, left of=schedule, node distance=4.0cm] (update) {Pull next event and advance clock};
-    \node [text width=1.5cm, decision, below of=schedule, node distance=1.5cm] (decide) {End event or empty event list?};
-    \node [block, below of=decide, node distance=2.1cm] (stop) {Stop and print report};
-    % Draw edges
-    \path [line] (event) -- (schedule);
-    \path [line] (schedule) -- (decide);
-    \path [line] (decide) -| node [near start, color=black] {no} (update);
-    \path [line] (update) |- (event);
-    \path [line] (decide) -- node [midway, right, color=black] {yes} (stop);
-\end{tikzpicture}
-\end{center}
-\end{footnotesize}
+\eventflowloop
 
 \end{frame}
 
