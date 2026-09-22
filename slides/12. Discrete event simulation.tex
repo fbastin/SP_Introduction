@@ -438,7 +438,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Lindley's Recurrence}
 	
-	Suppose we want to estimate \(E[\overline{W}_{100}]\) by \({\overline{W}_{100}}\):
+	Suppose we want to estimate \(\EE[\overline{W}_{100}]\) by \({\overline{W}_{100}}\):
 	\[
 	{\overline{W}_{100}} = \frac{1}{100} \sum_{i=1}^{100} W_i.
 	\]
@@ -451,7 +451,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	We then have \(t=198\), i.e., 
 	\[
-	E[\overline{W}_{100}] = \int_{[0,1)^{198}} f(\bu)d\bu.
+	\EE[\overline{W}_{100}] = \int_{[0,1)^{198}} f(\bu)d\bu.
 	\]
 	
 \end{frame}
@@ -542,7 +542,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	It is easy to verify that \(E[B] = 1\). %% and \(\Var[B] = 0.024\).
+	It is easy to verify that \(\EE[B] = 1\). %% and \(\var[B] = 0.024\).
 	
 	\mbox{}
 	
@@ -556,7 +556,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	We want to estimate \(\mu = E[G_i(s)]\), say for \(s=20\).
+	We want to estimate \(\mu = \EE[G_i(s)]\), say for \(s=20\).
 	
 \end{frame}
 
@@ -599,7 +599,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	\[
 	{\bar X_n} = {1\over n} \sum_{i=1}^n X_i.
 	\]
-	We have $E[\bar X_n] = \mu$ and $Var[\bar X_n] = Var[X_i]/n$ --- the estimator and its
+	We have $\EE[\bar X_n] = \mu$ and $\var[\bar X_n] = \var[X_i]/n$ --- the estimator and its
 	variance are recalled in the {\red probability background notes}, together with the
 	confidence intervals used below.
 	
@@ -607,14 +607,14 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	An experiment with ${n = 1000}$ yields $\bar X_n = 1518.3$ and $S_n^2
 	= {21615}$.
-	The estimated variance of $\bar X_n$ is then $\widehat{Var}[\bar X_n] = 21.6$.
+	The estimated variance of $\bar X_n$ is then $\widehat{\var}[\bar X_n] = 21.6$.
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{Introductory Example}
 	
-	We want to construct a confidence interval for \(\sigma^2 = n Var[\bar X_n]\), under the assumption that \((n-1)S_n^2/\sigma^2\) approximately follows a \(\chi^2\) distribution with \(n-1\) degrees of freedom. This allows us to construct the \(90\%\) interval: \([0.930S_n^2, 1.077S_n^2]\).
+	We want to construct a confidence interval for \(\sigma^2 = n \var[\bar X_n]\), under the assumption that \((n-1)S_n^2/\sigma^2\) approximately follows a \(\chi^2\) distribution with \(n-1\) degrees of freedom. This allows us to construct the \(90\%\) interval: \([0.930S_n^2, 1.077S_n^2]\).
 	
 	\mbox{}
 	
@@ -633,18 +633,18 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	We know that \(a = E[A_i] = \sum_{j=1}^m \lambda_j = 1660\).
+	We know that \(a = \EE[A_i] = \sum_{j=1}^m \lambda_j = 1660\).
 	
 	\mbox{}
 	
-	Thus, we can write \(\mu = E[X_i] = E[A_i - D_i] = a - E[D_i]\), which 
+	Thus, we can write \(\mu = \EE[X_i] = \EE[A_i - D_i] = a - \EE[D_i]\), which 
 	can be estimated by
-	$$ {\bar X_{\rm{i},n}} = E[A_i] - \bar D_n = a - {1\over n} \sum_{i=1}^n D_i.$$
+	$$ {\bar X_{\rm{i},n}} = \EE[A_i] - \bar D_n = a - {1\over n} \sum_{i=1}^n D_i.$$
 	
 	\mbox{}
 	
-	This estimator has less variance than \(\bar X_n\) if and only if \(Var[D_i] < Var[X_i]\). 
-	Estimated variance: \(\widehat{Var}[X_{\rm{i},i}] = {18389}\).
+	This estimator has less variance than \(\bar X_n\) if and only if \(\var[D_i] < \var[X_i]\). 
+	Estimated variance: \(\widehat{\var}[X_{\rm{i},i}] = {18389}\).
 	
 \end{frame}
 
@@ -655,9 +655,9 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	For example, if \(A_i\) is higher than usual \((A_i > E[A_i] = 1660)\),
+	For example, if \(A_i\) is higher than usual \((A_i > \EE[A_i] = 1660)\),
 	we expect that on that day, \(X_i\) and \(D_i\) 
-	\emph{overestimate} \(E[X_i]\) and \(E[D_i]\).
+	\emph{overestimate} \(\EE[X_i]\) and \(\EE[D_i]\).
 	
 	\mbox{}
 	
@@ -674,20 +674,20 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Control Variate (CV)}
 	
-	We have \(E[\bar X_{\rm{c},n}] = E[X_i]\) and 
-	$$ Var[\bar X_{\rm{c},n}] 
-	= \frac{Var[X_i] + \beta^2Var[A_i] - 2 \beta Cov[A_i,X_i]}{n}. $$ 
+	We have \(\EE[\bar X_{\rm{c},n}] = \EE[X_i]\) and 
+	$$ \var[\bar X_{\rm{c},n}] 
+	= \frac{\var[X_i] + \beta^2\var[A_i] - 2 \beta \cov[A_i,X_i]}{n}. $$ 
 	This variance is a quadratic function of \(\beta\), which we minimize
 	by taking
 	\[
-	\beta = {\beta^*} = \frac{Cov[A_i, X_i]}{Var[A_i]}.
+	\beta = {\beta^*} = \frac{\cov[A_i, X_i]}{\var[A_i]}.
 	\]
 	
 	\mbox{}
 	
 	The \emph{minimum variance} is
-	$$ Var[\bar X_{\rm{c},n}] = \frac{Var[X_i] - (\beta^*)^2 Var[A_i]}{n}
-	= Var[\bar X_n] (1- \rho^2[A_i,X_i]) $$
+	$$ \var[\bar X_{\rm{c},n}] = \frac{\var[X_i] - (\beta^*)^2 \var[A_i]}{n}
+	= \var[\bar X_n] (1- \rho^2[A_i,X_i]) $$
 	where \({\rho[A_i, X_i]}\) is the correlation coefficient between 
 	\(A_i\) and \(X_i\).
 	
@@ -696,7 +696,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Control Variate (CV)}
 	
-	We do not know \(Cov[A_i, X_i]\), but:
+	We do not know \(\cov[A_i, X_i]\), but:
 	\begin{enumerate}[(a)]
 		\item We can estimate it through \emph{pilot experiments}.
 		\item We can estimate it using the \emph{same \(n\) simulations} as \(\bar X_n\).
@@ -705,15 +705,15 @@ We assume $S_i$ and $A_i$ mutually independent.
 	With (b), we obtain the estimator (slightly biased):
 	\[
 	\bar X_{\rm{c},e,n} = \bar X_n - {1\over n-1} \left[\sum_{i=1}^n
-	(A_i-\bar A_n)(X_i-\bar X_n)\right] {\bar A_n - a\over Var[A_i]}.
+	(A_i-\bar A_n)(X_i-\bar X_n)\right] {\bar A_n - a\over \var[A_i]}.
 	\]
 	\vspace{-3mm}
 	
 	Conditional on \(B_i\), \(A_i \sim \text{Poisson}(1660 B_i)\). Thus, we have
 	\begin{align*}
-		{Var[A_i]} &= Var[E[A_i|B_i]] + E[Var[A_i|B_i]] \\
-		&= Var[1660 B_i] + E[1660 B_i] \\
-		&= 1660^2 Var[B_i] + 1660 E[B_i] \\
+		{\var[A_i]} &= \var[\EE[A_i|B_i]] + \EE[\var[A_i|B_i]] \\
+		&= \var[1660 B_i] + \EE[1660 B_i] \\
+		&= 1660^2 \var[B_i] + 1660 \EE[B_i] \\
 		&= 67794.4.
 	\end{align*}
 	The empirical variance obtained here is: {3310}.
@@ -750,11 +750,11 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	By setting \(\mu_t = E[X_i\mid B_i=b_t]\), we have
+	By setting \(\mu_t = \EE[X_i\mid B_i=b_t]\), we have
 	\begin{eqnarray*}
-		\mu &=& E[X_i]  = \sum_{t=1}^4 P[B_i = b_t] \cdot E[X_i\mid B_i=b_t] \\
-		&=&  0.25\, E[X_i\mid B_i=0.8] + 0.55\, E[X_i\mid B_i=1.0]  \\
-		&& + 0.15\, E[X_i\mid B_i=1.2] + 0.05\, E[X_i\mid B_i=1.4]  \\
+		\mu &=& \EE[X_i]  = \sum_{t=1}^4 P[B_i = b_t] \cdot \EE[X_i\mid B_i=b_t] \\
+		&=&  0.25\, \EE[X_i\mid B_i=0.8] + 0.55\, \EE[X_i\mid B_i=1.0]  \\
+		&& + 0.15\, \EE[X_i\mid B_i=1.2] + 0.05\, \EE[X_i\mid B_i=1.4]  \\
 		&=&  0.25\,\mu_1 + 0.55\, \mu_2 + 0.15\, \mu_3 + 0.05\, \mu_4.
 	\end{eqnarray*}
 	
@@ -773,7 +773,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	We can estimate \(\mu_t = E[X_i\mid B_i=b_t]\) by
+	We can estimate \(\mu_t = \EE[X_i\mid B_i=b_t]\) by
 	$$ {\hat\mu_t} = {1\over N_t} \sum_{i=1}^{N_t} X_{t,i} $$
 	and \(\mu\) by
 	\[
@@ -788,15 +788,15 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	We have 
 	\begin{align*}
-		&  Var[\bar X_{\rm{s},n} \mid N_1, N_2, N_3, N_4] \\
-		&= \sum_{t=1}^4 q_t^2 Var[\hat\mu_t | N_t]  
+		&  \var[\bar X_{\rm{s},n} \mid N_1, N_2, N_3, N_4] \\
+		&= \sum_{t=1}^4 q_t^2 \var[\hat\mu_t | N_t]  
 		= \sum_{t=1}^4 q_t^2 \frac{\sigma^2_t}{N_t} \\
 		&= 0.25^2 \frac{\sigma^2_1}{N_1} + 0.55^2 \frac{\sigma^2_2}{N_2} + 
 		0.15^2 \frac{\sigma^2_3}{N_3} + 0.05^2 \frac{\sigma^2_4}{N_4}.
 	\end{align*}
-	where \(\sigma^2_t = Var[X_i\mid B_i=b_t]\).
+	where \(\sigma^2_t = \var[X_i\mid B_i=b_t]\).
 	
-	The variance is reduced if the \(\sigma_t^2\) are less than \(Var[X_i]\).
+	The variance is reduced if the \(\sigma_t^2\) are less than \(\var[X_i]\).
 	
 	If the \(B_i\) are normally generated: \emph{post-stratification}.
 	
@@ -816,7 +816,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 		With \(n=1000\), this gives \(n_1 = 250\), \(n_2 = 550\), \(n_3 = 150\), \(n_4 = 50\).
 		\item
 		\emph{Optimal allocation}: 
-		choose the \(n_t\) to minimize \(Var[\bar X_{\rm{s},n}]\) under the constraint
+		choose the \(n_t\) to minimize \(\var[\bar X_{\rm{s},n}]\) under the constraint
 		\(n_1+n_2+n_3+n_4=n\). We obtain:
 		\[
 		\frac{{n_t}}{n} 
@@ -841,10 +841,10 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\mbox{}
 	
-	We minimize \(\sigma_t^2 = Var[X_{\rm{c},t,i}]\) by taking 
+	We minimize \(\sigma_t^2 = \var[X_{\rm{c},t,i}]\) by taking 
 	\[
-	\beta_t = {\beta_t^*} = \frac{Cov[A_{t,i},\, X_{t,i}]}{Var[A_{t,i}]}
-	= \frac{Cov[A_i, X_i | B_i=b_t]}{(a b_t)}.
+	\beta_t = {\beta_t^*} = \frac{\cov[A_{t,i},\, X_{t,i}]}{\var[A_{t,i}]}
+	= \frac{\cov[A_i, X_i | B_i=b_t]}{(a b_t)}.
 	\]
 	
 	\mbox{}
@@ -865,10 +865,10 @@ We assume $S_i$ and $A_i$ mutually independent.
 	\frametitle{Combined Strategies}
 	
 	By repeating the experiment with \(n = 100000\), we can find the following estimates for the variance (\(\pm 1\%\)):\\
-	$Var[X_{n}] = 21998$; \
-	$Var[X_{\rm{i},n}] = 17996$; \
-	$Var[X_{\rm{c},n}] = 3043$; \
-	$Var[X_{\rm{s}o,\rm{c},n}] = 885$.
+	$\var[X_{n}] = 21998$; \
+	$\var[X_{\rm{i},n}] = 17996$; \
+	$\var[X_{\rm{c},n}] = 3043$; \
+	$\var[X_{\rm{s}o,\rm{c},n}] = 885$.
 	
 \end{frame}
 
@@ -959,7 +959,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	As
 	\[
-	Var[\Delta_i] = Var[X_{1,i}] + Var[X_{2,i}] - 2Cov[X_{1,i},\,X_{2,i}],
+	\var[\Delta_i] = \var[X_{1,i}] + \var[X_{2,i}] - 2\cov[X_{1,i},\,X_{2,i}],
 	\]
 	the goal of common random variables is to make the covariance positive.
 	
@@ -1030,9 +1030,9 @@ We assume $S_i$ and $A_i$ mutually independent.
 				& \multicolumn{2}{|c}{$\delta = 0.1$}
 				& \multicolumn{2}{|c}{$\delta = 0.01$}
 				& \multicolumn{2}{|c|}{$\delta = 0.001$} \\
-				& $\bar \Delta_n$ & $\widehat{Var}[\Delta_i]$
-				& $\bar \Delta_n$ & $\widehat{Var}[\Delta_i]$
-				& $\bar \Delta_n$ & $\widehat{Var}[\Delta_i]$\\
+				& $\bar \Delta_n$ & $\widehat{\var}[\Delta_i]$
+				& $\bar \Delta_n$ & $\widehat{\var}[\Delta_i]$
+				& $\bar \Delta_n$ & $\widehat{\var}[\Delta_i]$\\
 				\hline
 				IRN (a + c)                      &  55.2 & 56913 &  4.98 & 45164 &  0.66 & 44046 \\
 				IRN (a + d)                      &  52.2 & 54696 &  7.22 & 45192 & -1.82 & 45022 \\
@@ -1057,7 +1057,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Induction of Correlation}
 	
-	Sufficient conditions for $Cov[X,Y]$ 
+	Sufficient conditions for $\cov[X,Y]$ 
 	to be positive or negative?
 	
 	\mbox{}
@@ -1082,7 +1082,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	For example, if the distribution function of a service duration is 
 	${F}$ in the first system and ${G}$ in the second,
 	and if we generate the service durations by
-	$X = F^{-1}(U)$ and $Y = G^{-1}(U)$, then $Cov[X, Y] \ge 0$.
+	$X = F^{-1}(U)$ and $Y = G^{-1}(U)$, then $\cov[X, Y] \ge 0$.
 	
 	\begin{theorem}
 		Let \ ${X} = {f}(U)$ where ${U} \sim U(0,1)$ and \
@@ -1090,10 +1090,10 @@ We assume $S_i$ and $A_i$ mutually independent.
 		\begin{itemize}
 			\item
 			if $f$ and $g$ are monotonic in the same direction and $V=U$,
-			then $Cov[X, Y] \ge 0$;
+			then $\cov[X, Y] \ge 0$;
 			\item
 			if $f$ and $g$ are monotonic in the same direction and $V=1-U$,
-			then $Cov[X, Y] \le 0$.
+			then $\cov[X, Y] \le 0$.
 		\end{itemize}
 	\end{theorem}
 	
@@ -1102,10 +1102,10 @@ We assume $S_i$ and $A_i$ mutually independent.
 \begin{frame}
 	\frametitle{Common Random Numbers (CRN)}
 	
-	We use ${\Delta} = {X_2}-{X_1}$ to estimate ${\mu_2}-{\mu_1} = E[X_2] - E[X_1]$.
+	We use ${\Delta} = {X_2}-{X_1}$ to estimate ${\mu_2}-{\mu_1} = \EE[X_2] - \EE[X_1]$.
 	Then
 	\[
-	Var[\Delta] = Var[X_1] + Var[X_2] - 2 \, Cov[X_1,X_2].
+	\var[\Delta] = \var[X_1] + \var[X_2] - 2 \, \cov[X_1,X_2].
 	\]
 	\emph{Goal}: to induce a positive correlation between $X_1$ and $X_2$
 	without changing their individual distributions.
@@ -1128,7 +1128,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	\begin{theorem}
 		If $f_1$ and $f_2$ are monotonic in the same direction with respect to
-		all their arguments, then  $Cov[X_1, X_2] \ge 0$.
+		all their arguments, then  $\cov[X_1, X_2] \ge 0$.
 	\end{theorem}
 	
 	\mbox{}
@@ -1147,7 +1147,7 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	If ${X_1}$ and ${X_2}$ are non-decreasing functions of the $W_i$
 	for two Lindley processes simulated with common random numbers,
-	then $Cov[X_1, X_2] \ge 0$.
+	then $\cov[X_1, X_2] \ge 0$.
 	
 	\mbox{}
 	
@@ -1168,13 +1168,13 @@ We assume $S_i$ and $A_i$ mutually independent.
 	
 	To \emph{test} if it is effective in practice:
 	conduct a \emph{pilot experiment with common random numbers} and estimate 
-	$Cov(X_1, X_2)$.
+	$\cov(X_1, X_2)$.
 	
 	\mbox{}
 	
 	It is not necessary to perform simulations without common random numbers:
 	to estimate the variance one would have without common random numbers,
-	it is sufficient to take the empirical version of $Var[X_1] + Var[X_2]$.
+	it is sufficient to take the empirical version of $\var[X_1] + \var[X_2]$.
 	
 \end{frame}
 

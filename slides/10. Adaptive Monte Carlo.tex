@@ -135,12 +135,12 @@ $\forall\, x \in S$, $G(x,\cdot)$ is measurable (i.e. its expectation exists).
 $\exists \overline{x} \in S$ such that $E_P[G(\overline{x}, \xi)^2] < \infty$.
 \item
 (Lipschitz continuity condition) 
-$\exists$ $K(\xi) \geq 0$ such that $E[K(\xi)]$ is finite, and
+$\exists$ $K(\xi) \geq 0$ such that $\EE[K(\xi)]$ is finite, and
 $\forall\, x_1$, $x_2 \in S$ and a.e. $\xi$,
 \[
 | G(x_1, \xi) - G(x_2, \xi) )| \leq K(\xi) \| x_1 - x_2\|,
 \]
-We assume moreover that $E[K^2(\xi)] < \infty$.% is finite.
+We assume moreover that $\EE[K^2(\xi)] < \infty$.% is finite.
 \end{enumerate}
 
 \end{frame}
@@ -186,7 +186,7 @@ N^{1/2}(\hat{v}_n - v^*) \Rightarrow N(0, \sigma^2(x^*) ).
 
 \mbox{}
 
-Under some additional conditions, we also have the convergence of $E[\hat{v}_N]$ to $v^*$.
+Under some additional conditions, we also have the convergence of $\EE[\hat{v}_N]$ to $v^*$.
 
 \mbox{}
 
@@ -841,7 +841,7 @@ with $N_i = N_{\max}$ for all $i$ large enough.
 				Bias of simulation (Taylor expansion):
 				\begin{center}
 					\colorbox{orange}{
-						$B := E[SLL^R(\theta)] - LL(\theta) =
+						$B := \EE[SLL^R(\theta)] - LL(\theta) =
 						-\frac{I\epsilon_{\delta}^2}{2\alpha_{\delta}^2}$
 					}
 				\end{center}
