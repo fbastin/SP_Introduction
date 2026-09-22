@@ -14,8 +14,11 @@
 *.dvi
 *.ps
 
-# Compiled decks belong in pdf/ only; never in slides/
+# Compiled decks belong in pdf/ only; never beside their sources
 slides/*.pdf
+background/*.pdf
+exercises/*.pdf
+exercises/**/*.pdf
 
 # OS / Editor temporary files
 .DS_Store

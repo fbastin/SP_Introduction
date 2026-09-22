@@ -32,10 +32,12 @@ SP_Introduction/
 ├── background/                    # Background lectures & supplementary notes
 │   ├── lp_background.tex          # Linear Programming fundamentals
 │   ├── kkt_background.tex         # KKT optimality conditions
+│   ├── probability_background.tex # Probability & statistics prerequisites
 │   ├── supp_material.tex          # Supplementary derivations
-│   ├── basis.tex                  # Probability theory background
-│   ├── d1.tex                     # Problem exercises
 │   └── first_order.tex            # Convex analysis & first-order conditions
+├── exercises/                     # Exercise collection; the source builds two PDFs
+│   ├── exercises.tex              # 13 exercises, statements + solutions
+│   └── Exercices/                 # Superseded French originals (PSTricks, not built)
 ├── sty/                           # Custom LaTeX macro definitions and style packages
 │   ├── macros.tex                 # Common mathematical vector & matrix shortcuts
 │   ├── crayola.sty                # Crayola color palette definitions
@@ -70,8 +72,44 @@ SP_Introduction/
 | **12** | **Discrete Event Simulation** | [`slides/12. Discrete event simulation.tex`](file:///home/bastin/slash/Git/SP_Introduction/slides/12.%20Discrete%20event%20simulation.tex) | [`pdf/12. Discrete event simulation.pdf`](file:///home/bastin/slash/Git/SP_Introduction/pdf/12.%20Discrete%20event%20simulation.pdf) | Event-driven simulation, queueing models, gradient estimation |
 
 ### Background & Prerequisites
-- [`background/lp_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/lp_background.tex) — Linear Programming background
-- [`background/kkt_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/kkt_background.tex) — Karush-Kuhn-Tucker (KKT) optimality conditions
+
+Three self-contained decks, built by `make background`. Students missing the
+prerequisites should read `probability_background` first, then `lp_background`;
+`kkt_background` is only needed from deck 05 onwards.
+
+| Deck | Source | Covers | Needed from |
+| :--- | :--- | :--- | :--- |
+| Probability | [`background/probability_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/probability_background.tex) | Probability space, support, quantiles, moments, Jensen, conditional expectation, LLN/CLT, confidence intervals | deck 01 |
+| Linear programming | [`background/lp_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/lp_background.tex) | Standard form, bases and vertices, duality, Farkas, the value function and its subgradients | deck 03 |
+| KKT | [`background/kkt_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/kkt_background.tex) | Lagrangian, duality gap, KKT conditions, constraint qualifications | deck 05 |
+
+### Exercise collection
+
+`exercises/exercises.tex` holds the whole collection, organized by topic:
+
+| Section | Exercises | Depends on |
+| :--- | :---: | :--- |
+| Generalities | 1 | deck 03 |
+| Two-stage problems with recourse | 7 | decks 01, 03 |
+| Decomposition methods | 2 | deck 04 |
+| Multistage problems | 1 | decks 06, 08 |
+| Monte Carlo approximation | 1 | decks 03, 09 |
+
+It is a **single source producing two PDFs**, so statements never have to be
+kept in sync with their solutions:
+
+| PDF | Contents | Built with |
+| :--- | :--- | :--- |
+| `pdf/exercises.pdf` | statements only — the version to hand out | `\def\nosolutions{}` on the command line |
+| `pdf/exercises_solutions.pdf` | statements **and** solutions | the default |
+
+Solutions live in a `solution` environment, which the `comment` package removes
+wholesale in the student version. Every figure is TikZ: the collection builds
+with a plain `pdflatex`, with no `-shell-escape`.
+
+To add a section or an exercise, edit that file; to start a second collection,
+drop another `.tex` in `exercises/` following the same pattern and
+`make exercises` picks it up automatically.
 
 ---
 
@@ -86,7 +124,7 @@ sudo apt-get install texlive-full
 ### Build Instructions using `make`
 From the root directory:
 
-- **Build all slides and background PDFs**:
+- **Build all slides, background notes and exercise sets**:
   ```bash
   make all
   ```
@@ -99,6 +137,11 @@ From the root directory:
 - **Build background PDFs**:
   ```bash
   make background
+  ```
+
+- **Build the exercise sets** (both the handout and the solutions version of each):
+  ```bash
+  make exercises
   ```
 
 - **Clean intermediate build files**:
