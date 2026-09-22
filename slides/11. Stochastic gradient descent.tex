@@ -89,17 +89,12 @@ Introduced in 1951, initially as a root-finding problem.
 
 \mbox{}
 
-It can be easily extended to unconstrained optimization using first-order condition as a necessary condition for the problem
+It extends easily to unconstrained optimization, the first-order necessary condition for
 $$
 \min_{x \in \RR^d} \ f(x)
+\qquad \text{being} \qquad
+\nabla_x f(x) = 0 .
 $$
-is
-$$
-\nabla_x f(x) = 0.
-$$
-
-\mbox{}
-
 We therefore search for a zero of the gradient of $f(x)$.
 
 \mbox{}
@@ -382,13 +377,7 @@ $$
 
 \mbox{}
 
-Therefore
-$$
-X_n = o_p(1) \Rightarrow X_n = O_p(1).
-$$
-The reverse does not hold.
-
-\mbox{}
+Therefore $X_n = o_p(1) \Rightarrow X_n = O_p(1)$; the reverse does not hold.
 
 More generally, $X_n = o_p(a_n)$ iff $X_n/{a_n} = o_p(1)$, i.e.
 $$
@@ -404,10 +393,7 @@ Source: Kim, Pasupathy, and Henderson, ``A Guide to Sample Average Approximation
 
 \mbox{}
 
-If the number of iterations completed in $c$ units of computer time, $n(c)$ grows roughly linearly in $c$
-(as would be the case if, e.g., sample gradients are computed in constant time).
-
-\mbox{}
+Suppose the number of iterations completed in $c$ units of computer time, $n(c)$, grows roughly linearly in $c$ --- as it would if sample gradients were computed in constant time.
 
 A time-changed version of the CLT establishes that the resulting SA estimator has
 an error
@@ -674,9 +660,6 @@ $$
 	$$
 		\EE_{\xi_k} [f(x_{k+1})] - f(x_k) \leq - \alpha_k \nabla f(x_k)^T \EE_{\xi_k} [ g(x_k, \xi_k) ] + \alpha_k^2 \frac{L}{2} \EE_{\xi_k} \left[ \| g(x_k, \xi_k) \|^2_2 \right].	
 	$$
-	
-	\begin{align*}
-	\end{align*}
 	
 \end{frame}
 
