@@ -128,13 +128,24 @@ Its {\red cumulative distribution function} (cdf) is
 F_{\bsxi}(x) = P[\bsxi \leq x].
 \]
 
+\end{frame}
+
+\begin{frame}
+\frametitle{The support}
+
+The {\red support} $\Xi \subseteq \RR^r$ of $\bsxi$ is the {\red smallest closed set} carrying all the probability, $P[\bsxi \in \Xi] = 1$. Equivalently, and more usable in practice,
+\[
+\Xi = \lbrace x \in \RR^r \,|\, P[\bsxi \in V] > 0 \ \text{ for every open } V \ni x \rbrace :
+\]
+a point belongs to the support when no neighbourhood of it can be discarded.
+
 \mbox{}
 
-The {\red support} $\Xi \subseteq \RR^r$ of $\bsxi$ is the {\red smallest closed set} with $P[\bsxi \in \Xi] = 1$.
+That a {\it smallest} such set exists is what the second form guarantees: the complement of $\Xi$ is a union of open sets of probability zero, and in $\RR^r$ countably many of them already cover it, so the complement itself has probability zero.
 
 \mbox{}
 
-{\footnotesize The closedness in that definition is not a detail: it is exactly what makes the argument of deck~03 work, where a set of favourable $\xi$ that is closed and of probability one must contain the whole support.}
+{\footnotesize The {\red closedness} is not a detail either. It is exactly what makes the argument of deck~03 work: there, the set of $\xi$ favourable to a given $x$ is closed and has probability one, and must therefore contain the whole support --- which is how $K_2$ and $K_2^P$ come to coincide under a fixed recourse. Note also that $\Xi$ need not be connected, nor equal to the range $\bsxi(\Omega)$: a value taken with probability zero is not in the support.}
 
 \end{frame}
 
@@ -187,7 +198,7 @@ i.e. $F_{\bsxi}(\bsxi) \sim U[0,1]$. Read backwards, this is {\red inversion sam
 \small
 
 \begin{center}
-\begin{tikzpicture}[x=1cm,y=1cm,>=latex,font=\footnotesize]
+\begin{tikzpicture}[x=1cm,y=0.86cm,>=latex,font=\footnotesize]
   % axes
   \draw[->,gray] (-0.3,0) -- (6.6,0) node[right,black]{$x$};
   \draw[->,gray] (0,-0.3) -- (0,3.6) node[above,black]{$F_{\bsxi}(x)$};
@@ -204,15 +215,17 @@ i.e. $F_{\bsxi}(\bsxi) \sim U[0,1]$. Read backwards, this is {\red inversion sam
   \node[red,left,font=\scriptsize] at (-0.25,1.1) {$p$};
   \draw[->,red,line width=0.9pt] (1.4,1.1) -- (1.4,0.15);
   \node[red,below,font=\scriptsize] at (1.4,-0.15) {$F^{-1}_{\bsxi}(p)$};
-  % support
-  \draw[decorate,decoration={brace,mirror,amplitude=4pt},teal,line width=0.7pt] (1.4,-0.95) -- (5.0,-0.95);
-  \node[teal,below,font=\scriptsize] at (3.2,-1.1) {support $\Xi$};
+  % support: the atom, plus the closure of the region where F increases --- and
+  % NOT the flat stretch in between, which the variable never visits
+  \fill[teal] (1.4,-0.95) circle (2.2pt);
+  \draw[decorate,decoration={brace,mirror,amplitude=4pt},teal,line width=0.7pt] (2.6,-0.95) -- (5.0,-0.95);
+  \node[teal,below,font=\scriptsize] at (3.3,-1.12) {support $\Xi$ --- the gap belongs to neither piece};
   \node[align=left,font=\scriptsize,anchor=west] at (3.3,0.55)
      {jump at $1.4$: an atom,\\$P[\bsxi = 1.4] > 0$};
 \end{tikzpicture}
 \end{center}
 
-{\footnotesize A flat stretch of $F$ is a region the variable never visits; a jump is an atom. The quantile is read horizontally then downwards, the $\inf$ picking the left end of a flat stretch. The support is the closure of what is left.}
+{\footnotesize A flat stretch of $F$ is a region the variable never visits; a jump is an atom. The quantile is read horizontally then downwards, the $\inf$ picking the left end of a flat stretch. The support is what is left, closed up --- here {\red disconnected}.}
 
 \end{frame}
 
