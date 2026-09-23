@@ -48,6 +48,7 @@ SP_Introduction/
     ├── Farmer.ipynb                          # The farmer problem (decks 01, 03)
     ├── newsvendor.ipynb                      # The newsvendor problem (decks 01, 03)
     ├── two_stages.ipynb                      # Two-stage models (deck 03)
+    ├── on dual function.ipynb                # JuMP `dual` vs `shadow_price` (deck 04, LP notes)
     ├── lshaped_general.ipynb                 # The L-shaped method (deck 04)
     ├── chance constrained toy example.ipynb  # Chance-constrained LP (deck 05)
     ├── portfolio-chanceconstrainedprogramming.ipynb  # Chance-constrained portfolio (deck 05)

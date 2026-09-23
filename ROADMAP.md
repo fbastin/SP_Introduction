@@ -311,6 +311,17 @@ Version générale de `two_stages.ipynb` : les contraintes gardent le sens sous 
 
 ---
 
+## Notebook — `code/on dual function.ipynb`
+
+- [x] **Récupéré du site du cours** : le notebook était publié mais absent du dépôt. Ajouté d'abord tel quel, octet pour octet, puis corrigé dans un second commit, de sorte que la divergence avec la version en ligne soit lisible dans l'historique.
+  - **Sujet** : `dual` de JuMP suit la dualité conique et ignore le sens de l'objectif, tandis que `shadow_price` suit l'interprétation par relaxation. Les deux diffèrent de signe sur les contraintes « plus grand que » et en maximisation. Démontré sur un primal, sur son dual explicite, puis sur l'exemple du manuel JuMP.
+  - **Vérifié** : le dual explicite de la cellule 12 est bien le dual du primal de la cellule 4 — $x_1$ libre donne l'égalité `c1`, $x_2 \ge 0$ l'inégalité `c2`, $x_3 \le 0$ l'inégalité `c3`, et les signes de $y_1 \ge 0$, $y_2 \le 0$ suivent le sens des contraintes primales.
+  - **Rédaction** : « the function use » → « uses » ; « relax the constraint *d'une unité* » → « by one unit » ; « when we have an equality greater then » → « on a greater-than constraint ». Seules deux cellules markdown changent : code et sorties restent identiques.
+  - **Exécution non vérifiée** : le notebook appelle Gurobi (licence commerciale) et aucune installation Julia n'était disponible. Les 22 sorties enregistrées permettent de le lire sans l'exécuter. À noter : `using GLPK` est importé mais jamais utilisé — un solveur libre de remplacement serait à envisager pour les étudiants.
+  - **À faire côté site** : la version en ligne porte encore les trois scories de rédaction ; la rafraîchir depuis le dépôt.
+
+---
+
 ## Backlog — corrections de l'audit (`slides_audit_report.md`)
 
 ### Priorité 1 — Erreurs mathématiques critiques (section 2 de l'audit)
