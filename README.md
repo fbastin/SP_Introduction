@@ -34,7 +34,7 @@ SP_Introduction/
 │   ├── lp_background.tex          # Linear programming fundamentals
 │   └── kkt_background.tex         # KKT optimality conditions
 ├── exercises/                     # Exercise collection; the source builds two PDFs
-│   ├── exercises.tex              # 13 exercises, statements + solutions
+│   ├── exercises.tex              # 18 exercises, statements + solutions
 │   └── Exercices/                 # Superseded French originals (PSTricks, not built)
 ├── sty/                           # Custom LaTeX macro definitions and style packages
 │   ├── macros.tex                 # Common mathematical vector & matrix shortcuts
@@ -88,9 +88,10 @@ prerequisites should read `probability_background` first, then `lp_background`;
 | Section | Exercises | Depends on |
 | :--- | :---: | :--- |
 | Generalities | 1 | deck 03 |
-| Two-stage problems with recourse | 7 | decks 01, 03 |
+| Two-stage problems with recourse | 8 | decks 01, 03 |
 | Decomposition methods | 2 | deck 04 |
 | Multistage problems | 1 | decks 06, 08 |
+| Random number generation | 5 | deck 02 |
 | Monte Carlo approximation | 1 | decks 03, 09 |
 
 It is a **single source producing two PDFs**, so statements never have to be

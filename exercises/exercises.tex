@@ -813,6 +813,139 @@ constraint is needed; at $t = 1$ they form two groups; at $t = 0$ a single one.
 \end{solution}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Random number generation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{exercise}
+(Deck~02.) A linear congruential generator produces $x_i = (a x_{i-1} + c) \bmod m$.
+\begin{enumerate}[(a)]
+\item For $m = 16$ and $c = 1$, use the period theorem to find every $a$ giving a full period.
+\item The ``standard minimal'' generator of Park and Miller is $x_{i} = 16807\, x_{i-1} \bmod (2^{31}-1)$. Why can its period not be $m$? What is the largest it could be, and why is that value actually reached here?
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} The three conditions are: $\gcd(m,c) = 1$; every prime dividing $m$ divides $a-1$; and if $4 \mid m$ then $4 \mid a-1$.
+
+Here $m = 16 = 2^4$ and $c = 1$, so $\gcd(16,1) = 1$ and the first holds. The only prime dividing $16$ is $2$, so the second requires $a$ odd. Since $4 \mid 16$, the third requires $4 \mid a-1$, which is strictly stronger. Hence
+\[
+\text{full period} \iff a \equiv 1 \pmod 4, \quad \text{i.e.\ } a \in \lbrace 1, 5, 9, 13 \rbrace \text{ modulo } 16 .
+\]
+
+\textbf{(b)} Here $c = 0$, so $x = 0$ is a fixed point of the recurrence: once the state hits $0$ it stays there, and $0$ cannot belong to a cycle of length $m$. The period is therefore at most $m-1$, and that bound is reachable only when $m$ is prime --- which is the case, $2^{31}-1$ being a Mersenne prime.
+
+Reaching $m-1 = 2^{31}-2$ requires the multiplier to be a {\red primitive root} modulo $m$, i.e.\ to generate the whole multiplicative group $(\ZZ/m\ZZ)^*$. That is exactly what Park and Miller checked for $a = 16807 = 7^5$.
+
+\medskip
+Note the contrast with $m = 2^k$, where the period of a multiplicative generator collapses to $m/4$: the modulus being prime is what makes the full multiplicative group available.
+\end{solution}
+
+\begin{exercise}
+(Deck~02.) Consider the linear feedback shift register over $\FF_2$ with $k = 4$ and $x_n = x_{n-1} \oplus x_{n-4}$, seeded at $0001$.
+\begin{enumerate}[(a)]
+\item Why is the all-zero state excluded, and why can the period not exceed $2^k-1$?
+\item A Tausworthe generator reads the output stream $w$ bits at a time, spaced $\nu$ apart. The slides take $w = 3$, $\nu = 3$ and observe only five distinct values instead of fifteen. Explain, and find every $\nu \in \lbrace 1, \ldots, 14 \rbrace$ giving the maximal output period.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} The recurrence is linear over $\FF_2$, so the all-zero state maps to itself: it is absorbing, and a register that reaches it never leaves. It must therefore be excluded from any cycle. The state is $k$ bits, so there are $2^k$ states in all and at most $2^k - 1 = 15$ usable ones. This register attains that bound --- its characteristic polynomial $z^4 - z^3 - 1$ is primitive over $\FF_2$ --- so all fifteen non-zero states are visited.
+
+\textbf{(b)} Taking every $\nu$-th bit of a sequence of period $\rho = 2^k-1$ produces a sequence of period
+\[
+\frac{\rho}{\gcd(\nu, \rho)} .
+\]
+With $\nu = 3$ and $\rho = 15$, $\gcd(3,15) = 3$ and the output period falls to $15/3 = 5$: the five values $7/8$, $5/8$, $3/8$, $1/8$, $0$ of the slides, repeating forever.
+
+The output period is maximal exactly when $\gcd(\nu, 15) = 1$. Excluding the multiples of $3$ and of $5$,
+\[
+\nu \in \lbrace 1, 2, 4, 7, 8, 11, 13, 14 \rbrace,
+\]
+that is $\varphi(15) = 8$ admissible spacings out of $14$. This is the coprimality condition of the slides, on the smallest example where it bites.
+\end{solution}
+
+\begin{exercise}
+(Deck~02.) Let $X$ take the values $1$, $2$, $3$ with probabilities $0.2$, $0.5$, $0.3$.
+\begin{enumerate}[(a)]
+\item Write $F_X$ and its generalized inverse, and check that $F_X^{-1}(U)$, $U \sim U[0,1]$, has the right distribution.
+\item Why can the ordinary inverse not be used here?
+\item Inversion is called the ``gold standard'' in the slides. Which property makes common random numbers and antithetic variates reliable with it?
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} $F_X$ is the step function $F_X(x) = 0$ for $x < 1$, $0.2$ on $[1,2)$, $0.7$ on $[2,3)$ and $1$ for $x \geq 3$. Its generalized inverse $F_X^{-1}(u) = \inf\lbrace x \mid F_X(x) \geq u \rbrace$ is
+\[
+F_X^{-1}(u) =
+\begin{cases}
+1 & 0 < u \leq 0.2, \\
+2 & 0.2 < u \leq 0.7, \\
+3 & 0.7 < u \leq 1 .
+\end{cases}
+\]
+Then $P[F_X^{-1}(U) = 1] = P[U \leq 0.2] = 0.2$, $P[F_X^{-1}(U) = 2] = P[0.2 < U \leq 0.7] = 0.5$ and $P[F_X^{-1}(U) = 3] = 0.3$: the masses are reproduced. The lengths of the three sub-intervals of $[0,1]$ {\it are} the probabilities, which is the whole mechanism.
+
+\textbf{(b)} $F_X$ is neither continuous nor injective: it jumps at $1$, $2$, $3$ and is constant in between. It has no inverse in the usual sense. The $\inf$ in the generalized inverse picks, among the $x$ with $F_X(x) \geq u$, the leftmost --- which is what makes the flat stretches harmless.
+
+\textbf{(c)} {\red Monotonicity}. $F_X^{-1}$ is non-decreasing, so a single uniform $U$ drives the output in a monotone way: reusing the same $U$ across two systems induces a correlation of known sign, which is what makes the variance of a difference shrink rather than grow. Two consequences, both in the slides: one uniform per variate, and synchronization preserved. Methods consuming a random number of uniforms --- acceptance--rejection, the ziggurat behind \texttt{randn()} --- lose both.
+\end{solution}
+
+\begin{exercise}
+(Deck~02.) In acceptance--rejection one takes $t \geq f$ with $\int t = a$, so that $r = t/a$ is a density, then repeats: draw $Y \sim r$ and $U \sim U[0,1]$ until $U \leq f(Y)/t(Y)$, and return $Y$.
+\begin{enumerate}[(a)]
+\item Compute the probability that one iteration is accepted.
+\item Deduce the expected number of iterations, and explain why the slides ask for $a$ close to $1$.
+\item Why does this method break common random numbers, even when the accepted value is correct?
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} Conditioning on $Y$ and using $U \perp Y$,
+\[
+P\left[ U \leq \frac{f(Y)}{t(Y)} \right]
+= \int r(y)\, \frac{f(y)}{t(y)}\, dy
+= \int \frac{t(y)}{a}\, \frac{f(y)}{t(y)}\, dy
+= \frac{1}{a} \int f(y)\, dy = \frac{1}{a},
+\]
+since $f$ is a density. The acceptance probability is $1/a$, and does not depend on the shape of $f$ --- only on the area wasted between $f$ and $t$.
+
+\textbf{(b)} Iterations are i.i.d.\ Bernoulli trials of success probability $1/a$, so their number is geometric with mean $a$. Each iteration consumes at least two uniforms (one for $Y$, one for $U$), hence about $2a$ per variate. This is why $t$ should hug $f$: $a$ is the cost multiplier, and $a = 1$ would mean $t = f$, the case where nothing is rejected.
+
+\textbf{(c)} The {\it number} of uniforms consumed is random. Two runs of a simulation compared under common random numbers then read the same stream at different offsets: after the first rejection, the two runs are no longer looking at the same draws, and the intended pairing is lost. The returned value is still correctly distributed --- rejection is exact --- but the synchronization on which the variance reduction depends is destroyed. This is the trade-off the slides set against inversion.
+\end{solution}
+
+\begin{exercise}
+(Deck~02.) Let $C$ be a bivariate copula, so that $H(x,y) = C(F_X(x), F_Y(y))$ is the joint cdf of $(X,Y)$.
+\begin{enumerate}[(a)]
+\item Show that the independence copula $C(u,v) = uv$ satisfies the Fréchet--Hoeffding bounds.
+\item The upper bound is attained by $C(u,v) = \min(u,v)$. Which dependence between $X$ and $Y$ does it describe?
+\item A tempting proof of the upper bound argues $P[A \cap B] \leq P[A]\,P[B] \leq \min(P[A], P[B])$. Give a counterexample to the first inequality, and state the correct argument.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} For $u, v \in [0,1]$, $uv \leq u$ and $uv \leq v$, so $uv \leq \min(u,v)$. For the lower bound, $(1-u)(1-v) \geq 0$ expands to $uv \geq u + v - 1$, and $uv \geq 0$; hence $uv \geq \max(u+v-1, 0)$.
+
+\textbf{(b)} It describes {\red comonotonicity}: $X$ and $Y$ are increasing functions of one another. Taking a single $U \sim U[0,1]$ and setting $X = F_X^{-1}(U)$, $Y = F_Y^{-1}(U)$ gives
+\[
+P[X \leq x,\ Y \leq y] = P\left[U \leq F_X(x),\ U \leq F_Y(y)\right] = \min\left(F_X(x), F_Y(y)\right).
+\]
+It is the strongest positive dependence compatible with the given margins --- and, incidentally, exactly what inversion driven by common random numbers produces.
+
+\textbf{(c)} The inequality $P[A \cap B] \leq P[A]P[B]$ is false in general; it holds with equality under independence and fails in the other direction under positive dependence. Take $X = Y$ uniform on $\lbrace 0, 1 \rbrace$, $A = \lbrace X \leq 0 \rbrace$, $B = \lbrace Y \leq 0 \rbrace$: then $A = B$, so
+\[
+P[A \cap B] = \tfrac12 \qquad \text{while} \qquad P[A]\,P[B] = \tfrac14 .
+\]
+
+The upper bound needs no independence, only monotonicity of the measure:
+\[
+\lbrace X \leq x \rbrace \cap \lbrace Y \leq y \rbrace \subseteq \lbrace X \leq x \rbrace
+\quad \text{and} \quad \subseteq \lbrace Y \leq y \rbrace,
+\]
+so $H(x,y) \leq F_X(x)$ and $H(x,y) \leq F_Y(y)$, hence $H(x,y) \leq \min(F_X(x), F_Y(y))$.
+\end{solution}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Monte Carlo approximation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
