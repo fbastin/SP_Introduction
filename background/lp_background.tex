@@ -253,8 +253,33 @@ The search for an optimum can therefore be restricted to the {\red finitely many
 	\[
 	f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda) f(y), \quad x, y \in \RR^n,\ \lambda \in [0,1].
 	\]
-	A maximum of linear functions is convex --- which is what will make the value function of a linear program convex.
+	These two notions --- convex set, convex function --- are really one, as the next slide shows.
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convexity through the epigraph}
+\small
+
+The {\red epigraph} of $f$ is the set of points lying above its graph,
+\[
+\operatorname{epi} f \overset{\mathrm{def}}{=} \lbrace (x,\mu) \in \RR^n \times \RR \,|\, \mu \geq f(x) \rbrace,
+\]
+and it turns one notion into the other:
+\[
+f \text{ convex} \quad \iff \quad \operatorname{epi} f \text{ convex}.
+\]
+
+\vspace{-2mm}
+
+Everything said about convex {\red sets} therefore applies to convex {\red functions}, read one dimension higher --- supporting hyperplanes in particular, which is how subgradients arise below.
+
+For a maximum of finitely many linear functions, $f(x) = \max_{i=1,\ldots,k} \lbrace (a^i)^Tx + \beta_i \rbrace$,
+\[
+\operatorname{epi} f = \bigcap_{i=1}^k \lbrace (x,\mu) \,|\, \mu \geq (a^i)^Tx + \beta_i \rbrace
+\]
+is an intersection of half-spaces, hence a polyhedron: {\red such an $f$ is convex and piecewise linear} --- the form the value function of a linear program will take.
 
 \end{frame}
 
@@ -708,11 +733,18 @@ and the set of them is the {\red subdifferential} $\partial f(b)$.
 
 \mbox{}
 
-For a differentiable $f$, $\partial f(b) = \lbrace \nabla f(b) \rbrace$; at a kink the subgradient is not unique.
+Geometrically, the graph of $b' \mapsto f(b) + g^T(b'-b)$ is a {\red supporting hyperplane} of $\operatorname{epi} f$ at $(b,f(b))$: it touches $f$ there and stays below it elsewhere. Subgradients are the epigraph reading of convexity, taken at one point.
 
-\mbox{}
+\vspace{1mm}
 
-Geometrically, the graph of $b' \mapsto f(b) + g^T(b'-b)$ is a {\red supporting hyperplane} of the {\red epigraph} $\operatorname{epi} f = \lbrace (b',\mu) \mid \mu \geq f(b') \rbrace$ at $(b,f(b))$: it touches $f$ there and stays below it elsewhere.
+\begin{itemize}
+	\item
+	$\partial f(b)$ is {\red convex and closed}: its definition is one linear inequality in $g$ per $b'$.
+	\item
+	It is {\red non-empty} at every $b$ in the relative interior of $\operatorname{dom} f$ --- there, a convex function never lacks a supporting hyperplane. A cut can thus be generated at {\red every} iterate.
+	\item
+	For a differentiable $f$, $\partial f(b) = \lbrace \nabla f(b) \rbrace$; at a kink the subgradient is not unique.
+\end{itemize}
 
 \end{frame}
 
@@ -767,6 +799,27 @@ Geometrically, the graph of $b' \mapsto f(b) + g^T(b'-b)$ is a {\red supporting 
 \vspace{-2mm}
 
 {\footnotesize One linear piece per optimal dual vertex. At a kink two bases are optimal and the subgradient is not unique --- the blue supporting line is one choice among many; elsewhere the slope is the unique optimal dual solution $\pi^*$. This is the function that recourse models differentiate, with $b = h(\xi) - T(\xi)x$.}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The subdifferential of the value function}
+
+That picture is exact. Let $I(b) = \lbrace i \,|\, (\pi^i)^Tb = z(b) \rbrace$ collect the dual vertices attaining the maximum at $b$. Then, for $b$ in the interior of $\operatorname{dom} z$,
+\[
+\partial z(b) = \operatorname{conv} \lbrace \pi^i \,|\, i \in I(b) \rbrace .
+\]
+
+\begin{itemize}
+	\item
+	$|I(b)| = 1$: $z$ is differentiable at $b$, and $\nabla z(b) = \pi^*$ is the unique optimal dual solution.
+	\item
+	$|I(b)| > 1$: $b$ is a kink, and $\partial z(b)$ is the polytope spanned by the optimal dual vertices --- the slope of the blue line opposite is one of its points.
+\end{itemize}
+
+\vspace{1mm}
+
+The extreme points of the dual polyhedron, met at the start of these reminders, are thus exactly the {\red generators of the subdifferential} of the value function: the polyhedral theory and the convex analysis are two readings of one object. A decomposition method that returns an optimal dual solution returns a vertex of $\partial z(b)$.
 
 \end{frame}
 

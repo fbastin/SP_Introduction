@@ -89,7 +89,7 @@ prerequisites should read `probability_background` first, then `lp_background`;
 | Deck | Source | Covers | Needed from |
 | :--- | :--- | :--- | :--- |
 | Probability | [`background/probability_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/probability_background.tex) | Probability space, support, quantiles, moments, Jensen, conditional expectation, LLN/CLT, confidence intervals | deck 01 |
-| Linear programming | [`background/lp_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/lp_background.tex) | Standard form, bases and vertices, duality, Farkas, the value function and its subgradients | deck 03 |
+| Linear programming | [`background/lp_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/lp_background.tex) | Standard form, bases and vertices, convexity and epigraphs, duality, Farkas, the value function and its subdifferential | deck 03 |
 | KKT | [`background/kkt_background.tex`](file:///home/bastin/slash/Git/SP_Introduction/background/kkt_background.tex) | Lagrangian, duality gap, KKT conditions, constraint qualifications | deck 05 |
 
 ### Exercise collection
