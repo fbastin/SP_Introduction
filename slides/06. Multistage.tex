@@ -273,7 +273,7 @@ Let $\omega_{it}$ be the random return; it can be seen as function of the scenar
 \sum_{i \in N} \omega_{it{\red s}}x_{i,t-1,{\red s}} & = \sum_{i \in
   N} x_{it{\red s}}, \quad \forall t \in \mathcal{T} \backslash 1,
 {\red \forall s \in S} \\
-\sum_{i \in N} \omega_{iT{\red s}}x_{iT} - y_{\red s} + w_{\red s} & = G,
+\sum_{i \in N} \omega_{iT{\red s}}x_{iT{\red s}} - y_{\red s} + w_{\red s} & = G,
 \quad {\red \forall s \in S}, \\
 x_{it{\red s}} & \geq 0, \quad \forall i \in N,\ t \in \mathcal{T},
 {\red \forall s \in S},\\
@@ -321,12 +321,12 @@ S,\ \forall s' \in S_s^t.
 
 Equivalently,
 \[
-\left( \sum_{s' \in S_s^t} p'_s \right) x_{its} = \sum_{s' \in S_s^t} p'_s x_{its'} \quad \forall\ i,t,s,
+\left( \sum_{s' \in S_s^t} p_{s'} \right) x_{its} = \sum_{s' \in S_s^t} p_{s'} x_{its'} \quad \forall\ i,t,s,
 \]
 or
 \begin{align*}
  x_{its}
-&= \frac{\sum_{s' \in S_s^t} p'_s x_{its'}}{\sum_{s' \in S_s^t} p'_s} \quad \forall\ i,t,s \\
+&= \frac{\sum_{s' \in S_s^t} p_{s'} x_{its'}}{\sum_{s' \in S_s^t} p_{s'}} \quad \forall\ i,t,s \\
 &= \EE[ x_{its'} | s' \in S_s^t ] \quad \forall\ i,t,s.
 \end{align*}
 

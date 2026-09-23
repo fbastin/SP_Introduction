@@ -76,7 +76,7 @@ Liens :
   - *The four values on one axis* (après « A chain of bounds ») : $\EV \leq \WS \leq \RP \leq \EEV$ sur un axe, accolades $\EVPI$ et $\VSS$, la première inégalité marquée comme conditionnelle, et un second axe avec les valeurs de l'exemple ($0$, $0$, $1$, $10/9$).
   - **Préambule** : ajout de `tikz` et des bibliothèques `arrows.meta`, `decorations.pathreplacing` (aucun autre paquetage ; cohérent avec les decks 06, 07, 08 passés à TikZ).
   - **Compilation** : `make slides`, 86 pages (77 + 9), 0 erreur, 0 `Overfull`, 0 `Underfull` ; le texte extrait de l'ancien PDF se retrouve intégralement dans le nouveau (aucune ligne perdue) ; PDF synchronisé dans `pdf/03. Two-stage stochastic programming.pdf`.
-- [ ] **TODO de l'auteur** (commentaire l.30 du source) : « manque la caractérisation de $K_2$ comme polyèdre. Voir Birge & Louveaux, chapitre 2 ».
+- [x] **TODO de l'auteur** (commentaire l.30 du source) : « manque la caractérisation de $K_2$ comme polyèdre ». Diapo « $K_2$ is a polyhedron » ajoutée après le théorème $K_2 = K_2^s = K_2^P$ : $\operatorname{pos} W$ étant un cône polyédral, il est l'intersection d'un nombre fini de demi-espaces $(\sigma^k)^Tz \le 0$ engendrés par son cône polaire, d'où $K_2(\xi)$ polyédral et, à support fini, $K_2 = \cap_s K_2(\xi_s)$ aussi. La diapo note que ces inégalités *sont* les coupes de faisabilité du chapitre suivant, que la méthode $L$-shaped découvre une à une, et qu'à support infini $K_2$ reste fermé convexe sans être nécessairement polyédral. Le commentaire TODO est retiré du source.
 
 ---
 
@@ -140,6 +140,24 @@ Liens :
     - Préambule nettoyé : suppression de `pstricks`, `pst-tree`, `auto-pst-pdf`, `ulem`, `epstopdf`, des quatre `\newtheorem` inutilisés et des macros mortes (`\bxi`, `\bepsilon`, `\bomega`, `\aff`, `\tim`, `\KK` dupliqué) ; ajout de `tikz` et `graphicx`.
   - **Nouveau contenu** : deux diapos d'illustration numérique (convergence des bornes, et coupes contre fonction de recours exacte) produites par le notebook `code/SDDP_from_scratch.ipynb` — figures `imgs/sddp_convergence.pdf` et `imgs/sddp_value_function.pdf` — et une diapo de références (Pereira et Pinto 1991, Shapiro 2011, Birge et Louveaux 2011 ch. 7, Dowson et Kapelevich 2021, Papavasiliou).
   - **Compilation** : vérifiée avec `pdflatex` via `make` (30 pages, 0 erreur, 0 `Overfull \vbox`, 0 `Overfull \hbox`), les dix figures TikZ contrôlées page à page, PDF synchronisé dans `pdf/07. SDDP.pdf`.
+
+---
+
+## Slides — `slides/08. Lagrangian.tex`
+
+- [x] **Révision complète effectuée** :
+  - **Précision mathématique** :
+    - **Signe des multiplicateurs de non-anticipativité** : les duaux construits sur ces contraintes étaient maximisés sur $\pi(\xi) \ge 0$. Or les contraintes de non-anticipativité sont des *égalités* ($x_s - \sum_k p_k x_k = 0$), dont les multiplicateurs sont de signe libre ; les restreindre ampute le dual et peut placer l'optimum hors d'atteinte. Corrigé aux trois endroits (le dual lui-même, l'initialisation $\pi^0$ de l'algorithme par scénarios, et la projection de l'étape 3, désormais supprimée). La *première* occurrence du deck garde $\pi \ge 0$ : elle porte sur les contraintes d'inégalité de seconde étape, où la condition de signe est correcte — conformément à la convention $\lambda \ge 0$ / $\mu$ libre de `kkt_background`.
+    - **Critère d'arrêt de la montée duale** : l'algorithme s'arrêtait « si le résidu $b_i^2 + g_i^2$ est nul pour tout $s$ ». Pour des contraintes d'inégalité, c'est suffisant mais **non nécessaire** : à l'optimum, une contrainte inactive conserve un résidu strictement négatif et un multiplicateur nul, de sorte que le test pouvait ne jamais se déclencher en un point pourtant optimal. Remplacé par faisabilité *et* complémentarité ($r_i^s \le 0$, $\pi_i^s r_i^s = 0$), et le résidu renommé $r$ pour ne plus porter le nom d'un multiplicateur.
+    - **Hypothèse d'unicité mal attribuée** : « the dual problem always has a unique solution » ; c'est l'unicité du *minimiseur du lagrangien* qui rend $\theta$ différentiable et fait du résidu un gradient plutôt qu'un simple sous-gradient. La même formulation fautive figurait sur la diapo « Properties - convergence », qui porte maintenant l'explication : $\theta$, infimum de fonctions affines de $\pi$, est concave mais non lisse en général.
+    - **Fermeture de $K_2$ non justifiée** : le corollaire « $K_2 = \lbrace x : \calQ(x) < \infty \rbrace$ est fermé et convexe » suivait celui sur la convexité de $\calQ$ comme s'il en découlait. Il n'en découle pas — le domaine d'une fonction convexe, même s.c.i., n'est pas fermé en général ($x \mapsto 1/x$ sur $(0,\infty)$). Note ajoutée sur ce qui le sauve ici : la structure séparable $b_i^2(x,\xi) + g_i^2(y,\xi) \le 0$ fait de chaque $K_2(\xi)$ un ensemble de sous-niveau d'une fonction convexe.
+    - **Collision d'indice** : $\hat{x}_s^{\nu+1} = \sum_{s=1}^S p_s x_s^{\nu+1}$ employait $s$ à la fois comme indice libre et comme indice de sommation ; corrigé en $\sum_{k=1}^S p_k x_k^{\nu+1}$, avec la remarque que la valeur ne dépend pas de $s$ — ce qui est précisément ce qui rend $\hat{x}^{\nu+1}$ non anticipatif.
+    - Coquilles mathématiques : $t_i^2 \to b_i^2$ et $\xi_S \to \xi_s$ dans le lagrangien augmenté ; $b_i^2(x,s) \to b_i^2(x,\xi_s)$ ; une parenthèse en trop dans le dual par scénarios et une parenthèse **jamais fermée** après $f_{t+1}$ (deux fois) ; `\max_\pi \theta(\pi) = \min_{x,y}(\ldots)` confondait la valeur optimale du dual avec la minimisation interne ; étape numérotée 2 là où le texte désignait l'étape 1 ; théorème de convergence de PHA reformulé en point-selle $(x^*, \pi^*)$.
+  - **Délimiteurs croisés (sous-problème PHA)** : `\left( \pi' \biggl( x - \hat{x} \right) \ldots \biggr)` entrecroisait les paires `\left`/`\right` et `\biggl`/`\biggr`. Chacune étant équilibrée de son côté, rien n'échouait à la compilation, mais le rendu donnait $\pi'(x - \hat{x} + \tfrac{\rho}{2}\|x-\hat{x}\|^2)$ au lieu de $\pi'(x - \hat{x}) + \tfrac{\rho}{2}\|x-\hat{x}\|^2$.
+  - **Notations** : `\bxi` $\to$ `\bsxi` (7, la macro locale faisait doublon avec `macros.tex`), `E_{\xi}` $\to$ `\EE_{\xi}` (2), `\mathcal{Q}` $\to$ `\calQ` (10), `\bf{0}` $\to$ `\bszero` ; exposants de scénario harmonisés en $(s)$ dans PHA ; la $\sigma$-algèbre notée $\mathcal{A}$ — en collision avec l'ensemble réalisable du deck 09 — renommée $\calF$.
+  - **Anglais** : « et » $\to$ « and » ; « designs » $\to$ « denotes » (calque de *désigne*) ; « $\rho$ **if** the penalty parameter » $\to$ « is ».
+  - **Préambule** : `inputenc` chargé deux fois ; cinq paquets jamais utilisés retirés (`epic`, `eepic`, `epstopdf`, `ulem`, `listings` avec son `\lstloadlanguages{C++}`, `mathtools`). `mathlist` est **conservé** — il fournit l'environnement `algo` des trois algorithmes — avec un commentaire le disant, une première tentative de retrait l'ayant cassé. `\texorpdfstring` sur la ligne d'auteur : 46 avertissements `hyperref` $\to$ 2 (les `\\` du titre, communs à tous les decks).
+  - **Compilation** : vérifiée avec `pdflatex` via `make` (35 pages, 0 erreur, 0 `Overfull \vbox`), PDF synchronisé dans `pdf/08. Lagrangian.pdf`.
 
 ---
 
@@ -278,7 +296,7 @@ Version générale de `two_stages.ipynb` : les contraintes gardent le sens sous 
   - **vendeur de journaux** avec deux lignes d'**égalité** ($s+v=x$, $s+u=\xi$) : $x^\star = 30$ et valeur $-145$, conformes au quantile critique $(p-c)/(p-r) = 0{,}7$ ;
   - crèmes glacées avec **bornes** $y_{ij} \le 3$ : l'optimum se déplace en $(3,4,3,2)$, valeur $1911/5 = 382{,}2$, et des itérés irréalisables apparaissent bien que la capacité totale suffise.
 - [ ] **Exécution non vérifiée** (pas de Julia disponible) : algorithme, formules de coupes, conventions de signe et les trois optima ci-dessus validés hors dépôt en arithmétique exacte ; la syntaxe JuMP reste à confirmer par une exécution.
-- [ ] Le tableau `code/` du `README.md` est obsolète (il ne liste ni `two_stages.ipynb`, ni `Farmer.ipynb`, ni ce notebook) — à rafraîchir.
+- [x] Le tableau `code/` du `README.md` est rafraîchi : les treize notebooks et scripts réellement présents y figurent, chacun rattaché au deck qu'il accompagne ; le `hello.jl` qui y était listé n'existe pas.
 
 ---
 
@@ -321,9 +339,16 @@ Vérifié : les 12 slides + 3 notes background compilent sans erreur (15 PDF ré
 ### Priorité 3 — Langue et typos (~120 issues secondaires)
 
 - [x] **Deck 12** — Diapo 25 entièrement en français (`~l.598-609`) + libellés du flowchart (`Liste d'événements…`, `oui`/`non`).
-- [ ] Gallicismes récurrents tous decks : `t.q.` → `s.t.`, `si` → `if`, `et` → `and`, `plans` → `planes`, `module` → `modulus`, `Alors`, `journaux`, `Exercice`, `planification`, etc.
-- [ ] Typos mathématiques secondaires : index et dimensions (deck 03 `y_{1s}`→`y_{2s}` : ~~fait~~, deck 06 `x_{iT}`/`p'_s`, deck 08 `t_i²`→`b_i²`, deck 12 allocation de Neyman), `x_{x+1}` ×7 (deck 11), etc.
-- [ ] Syntaxe LaTeX : délimiteurs appariés, parenthèses en trop, macros dupliquées (`inputenc`, `\bu`, `\KK`).
+- [x] Gallicismes récurrents tous decks — **plus aucune occurrence** de `t.q.`, `si`, `plans`, `module`, `Alors`, `journaux`, `Exercice`, `planification` ; le dernier « et » français (deck 08) est corrigé. Les quatre `et` restants sont des « et al. » de bibliographie et une ligne commentée.
+- [x] Typos mathématiques secondaires :
+  - deck 03 `y_{1s}`→`y_{2s}` ;
+  - deck 06 — `x_{iT}` n'avait pas reçu l'indice de scénario dans la contrainte de dernière étape, alors que `ω`, `y` et `w` l'avaient ; et `\sum_{s' \in S_s^t} p'_s` portait la prime sur `p` au lieu de l'indice (la somme ne dépendait donc pas de `s'`, et l'identité de non-anticipativité était fausse) → `p_{s'}`, 4 occurrences ;
+  - deck 08 `t_i²`→`b_i²` (voir la section du deck ci-dessus) ;
+  - deck 12 allocation de Neyman — `σ_k q_k / Σ_k σ_k q_k` employait `k` libre au numérateur et lié au dénominateur → `σ_t q_t` ;
+  - deck 11 `x_{x+1}` : plus aucune occurrence.
+- [x] Syntaxe LaTeX : délimiteurs appariés et parenthèses en trop corrigés (deck 08, dont une paire `\left`/`\biggl` entrecroisée qui compilait mais changeait le sens) ; `inputenc` dédoublonné dans les decks 08 et 10. Les `\def\cA`/`\cB`/`\cC` du deck 06 **ne sont pas** des doublons : ce sont les deux branches d'un `\ifnum`. Aucun `\KK` ni `\bu` dupliqué ne subsiste.
+
+**P3 terminé.**
 
 > Note : l'item « macros `\red`/`\blue` manquantes » de l'audit est **réfuté** — `pstricks` les définit ; aucune action requise.
 

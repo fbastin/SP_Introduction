@@ -42,12 +42,22 @@ SP_Introduction/
 │   ├── eclbkbox.sty               # Breakable box environment style
 │   └── mathlist.sty               # Custom list environment for math slides
 ├── imgs/                          # Figure, diagram, and plot assets (EPS, PNG, PDF, JPG)
-└── code/                          # Associated code, notebooks, and scripts
-    ├── chance constrained toy example.ipynb  # Jupyter notebook for chance-constrained LP
-    ├── SDDP_from_scratch.ipynb               # Step-by-step SDDP implementation (lecture 07)
-    ├── SDDP_hydro.ipynb                      # Hydro-thermal examples with SDDP.jl
-    ├── cp.plot                               # Gnuplot script
-    └── hello.jl                              # Julia sample script
+└── code/                          # Associated notebooks and scripts
+    ├── random.ipynb                          # Generators, LFSR, ziggurat (deck 02)
+    ├── lfsr.jl, lfsr_test.jl                 # LFSR in Julia, with its tests (deck 02)
+    ├── Farmer.ipynb                          # The farmer problem (decks 01, 03)
+    ├── newsvendor.ipynb                      # The newsvendor problem (decks 01, 03)
+    ├── two_stages.ipynb                      # Two-stage models (deck 03)
+    ├── lshaped_general.ipynb                 # The L-shaped method (deck 04)
+    ├── chance constrained toy example.ipynb  # Chance-constrained LP (deck 05)
+    ├── portfolio-chanceconstrainedprogramming.ipynb  # Chance-constrained portfolio (deck 05)
+    ├── portfolio_stochastic_programming.ipynb # Portfolio as a stochastic program
+    ├── SDDP_from_scratch.ipynb               # SDDP step by step (deck 07)
+    ├── SDDP_hydro.ipynb                      # Hydro-thermal examples with SDDP.jl (deck 07)
+    ├── simulation_callcenter.ipynb           # Call-centre simulation (deck 12)
+    ├── simulation_portfolio.ipynb            # Portfolio simulation (decks 10, 12)
+    ├── StochasticPrograms/                   # Julia project: Farmer and L-shaped examples
+    └── cp.plot                               # Gnuplot script
 ```
 
 ---
