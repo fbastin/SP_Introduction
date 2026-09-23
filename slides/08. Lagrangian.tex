@@ -5,9 +5,7 @@
 \usepackage{xcolor}
 \setbeamertemplate{footline}[frame number]
 
-\usepackage{../sty/mathlist}
-
-\usepackage[utf8]{inputenc}
+\usepackage{../sty/mathlist}   % provides the `algo' environment used below
 \usepackage{amsmath,amssymb}
 
 \newtheorem{defi}{Definition}
@@ -15,29 +13,15 @@
 \newtheorem{coro}{Corollary}
 \newtheorem{lem}{Lemma}
 
-\usepackage{epic,eepic}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 
-\usepackage{epstopdf}
-
 \usepackage{times}
-
-\usepackage{ulem}
-
-\usepackage{listings}
-%\topmargin=-0.6in
-\lstloadlanguages{C++}
-\lstset{language=C++}
-%%}
-
-\usepackage{mathtools}
 
 \setbeamercovered{dynamic}
 
 \input{../sty/macros}
 
-\def\bxi{\boldsymbol\xi}
 \def\aff{\operatorname{aff}}
 \def\cD{\mathcal{D}}
 \def\cS{\mathcal{S}}
@@ -78,7 +62,7 @@
 
 \title[Stochastic Lagrangian]{Stochastic programming\\Lagrangian methods}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{bastin@iro.umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\author[Fabian Bastin]{Fabian Bastin \\ \texorpdfstring{\url{bastin@iro.umontreal.ca}}{bastin@iro.umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 
 \date{}
 
@@ -97,16 +81,16 @@
 
 We consider the general {\blue two-stage nonlinear program}
 \begin{align*}
-\inf z\ &= f^1(x) + \mathcal{Q}(x) \\
+\inf z\ &= f^1(x) + \calQ(x) \\
 \mbox{s.t. } & g_i^1(x) \leq 0,\ i = 1,\ldots,m_1,
 \end{align*}
-where $\mathcal{Q}(x) = E_{\bxi}[Q(x,\bxi)]$, and
+where $\calQ(x) = \EE_{\bsxi}[Q(x,\bsxi)]$, and
 \begin{align*}
 Q(x,\xi) = \inf\ & f^2(y(\xi),\xi) \\
 \mbox{s.t. } & b_i^2(x,\xi) + g_i^2(y(\xi), \xi) \leq 0,\ i = 1,\ldots,m_2.
 \end{align*}
 
-We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdot,\xi)$ are continuous in the first argument for any given $\xi$, and measurable in $\xi$ for any fixed first argument. $\xi$ has finite second-order moments.
+We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ and $g_i^2(\cdot,\xi)$ are continuous in the first argument for any given $\xi$, and measurable in $\xi$ for any fixed first argument. $\bsxi$ has finite second-order moments.
 
 \end{frame}
 
@@ -115,7 +99,7 @@ We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdo
 
 %Consider the stochastic problem under the form
 %\begin{align*}
-%\inf\ & z = f^1(x) + E_{\bxi}[f^2(y(\xi),\xi)]\\
+%\inf\ & z = f^1(x) + \EE_{\bsxi}[f^2(y(\xi),\xi)]\\
 %\text{s.t. }& g_i^1(x) \leq 0,\ i=1,\ldots{},m_1,\\
 %& b_i^2(x,\xi)+g_i^2(y(\xi),\xi) \leq 0, i=1,\ldots{},m_2\ a.s,
 %\end{align*}
@@ -131,7 +115,7 @@ We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdo
 		K_1 &= \lbrace x \,|\, g_i^1(x) \leq 0,\ i = 1,\ldots,m_1 \rbrace,\\
 		K_2(\xi) &= \lbrace x \,|\, \exists y(\xi) \mbox{ s.t. } b_i^2(x,\xi) +
 		g_i^2(y(\xi),\xi) \leq 0,\ i = 1,\ldots,m_2 \rbrace,\\
-		K_2 &= \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace.
+		K_2 &= \lbrace x \,|\, \calQ(x) < \infty \rbrace.
 	\end{align*}
 	
 	{\blue Assumptions}.
@@ -140,7 +124,7 @@ We assume that all functions $f^2(\cdot,\xi)$, $b_i^2(\cdot,\xi)$ et $g_i^2(\cdo
 		The function $f^1$ is convex on $\RR^{n_1}$, $g_i^1$ is convex on $\RR^{n_1}$ ($i =
 		1,\ldots,m_1$), $f^2(\cdot,\xi)$ is convex on $\RR^{n_2}$ for all $\xi \in \Xi$, $g_i^2(\cdot,\xi)$ is convex on $\RR^{n_2}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$, and $b_i^2(\cdot, \xi)$ is convex on $\RR^{n_1}$ ($i = 1,\ldots,m_2$), for all $\xi \in \Xi$.
 		\item \mbox{\red Slater condition}
-		If $\mathcal{Q}(x) < \infty$, for almost every (a.e.) $\xi \in \Xi$, $\exists$ some $y(\xi)$ s.t. $b_i^2(x, \xi) + g_i^2(y(\xi), \xi) < 0$ ($i = 1,\ldots,m_2)$.
+		If $\calQ(x) < \infty$, for almost every (a.e.) $\xi \in \Xi$, $\exists$ some $y(\xi)$ s.t. $b_i^2(x, \xi) + g_i^2(y(\xi), \xi) < 0$ ($i = 1,\ldots,m_2)$.
 	\end{enumerate}
 	
 \end{frame}
@@ -205,15 +189,16 @@ $$
 \frametitle{Convexity (cont'd)}
 
 \begin{corollary}
-The expected recourse function $\mathcal{Q}(x)$ is a convex function in $x$.
+The expected recourse function $\calQ(x)$ is a convex function in $x$.
 \end{corollary}
 
 \begin{corollary}
-The feasible set $K_2 = \lbrace x \,|\, \mathcal{Q}(x) < \infty \rbrace$ is closed and convex.
+The feasible set $K_2 = \lbrace x \,|\, \calQ(x) < \infty \rbrace$ is convex, and closed under the assumptions of Birge and Louveaux, Section~3.4.
 \end{corollary}
+{\footnotesize Convexity alone does not give closedness: the domain of a convex --- even lower semi-continuous --- function need not be closed, as $x \mapsto 1/x$ on $(0,\infty)$ shows. What rescues it here is the separable structure $b_i^2(x,\xi) + g_i^2(y,\xi) \leq 0$, which makes each $K_2(\xi)$ a sublevel set of a convex function.}
 
 \begin{corollary}
-If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $\mathcal{Q}$ is a lower semi-continuous function.
+If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $\calQ$ is a lower semi-continuous function.
 \end{corollary}
 
 \end{frame}
@@ -234,14 +219,14 @@ If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $\mathcal{Q}$
 \begin{theorem}
 Assume that the Slater condition is satisfied:
 $$
- \exists\, x \text{ s.t. } x \in ri(\mbox{dom}(f^1(x)), x \in ri(\mbox{dom}(\mathcal{Q}(x))) \text{ and } g_i^1(x) < 0, i = 1,\ldots,m_1.
+ \exists\, x \text{ s.t. } x \in ri(\mbox{dom}(f^1(x)), x \in ri(\mbox{dom}(\calQ(x))) \text{ and } g_i^1(x) < 0, i = 1,\ldots,m_1.
 $$
 $x^*$ is optimal iff there exists $\lambda^*$ such that $(x^*, \lambda^*)$ satisfies the KKT conditions for the two-stage stochastic program, i.e.
 \begin{align*}
 \bullet\ & x^* \in K_1, \\
 \bullet\ & \lambda^* \geq 0, \\ 
 \bullet\ & \lambda_i^*g_i^1(x^*) = 0, i = 1,\ldots,m, \\
-\bullet\ & 0 \in \partial f^1(x^*) + \partial \mathcal{Q}(x^*) +
+\bullet\ & 0 \in \partial f^1(x^*) + \partial \calQ(x^*) +
  \sum_{i=1}^{m_1}\lambda_i^* \partial g_i^1(x^*).
 \end{align*}
 \end{theorem}
@@ -280,7 +265,7 @@ Nonlinear problem.
 \item
 We aim to build a search direction and compute a step along this direction to reduce the objective.
 \item
-Problem: classical nonlinear methods assume that the (sub-)gradients of $\mathcal{Q}$ are available and cheap to obtain.
+Problem: classical nonlinear methods assume that the (sub-)gradients of $\calQ$ are available and cheap to obtain.
 Not the case here.
 \item
 Link the first and second stages in order to avoid optimization subproblems when building search directions.
@@ -324,7 +309,7 @@ there exists a finite optimal value,
 \item
 the Slater constraints qualification condition holds,
 \item
-the support of $\bxi$ is finite.
+the support of $\bsxi$ is finite.
 \end{itemize}
 
 Then $z \geq w$ for all $x, y_1,\ldots{},y_S$ feasible in the primal formulation and $\pi_1,\ldots{},\pi_S$ feasible in the dual formulation (weak duality).
@@ -342,8 +327,9 @@ We thus assume from now that {\red $\Xi$ is finite}, and we will describe some p
 
 \begin{frame}
 \frametitle{Basic Lagrangian dual ascent method}
+\small
 
-Assumption: the dual problem always has a unique solution.
+Assumption: the inner problem $\inf_{x,y} L$ has a {\red unique} minimizer.
 
 \begin{algo}{Lagrangian dual ascent method}
 \begin{description}
@@ -353,13 +339,13 @@ Given $\pi = \pi^{\nu}$ in the dual problem, consider the solution
 $(x^{\nu}, y_1^{\nu},\ldots{},y_S^{\nu})$.
 For $s = 1, \ldots{}, S$, define
 $$
-\hat{\pi}_i^s = b_i^2(x^{\nu},s)+g_i^2(y_s^{\nu},s).
+r_i^s = b_i^2(x^{\nu},\xi_s)+g_i^2(y_s^{\nu},\xi_s),
 $$
-If $\hat{\pi}^s = 0$ for all $s$, stop.
+the residual of the second-stage constraints. Stop when $r_i^s \leq 0$ and $\pi_i^{\nu,s} r_i^s = 0$ for every $i$, $s$: feasibility and complementarity.
 \item[Step 2.]
 Choose a step $\alpha^{\nu} \geq 0$ and set
 $
-\pi^{\nu+1,s} = \max\{\pi^{\nu,s} + \alpha^{\nu}\hat{\pi}, 0\}.
+\pi^{\nu+1,s} = \max\{\pi^{\nu,s} + \alpha^{\nu}r^s, 0\}.
 $
 Set $\nu := \nu+1$ and check convergence. If we have not yet converged, return to Step 1.
 \end{description}
@@ -369,11 +355,14 @@ Set $\nu := \nu+1$ and check convergence. If we have not yet converged, return t
 
 \begin{frame}
 \frametitle{Properties - convergence}
+\small
 
 \begin{itemize}
 \item
-Various strategies can be used to compute the step $\alpha^\nu$. Assume we compute the step to maximize $\theta(\pi^{\nu}+\alpha\hat{\pi})$ on $\alpha \geq 0$.
-Under the assumption of uniqueness of dual solution, we can show that this algorithm always produces an {\blue ascent direction} in $\theta$.
+Various strategies can be used to compute the step $\alpha^\nu$. Assume we compute the step to maximize $\theta(\pi^{\nu}+\alpha r)$ on $\alpha \geq 0$.
+The uniqueness of the inner minimizer is what makes $\theta$ {\red differentiable}: an infimum of affine functions of $\pi$, it is concave but in general non-smooth, and the residual $r$ is then only a subgradient. Under uniqueness it is the gradient, and the algorithm always produces an {\blue ascent direction} in $\theta$.
+\item
+Stopping on complementarity rather than on $r = 0$ matters for the same reason: at the optimum the inactive constraints keep a strictly negative residual.
 \item
 Either the algorithm converges to an optimal solution, or, assuming a bounded set of optimal solutions, it produces an infinite sequence where all limit points are optimal.
 \item
@@ -399,8 +388,7 @@ x_{t+1}(\xi)) \right], \\
 \mbox{s.t. } & x_t(\xi) \in X_t(\xi) \mbox{ a.s.},
 \end{align*}
 where $x_t$ is the decision at stage $t$, and $x^t$ is the decisions history at stage $t$, i.e. $x^t = \lbrace x_1,\ldots, x_t \rbrace$.
-$\mathcal{N}$ designs the closed linear subspace of nonanticipative processes.
-Denote $\mathcal{A}$ the $\sigma$-field of all the events (i.e. the collection of events subsets, with the probability measure associated to $\bxi$).
+$\mathcal{N}$ denotes the closed linear subspace of nonanticipative processes, and $\calF$ the $\sigma$-field carrying the events, with the probability measure associated to $\bsxi$.
 
 \end{frame}
 
@@ -457,12 +445,12 @@ S,\ \forall s' \in S_s^t.
 
 Consider the maximization of the dual built on the nonanticipativity constraints:
 \[
-\max_{\pi(\xi) \geq 0} w = \theta(\pi),
+\max_{\pi(\xi)} w = \theta(\pi),
 \]
 where
 \begin{align*}
 \theta(\pi) = \inf_{x \in \mathcal{X}} z = & 
-\EE\left[\sum_{t = 0}^T f_{t+1} (\bsxi, x^t(\xi), x_{t+1}(\bsxi) \right] \\
+\EE\left[\sum_{t = 0}^T f_{t+1}\left(\bsxi, x^t(\bsxi), x_{t+1}(\bsxi)\right) \right] \\
 & + \EE\left[\sum_{t = 0}^T \pi^t(\bsxi)(I-\Pi_t)x^t(\bsxi) \right],
 \end{align*}
 where $\pi^t$ corresponds to the components of $\pi$ associated to the $t$ first periods.
@@ -482,8 +470,8 @@ The primal problem becomes (omitting all the constraints except the nonanticipat
 \end{align*}
 The dual problem can now be written as
 \begin{align*}
-\max_{\pi} \theta(\pi) = \min_{x,y} \sum_{s=1}^S p_s\Biggl(& f^1(x_s)+f^2(x_s,
-y_s))\\
+\theta(\pi) = \min_{x,y} \sum_{s=1}^S p_s\Biggl(& f^1(x_s)+f^2(x_s,
+y_s)\\
 & + \pi_s\left( x_s - \sum_{k=1}^S p_kx_k \right) \Biggr).
 \end{align*}
 }
@@ -495,7 +483,7 @@ y_s))\\
 
 \begin{algo}{Lagrangian dual ascent method}
 \begin{description}
-\item[Step 0.] Let $\pi^0 \geq 0$, $\nu = 0$.
+\item[Step 0.] Let $\pi^0$ be arbitrary --- {\red unrestricted in sign}, the nonanticipativity constraints being equalities --- and $\nu = 0$.
 \item[Step 1.]
 Given $\pi = \pi^{\nu}$ in the dual problem, compute the solution
 $(x^{\nu}_1, \ldots, x^{\nu}_S, y_1^{\nu},\ldots{},y_S^{\nu})$.
@@ -504,8 +492,7 @@ If $x_s - \sum_{k = 1}^S p_kx_k = 0$, $s = 1,\ldots,S$, stop: the solution is op
 
 Otherwise, define $\hat{\pi}_s = x_s - \sum_{k=1}^S p_kx_k$, and go to Step 3.
 \item[Step 3.]
-Let $\alpha^\nu$ maximize $\theta(\pi^{\nu}+\alpha\hat{\pi})$ on
-$\pi^{\nu}+\alpha\hat{\pi} \geq 0,\ \alpha \geq 0$.
+Let $\alpha^\nu$ maximize $\theta(\pi^{\nu}+\alpha\hat{\pi})$ on $\alpha \geq 0$; no projection is needed here, $\pi$ being unrestricted.
 Set $\pi^{\nu+1} = \pi^{\nu} + \alpha^{\nu}\hat{\pi}$, $\nu = \nu+1$. Return to Step 1.
 \end{description}
 \end{algo}
@@ -554,12 +541,12 @@ We again develop the ideas in the two-stages context, while the approach can be 
 
 Recall that we aim to solve
 \[
-\max_{\pi(\xi) \geq 0} w = \theta(\pi),
+\max_{\pi(\xi)} w = \theta(\pi),
 \]
 where
 \begin{align*}
 \theta(\pi) = \inf_{x \in \mathcal{X}} z = & 
-\EE\left[\sum_{t = 0}^T f_{t+1} (\xi, x^t(\xi), x_{t+1}(\xi) \right] \\
+\EE\left[\sum_{t = 0}^T f_{t+1}\left(\bsxi, x^t(\bsxi), x_{t+1}(\bsxi)\right) \right] \\
 & + \EE\left[\sum_{t = 0}^T \pi^t(\xi)(I-\Pi_t)x^t(\xi) \right],
 \end{align*}
 
@@ -577,10 +564,10 @@ Penalizing the nonanticipativity constraints, we obtain the following program, w
   p_sf^2(y_s,\xi_s) + \pi_s^T(x_s-\hat{x}) + \frac{\rho}{2} \|
 x_s-\hat{x} \|^2\right) \\
 & \text{s.t. } g_i^1(\hat{x}) \leq 0,\ i=1,\ldots{},m_1,\\
-& \phantom{\text{s.t. }} t_i^2(x_s,\xi_s)+g_i^2(y_s,\xi_S) \leq 0,\ 
+& \phantom{\text{s.t. }} b_i^2(x_s,\xi_s)+g_i^2(y_s,\xi_s) \leq 0,\ 
 i=1,\ldots{},m_2,\ s=1,\ldots{},S.
 \end{align*}
-$\rho$ if the augmented Lagrangian penalty parameter, and $\pi_s$ is the vector of dual variables associated to the nonanticipativity constraints of the scenario  $s$.
+$\rho > 0$ is the augmented Lagrangian penalty parameter, and $\pi_s$ is the vector of dual variables associated to the nonanticipativity constraints of the scenario  $s$.
 
 \mbox{}
 
@@ -655,8 +642,9 @@ Let $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$ be a solution of the previous Lagran
 \hat{x}^{\nu+1} = \left( \hat{x}_1^{\nu+1}, \ldots{}, \hat{x}_S^{\nu+1}\right)^T,
 \]
 \[
-\mbox{where } \hat{x}_s^{\nu+1} = \sum_{s=1}^S p_s x_s^{\nu+1},\ s=1,\ldots,S.
+\mbox{where } \hat{x}_s^{\nu+1} = \sum_{k=1}^S p_k x_k^{\nu+1},\ s=1,\ldots,S
 \]
+--- the same value for every $s$, which is exactly what makes $\hat{x}^{\nu+1}$ nonanticipative.
 \end{description}
 
 \end{frame}
@@ -677,8 +665,8 @@ Otherwise, set $\nu = \nu+1$ and return to Step 1.
 
 \begin{itemize}
 \item
-Step 2 simply consists of taking the expected value of $x^{\nu+1}$
-as $\hat{x}^{\nu+1}$.
+Step 1 simply consists of taking the expected value of $x^{\nu+1}$
+as $\hat{x}^{\nu+1}$; Step 2 is the multiplier update.
 \item
 The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point rather than a dual ascent strategy.
 \item
@@ -761,18 +749,19 @@ In order to achieve full separability, fix $\hat{x}_t^{(s)}$ and repeatedly solv
 
 \begin{frame}
 \frametitle{Progressive hedging algorithm (PHA)}
+\small
 
 \begin{description}
 	\item[Step 0.]
-	Set $\hat{x}^{(s) ,0} = \left(\hat{x}_1^{(s),0}, \dots, \hat{x}_T^{(s),0}\right)$ and $k = 0$. Choose $\pi^{(s),0} = \bf{0}$, $\rho^0 > 0$.
+	Set $\hat{x}^{(s) ,0} = \left(\hat{x}_1^{(s),0}, \dots, \hat{x}_T^{(s),0}\right)$ and $k = 0$. Choose $\pi^{(s),0} = \bszero$, $\rho^0 > 0$.
 	\item[Step 1.]
-	Compute $x^{(s),k+1} =  (x_1^{s,k+1}, \dots, x_T^{s,k+1})$, $s = 1,\ldots,S$, by solving each scenario subproblem
+	Compute $x^{(s),k+1} =  \left(x_1^{(s),k+1}, \dots, x_T^{(s),k+1}\right)$, $s = 1,\ldots,S$, by solving each scenario subproblem
 	$$
 	%\begin{equation}
 	%\label{PHA-Scen-subprob}
 	\begin{aligned}
-	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \left( {\pi_t^{(s)}}' \biggl(x_t^{(s)} - \hat{x}_t^{(s),k}\right) \\
-	& + \frac{\rho^k}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s),k} \right\|^2 \biggr)\\
+	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^T \biggl( {\pi_t^{(s)}}^T \left(x_t^{(s)} - \hat{x}_t^{(s),k}\right) \\
+	& \qquad + \frac{\rho^k}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s),k} \right\|^2 \biggr)\\
 	\text{s.t.} & \; x^{(s)}  \in \mathcal{X}^{(s)}.
 	\end{aligned}
 	$$
@@ -808,8 +797,8 @@ In order to achieve full separability, fix $\hat{x}_t^{(s)}$ and repeatedly solv
 
 \begin{theorem}
 Assume that the initial nonlinear stochastic program has only convex functions and a finite optimal value, as well as a strictly feasible point.
-Assume moreover that the support of $\bxi$ is finite.
-The progressive hedging algorithm converges to an optimal solution $x^*, \pi^*$.
+Assume moreover that the support of $\bsxi$ is finite.
+The progressive hedging algorithm converges to a saddle point $(x^*, \pi^*)$, $x^*$ being optimal for the original program.
 \end{theorem}
 
 \begin{itemize}
