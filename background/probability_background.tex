@@ -172,24 +172,55 @@ Writing $dF$ rather than $f(x)dx$ covers both cases at once, and is the notation
 \end{frame}
 
 \begin{frame}
-\frametitle{Distribution function and quantiles}
+\frametitle{The distribution function}
 \small
 
-From its definition, $F_{\bsxi}$ takes values in $[0,1]$, is non-decreasing, and tends to $1$ at $+\infty$ and to $0$ at $-\infty$.
+For a random variable, $F_{\bsxi}$ takes values in $[0,1]$, is non-decreasing, and tends to $1$ at $+\infty$ and to $0$ at $-\infty$.
+It is moreover {\red right-continuous}, with left limits:
+\[
+\lim_{y \downarrow x} F_{\bsxi}(y) = P[\bsxi \leq x] = F_{\bsxi}(x),
+\qquad
+F_{\bsxi}(x^-) \overset{\mathrm{def}}{=} \lim_{y \uparrow x} F_{\bsxi}(y) = P[\bsxi < x],
+\]
+since the events $\lbrace \bsxi \leq y \rbrace$ decrease to $\lbrace \bsxi \leq x \rbrace$ in the first case, and increase to $\lbrace \bsxi < x \rbrace$ in the second.
+The {\red jump} of $F_{\bsxi}$ at $x$ is therefore the mass at $x$,
+\[
+F_{\bsxi}(x) - F_{\bsxi}(x^-) = P[\bsxi = x],
+\]
+and $F_{\bsxi}$ is continuous {\red exactly when $\bsxi$ has no atom}.
+\begin{itemize}
+\item
+{\blue Discrete}: $F_{\bsxi}(x) = \sum_{k \,:\, \xi_k \leq x} p_k$ increases only by jumps, of height $p_k$ at each $\xi_k$. With finitely many scenarios, it is a {\red step function}: right-continuous, but not continuous.
+\item
+{\blue With a density}: there is no atom, so $F_{\bsxi}$ is continuous. The converse fails --- a continuous cdf need not have a density --- but the course never meets that case.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Quantiles}
+\small
 
 The {\red quantile function} is the {\red generalized inverse}
 \[
 F_{\bsxi}^{-1}(p) = \inf \lbrace x \in \RR \,|\, F_{\bsxi}(x) \geq p \rbrace, \quad p \in (0,1),
 \]
-which is defined whether or not $F_{\bsxi}$ is invertible --- in particular for discrete variables, where $F$ has jumps.
+defined whether or not $F_{\bsxi}$ is invertible --- in particular when $F_{\bsxi}$ has jumps.
 
-\mbox{}
+\smallskip
 
-{\blue Two uses in the course.} If $\bsxi$ is continuous, $F_{\bsxi}$ is continuous and invertible on $\Xi$, so for $u \in [0,1]$,
+{\blue Two uses in the course.}
+\begin{itemize}
+\item
+{\red Inversion sampling} (deck~02). For $u \in (0,1)$, $F_{\bsxi}^{-1}(u) \leq x \iff u \leq F_{\bsxi}(x)$, the infimum being attained by right-continuity, so $P[F_{\bsxi}^{-1}(\bsu) \leq x] = F_{\bsxi}(x)$ for $\bsu \sim U[0,1]$ --- {\red for every} $F_{\bsxi}$, discrete ones included.
+
+Conversely, if $\bsxi$ has no atom, $F_{\bsxi}(\bsxi) \sim U[0,1]$: $F_{\bsxi}$ is continuous, so $F_{\bsxi}(F_{\bsxi}^{-1}(u)) = u$ (right-continuity gives $\geq$, left-continuity $\leq$). $F_{\bsxi}$ may still not be invertible, being constant across any gap of the support, but $\lbrace F_{\bsxi}(\bsxi) \leq u \rbrace$ and $\lbrace \bsxi \leq F_{\bsxi}^{-1}(u) \rbrace$ differ only on such a flat stretch, of probability zero:
 \[
-P[F_{\bsxi}(\bsxi) \leq u] = P\left[\bsxi \leq F_{\bsxi}^{-1}(u)\right] = F_{\bsxi}\left(F_{\bsxi}^{-1}(u)\right) = u,
+P[F_{\bsxi}(\bsxi) \leq u] = P\left[\bsxi \leq F_{\bsxi}^{-1}(u)\right] = F_{\bsxi}\left(F_{\bsxi}^{-1}(u)\right) = u, \qquad u \in (0,1).
 \]
-i.e. $F_{\bsxi}(\bsxi) \sim U[0,1]$. Read backwards, this is {\red inversion sampling} (deck~02); and a chance constraint $P[\cdot] \geq \alpha$ is a statement about a quantile (deck~05).
+\item
+A chance constraint $P[\cdot] \geq \alpha$ is a statement about a quantile (deck~05).
+\end{itemize}
 
 \end{frame}
 
@@ -260,31 +291,51 @@ It is {\red monotone}: $\bsxi \leq \bseta$ a.s. $\Rightarrow \EE[\bsxi] \leq \EE
 \end{frame}
 
 \begin{frame}
-\frametitle{Variance, covariance, and ``finite second-order moments''}
+\frametitle{Moments}
 \small
 
-\[
-\var[\bsxi] = \EE\left[(\bsxi - \EE[\bsxi])^2\right] = \EE[\bsxi^2] - \EE[\bsxi]^2,
-\qquad
-\cov[\bsxi, \bseta] = \EE\left[(\bsxi - \EE\bsxi)(\bseta - \EE\bseta)\right].
-\]
-For a random vector, the covariance matrix $\Sigma = \EE[(\bsxi-\EE\bsxi)(\bsxi-\EE\bsxi)^T]$ is symmetric positive semi-definite.
+For an integer $p \geq 1$, the {\red moment of order $p$} of a random variable $\bsxi$ is $\EE[\bsxi^p]$, and its {\red central moment} of order $p$ is $\EE\left[(\bsxi - \EE[\bsxi])^p\right]$: the mean is the first moment, the variance the second central moment.
+For any real $p > 0$, the {\red absolute moment} of order $p$ is $\EE[|\bsxi|^p]$.
 
 \mbox{}
 
-The hypothesis {\red ``$\bsxi$ has finite second-order moments''}, which appears eight times in deck~03 alone, means
-\[
-\EE\left[\|\bsxi\|^2\right] < \infty,
-\]
-equivalently: every component has a finite variance.
+$\bsxi$ has {\red finite moments of order $p$} when $\EE[|\bsxi|^p] < \infty$, which makes $\EE[\bsxi^p]$ well defined and finite; for $p = 1$, $\bsxi$ is said to be {\red integrable}.
+A random vector has finite moments of order $p$ when $\EE[\|\bsxi\|^p] < \infty$.
+For $p = 2$, as $\|\bsxi\|^2 = \sum_i \bsxi_i^2$, this asks every component to have a finite second moment: it is the hypothesis {\red ``$\bsxi$ has finite second-order moments''}, which appears eight times in deck~03 alone.
 
 \mbox{}
+
+{\blue Lower orders come for free.} If $0 < r \leq p$, then $|x|^r \leq 1 + |x|^p$ for every $x$ (bound $|x|^r$ by $1$ if $|x| \leq 1$, by $|x|^p$ otherwise), hence
+\[
+\EE\left[|\bsxi|^r\right] \leq 1 + \EE\left[|\bsxi|^p\right].
+\]
+In particular, finite second-order moments give $\EE[|\bsxi|] < \infty$: the mean exists and is finite.
+The converse fails: with $P[\bsxi = k] = c/k^3$, $k = 1, 2, \ldots$, the mean $c\sum_k 1/k^2$ is finite, but $\EE[\bsxi^2] = c\sum_k 1/k = +\infty$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Variance and covariance}
+\small
+
+The {\red variance} is the second central moment,
+\[
+\var[\bsxi] = \EE\left[(\bsxi - \EE[\bsxi])^2\right] = \EE[\bsxi^2] - \EE[\bsxi]^2.
+\]
+It presupposes a finite mean, which finite second-order moments guarantee (previous slide); expanding the square then gives the second form.
+Conversely, $\EE[\bsxi^2] = \var[\bsxi] + \EE[\bsxi]^2$: a random vector has finite second-order moments {\red if and only if} every component has a finite variance.
+
+\smallskip
+
+For two such variables, $\cov[\bsxi, \bseta] = \EE\left[(\bsxi - \EE[\bsxi])(\bseta - \EE[\bseta])\right]$ is finite too, by Cauchy--Schwarz below; the covariance matrix $\Sigma = \EE\left[(\bsxi-\EE[\bsxi])(\bsxi-\EE[\bsxi])^T\right]$ of a random vector is symmetric positive semi-definite.
+
+\smallskip
 
 {\blue Why the course needs exactly this.} By {\red Cauchy--Schwarz},
 \[
 \EE\left[\,|\bsu^T\bsv|\,\right] \leq \EE\left[\|\bsu\|\|\bsv\|\right] \leq \left(\EE\|\bsu\|^2\right)^{1/2}\left(\EE\|\bsv\|^2\right)^{1/2}.
 \]
-In a two-stage model the recourse cost is of the form $q(\bsxi)^Tz(\bsxi)$ with $q$ and $z = h - Tx$ affine in $\bsxi$. Finite second-order moments therefore make $\EE$ of that product finite --- which is precisely what makes $\calQ(x)$ finite, and what the simple-recourse proof of deck~03 invokes.
+In deck~03 the recourse cost is $q(\bsxi)^Tz(\bsxi)$, $z = h - Tx$, and $\bsxi$ gathers the random entries of $q$, $h$, $T$. Finite second-order moments therefore make $\EE$ of that product finite --- which is precisely what makes $\calQ(x)$ finite, and what the simple-recourse proof there invokes.
 
 \end{frame}
 
@@ -342,7 +393,7 @@ For $\varphi$ concave the inequality is reversed.
 
 \vspace{-1mm}
 
-{\footnotesize With $\bsxi$ taking two values, $\EE[\varphi(\bsxi)]$ sits on the chord and $\varphi(\EE[\bsxi])$ on the curve, below it. Deck~03 uses exactly this to obtain $\EV \leq \WS$: the value function of a linear program is convex in its right-hand side, so replacing $\bsxi$ by its mean can only look {\it too good}.}
+{\footnotesize With $\bsxi$ taking two values, $\EE[\varphi(\bsxi)]$ sits on the chord and $\varphi(\EE[\bsxi])$ on the curve, below it. Deck~03 obtains $\EV \leq \WS$ this way: the value function of a linear program is convex in its right-hand side, so replacing the latter by its mean can only look {\it too good} --- as does using $\EE[\bsxi]$, if $h$ is affine.}
 
 \end{frame}
 

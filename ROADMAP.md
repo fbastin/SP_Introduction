@@ -241,6 +241,20 @@ Liens :
 
 ---
 
+## Background — `background/probability_background.tex`
+
+- [x] **Quatre lacunes signalées par l'auteur, comblées** (24 $\to$ 26 pages) :
+  - **Continuité de la fonction de répartition** : les propriétés énumérées (valeurs dans $[0,1]$, croissance, limites) ne disaient rien de la continuité, si bien que rien ne distinguait la fonction en escalier d'une variable discrète de celle, continue, d'une variable à densité. Nouvelle diapo « The distribution function » : $F$ est continue à droite avec limites à gauche, $F(x^-) = P[\bsxi < x]$ (suites d'événements décroissante, resp. croissante), le saut en $x$ vaut la masse $P[\bsxi = x]$, et $F$ est continue exactement quand $\bsxi$ n'a pas d'atome ; cas discret ($F(x) = \sum_{\xi_k \le x} p_k$, fonction en escalier continue à droite mais pas continue) et cas à densité (continue ; la réciproque est fausse, une fonction de répartition continue pouvant n'avoir pas de densité). L'ancienne diapo « Distribution function and quantiles » devient « Quantiles ».
+  - **Crochets manquants** : dans la covariance et la matrice $\Sigma$, $\EE\bsxi$ et $\EE\bseta$ $\to$ $\EE[\bsxi]$ et $\EE[\bseta]$.
+  - **Moment d'ordre $p$ non défini** : nouvelle diapo « Moments » — moment $\EE[\bsxi^p]$ et moment centré d'ordre entier $p$, moment absolu $\EE[|\bsxi|^p]$ d'ordre réel $p > 0$, « moments finis d'ordre $p$ » ($\EE[|\bsxi|^p] < \infty$, ou $\EE[\|\bsxi\|^p] < \infty$ pour un vecteur), et le terme « intégrable » pour $p = 1$, qu'employait sans le définir l'énoncé de l'inégalité de Jensen. L'hypothèse « moments d'ordre deux finis » du deck 03 y est présentée comme le cas $p = 2$.
+  - **Moments d'ordre deux finis $\Rightarrow$ moyenne finie, non démontré** : alors que la variance présuppose une moyenne finie. Sur la diapo « Moments » : pour $0 < r \le p$, $|x|^r \le 1 + |x|^p$, d'où $\EE[|\bsxi|^r] \le 1 + \EE[|\bsxi|^p]$ ; la réciproque est fausse ($P[\bsxi = k] = c/k^3$ : moyenne finie, second moment infini). La diapo « Variance and covariance » (ex-« Variance, covariance, and finite second-order moments ») en tire que la variance est bien définie, et justifie l'équivalence « moments d'ordre deux finis $\iff$ variance finie de chaque composante » par $\EE[\bsxi^2] = \var[\bsxi] + \EE[\bsxi]^2$.
+  - **Compilation** : 0 erreur, aucun nouveau dépassement (seul reste l'`Overfull \hbox` de 3,9 pt, ligne 61, préexistant) ; PDF synchronisé dans `pdf/probability_background.pdf`.
+- [x] **Diapo « Quantiles » : « continue et inversible sur $\Xi$ » corrigé.** L'inversibilité sur $\Xi$ est fausse dès que le support est disconnexe ($F$ prend la même valeur aux deux bords d'un trou, comme sur la figure de la diapo suivante), et la première égalité $P[F(\bsxi) \le u] = P[\bsxi \le F^{-1}(u)]$ n'était justifiée que par elle. L'énoncé porte désormais sur la bonne hypothèse, l'absence d'atome : $F$ est alors continue, d'où $F(F^{-1}(u)) = u$ pour $u \in (0,1)$ (la continuité à droite donne $\ge$, celle à gauche $\le$) ; les événements $\lbrace F(\bsxi) \le u \rbrace$ et $\lbrace \bsxi \le F^{-1}(u) \rbrace$ ne diffèrent que sur un palier de $F$, de probabilité nulle, ce qui donne $F(\bsxi) \sim U[0,1]$. L'intervalle $u \in [0,1]$ devient $(0,1)$, domaine de $F^{-1}$.
+  - **Échantillonnage par inversion** : « lu à l'envers, c'est l'échantillonnage par inversion » laissait croire que l'inversion exige elle aussi la continuité. Elle n'exige rien : $F^{-1}(u) \le x \iff u \le F(x)$ (l'infimum est atteint par continuité à droite), donc $F^{-1}(\bsu)$ suit la loi de $\bsxi$ pour toute $F$, lois discrètes comprises. Les deux sens sont maintenant énoncés séparément, chacun sous sa propre hypothèse.
+  - **Compilation** : 0 erreur, aucun nouveau dépassement (texte resserré pour tenir sur la diapo) ; PDF synchronisé.
+
+---
+
 ## Notebook — `code/random.ipynb`
 
 - [x] **Révision complète effectuée** (corrections vérifiées en exécutant le notebook avec Julia 1.12) :
