@@ -501,8 +501,13 @@ T(\xi)x + Wy(\xi) &= h(\xi) \qquad \text{for a.e. } \xi \in \Xi, \\
 x & \in X, \\
 y(\xi) & \in Y \qquad \text{for a.e. } \xi \in \Xi,
 \end{align*}
-where $\bsxi$ is a random vector defined on the probability space 
+where $\bsxi$ is a random vector defined on the probability space
 $(\Omega, \mathcal{F}, P)$, and $\Xi$ is the support of $\bsxi$.
+
+\mbox{}
+
+Unless stated otherwise, $\bsxi$ {\red gathers the random entries} of $q$, $h$ and $T$, as in Birge and Louveaux.
+This loses no generality, and the hypotheses made on $\bsxi$ below --- moments, absolute continuity --- are then hypotheses on the data themselves.
 
 \end{frame}
 
@@ -1129,7 +1134,7 @@ $|Q(x,\xi)| \leq \|q(\xi)\| \, \|z(\xi)\|$.
 
 \mbox{}
 
-{\red This is where the finite second-order moments are used}: $z(\xi) = h(\xi)-T(\xi)x$ is affine in $\xi$, so $\EE[\|z(\bsxi)\|^2] < \infty$, and Cauchy--Schwarz gives
+{\red This is where the finite second-order moments are used}: $\bsxi$ gathers the random entries of $q$, $h$ and $T$ (the convention stated with the fixed-recourse problem), and $z(\xi) = h(\xi)-T(\xi)x$ is linear in $(h, T)$, so $\EE[\|q(\bsxi)\|^2]$ and $\EE[\|z(\bsxi)\|^2]$ are finite, and Cauchy--Schwarz gives
 $$
 \EE\left[ \|q(\bsxi)\| \, \|z(\bsxi)\| \right] \leq
 \left( \EE\left[\|q(\bsxi)\|^2\right] \right)^{1/2}
@@ -1754,19 +1759,45 @@ $\VSS$ measures what is gained by modelling the uncertainty explicitly, rather t
 
 \begin{frame}
 \frametitle{A chain of bounds}
+\small
 
 \begin{theo}
-If only the right-hand side $h(\bsxi)$ is random, $W$, $T$ and $q$ being fixed, and $h$ depends affinely on $\xi$, then $\EV \leq \WS$.
+Assume that $W$, $T$ and $q$ are fixed, and that only the right-hand side is random, {\red affine} in $\xi$: $h(\xi) = h_0 + H\xi$ for a fixed vector $h_0$ and a fixed matrix $H$ (e.g.\ $h(\xi) = \xi$).
+Then $\EV \leq \WS$.
 \end{theo}
 \begin{proof}
 Set $\psi(\xi) \overset{\mathrm{def}}{=} \min_{x \in K_1 \cap K_2(\xi)} z(x,\xi)$.
-As $W$, $T$ and $q$ are fixed, $\psi(\xi)$ is the optimal value of a linear program whose only varying data is the right-hand side, so it is convex in $h(\xi)$ and hence in $\xi$ (LP notes). Jensen's inequality (probability notes) then gives
+Minimizing over $x$ and $y$ together, $\psi(\xi) = \varphi(h(\xi))$, where
 \[
-\EV = \psi(\EE[\bsxi]) \leq \EE_{\bsxi}[\psi(\bsxi)] = \WS.
+\varphi(r) \overset{\mathrm{def}}{=} \min_{x \geq 0,\, y \geq 0} \lbrace c^Tx + q^Ty \,|\, Ax = b,\ Tx + Wy = r \rbrace
 \]
+is the value function of a single linear program in its right-hand side, hence convex (LP notes): this is where $W$, $T$ and $q$ must be fixed. Then
+\[
+\EV = \varphi\big(h(\EE[\bsxi])\big) \ {\red =}\ \varphi\big(\EE[h(\bsxi)]\big) \leq \EE_{\bsxi}\big[\varphi(h(\bsxi))\big] = \WS.
+\]
+The {\red equality} is where affinity is used, $h(\EE[\bsxi]) = h_0 + H\,\EE[\bsxi] = \EE[h(\bsxi)]$, and the inequality is Jensen's (probability notes), for the random vector $h(\bsxi)$.
 \end{proof}
-If $T$ is random, $\psi$ is no longer an optimal value with respect to the right-hand side only, and the argument does not apply.
-Collecting the results:
+\end{frame}
+
+\begin{frame}
+\frametitle{Neither assumption can be dropped}
+\small
+
+Take $c = 0$, $0 \leq x \leq 1$, $\bsxi = \pm 1$ with probability $1/2$ each, and a single second-stage constraint:
+\[
+Q(x,\xi) = \min_{y \geq 0} \lbrace y \,|\, y \geq h(\xi) - T(\xi)x \rbrace = \big(h(\xi) - T(\xi)x\big)^+.
+\]
+\begin{itemize}
+\item
+{\blue $h$ random, not affine}: $h(\xi) = 1 - \xi^2$, $T = 0$.
+Then $\psi(\xi) = (1-\xi^2)^+$, so $\WS = 0 < 1 = \psi(0) = \EV$.
+The red equality fails, $h(\EE[\bsxi]) = 1 \neq 0 = \EE[h(\bsxi)]$: the EV problem is built on the mean of $\bsxi$, not on the mean right-hand side.
+\item
+{\blue $T$ random}: $h = 1$, $T(\xi) = \xi$.
+Then $\psi(1) = \min_x (1-x)^+ = 0$ and $\psi(-1) = \min_x (1+x)^+ = 1$, so $\WS = 1/2 < 1 = \psi(0) = \EV$.
+Now $\xi$ multiplies $x$: $Q(x,\cdot)$ is still convex in $T$ for each fixed $x$, but the minimum over $x$ is not --- $\psi = 1$ on $[-1,0]$ and $1-\xi$ on $[0,1]$.
+\end{itemize}
+Collecting the results: $\WS \leq \RP \leq \EEV$ always holds, and when only $h(\bsxi)$ is random, affine in $\xi$,
 \[
 \EV \leq \WS \leq \RP \leq \EEV.
 \]
@@ -1788,7 +1819,7 @@ Collecting the results:
   \draw[decorate,decoration={brace,amplitude=3pt,mirror},gray]
      (1.0,-0.7) -- (2.6,-0.7);
   \node[below,font=\scriptsize,align=center,gray] at (1.8,-0.85)
-     {holds only if $h(\bsxi)$ alone is random};
+     {guaranteed when only $h(\bsxi)$\\ is random, affine in $\xi$};
   % --- the numerical example
   \begin{scope}[yshift=-2.9cm]
     \draw[->] (0,0) -- (9.2,0) node[right]{cost};
