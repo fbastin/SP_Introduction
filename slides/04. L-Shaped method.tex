@@ -25,6 +25,66 @@
 
 \usepackage[normalem]{ulem}
 
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
+% Expected recourse Q(x) of the example and the L-shaped cuts generated so far.
+% #1 = number of cuts (0 to 4); the most recent cut is drawn thicker and the
+% next master iterate (x^{k+1}, theta^{k+1}) is marked when it lies in the window.
+\newcommand{\LShapedCuts}[1]{%
+\def\LSw##1{\ifnum#1=##1 1.6pt\else 0.8pt\fi}%
+\edef\LSwA{\LSw{1}}\edef\LSwB{\LSw{2}}\edef\LSwC{\LSw{3}}%
+\begin{tikzpicture}
+\begin{axis}[
+	width=0.62\textwidth, height=0.72\textheight,
+	xmin=-0.2, xmax=6.2, ymin=-0.7, ymax=4.3,
+	xlabel={$x$}, ylabel={$\theta$},
+	xtick={0,1,...,6}, ytick={0,1,...,4},
+	grid=major, grid style={gray!25},
+	axis lines=left, clip=true,
+	legend pos=outer north east, legend cell align=left,
+	legend style={font=\scriptsize, fill=white, fill opacity=0.9, text opacity=1},
+	every axis plot/.append style={domain=-0.2:6.2, samples=2},
+]
+\addplot[black, very thick, samples=50]
+	{max(7/3-x, max(5/3-x/3, max(x/3+1/3, x-7/3)))};
+\addlegendentry{$\mathcal{Q}(x)$}
+\ifnum#1>0
+\addplot[red, line width=\LSwA] {7/3-x};
+\addlegendentry{$\theta \geq 7/3-x$}
+\fi
+\ifnum#1>1
+\addplot[blue, line width=\LSwB] {x-7/3};
+\addlegendentry{$\theta \geq x-7/3$}
+\fi
+\ifnum#1>2
+\addplot[green!60!black, line width=\LSwC] {(x+1)/3};
+\addlegendentry{$\theta \geq (x+1)/3$}
+\fi
+\ifnum#1>3
+\addplot[orange, line width=1.6pt] {(5-x)/3};
+\addlegendentry{$\theta \geq (5-x)/3$}
+\fi
+\ifcase#1
+	\addplot[only marks, mark=*, mark size=2pt] coordinates {(0,7/3)};
+	\node[anchor=west, font=\footnotesize] at (axis cs:0.1,7/3) {$x^1=0$};
+\or
+	\draw[->, thick] (axis cs:5.0,0.3) -- (axis cs:6.1,0.3)
+		node[pos=0, anchor=east, font=\footnotesize] {$x^2=10$};
+\or
+	\addplot[only marks, mark=*, mark size=2pt] coordinates {(7/3,0)};
+	\node[anchor=north west, font=\footnotesize] at (axis cs:7/3,0) {$(x^3,\theta^3)$};
+\or
+	\addplot[only marks, mark=*, mark size=2pt] coordinates {(1.5,2.5/3)};
+	\node[anchor=north east, font=\footnotesize] at (axis cs:1.5,2.5/3) {$(x^4,\theta^4)$};
+\or
+	\addplot[only marks, mark=*, mark size=2pt] coordinates {(2,1)};
+	\node[anchor=south, font=\footnotesize] at (axis cs:2,1.05) {$(x^5,\theta^5)$};
+\fi
+\end{axis}
+\end{tikzpicture}%
+}
+
 \setbeamercovered{dynamic}
 
 \input{../sty/macros}
@@ -1111,35 +1171,40 @@ The sequence of iterates for the $L$-shaped method is as follows.
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, no cut}
 	
-	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{all.eps}
+	\centering
+	\LShapedCuts{0}
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq 7/3-x$}
 	
-	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_1.eps}
+	\centering
+	\LShapedCuts{1}
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq x-7/3$}
 	
-	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_2.eps}
+	\centering
+	\LShapedCuts{2}
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq (x+1)/3$}
 	
-	\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_3.eps}
+	\centering
+	\LShapedCuts{3}
 	
 \end{frame}
 
 \begin{frame}
 \frametitle{$\mathcal{Q}(x)$, addition of the cut $\theta \geq (5-x)/3$}
 	
-\includegraphics[width=0.9\textwidth,height=0.75\textheight,keepaspectratio]{coupe_4.eps}
+	\centering
+	\LShapedCuts{4}
 	
 \end{frame}
 
