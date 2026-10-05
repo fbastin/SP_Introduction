@@ -377,7 +377,8 @@ Par ordre de priorité ; chaque point se mesure avec `LShaped_benchmark.jl`.
 
 **Priorité 3 — portée du benchmark**
 
-- [ ] **Instances où la forme extensive devient coûteuse** : augmenter $S$ et la taille du recours jusqu'à ce que la forme extensive ne tienne plus en mémoire ou dépasse le temps de la décomposition, pour montrer l'intérêt de la méthode.
+- [ ] **Comparaison équitable avec la forme extensive** : fixer explicitement le nombre de fils de HiGHS (option `threads`) pour la forme extensive comme pour la décomposition, et mesurer chaque méthode à nombre de cœurs égal (1, puis 6). Aujourd'hui, HiGHS gère son propre parallélisme indépendamment des fils de Julia : on ignore combien de cœurs la forme extensive a utilisés, alors que la version multicoupes sur 6 fils, la seule qui la batte (3,8 s contre 6,4 s sur la plus grande instance), en utilise 6. Mesurer aussi la mémoire de travail de HiGHS, que les allocations de Julia ne comptent pas, pour établir l'argument mémoire.
+- [ ] **Instances où la forme extensive devient coûteuse** : augmenter $S$ et la taille du recours jusqu'à ce que la forme extensive ne tienne plus en mémoire ou dépasse le temps de la décomposition, pour montrer l'intérêt de la méthode. L'écart se resserre déjà avec la taille (multicoupes sur 1 fil : 6 fois plus lent sur le fermier à 1000 scénarios, 1,3 fois sur la capacité 20×20 à 500 scénarios), mais rien n'a été mesuré au-delà.
 - [ ] **Instances de référence** : lire le format SMPS (que StochasticPrograms sait lire) pour comparer sur des problèmes publiés (SSN, 20-term, storm…), plutôt que sur les seules instances générées.
 - [ ] **Recours en nombres entiers** : hors de portée de la méthode $L$-shaped telle quelle (le module le refuse) ; la méthode $L$-shaped entière de Laporte et Louveaux serait l'extension naturelle, si le cours aborde ce sujet.
 
