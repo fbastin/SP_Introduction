@@ -69,14 +69,23 @@ to_sense(s::Symbol) = to_sense(String(s)[1])
 # --------------------------------------------------------------------------------------------
 
 """
-    new_model(optimizer; silent = true, kwargs...)
+    new_model(optimizer; silent = true, direct = false, kwargs...)
 
 A JuMP model attached to `optimizer`, which may be a `MOI.OptimizerFactory` such as
 `HiGHS.Optimizer`, an `MOI.OptimizerWithAttributes` — the way to tune a solver — or an
 `MOI.AbstractOptimizer` already bound to a model.
+
+`direct = true` builds the model in direct mode (`JuMP.direct_model`), without the cache and the
+bridges between JuMP and the solver: about three times faster to build and solve once, with far
+less memory, but the solver must then support natively every constraint the model uses. The
+models built for a [`TwoStageProblem`](@ref) are direct; `kwargs` only apply otherwise.
 """
-function new_model(optimizer; silent::Bool = true, kwargs...)
-    m = JuMP.Model(optimizer; kwargs...)
+function new_model(optimizer; silent::Bool = true, direct::Bool = false, kwargs...)
+    m = if direct
+        JuMP.direct_model(optimizer isa MOI.AbstractOptimizer ? optimizer : MOI.instantiate(optimizer))
+    else
+        JuMP.Model(optimizer; kwargs...)
+    end
     silent && JuMP.set_silent(m)
     return m
 end
@@ -244,22 +253,51 @@ struct RecourseTemplate
     rhs::Function
     row::Vector{Int}
     sign::Vector{Float64}
+    groups::Vector{Any}      # the constraints of `con` by concrete type, and their positions
 end
 
+RecourseTemplate(model, y, con, rhs, row, sign) =
+    RecourseTemplate(model, y, con, rhs, row, sign, constraint_groups(con))
 RecourseTemplate(model, y, con, rhs) =
     RecourseTemplate(model, y, con, rhs, collect(eachindex(con)), ones(length(con)))
 
+"""
+    constraint_groups(con)
+
+The constraints of `con` grouped by concrete type, each group as a typed vector with the positions
+of its constraints in `con`. `con` mixes the types of the rows of different senses; reading and
+writing them group by group, through typed vectors, avoids resolving every call at run time, and
+lets JuMP set the right-hand sides of a group in one call.
+"""
+function constraint_groups(con::AbstractVector)
+    positions = Dict{DataType,Vector{Int}}()
+    for (k, c) in enumerate(con)
+        push!(get!(positions, typeof(c), Int[]), k)
+    end
+    return Any[(T[con[k] for k in ks], ks) for (T, ks) in positions]
+end
+
 """Update the right-hand side of `r` for the first-stage solution `x` in scenario `s`."""
-set_recourse_rhs!(md::AbstractTwoStageModel, r::RecourseTemplate, x, s) =
-    JuMP.set_normalized_rhs.(r.con, r.rhs(x, s))
+function set_recourse_rhs!(md::AbstractTwoStageModel, r::RecourseTemplate, x, s)
+    values = r.rhs(x, s)
+    for (refs, ks) in r.groups
+        _set_rhs!(refs, values, ks)
+    end
+end
+_set_rhs!(refs, values, ks) = JuMP.set_normalized_rhs(refs, values[ks])
 
 """The multiplier of each row of the recourse problem, assembled from the multipliers of `r.con`."""
 function multipliers(r::RecourseTemplate)
     σ = zeros(isempty(r.row) ? 0 : maximum(r.row))
-    for k in eachindex(r.con)
-        σ[r.row[k]] += r.sign[k] * JuMP.dual(r.con[k])
+    for (refs, ks) in r.groups
+        _add_multipliers!(σ, r, refs, ks)
     end
     return σ
+end
+function _add_multipliers!(σ, r::RecourseTemplate, refs, ks)
+    for (c, k) in zip(refs, ks)
+        σ[r.row[k]] += r.sign[k] * JuMP.dual(c)
+    end
 end
 
 """The value of the subproblem: `Q(x, ξ)` on a recourse model, the total violation on an elastic one."""
@@ -398,10 +436,10 @@ function TwoStageProblem(; c, A, senses1, b, q, W, senses2, T, h, ξ, p,
     ny = q isa AbstractVector ? length(q) : size(W, 2)
     pb = TwoStageProblem(
         Float64.(c), Float64.(A), to_sense.(collect(senses1)), Float64.(b),
-        q isa Function ? q : (_ -> Float64.(q)),
+        q isa Function ? q : (qc = Float64.(q); _ -> qc),     # converted once, not at every call
         Float64.(W), to_sense.(collect(senses2)),
-        T isa AbstractMatrix ? (_ -> Float64.(T)) : T,
-        h isa AbstractVector ? (_ -> Float64.(h)) : h,
+        T isa AbstractMatrix ? (Tc = Float64.(T); _ -> Tc) : T,
+        h isa AbstractVector ? (hc = Float64.(h); _ -> hc) : h,
         collect(ξ), Float64.(p),
         lb1 isa Number ? fill(Float64(lb1), nx) : Float64.(lb1),
         ub1 isa Number ? fill(Float64(ub1), nx) : Float64.(ub1),
@@ -438,7 +476,7 @@ recourse_variables!(m::JuMP.Model, pb::TwoStageProblem; base_name = "y") =
     declare_box!(m, @variable(m, [1:n_y(pb)], base_name = base_name), pb.lb, pb.ub)
 
 function build_master(pb::TwoStageProblem, optimizer)
-    m = new_model(optimizer)
+    m = new_model(optimizer; direct = true)
     x = declare_box!(m, @variable(m, [1:n_x(pb)], base_name = "x"), pb.lb1, pb.ub1, pb.integer1)
     add_rows!(m, pb.A * x, pb.senses1, pb.b)
     @objective(m, Min, dot(pb.c, x))
@@ -447,7 +485,7 @@ end
 
 function build_recourse(pb::TwoStageProblem, optimizer, s)
     ξ = pb.ξ[s]
-    m = new_model(optimizer)
+    m = new_model(optimizer; direct = true)
     y = recourse_variables!(m, pb)
     con = add_rows!(m, pb.W * y, pb.senses2, zeros(n_rows(pb)))
     @objective(m, Min, dot(pb.q(ξ), y))
@@ -472,7 +510,7 @@ if and only if the recourse problem is feasible.
 function build_elastic(pb::TwoStageProblem, optimizer, s)
     ξ, rows, senses = pb.ξ[s], n_rows(pb), pb.senses2
     equalities = count(==(EQ), senses)
-    m = new_model(optimizer)
+    m = new_model(optimizer; direct = true)
     y = recourse_variables!(m, pb)
     @variable(m, w[1:(rows + 2equalities)] >= 0)   # one per row, two for an `=` row
     lhs = pb.W * y
@@ -615,6 +653,7 @@ cut_intercept(md::JuMPTwoStageProblem, r, s, x, π, v) = md.cut_intercept(s, x, 
 """
     lshaped(md; optimizer, master_optimizer = optimizer, recourse_optimizer = optimizer,
               cuts = :single, maxiter = 500, tol = 1e-8, feastol = 1e-7,
+              threads = false, drop_inactive = nothing,
               verbose = true, log = stdout)
 
 Solve a two-stage stochastic linear program by L-shaped decomposition, on the modelization `md`.
@@ -639,7 +678,24 @@ per scenario**,
     Eₛ'x + θₛ ≥ Eₛ'xᵏ + Q(xᵏ, ξₛ),
 
 which is the multicut version of Birge and Louveaux (2011, Section 5.1.d): the same subproblems per
-iteration, a larger master, and usually a better approximation of `Q` around `xᵏ`.
+iteration, a larger master, and usually a better approximation of `Q` around `xᵏ`. After the first
+round, which bounds every `θₛ`, a scenario's cut is only added if it is violated, that is if
+`θₛ < Q(xᵏ, ξₛ)` beyond the tolerance: a cut satisfied at `xᵏ` would not change the master there.
+
+`threads = true` solves the recourse problems of an iteration in parallel, on the threads Julia was
+started with (`julia -t N`). The master is only modified once all of them are solved, in the order
+of the scenarios, so the results do not depend on it. The recourse solver must be thread-safe when
+its instances are solved concurrently: HiGHS is, GLPK is not and crashes. GLPK is unsafe even
+unused here: its models are freed by finalizers, which crash Julia when the garbage collector runs
+them on a worker thread; call `GC.gc()` before `lshaped` once GLPK models have been discarded. The callbacks of a
+[`JuMPTwoStageProblem`](@ref) must also be safe to call from several threads at once, which they
+are if they only build and read their own models.
+
+`drop_inactive = k` deletes an optimality cut from the master once it has been slack at `k`
+consecutive iterates, which keeps the master small on long runs (Linderoth and Wright, 2003).
+Feasibility cuts are kept. A master with fewer cuts is still a relaxation, so the lower bound and
+the stopping test remain valid, but the finite convergence of the method is no longer guaranteed:
+`maxiter` then matters.
 
 `master_optimizer` and `recourse_optimizer` are independent — the master is a sequence of LPs that
 grows, the recourse problems are small and re-solved at every iterate, so the two rarely deserve
@@ -653,7 +709,8 @@ tolerance would ask more of the solvers than they deliver on objectives of large
 The upper bound is that of the **incumbent**, the best first-stage solution met so far: the value
 `c'xᵏ + Q(xᵏ)` of the current iterate does not decrease monotonically. Returns a named tuple with
 the incumbent `x` and its `objective`, the last `lower_bound`, the `gap` between them,
-`converged`, the counters of both kinds of cut, the `problem` `md` and the models, and the
+`converged`, the counters of both kinds of cut and of the `dropped_cuts`, the `problem` `md` and the
+models, and the
 `history`, whose entries record per iteration the bounds and the `value` of the iterate `x`.
 [`first_stage_decision`](@ref), [`second_stage_decision`](@ref), [`print_first_stage`](@ref) and
 [`print_second_stage`](@ref) read the decisions off this result.
@@ -666,9 +723,13 @@ function lshaped(md::AbstractTwoStageModel;
                  maxiter::Integer = 500,
                  tol::Real = 1e-8,
                  feastol::Real = 1e-7,
+                 threads::Bool = false,
+                 drop_inactive::Union{Nothing,Integer} = nothing,
                  verbose::Bool = true,
                  log::IO = stdout)
     cuts in (:single, :multi) || error("`cuts` must be :single or :multi, got :$cuts")
+    drop_inactive === nothing || drop_inactive >= 1 ||
+        error("`drop_inactive` must be a positive number of iterations, got $drop_inactive")
     master_optimizer === nothing &&
         error("pass `optimizer`, or both `master_optimizer` and `recourse_optimizer`")
     recourse_optimizer === nothing &&
@@ -704,7 +765,8 @@ function lshaped(md::AbstractTwoStageModel;
                 cuts == :single ? "θ" : "min θₛ", "Q(x)")
     end
 
-    n_optimality = n_feasibility = 0
+    n_optimality = n_feasibility = n_dropped = 0
+    optimality_cuts = Tuple{Any,Int}[]     # each cut and the last iteration at which it was tight
     history = NamedTuple[]
     lower, upper, xstar, converged = -Inf, Inf, fill(NaN, n), false
     iteration = 0
@@ -717,50 +779,24 @@ function lshaped(md::AbstractTwoStageModel;
         xk = value.(x)
         lower = any(bounded) ? objective_value(master.model) : -Inf
         θk = [bounded[t] ? value(θ[t]) : -Inf for t in eachindex(θ)]
-
-        Qs, es = zeros(scenarios), zeros(scenarios)
-        Es = [zeros(n) for _ in 1:scenarios]
-        infeasible = Int[]
-        for s in 1:scenarios
-            set_recourse_rhs!(md, recourse[s], xk, s)
-            optimize!(recourse[s].model)
-            if termination_status(recourse[s].model) != MOI.OPTIMAL
-                # Either infeasible, or the solver cannot tell: the elastic model decides which.
-                if elastic[s] === nothing
-                    elastic[s] = build_elastic(md, recourse_optimizer, s)
-                end
-                elastic[s] === nothing && error("""
-                    scenario $s: the recourse problem is $(termination_status(recourse[s].model)) \
-                    and no elastic model is available; provide `elastic_builder` to cut feasibility""")
-                set_recourse_rhs!(md, elastic[s], xk, s)
-                optimize!(elastic[s].model)
-                termination_status(elastic[s].model) == MOI.OPTIMAL ||
-                    error("elastic problem, scenario $s: $(termination_status(elastic[s].model))")
-                certificate = feasibility_certificate(elastic[s])
-                if certificate.value <= feastol
-                    error("scenario $s: the recourse problem is " *
-                          "$(termination_status(recourse[s].model)) yet its elastic relaxation has " *
-                          "value $(certificate.value); the second stage is unbounded, or the " *
-                          "solver could not solve it")
-                end
-                σ = certificate.σ
-                E_f = cut_coefficients(md, elastic[s], s, xk, σ)
-                length(E_f) == n ||
-                    error("`cut_coefficients` returned $(length(E_f)) coefficients, expected $n")
-                e_f = cut_intercept(md, elastic[s], s, xk, σ, certificate.value)
-                @constraint(master.model, dot(E_f, x) >= e_f)
-                n_feasibility += 1
-                push!(infeasible, s)
-                continue
-            end
-            # π as the solver returns them: πᵀ(h - Tx) = Q(x, ξ) whatever the mix of senses
-            π = multipliers(recourse[s])
-            Qs[s] = recourse_value(recourse[s])
-            Es[s] = cut_coefficients(md, recourse[s], s, xk, π)
-            length(Es[s]) == n ||
-                error("`cut_coefficients` returned $(length(Es[s])) coefficients, expected $n")
-            es[s] = cut_intercept(md, recourse[s], s, xk, π, Qs[s])
+        if drop_inactive !== nothing
+            n_dropped += drop_inactive_cuts!(master.model, optimality_cuts, k, drop_inactive)
         end
+
+        # the subproblems, in parallel or not; the master is only modified afterwards, in the
+        # order of the scenarios, so that the results do not depend on the threads
+        pieces = Vector{Any}(undef, scenarios)
+        foreach_scenario(threads, scenarios) do s
+            pieces[s] = solve_scenario!(md, recourse, elastic, recourse_optimizer, s, xk, n, feastol)
+        end
+        infeasible = [s for s in 1:scenarios if !pieces[s].feasible]
+        for s in infeasible
+            @constraint(master.model, dot(pieces[s].E, x) >= pieces[s].e)
+            n_feasibility += 1
+        end
+        Qs = [pieces[s].feasible ? pieces[s].Q : 0.0 for s in 1:scenarios]
+        Es = [pieces[s].E for s in 1:scenarios]
+        es = [pieces[s].e for s in 1:scenarios]
         if !isempty(infeasible)
             verbose && @printf(log, "%5d   feasibility cut(s) on scenario(s) %s\n",
                                k, join(infeasible, ", "))
@@ -796,29 +832,130 @@ function lshaped(md::AbstractTwoStageModel;
                 E .+= p[s] .* Es[s]
                 e += p[s] * es[s]
             end
-            @constraint(master.model, dot(E, x) + θ[1] >= e)
+            push!(optimality_cuts, (@constraint(master.model, dot(E, x) + θ[1] >= e), k))
+            n_optimality += 1
         else
             for s in 1:scenarios
-                @constraint(master.model, dot(Es[s], x) + θ[s] >= es[s])
+                # the first round bounds every θₛ; afterwards, only the violated cuts are added
+                bounded[s] && θk[s] >= Qs[s] - tol * (1 + abs(Qs[s])) && continue
+                push!(optimality_cuts, (@constraint(master.model, dot(Es[s], x) + θ[s] >= es[s]), k))
+                n_optimality += 1
             end
         end
-        bounded .= true
-        set_objective!()
-        n_optimality += cuts == :single ? 1 : scenarios     # the cuts added, not the rounds
+        # the objective only changes when some θ is bounded for the first time
+        if !all(bounded)
+            bounded .= true
+            set_objective!()
+        end
     end
 
     if verbose
         if converged
-            @printf(log, "converged in %d iteration(s): %d optimality cut(s), %d feasibility cut(s)\n",
-                    iteration, n_optimality, n_feasibility)
+            @printf(log, "converged in %d iteration(s): %d optimality cut(s), %d feasibility cut(s)%s\n",
+                    iteration, n_optimality, n_feasibility,
+                    drop_inactive === nothing ? "" : ", $n_dropped dropped")
         else
             @printf(log, "no convergence in %d iteration(s), last gap %g\n", maxiter, upper - lower)
         end
     end
     return (x = xstar, objective = upper, lower_bound = lower, gap = upper - lower,
             converged = converged, iterations = iteration, optimality_cuts = n_optimality,
-            feasibility_cuts = n_feasibility, problem = md, master = master,
+            feasibility_cuts = n_feasibility, dropped_cuts = n_dropped, problem = md, master = master,
             recourse = recourse, history = history)
+end
+
+"""
+    solve_scenario!(md, recourse, elastic, optimizer, s, xk, n, feastol)
+
+Solve the recourse problem of scenario `s` at `xk`. Returns `(feasible = true, Q, E, e)`, its value
+and the coefficients of its optimality cut, or, if it is infeasible, `(feasible = false, E, e)`,
+those of a feasibility cut obtained from the elastic model, built on first need. Only touches the
+models of scenario `s`, so that the scenarios can be solved in parallel.
+"""
+function solve_scenario!(md, recourse, elastic, optimizer, s, xk, n, feastol)
+    r = recourse[s]
+    set_recourse_rhs!(md, r, xk, s)
+    optimize!(r.model)
+    status = termination_status(r.model)
+    if status != MOI.OPTIMAL
+        # Either infeasible, or the solver cannot tell: the elastic model decides which.
+        if elastic[s] === nothing
+            elastic[s] = build_elastic(md, optimizer, s)
+        end
+        elastic[s] === nothing && error("""
+            scenario $s: the recourse problem is $status and no elastic model is available; \
+            provide `elastic_builder` to cut feasibility""")
+        set_recourse_rhs!(md, elastic[s], xk, s)
+        optimize!(elastic[s].model)
+        termination_status(elastic[s].model) == MOI.OPTIMAL ||
+            error("elastic problem, scenario $s: $(termination_status(elastic[s].model))")
+        certificate = feasibility_certificate(elastic[s])
+        certificate.value <= feastol &&
+            error("scenario $s: the recourse problem is $status yet its elastic relaxation has " *
+                  "value $(certificate.value); the second stage is unbounded, or the solver " *
+                  "could not solve it")
+        E = cut_coefficients(md, elastic[s], s, xk, certificate.σ)
+        length(E) == n || error("`cut_coefficients` returned $(length(E)) coefficients, expected $n")
+        return (feasible = false, Q = NaN, E = E,
+                e = cut_intercept(md, elastic[s], s, xk, certificate.σ, certificate.value))
+    end
+    # π as the solver returns them: πᵀ(h - Tx) = Q(x, ξ) whatever the mix of senses
+    π = multipliers(r)
+    Q = recourse_value(r)
+    E = cut_coefficients(md, r, s, xk, π)
+    length(E) == n || error("`cut_coefficients` returned $(length(E)) coefficients, expected $n")
+    return (feasible = true, Q = Q, E = E, e = cut_intercept(md, r, s, xk, π, Q))
+end
+
+"""
+    foreach_scenario(f, threads, scenarios)
+
+`f(s)` for every scenario, on Julia's threads if `threads` and there are several. An error is
+raised once all the scenarios are done, that of the first scenario in which one occurred.
+"""
+function foreach_scenario(f, threads::Bool, scenarios::Integer)
+    if !threads || Threads.nthreads() == 1
+        foreach(f, 1:scenarios)
+        return nothing
+    end
+    errors = Vector{Any}(nothing, scenarios)
+    Threads.@threads for s in 1:scenarios
+        try
+            f(s)
+        catch err
+            errors[s] = err
+        end
+    end
+    i = findfirst(!isnothing, errors)
+    i === nothing || throw(errors[i])
+    return nothing
+end
+
+"""
+    drop_inactive_cuts!(model, cuts, k, window)
+
+Record which of the optimality `cuts` are tight at the current solution of the master `model`, and
+delete those slack at the last `window` iterations; returns how many were deleted. `cuts` holds each
+cut and the last iteration at which it was tight.
+"""
+function drop_inactive_cuts!(model::JuMP.Model, cuts::Vector{Tuple{Any,Int}}, k::Integer,
+                             window::Integer)
+    # all the slacks are read first: deleting a row invalidates the solution of the model
+    tight = map(cuts) do (con, _)
+        rhs = JuMP.normalized_rhs(con)
+        return JuMP.value(con) - rhs <= 1e-7 * (1 + abs(rhs))
+    end
+    keep = trues(length(cuts))
+    for (i, (con, last)) in enumerate(cuts)
+        if tight[i]
+            cuts[i] = (con, k)
+        elseif k - last >= window
+            JuMP.delete(model, con)
+            keep[i] = false
+        end
+    end
+    keepat!(cuts, keep)
+    return count(!, keep)
 end
 
 _num(v) = isfinite(v) ? @sprintf("%.6f", v) : "-Inf"

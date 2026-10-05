@@ -5,6 +5,7 @@
 # directly by HiGHS, gives the reference value every result is checked against.
 #
 #     julia --project=@v1.12 LShaped_benchmark.jl            # all instances, best of 3 runs
+#     julia -t 6 --project=@v1.12 LShaped_benchmark.jl       # adds LShaped.jl with 6 threads
 #     julia --project=@v1.12 LShaped_benchmark.jl quick      # small instances, one run
 #     julia --project=@v1.12 LShaped_benchmark.jl reps=5 csv=results.csv
 #
@@ -15,8 +16,8 @@
 # What is measured, per instance and method:
 #   - the objective and its relative error with respect to the extensive form;
 #   - whether the method converged (StochasticPrograms: its termination status);
-#   - the iterations and the cuts (optimality and feasibility) it added: the multicut version of
-#     LShaped.jl adds one cut per scenario at each round, StochasticPrograms only the violated ones;
+#   - the iterations and the cuts (optimality and feasibility) it added: both multicut versions add
+#     only the violated cuts after the first round;
 #   - the wall-clock time, the best of `reps` runs after a warm-up that compiles everything, building
 #     the models included (LShaped.jl builds them inside `lshaped`, StochasticPrograms in
 #     `instantiate`), and the memory allocated by one run.
@@ -201,10 +202,14 @@ function extensive(inst::Instance)
     return Outcome("extensive form (HiGHS)", "OPTIMAL", obj, 0, 0)
 end
 
-function ours(inst::Instance, cuts::Symbol)
+function ours(inst::Instance, cuts::Symbol; threads::Bool = false, drop_inactive = nothing)
     res = lshaped(inst.ours; optimizer = HiGHS.Optimizer, cuts = cuts, tol = 1e-6,
-                  maxiter = 10_000, verbose = false)
-    return Outcome("LShaped.jl, $(cuts)-cut", res.converged ? "converged" : "not converged",
+                  maxiter = 10_000, threads = threads, drop_inactive = drop_inactive,
+                  verbose = false)
+    label = "LShaped.jl, $(cuts)-cut" *
+            (threads ? ", $(Threads.nthreads()) threads" : "") *
+            (drop_inactive === nothing ? "" : ", drop $drop_inactive")
+    return Outcome(label, res.converged ? "converged" : "not converged",
                    res.objective, res.iterations, res.optimality_cuts + res.feasibility_cuts)
 end
 
@@ -226,8 +231,11 @@ function theirs(inst::Instance, cuts::Symbol)
                    lshaped_algorithm.data.num_cuts)
 end
 
+# the parallel variant only when Julia has several threads (`julia -t N`)
 const METHODS = [extensive,
-                 inst -> ours(inst, :single), inst -> ours(inst, :multi),
+                 inst -> ours(inst, :single), inst -> ours(inst, :single; drop_inactive = 5),
+                 inst -> ours(inst, :multi),
+                 (Threads.nthreads() > 1 ? [inst -> ours(inst, :multi; threads = true)] : [])...,
                  inst -> theirs(inst, :single), inst -> theirs(inst, :multi)]
 
 # --------------------------------------------------------------------------------------------
@@ -256,11 +264,11 @@ function measure(inst::Instance, method, reference, reps::Integer)
 end
 
 function report(io::IO, measures::Vector{Measure})
-    @printf(io, "  %-30s %-14s %16s %10s %7s %7s %10s %10s\n", "method", "status", "objective",
+    @printf(io, "  %-36s %-14s %16s %10s %7s %7s %10s %10s\n", "method", "status", "objective",
             "rel. error", "iter.", "cuts", "time (s)", "alloc (MB)")
     for m in measures
         o = m.outcome
-        @printf(io, "  %-30s %-14s %16.4f %10.1e %7s %7s %10.3f %10.1f\n", o.method, o.status,
+        @printf(io, "  %-36s %-14s %16.4f %10.1e %7s %7s %10.3f %10.1f\n", o.method, o.status,
                 o.objective, m.error, o.iterations == 0 ? "-" : string(o.iterations),
                 o.cuts == 0 ? "-" : string(o.cuts), m.time, m.memory)
     end
@@ -302,8 +310,8 @@ function main(args)
         foreach(method -> method(warmup), METHODS)
     end
 
-    println("LShaped.jl vs StochasticPrograms.jl, HiGHS.jl ", pkgversion(HiGHS), ", best of ",
-            reps, reps == 1 ? " run\n" : " runs\n")
+    println("LShaped.jl vs StochasticPrograms.jl, HiGHS.jl ", pkgversion(HiGHS), ", ",
+            Threads.nthreads(), " thread(s), best of ", reps, reps == 1 ? " run\n" : " runs\n")
     results = Measure[]
     for make in instances
         inst = make()

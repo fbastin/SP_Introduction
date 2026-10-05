@@ -133,7 +133,9 @@ of deck 04, in its single-cut and multicut versions, with feasibility cuts:
   `W`, `T(ξ)`, `h(ξ)`, each row with its own sense `≤`, `=` or `≥`, bounds on both
   stages, optionally integer first-stage variables) or as **JuMP models of your
   own** (`JuMPTwoStageProblem`, for instance when `W` or `q` depend on the scenario);
-- the master and the recourse problems may use different solvers;
+- the master and the recourse problems may use different solvers, and the recourse
+  problems of an iteration may be solved in parallel (`threads = true`, with a
+  thread-safe solver such as HiGHS);
 - scenarios are tabulated, or sampled reproducibly with `sample_scenarios` and
   `substream`;
 - the first-stage decision, and the second-stage decision of any given scenario,
@@ -160,7 +162,7 @@ on generated instances of growing size, all checked against the extensive form;
 
 ```bash
 cd code
-julia --project=@v1.12 LShaped_benchmark.jl [quick] [reps=3] [csv=results.csv]
+julia [-t 6] --project=@v1.12 LShaped_benchmark.jl [quick] [reps=3] [csv=results.csv]
 ```
 
 ---

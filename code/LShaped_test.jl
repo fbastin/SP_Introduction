@@ -212,6 +212,11 @@ end
 
 reference(pb; optimizer = HiGHS.Optimizer) = extensive_form(pb; optimizer)[3]
 
+"""The rows of a master problem that involve a θ: its optimality cuts."""
+count_theta_rows(model) =
+    count(con -> occursin("θ", string(con)),
+          all_constraints(model; include_variable_in_set_constraints = false))
+
 # Two plants whose capacity is bought in the first stage, with a *sampled* demand: the same code
 # path, the `(ξ, p)` pair coming from `sample_scenarios` rather than from a table. Plant 1 is free
 # to run, plant 2 charges 3 per ton, so the recourse problem trades capacity against unmet demand
@@ -317,11 +322,15 @@ end
     @test lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false).iterations <
           lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false).iterations
     # the counters count cuts, not rounds: one per iteration but the last in the single-cut
-    # version, one per scenario and per such iteration in the multicut version
+    # version, at most one per scenario and per such iteration in the multicut version, which
+    # only adds the violated ones; each is a row of the master involving θ
     single = lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false)
     multi = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
     @test single.optimality_cuts == single.iterations - 1
-    @test multi.optimality_cuts == SCENARIOS_ICECREAM * (multi.iterations - 1)
+    @test multi.optimality_cuts <= SCENARIOS_ICECREAM * (multi.iterations - 1)
+    for res in (single, multi)
+        @test res.optimality_cuts == count_theta_rows(res.master.model)
+    end
 end
 
 @testset "ice cream: feasibility cuts once the minimum capacity is dropped" begin
@@ -458,6 +467,64 @@ end
             @test res.x ≈ x_optimal atol = 1e-5
         end
     end
+end
+
+# --------------------------------------------------------------------------------------------
+# performance options: violated cuts only, threads, inactive cuts
+# --------------------------------------------------------------------------------------------
+
+@testset "multicut: only the violated cuts are added" begin
+    pb = sampled_demand()
+    S = length(pb.ξ)
+    res = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+    @test res.converged
+    @test res.objective ≈ reference(pb) atol = 1e-6
+    # the first round adds the S cuts; after it, only a few scenarios are violated at a time
+    @test S <= res.optimality_cuts < S * (res.iterations - 1)
+    @test res.optimality_cuts == count_theta_rows(res.master.model)
+end
+
+@testset "threads: the same results, in parallel or not" begin
+    # GLPK frees its problems in finalizers, which crash Julia when the garbage collector runs them
+    # on another thread than the one that created them: collect the GLPK models of the earlier
+    # tests here, on the main thread, before any thread may trigger a collection
+    GC.gc()
+    instances = [("ice cream", icecream(), :single), ("ice cream", icecream(), :multi),
+                 ("feasibility cuts", icecream(min_capacity = 0.0), :multi),
+                 ("sampled", sampled_demand(), :multi), ("JuMP model", farm_jump(), :single)]
+    for (name, pb, cuts) in instances
+        serial = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = cuts, threads = false, verbose = false)
+        parallel = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = cuts, threads = true, verbose = false)
+        @test parallel.objective == serial.objective
+        @test parallel.x == serial.x
+        @test parallel.iterations == serial.iterations
+        @test (parallel.optimality_cuts, parallel.feasibility_cuts) ==
+              (serial.optimality_cuts, serial.feasibility_cuts)
+    end
+    # an error raised in a thread surfaces as it would serially
+    @test_throws ErrorException lshaped(one_variable(objective = y -> -y);
+                                        optimizer = HiGHS.Optimizer, threads = true, verbose = false)
+    @info "threads tested with $(Threads.nthreads()) thread(s)"
+end
+
+@testset "inactive cuts are dropped" begin
+    pb = icecream(ub = 3.0)
+    kept = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+    dropped = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, drop_inactive = 1,
+                      verbose = false)
+    @test kept.dropped_cuts == 0
+    @test dropped.converged
+    @test dropped.objective ≈ reference(pb) atol = 1e-6
+    @test dropped.dropped_cuts > 0
+    # the master holds what was added minus what was dropped, and fewer rows than without dropping
+    @test count_theta_rows(dropped.master.model) == dropped.optimality_cuts - dropped.dropped_cuts
+    @test count_theta_rows(dropped.master.model) < count_theta_rows(kept.master.model)
+    # the single-cut version too, on an instance that needs feasibility cuts, which are never dropped
+    pb = icecream(min_capacity = 0.0)
+    res = lshaped(pb; optimizer = HiGHS.Optimizer, drop_inactive = 1, verbose = false)
+    @test res.converged
+    @test res.objective ≈ reference(pb) atol = 1e-6
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, drop_inactive = 0)
 end
 
 # --------------------------------------------------------------------------------------------
