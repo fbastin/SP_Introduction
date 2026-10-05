@@ -50,6 +50,8 @@ SP_Introduction/
     ├── two_stages.ipynb                      # Two-stage models (deck 03)
     ├── on dual function.ipynb                # JuMP `dual` vs `shadow_price`, HiGHS (deck 04, LP notes)
     ├── lshaped_general.ipynb                 # The L-shaped method (deck 04)
+    ├── LShaped.jl, LShaped_test.jl           # L-shaped module, single/multi-cut, with its tests (deck 04)
+    ├── LShaped_usage.ipynb                   # How to use the L-shaped module (deck 04)
     ├── chance constrained toy example.ipynb  # Chance-constrained LP (deck 05)
     ├── portfolio-chanceconstrainedprogramming.ipynb  # Chance-constrained portfolio (deck 05)
     ├── portfolio_stochastic_programming.ipynb # Portfolio as a stochastic program
@@ -120,6 +122,29 @@ with a plain `pdflatex`, with no `-shell-escape`.
 To add a section or an exercise, edit that file; to start a second collection,
 drop another `.tex` in `exercises/` following the same pattern and
 `make exercises` picks it up automatically.
+
+### The L-shaped module
+
+`code/LShaped.jl` is a stand-alone Julia module implementing the L-shaped method
+of deck 04, in its single-cut and multicut versions, with feasibility cuts:
+
+- a problem is given either as **data** (`TwoStageProblem`: `c`, `A`, `b`, `q`,
+  `W`, `T(ξ)`, `h(ξ)`, each row with its own sense `≤`, `=` or `≥`, bounds on both
+  stages, optionally integer first-stage variables) or as **JuMP models of your
+  own** (`JuMPTwoStageProblem`, for instance when `W` or `q` depend on the scenario);
+- the master and the recourse problems may use different solvers;
+- scenarios are tabulated, or sampled reproducibly with `sample_scenarios` and
+  `substream`.
+
+`code/LShaped_usage.ipynb` walks through these features one at a time.
+`code/LShaped_test.jl` checks every method against the extensive form, on the
+ice-cream, newsvendor and farm instances among others. It needs JuMP, HiGHS, GLPK,
+Distributions and RandomDataStreams:
+
+```bash
+cd code
+julia --project=@v1.12 LShaped_test.jl
+```
 
 ---
 
