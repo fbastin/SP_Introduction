@@ -52,6 +52,7 @@ SP_Introduction/
     ├── lshaped_general.ipynb                 # The L-shaped method (deck 04)
     ├── LShaped.jl, LShaped_test.jl           # L-shaped module, single/multi-cut, with its tests (deck 04)
     ├── LShaped_usage.ipynb                   # How to use the L-shaped module (deck 04)
+    ├── LShaped_benchmark.jl                  # LShaped.jl vs StochasticPrograms.jl, with results (deck 04)
     ├── chance constrained toy example.ipynb  # Chance-constrained LP (deck 05)
     ├── portfolio-chanceconstrainedprogramming.ipynb  # Chance-constrained portfolio (deck 05)
     ├── portfolio_stochastic_programming.ipynb # Portfolio as a stochastic program
@@ -150,6 +151,16 @@ Distributions and RandomDataStreams:
 ```bash
 cd code
 julia --project=@v1.12 LShaped_test.jl
+```
+
+`code/LShaped_benchmark.jl` compares the module with the L-shaped method of
+StochasticPrograms.jl (the fixed fork, https://github.com/fbastin/StochasticPrograms.jl)
+on generated instances of growing size, all checked against the extensive form;
+`quick` runs the small ones only. `code/LShaped_benchmark_results.md` records a run.
+
+```bash
+cd code
+julia --project=@v1.12 LShaped_benchmark.jl [quick] [reps=3] [csv=results.csv]
 ```
 
 ---

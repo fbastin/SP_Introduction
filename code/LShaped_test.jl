@@ -14,6 +14,7 @@ using Statistics
 using Distributions
 
 const DEMAND_SCENARIOS = [3.0, 5.0, 7.0]
+const SCENARIOS_ICECREAM = length(DEMAND_SCENARIOS)
 const DEMAND_PROBABILITIES = [0.3, 0.4, 0.3]
 
 # --------------------------------------------------------------------------------------------
@@ -315,6 +316,12 @@ end
     end
     @test lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false).iterations <
           lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false).iterations
+    # the counters count cuts, not rounds: one per iteration but the last in the single-cut
+    # version, one per scenario and per such iteration in the multicut version
+    single = lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false)
+    multi = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+    @test single.optimality_cuts == single.iterations - 1
+    @test multi.optimality_cuts == SCENARIOS_ICECREAM * (multi.iterations - 1)
 end
 
 @testset "ice cream: feasibility cuts once the minimum capacity is dropped" begin

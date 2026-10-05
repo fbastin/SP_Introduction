@@ -1,0 +1,322 @@
+# Benchmark of LShaped.jl against the L-shaped method of StochasticPrograms.jl.
+#
+# Both libraries solve the same generated instances, with the same LP solver (HiGHS) for the master
+# and the recourse problems, in their single-cut and multicut versions; the extensive form, solved
+# directly by HiGHS, gives the reference value every result is checked against.
+#
+#     julia --project=@v1.12 LShaped_benchmark.jl            # all instances, best of 3 runs
+#     julia --project=@v1.12 LShaped_benchmark.jl quick      # small instances, one run
+#     julia --project=@v1.12 LShaped_benchmark.jl reps=5 csv=results.csv
+#
+# Needs, besides the packages of LShaped.jl (JuMP, HiGHS, Distributions, RandomDataStreams),
+# StochasticPrograms.jl from https://github.com/fbastin/StochasticPrograms.jl, whose fixes the
+# comparison relies on: the registered release returns wrong L-shaped solutions.
+#
+# What is measured, per instance and method:
+#   - the objective and its relative error with respect to the extensive form;
+#   - whether the method converged (StochasticPrograms: its termination status);
+#   - the iterations and the cuts (optimality and feasibility) it added: the multicut version of
+#     LShaped.jl adds one cut per scenario at each round, StochasticPrograms only the violated ones;
+#   - the wall-clock time, the best of `reps` runs after a warm-up that compiles everything, building
+#     the models included (LShaped.jl builds them inside `lshaped`, StochasticPrograms in
+#     `instantiate`), and the memory allocated by one run.
+# The tolerances differ in their definitions: LShaped.jl stops when θ ≥ Q - tol (1 + |Q|), here with
+# tol = 1e-6, StochasticPrograms when |θ - Q| / |Q| ≤ τ, its default 1e-6. The relative errors show
+# what either achieves.
+
+module Ours
+include(joinpath(@__DIR__, "LShaped.jl"))
+end
+
+using .Ours.LShaped: TwoStageProblem, lshaped, extensive_form, substream
+using StochasticPrograms
+using HiGHS
+using Distributions
+using LinearAlgebra
+using Printf
+using Statistics
+
+const SPL = StochasticPrograms.LShaped
+const MOI = StochasticPrograms.MOI
+
+# --------------------------------------------------------------------------------------------
+# instances: the same data, written for each library
+# --------------------------------------------------------------------------------------------
+
+struct Instance
+    name::String
+    ours::TwoStageProblem
+    sp_model::StochasticModel
+    sp_scenarios::Vector
+end
+
+"""
+    farmer(S; seed)
+
+The farmer of Birge and Louveaux (2011, Section 1.1), with `S` equally likely scenarios whose three
+yields are drawn independently, uniformly within ±20% of their mean: the randomness is in the
+technology matrix `T`. A small first stage, many scenarios.
+"""
+function farmer(S::Integer; seed::Integer = 1)
+    rng = substream(seed)
+    mean_yield = [2.5, 3.0, 20.0]
+    yields = [mean_yield .* rand(rng, Uniform(0.8, 1.2), 3) for _ in 1:S]
+    ours = TwoStageProblem(
+        c = [150.0, 230.0, 260.0], A = ones(1, 3), senses1 = ['<'], b = [500.0],
+        q = [238.0, 210.0, -170.0, -150.0, -36.0, -10.0],
+        W = [1.0 0.0 -1.0 0.0 0.0 0.0; 0.0 1.0 0.0 -1.0 0.0 0.0;
+             0.0 0.0 0.0 0.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 0.0],
+        senses2 = ['>', '>', '<', '<'],
+        T = t -> [t[1] 0.0 0.0; 0.0 t[2] 0.0; 0.0 0.0 -t[3]; 0.0 0.0 0.0],
+        h = [200.0, 240.0, 0.0, 6000.0], ξ = yields, p = fill(1 / S, S))
+    model = @stochastic_model begin
+        @stage 1 begin
+            @decision(model, x[1:3] >= 0)
+            @constraint(model, sum(x) <= 500)
+            @objective(model, Min, 150x[1] + 230x[2] + 260x[3])
+        end
+        @stage 2 begin
+            @known(model, x)
+            @uncertain t[1:3]
+            @recourse(model, w[1:2] >= 0)
+            @recourse(model, y[1:4] >= 0)
+            @constraint(model, t[1] * x[1] + w[1] - y[1] >= 200)
+            @constraint(model, t[2] * x[2] + w[2] - y[2] >= 240)
+            @constraint(model, y[3] + y[4] <= t[3] * x[3])
+            @constraint(model, y[3] <= 6000)
+            @objective(model, Min, 238w[1] + 210w[2] - 170y[1] - 150y[2] - 36y[3] - 10y[4])
+        end
+    end
+    scenarios = [@scenario(t[1:3] = yields[s], probability = 1 / S) for s in 1:S]
+    return Instance("farmer, S = $S", ours, model, scenarios)
+end
+
+"""
+    capacity(P, F, S; shortage = true, seed)
+
+Capacity expansion, after the ice-cream example: capacity `xᵢ` bought for each of `P` plants, then
+`F` products made, `yᵢⱼ`, to meet random demands `dⱼ`, drawn from a log-normal distribution around
+a mean of their own; the randomness is in `h`. With `shortage`, unmet demand `uⱼ` costs a penalty
+(complete recourse); without, the demand must be met, the recourse problem is infeasible whenever
+the capacity falls short, and the methods need feasibility cuts.
+"""
+function capacity(P::Integer, F::Integer, S::Integer; shortage::Bool = true, seed::Integer = 2)
+    rng = substream(seed)
+    c = rand(rng, Uniform(5.0, 15.0), P)                     # capacity costs
+    a = rand(rng, Uniform(1.0, 10.0), P, F)                  # production costs
+    mean_demand = rand(rng, Uniform(10.0, 50.0), F)
+    demands = [mean_demand .* rand(rng, LogNormal(0.0, 0.3), F) for _ in 1:S]
+    penalty = 100.0
+    total = 2 * maximum(sum, demands)                         # a loose bound on the capacity
+    nu = shortage ? F : 0
+    idx(i, j) = F * (i - 1) + j
+    W = zeros(P + F, P * F + nu)
+    for i in 1:P, j in 1:F
+        W[i, idx(i, j)] = 1.0                                 # Σⱼ yᵢⱼ ≤ xᵢ
+        W[P + j, idx(i, j)] = 1.0                             # Σᵢ yᵢⱼ (+ uⱼ) ≥ dⱼ
+    end
+    shortage && (W[P+1:end, P*F+1:end] = Matrix(1.0I, F, F))
+    ours = TwoStageProblem(
+        c = c, A = ones(1, P), senses1 = ['<'], b = [total],
+        q = vcat(vec(permutedims(a)), fill(penalty, nu)),
+        W = W, senses2 = vcat(fill('<', P), fill('>', F)),
+        T = vcat(-Matrix(1.0I, P, P), zeros(F, P)), h = d -> vcat(zeros(P), d),
+        ξ = demands, p = fill(1 / S, S))
+    model = if shortage
+        @stochastic_model begin
+            @stage 1 begin
+                @parameters begin
+                    P = P
+                    c = c
+                    total = total
+                end
+                @decision(model, x[i in 1:P] >= 0)
+                @constraint(model, sum(x) <= total)
+                @objective(model, Min, sum(c[i] * x[i] for i in 1:P))
+            end
+            @stage 2 begin
+                @parameters begin
+                    P = P
+                    F = F
+                    a = a
+                    penalty = penalty
+                end
+                @known(model, x)
+                @uncertain d[1:F]
+                @recourse(model, y[i in 1:P, j in 1:F] >= 0)
+                @recourse(model, u[j in 1:F] >= 0)
+                @constraint(model, [i in 1:P], sum(y[i, j] for j in 1:F) <= x[i])
+                @constraint(model, [j in 1:F], sum(y[i, j] for i in 1:P) + u[j] >= d[j])
+                @objective(model, Min, sum(a[i, j] * y[i, j] for i in 1:P, j in 1:F) +
+                                       penalty * sum(u[j] for j in 1:F))
+            end
+        end
+    else
+        @stochastic_model begin
+            @stage 1 begin
+                @parameters begin
+                    P = P
+                    c = c
+                    total = total
+                end
+                @decision(model, x[i in 1:P] >= 0)
+                @constraint(model, sum(x) <= total)
+                @objective(model, Min, sum(c[i] * x[i] for i in 1:P))
+            end
+            @stage 2 begin
+                @parameters begin
+                    P = P
+                    F = F
+                    a = a
+                end
+                @known(model, x)
+                @uncertain d[1:F]
+                @recourse(model, y[i in 1:P, j in 1:F] >= 0)
+                @constraint(model, [i in 1:P], sum(y[i, j] for j in 1:F) <= x[i])
+                @constraint(model, [j in 1:F], sum(y[i, j] for i in 1:P) >= d[j])
+                @objective(model, Min, sum(a[i, j] * y[i, j] for i in 1:P, j in 1:F))
+            end
+        end
+    end
+    scenarios = [@scenario(d[1:F] = demands[s], probability = 1 / S) for s in 1:S]
+    kind = shortage ? "capacity" : "capacity, no shortage"
+    return Instance("$kind, P = $P, F = $F, S = $S", ours, model, scenarios)
+end
+
+# --------------------------------------------------------------------------------------------
+# methods
+# --------------------------------------------------------------------------------------------
+
+"""The outcome of a method on an instance, as reported in the tables."""
+struct Outcome
+    method::String
+    status::String
+    objective::Float64
+    iterations::Int
+    cuts::Int
+end
+
+function extensive(inst::Instance)
+    _, _, obj = extensive_form(inst.ours; optimizer = HiGHS.Optimizer)
+    return Outcome("extensive form (HiGHS)", "OPTIMAL", obj, 0, 0)
+end
+
+function ours(inst::Instance, cuts::Symbol)
+    res = lshaped(inst.ours; optimizer = HiGHS.Optimizer, cuts = cuts, tol = 1e-6,
+                  maxiter = 10_000, verbose = false)
+    return Outcome("LShaped.jl, $(cuts)-cut", res.converged ? "converged" : "not converged",
+                   res.objective, res.iterations, res.optimality_cuts + res.feasibility_cuts)
+end
+
+function theirs(inst::Instance, cuts::Symbol)
+    sp = instantiate(inst.sp_model, inst.sp_scenarios, optimizer = SPL.Optimizer)
+    set_silent(sp)
+    set_optimizer_attribute(sp, MasterOptimizer(), HiGHS.Optimizer)
+    set_optimizer_attribute(sp, SubProblemOptimizer(), HiGHS.Optimizer)
+    # feasibility cuts are off by default, and StochasticPrograms first evaluates the subproblems
+    # at x = 0, where the instances without complete recourse are infeasible
+    set_optimizer_attribute(sp, SPL.FeasibilityStrategy(), SPL.FeasibilityCuts())
+    cuts == :single && set_optimizer_attribute(sp, SPL.Aggregator(), SPL.Aggregate())
+    optimize!(sp)
+    status = termination_status(sp)
+    lshaped_algorithm = StochasticPrograms.optimizer(sp).lshaped
+    return Outcome("StochasticPrograms, $(cuts)-cut", string(status),
+                   status == MOI.OPTIMAL ? objective_value(sp) : NaN,
+                   StochasticPrograms.num_iterations(StochasticPrograms.optimizer(sp)),
+                   lshaped_algorithm.data.num_cuts)
+end
+
+const METHODS = [extensive,
+                 inst -> ours(inst, :single), inst -> ours(inst, :multi),
+                 inst -> theirs(inst, :single), inst -> theirs(inst, :multi)]
+
+# --------------------------------------------------------------------------------------------
+# measurement
+# --------------------------------------------------------------------------------------------
+
+struct Measure
+    instance::String
+    outcome::Outcome
+    error::Float64          # relative to the extensive form
+    time::Float64           # best of the runs, seconds
+    memory::Float64         # allocated by one run, MB
+end
+
+function measure(inst::Instance, method, reference, reps::Integer)
+    best, outcome, bytes = Inf, nothing, 0
+    for _ in 1:reps
+        GC.gc()
+        stats = @timed method(inst)
+        if stats.time < best
+            best, outcome, bytes = stats.time, stats.value, stats.bytes
+        end
+    end
+    error = abs(outcome.objective - reference) / max(1.0, abs(reference))
+    return Measure(inst.name, outcome, error, best, bytes / 2^20)
+end
+
+function report(io::IO, measures::Vector{Measure})
+    @printf(io, "  %-30s %-14s %16s %10s %7s %7s %10s %10s\n", "method", "status", "objective",
+            "rel. error", "iter.", "cuts", "time (s)", "alloc (MB)")
+    for m in measures
+        o = m.outcome
+        @printf(io, "  %-30s %-14s %16.4f %10.1e %7s %7s %10.3f %10.1f\n", o.method, o.status,
+                o.objective, m.error, o.iterations == 0 ? "-" : string(o.iterations),
+                o.cuts == 0 ? "-" : string(o.cuts), m.time, m.memory)
+    end
+end
+
+function write_csv(path::AbstractString, measures::Vector{Measure})
+    open(path, "w") do io
+        println(io, "instance,method,status,objective,relative_error,iterations,cuts,time_s,alloc_MB")
+        for m in measures
+            o = m.outcome
+            println(io, join(("\"$(m.instance)\"", "\"$(o.method)\"", o.status, o.objective,
+                              m.error, o.iterations, o.cuts, m.time, m.memory), ","))
+        end
+    end
+end
+
+# --------------------------------------------------------------------------------------------
+# main
+# --------------------------------------------------------------------------------------------
+
+function main(args)
+    quick = "quick" in args
+    function option(name, default)
+        for a in args
+            startswith(a, name * "=") && return String(split(a, "="; limit = 2)[2])
+        end
+        return default
+    end
+    reps = parse(Int, option("reps", quick ? "1" : "3"))
+    csv = option("csv", "")
+    instances = quick ?
+        [() -> farmer(50), () -> capacity(5, 5, 20), () -> capacity(5, 5, 20; shortage = false)] :
+        [() -> farmer(100), () -> farmer(1000),
+         () -> capacity(10, 10, 100), () -> capacity(20, 20, 500),
+         () -> capacity(10, 10, 100; shortage = false), () -> capacity(20, 20, 200; shortage = false)]
+
+    # compile everything on a tiny instance first, so that no timing includes it
+    for warmup in (farmer(5), capacity(2, 2, 3), capacity(2, 2, 3; shortage = false))
+        foreach(method -> method(warmup), METHODS)
+    end
+
+    println("LShaped.jl vs StochasticPrograms.jl, HiGHS.jl ", pkgversion(HiGHS), ", best of ",
+            reps, reps == 1 ? " run\n" : " runs\n")
+    results = Measure[]
+    for make in instances
+        inst = make()
+        reference = extensive(inst).objective
+        measures = [measure(inst, method, reference, reps) for method in METHODS]
+        println(inst.name)
+        report(stdout, measures)
+        println()
+        flush(stdout)       # show each instance as soon as it is done, even when redirected
+        append!(results, measures)
+    end
+    isempty(csv) || (write_csv(csv, results); println("written to ", csv))
+    return results
+end
+
+abspath(PROGRAM_FILE) == (@__FILE__) && main(ARGS)

@@ -804,7 +804,7 @@ function lshaped(md::AbstractTwoStageModel;
         end
         bounded .= true
         set_objective!()
-        n_optimality += 1
+        n_optimality += cuts == :single ? 1 : scenarios     # the cuts added, not the rounds
     end
 
     if verbose
