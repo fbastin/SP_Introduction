@@ -8,6 +8,7 @@
 #     julia -t 6 --project=@v1.12 LShaped_benchmark.jl       # adds LShaped.jl with 6 threads
 #     julia --project=@v1.12 LShaped_benchmark.jl quick      # small instances, one run
 #     julia --project=@v1.12 LShaped_benchmark.jl reps=5 csv=results.csv
+#     julia --project=@v1.12 LShaped_benchmark.jl quick rd   # adds regularized decomposition
 #
 # Needs, besides the packages of LShaped.jl (JuMP, HiGHS, Distributions, RandomDataStreams),
 # StochasticPrograms.jl from https://github.com/fbastin/StochasticPrograms.jl, whose fixes the
@@ -205,7 +206,7 @@ end
 
 # HiGHS's QP solver fails on the masters of regularized decomposition: Ipopt solves them, without
 # relaxing the constraints
-const QP_MASTER = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)
+const QP_MASTER = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0, "sb" => "yes")
 
 function ours(inst::Instance, cuts; threads::Bool = false, drop_inactive = nothing,
               regularization::Symbol = :none, x0 = nothing)
@@ -242,17 +243,22 @@ function theirs(inst::Instance, cuts::Symbol)
                    lshaped_algorithm.data.num_cuts)
 end
 
-# the parallel variant only when Julia has several threads (`julia -t N`)
+# the parallel variant only when Julia has several threads (`julia -t N`); regularized
+# decomposition only on demand (`rd`), being much slower: see `RD_METHODS`
 const METHODS = [extensive,
                  inst -> ours(inst, :single), inst -> ours(inst, :single; drop_inactive = 5),
                  inst -> ours(inst, :single; x0 = :mean_value),
                  inst -> ours(inst, :single; regularization = :trust_region),
                  inst -> ours(inst, min(10, Ours.LShaped.n_scenarios(inst.ours))),
                  inst -> ours(inst, :multi),
-                 inst -> ours(inst, :multi; regularization = :regularized_decomposition),
                  inst -> ours(inst, :multi; regularization = :trust_region),
                  (Threads.nthreads() > 1 ? [inst -> ours(inst, :multi; threads = true)] : [])...,
                  inst -> theirs(inst, :single), inst -> theirs(inst, :multi)]
+
+# Regularized decomposition with the fixed `rho = 1` of deck 04 takes small steps on instances whose
+# decisions are in the hundreds, and its quadratic masters need Ipopt: hours on the full benchmark.
+const RD_METHODS = [inst -> ours(inst, :single; regularization = :regularized_decomposition),
+                    inst -> ours(inst, :multi; regularization = :regularized_decomposition)]
 
 # --------------------------------------------------------------------------------------------
 # measurement
@@ -307,6 +313,7 @@ end
 
 function main(args)
     quick = "quick" in args
+    methods = "rd" in args ? [METHODS[1:end-2]; RD_METHODS; METHODS[end-1:end]] : METHODS
     function option(name, default)
         for a in args
             startswith(a, name * "=") && return String(split(a, "="; limit = 2)[2])
@@ -323,7 +330,7 @@ function main(args)
 
     # compile everything on a tiny instance first, so that no timing includes it
     for warmup in (farmer(5), capacity(2, 2, 3), capacity(2, 2, 3; shortage = false))
-        foreach(method -> method(warmup), METHODS)
+        foreach(method -> method(warmup), methods)
     end
 
     println("LShaped.jl vs StochasticPrograms.jl, HiGHS.jl ", pkgversion(HiGHS), ", ",
@@ -332,7 +339,7 @@ function main(args)
     for make in instances
         inst = make()
         reference = extensive(inst).objective
-        measures = [measure(inst, method, reference, reps) for method in METHODS]
+        measures = [measure(inst, method, reference, reps) for method in methods]
         println(inst.name)
         report(stdout, measures)
         println()

@@ -166,11 +166,12 @@ julia --project=@v1.12 LShaped_test.jl
 `code/LShaped_benchmark.jl` compares the module with the L-shaped method of
 StochasticPrograms.jl (the fixed fork, https://github.com/fbastin/StochasticPrograms.jl)
 on generated instances of growing size, all checked against the extensive form;
-`quick` runs the small ones only. `code/LShaped_benchmark_results.md` records a run.
+`quick` runs the small ones only, `rd` adds regularized decomposition, much slower.
+`code/LShaped_benchmark_results.md` records a run.
 
 ```bash
 cd code
-julia [-t 6] --project=@v1.12 LShaped_benchmark.jl [quick] [reps=3] [csv=results.csv]
+julia [-t 6] --project=@v1.12 LShaped_benchmark.jl [quick] [rd] [reps=3] [csv=results.csv]
 ```
 
 ---

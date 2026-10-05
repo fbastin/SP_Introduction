@@ -728,7 +728,7 @@ end
                  ("exercise 5", exercise_5())]
     # HiGHS's QP solver is not reliable on the masters of regularized decomposition: Ipopt solves
     # them, if it does not relax the constraints
-    ipopt = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)
+    ipopt = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0, "sb" => "yes")
     for (name, pb) in instances, regularization in (:regularized_decomposition, :trust_region),
         cuts in (:single, :multi)
         master = regularization == :trust_region ? HiGHS.Optimizer : ipopt
@@ -779,11 +779,13 @@ end
             @test res.objective ≈ reference(pb) rtol = 1e-6
         end
     end
-    ipopt = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)
+    ipopt = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0, "sb" => "yes")
     res = lshaped(sampled_farmer; master_optimizer = ipopt, recourse_optimizer = HiGHS.Optimizer,
                   cuts = :multi, regularization = :regularized_decomposition, verbose = false)
     @test res.converged
     @test res.objective ≈ reference(sampled_farmer) rtol = 1e-6
+    @test res.lower_bound <= res.objective + 1e-6 * (1 + abs(res.objective))
+    @test isfinite(res.lower_bound)
 end
 
 @testset "starting point, callback, and bounds on the EVPI and the VSS" begin

@@ -704,8 +704,11 @@ iterate to begin with (`x0`, if given and feasible), as presented in deck 04:
   objective and `m` the master's model: if `τ ≥ eta1`, `xᵏ` becomes the centre, and if moreover
   `τ ≥ eta2`, the radius grows to `min(max_radius, gamma Δ)`; after `patience` unsuccessful
   iterations in a row, the radius is halved (deck 04 leaves this rule open).
-Both stop when the model value of the master solution reaches `f(a)`, up to `tol`: then `a` is
-optimal. The master of a regularized iteration gives no lower bound; a valid one is computed once at
+Both stop when the model value of the master solution reaches `f(a)`, up to `tol` relative to
+`1 + |f(a)| + Σₖ Pₖ |Qₖ(a)|`, the scale of the cut tests: then `a` is optimal. Up to a tolerance,
+this test is weaker for regularized decomposition, whose proximal term flattens the model: there,
+the master is then also solved without it, and the method only stops if this lower bound meets the
+incumbent; otherwise the solution of this LP is the next iterate. The master of a regularized iteration gives no lower bound; a valid one is computed once at
 the end, by solving the master without the regularization.
 
 `x0` is a first-stage decision at which the subproblems are evaluated before the first master
@@ -815,6 +818,7 @@ function lshaped(md::AbstractTwoStageModel;
     θ = @variable(master.model, [1:C], base_name = "θ")
     bounded = falses(C)
     center, f_center = Float64[], Inf          # the centre `a` of a regularization, and f(a)
+    scale_center = Inf                         # the scale of the stopping test at `a`
     Δ = radius === nothing ? NaN : Float64(radius)
     box = Any[]                                # the trust region, once there is a centre
     unsuccessful = 0
@@ -829,8 +833,8 @@ function lshaped(md::AbstractTwoStageModel;
         end
         @objective(master.model, Min, f)
     end
-    function set_center!(a, fa)
-        center, f_center = copy(a), fa
+    function set_center!(a, fa, scale)
+        center, f_center, scale_center = copy(a), fa, scale
         if regularization == :trust_region
             isnan(Δ) && (Δ = 0.1 * max(1.0, norm(a, Inf)))
             set_box!()
@@ -928,10 +932,23 @@ function lshaped(md::AbstractTwoStageModel;
                 n_dropped += drop_inactive_cuts!(master.model, stored, it, drop_inactive)
             end
             # the stopping test of the regularized methods: the model reaches f(a) (deck 04)
-            if regularized && !isempty(center) && model >= f_center - tol * (1 + abs(f_center))
-                regularization == :regularized_decomposition && check_proximal_step(xk, model)
-                converged = true
-                break
+            if regularized && !isempty(center) && model >= f_center - tol * scale_center
+                regularization == :trust_region && (converged = true; break)
+                check_proximal_step(xk, model)
+                # Up to a tolerance ε, the test only bounds the error of `a` by about
+                # ‖a - x*‖ √(2ε/ρ): the master without the proximal term, an LP, says whether the
+                # incumbent is optimal. If not, its solution is the next iterate, an L-shaped step
+                # where the model is too loose.
+                set_objective!(proximal = false)
+                stale = true
+                optimize!(master.model)
+                status = termination_status(master.model)
+                status in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED) || error("master problem: $status")
+                lower = objective_value(master.model)
+                upper - lower <= tol * scale_center && (converged = true; break)
+                xk = value.(x)
+                θk = [value(θ[k]) for k in 1:C]
+                model = lower
             end
         end
 
@@ -973,6 +990,10 @@ function lshaped(md::AbstractTwoStageModel;
         end
         Qk = [sum(p[s] * Qs[s] for s in cluster) / P[k] for (k, cluster) in enumerate(clusters)]
         violated = [!bounded[k] || θk[k] < Qk[k] - tol * (1 + abs(Qk[k])) for k in 1:C]
+        # the stopping test of the regularizations, f(a) - m(x) ≤ tol × scale, must not ask more
+        # than the cuts: without a violated cut, m(xᵏ) may still fall short of f(xᵏ) by up to
+        # Σₖ Pₖ tol (1 + |Qₖ|), and the method would neither cut nor stop
+        scale = 1 + abs(current) + dot(P, abs.(Qk))
         if !regularized && !any(violated)
             converged = true
             break
@@ -984,17 +1005,17 @@ function lshaped(md::AbstractTwoStageModel;
 
         # the centre of a regularization, before the cuts of this iteration change the model
         if regularized && isempty(center)
-            set_center!(xk, current)           # the first feasible iterate
+            set_center!(xk, current, scale)    # the first feasible iterate
         elseif regularization == :regularized_decomposition
             # exact serious step if no cut is violated, approximate if xᵏ is not worse than a
-            (!any(violated) || current <= f_center) && set_center!(xk, current)
+            (!any(violated) || current <= f_center) && set_center!(xk, current, scale)
         elseif regularization == :trust_region
             predicted = model_value(center) - model
             τ = predicted > 0 ? (f_center - current) / predicted : -Inf
             if τ >= eta1                       # successful: move the centre
                 unsuccessful = 0
                 τ >= eta2 && (Δ = min(max_radius, gamma * Δ))
-                set_center!(xk, current)
+                set_center!(xk, current, scale)
             else
                 unsuccessful!()
             end
@@ -1021,7 +1042,8 @@ function lshaped(md::AbstractTwoStageModel;
         empty!(box)
         set_objective!(proximal = false)
         optimize!(master.model)
-        termination_status(master.model) == MOI.OPTIMAL && (lower = objective_value(master.model))
+        termination_status(master.model) in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED) &&
+            (lower = objective_value(master.model))
     end
     if verbose
         if converged
