@@ -346,6 +346,41 @@ Version générale de `two_stages.ipynb` : les contraintes gardent le sens sous 
 
 ---
 
+## Code — `code/LShaped.jl` (module), ses tests et son benchmark
+
+Module autonome issu de `lshaped_general.ipynb` : méthode $L$-shaped à coupe unique et multicoupes, coupes de faisabilité par problème élastique, problème donné sous forme de données (`TwoStageProblem`) ou de modèles JuMP (`JuMPTwoStageProblem`), solveurs distincts pour le maître et les sous-problèmes, scénarios tirés de façon reproductible. Accompagné de `LShaped_test.jl` (208 tests, tous recoupés avec la forme extensive), de `LShaped_usage.ipynb` (dix sections) et de `LShaped_benchmark.jl`.
+
+- [x] **Module, tests et notebook d'utilisation** : borne supérieure tenue par l'*incumbent* (meilleure solution rencontrée), tolérance d'arrêt relative, refus explicite d'un recours en maximisation ou en nombres entiers (multiplicateurs de mauvais signe ou inexistants), avertissement dès que les bornes se croisent.
+- [x] **Décisions** : `first_stage_decision`, `second_stage_decision(res, s)`, `print_first_stage`, `print_second_stage(res, s)`. La décision de second niveau est recalculée au $x$ retourné, les modèles de recours ayant été résolus en dernier lieu au dernier itéré.
+- [x] **EVPI et VSS** : `wait_and_see`, `expected_value_problem`, `expected_result`, `evpi`, `vss`, conformes aux définitions du deck 03 ; valeurs de Birge et Louveaux retrouvées sur le fermier (EVPI 7015,56, VSS 1150) et sur l'exemple $|x-\xi|$ des diapos (EVPI 1, VSS 1/9). Section correspondante ajoutée au deck 04.
+- [x] **Benchmark contre StochasticPrograms.jl** (fork corrigé, <https://github.com/fbastin/StochasticPrograms.jl>) : mêmes instances, HiGHS partout, résultats vérifiés contre la forme extensive ; consignés dans `LShaped_benchmark_results.md`. `LShaped.jl` est 3 à 5 fois plus rapide et alloue 3 à 12 fois moins de mémoire ; aucune des deux décompositions ne bat toutefois la forme extensive à ces tailles.
+- [x] **Compteur de coupes** : en multicoupes, `optimality_cuts` comptait les tours et non les coupes ; il compte désormais les coupes ajoutées.
+
+### Suggestions
+
+Par ordre de priorité ; chaque point se mesure avec `LShaped_benchmark.jl`.
+
+**Priorité 1 — performances de la méthode**
+
+- [ ] **Multicoupes : n'ajouter que les coupes violées.** La version multicoupes ajoute à chaque tour la coupe de chaque scénario, même quand $\theta_s \geq Q(x^k, \xi_s)$ ; StochasticPrograms n'ajoute que les coupes violées (8 582 coupes contre 11 000 sur la plus grande instance). Le maître resterait plus petit sans changer la convergence, la coupe non violée n'apportant rien en $x^k$.
+- [ ] **Sous-problèmes en parallèle.** Les $S$ sous-problèmes d'une itération sont indépendants : les résoudre avec `Threads.@threads` (un modèle par scénario existe déjà) est le principal avantage d'une décomposition sur la forme extensive, et aucune des deux bibliothèques ne l'exploite dans le benchmark.
+- [ ] **Gestion des coupes inactives.** Sur la plus grande instance, la version à coupe unique fait 159 itérations ; retirer périodiquement les coupes inactives depuis longtemps (Linderoth et Wright, 2003, cités dans le deck 04) borne la taille du maître.
+
+**Priorité 2 — fidélité au cours**
+
+- [ ] **Régularisation** : décomposition régularisée et région de confiance, présentées dans le deck 04 mais absentes du module ; elles visent précisément les longues séries d'itérations de la version à coupe unique.
+- [ ] **Agrégation partielle** (« Hybrid approaches » du deck 04) : regrouper les scénarios en $k$ paquets, entre coupe unique et multicoupes ; le benchmark dirait où se situe le meilleur compromis.
+- [ ] **Démarrage en $\overline{x}$** : évaluer les sous-problèmes à la décision du problème en valeur moyenne avant le premier maître, comme le suggère la nouvelle section du deck 04 ; on obtient l'EEV et une première coupe pour le prix d'une itération.
+- [ ] **Bornes sur l'EVPI et la VSS en cours de route** : exposer l'encadrement $L^{\nu} - \mathrm{WS} \leq \mathrm{EVPI} \leq U^{\nu} - \mathrm{WS}$ (et son analogue pour la VSS) et permettre d'arrêter dès qu'il répond à la question posée.
+
+**Priorité 3 — portée du benchmark**
+
+- [ ] **Instances où la forme extensive devient coûteuse** : augmenter $S$ et la taille du recours jusqu'à ce que la forme extensive ne tienne plus en mémoire ou dépasse le temps de la décomposition, pour montrer l'intérêt de la méthode.
+- [ ] **Instances de référence** : lire le format SMPS (que StochasticPrograms sait lire) pour comparer sur des problèmes publiés (SSN, 20-term, storm…), plutôt que sur les seules instances générées.
+- [ ] **Recours en nombres entiers** : hors de portée de la méthode $L$-shaped telle quelle (le module le refuse) ; la méthode $L$-shaped entière de Laporte et Louveaux serait l'extension naturelle, si le cours aborde ce sujet.
+
+---
+
 ## Notebook — `code/SDDP_from_scratch.ipynb`
 
 - [x] **Nouveau notebook** : implémentation pédagogique de SDDP en Julia (JuMP + HiGHS), écrite à la notation du deck 07 et destinée à être lue à côté de lui — `code/SDDP_hydro.ipynb` n'utilise que l'API de `SDDP.jl`, qui masque l'algorithme.
