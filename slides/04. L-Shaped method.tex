@@ -93,6 +93,12 @@
 \def\cK{\mathcal{K}}
 \def\cB{\mathcal{B}}
 \def\cQ{\mathcal{Q}}
+\newcommand{\WS}{\mathrm{WS}}
+\newcommand{\RP}{\mathrm{RP}}
+\newcommand{\EV}{\mathrm{EV}}
+\newcommand{\EEV}{\mathrm{EEV}}
+\newcommand{\EVPI}{\mathrm{EVPI}}
+\newcommand{\VSS}{\mathrm{VSS}}
 
 \author[Fabian Bastin]{Fabian Bastin \\ \url{fabian.bastin@umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO}
 \date{}
@@ -1509,6 +1515,155 @@ new cut: $\theta_2 \geq \frac{1}{7}(x-2)$.
 \mbox{}
 
 This example shows that the multicut approach can sometimes take more iterations than the single-cut version.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Computing the EVPI and the VSS}
+
+Recall the four values of the previous chapter, with $z(x,\xi) = c^Tx + Q(x,\xi)$ and
+$\overline{\xi} = \sum_{s=1}^S p_s\xi_s$:
+\begin{align*}
+\RP &= \min_{x \in K_1 \cap K_2} c^Tx + \cQ(x), &
+\WS &= \sum_{s=1}^S p_s \min_{x \in K_1 \cap K_2(\xi_s)} z(x,\xi_s), \\
+\EV &= \min_{x \in K_1 \cap K_2(\overline{\xi})} z(x,\overline{\xi}), &
+\EEV &= c^T\overline{x} + \cQ(\overline{x}),
+\end{align*}
+where $\overline{x} = \overline{x}(\overline{\xi})$ is an optimal solution of the $\EV$ problem, and
+\[
+\EVPI = \RP - \WS, \qquad \VSS = \EEV - \RP.
+\]
+
+\mbox{}
+
+{\red Question}: what does each of them cost to compute, with the tools of this chapter?
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$\RP$ and $\WS$}
+
+\begin{itemize}
+\item
+{\blue $\RP$} is the optimal value of the two-stage program: one run of the $L$-shaped method, each
+iteration solving the master problem and the $S$ subproblems.
+\item
+{\blue $\WS$} asks for $S$ {\red independent} problems, one per scenario, in which $x$ may depend on
+$\xi_s$:
+\[
+\min_{x, y} \lbrace c^Tx + q_s^Ty \mid Ax = b,\ T_sx + Wy = h_s,\ x \geq 0,\ y \geq 0 \rbrace.
+\]
+Each is a deterministic program with $n_1 + n_2$ variables --- or the $L$-shaped method with a
+single scenario.
+\item
+The $S$ problems can be solved in parallel: they have $S(n_1 + n_2)$ variables in all, against
+$n_1 + Sn_2$ for the extensive form of $\RP$, but share nothing.
+\item
+Their solutions $x_s^*$ show how much the first-stage decision would change with the information.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$\EV$ and $\EEV$}
+
+\begin{itemize}
+\item
+{\blue $\EV$} is a single deterministic program, at $\overline{\xi}$. This requires $T$, $h$ and $q$
+to be defined at $\overline{\xi}$, which need not be one of the scenarios.
+\item
+{\blue $\EEV$} involves no optimization over $x$: $\overline{x}$ is fixed, and
+\[
+\EEV = c^T\overline{x} + \sum_{s=1}^S p_s Q(\overline{x}, \xi_s)
+\]
+is exactly what step~2 of the $L$-shaped method computes at $x^{\nu} = \overline{x}$: the $S$
+subproblems.
+\item
+If one of the subproblems is infeasible, $\overline{x} \notin K_2$ and $\EEV = \VSS = +\infty$. The
+$L$-shaped method would add a feasibility cut at this point.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Using the $L$-shaped iterations}
+
+\begin{itemize}
+\item
+Evaluating the subproblems at $\overline{x}$ {\red before} the first master problem gives $\EEV$ for
+free, together with a first optimality or feasibility cut, at a well-informed point.
+\item
+At iteration $\nu$, once $\theta$ is bounded by a cut, the master problem gives a lower bound and
+the best point visited an upper bound:
+\[
+L^{\nu} = c^Tx^{\nu} + \theta^{\nu} \leq \RP \leq U^{\nu} = \min_{k \leq \nu} c^Tx^k + \cQ(x^k).
+\]
+\item
+Before convergence, the two measures are therefore already bracketed:
+\[
+L^{\nu} - \WS \leq \EVPI \leq U^{\nu} - \WS, \qquad
+\EEV - U^{\nu} \leq \VSS \leq \EEV - L^{\nu}.
+\]
+\item
+The method can be stopped as soon as these intervals answer the question asked, for instance whether
+$\VSS$ is large enough to justify the stochastic model.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: the farmer}
+
+Back to the farmer of the first chapter (Birge and Louveaux, Section~1.1), in profits, so that
+$\EVPI = \WS - \RP$ and $\VSS = \RP - \EEV$.
+
+\mbox{}
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+& wheat, corn, beets (acres) & profit \\
+\hline
+$\WS$, above-average yields & $183.33,\ 66.67,\ 250$ & $167\,667$ \\
+$\WS$, average yields & $120,\ 80,\ 300$ & $118\,600$ \\
+$\WS$, below-average yields & $100,\ 25,\ 375$ & $59\,950$ \\
+$\WS$ & & $115\,406$ \\
+\hline
+$\RP$ & $170,\ 80,\ 250$ & $108\,390$ \\
+$\EV$, at the average yields & $\overline{x} = (120,\ 80,\ 300)$ & $118\,600$ \\
+$\EEV$ & & $107\,240$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\mbox{}
+
+Hence $\EVPI = 7\,016$ and $\VSS = 1\,150$. Here $\overline{\xi}$ is one of the scenarios, so that
+$\overline{x}$ is also its wait-and-see decision.
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{In the course code}
+
+\texttt{code/LShaped.jl} computes each value, for a problem \texttt{farmer} given as data (costs,
+hence negative values; see section~10 of \texttt{LShaped\_usage.ipynb}):
+
+\begin{footnotesize}
+\begin{semiverbatim}
+rp  = lshaped(farmer; optimizer = HiGHS.Optimizer).objective
+ws  = wait_and_see(farmer; optimizer = HiGHS.Optimizer)   # S problems
+ev  = expected_value_problem(farmer; optimizer = HiGHS.Optimizer)
+eev = expected_result(farmer, ev.x; optimizer = HiGHS.Optimizer)
+                                    # S subproblems at xbar
+evpi(farmer; rp = rp, optimizer = HiGHS.Optimizer)   # RP - WS
+vss(farmer; rp = rp, optimizer = HiGHS.Optimizer)    # EEV - RP
+\end{semiverbatim}
+\end{footnotesize}
+
+\texttt{wait\_and\_see}, \texttt{expected\_result}, \texttt{evpi}, and \texttt{vss} with a given
+$\overline{x}$, also apply to problems written as JuMP models; \texttt{expected\_value\_problem} needs
+scenarios that can be averaged.
 
 \end{frame}
 
