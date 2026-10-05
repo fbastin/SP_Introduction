@@ -134,7 +134,10 @@ of deck 04, in its single-cut and multicut versions, with feasibility cuts:
   own** (`JuMPTwoStageProblem`, for instance when `W` or `q` depend on the scenario);
 - the master and the recourse problems may use different solvers;
 - scenarios are tabulated, or sampled reproducibly with `sample_scenarios` and
-  `substream`.
+  `substream`;
+- the first-stage decision, and the second-stage decision of any given scenario,
+  are read with `first_stage_decision` and `second_stage_decision`, and displayed
+  with `print_first_stage` and `print_second_stage`.
 
 `code/LShaped_usage.ipynb` walks through these features one at a time.
 `code/LShaped_test.jl` checks every method against the extensive form, on the

@@ -45,6 +45,7 @@ export Sense, LEQ, EQ, GEQ, to_sense,
        MasterTemplate, RecourseTemplate,
        lshaped, single_cut_lshaped, multi_cut_lshaped,
        extensive_form, multipliers, feasibility_certificate, new_model,
+       first_stage_decision, second_stage_decision, print_first_stage, print_second_stage,
        sample_scenarios, substream
 
 # --------------------------------------------------------------------------------------------
@@ -432,12 +433,12 @@ scenario_data(pb::TwoStageProblem, s) = pb.ξ[s]
 """Right-hand side of the second stage at `(x, ξ)`."""
 recourse_rhs(pb::TwoStageProblem, x, ξ) = pb.h(ξ) - pb.T(ξ) * x
 
-recourse_variables!(m::JuMP.Model, pb::TwoStageProblem) =
-    declare_box!(m, @variable(m, [1:n_y(pb)]), pb.lb, pb.ub)
+recourse_variables!(m::JuMP.Model, pb::TwoStageProblem; base_name = "y") =
+    declare_box!(m, @variable(m, [1:n_y(pb)], base_name = base_name), pb.lb, pb.ub)
 
 function build_master(pb::TwoStageProblem, optimizer)
     m = new_model(optimizer)
-    x = declare_box!(m, @variable(m, [1:n_x(pb)]), pb.lb1, pb.ub1, pb.integer1)
+    x = declare_box!(m, @variable(m, [1:n_x(pb)], base_name = "x"), pb.lb1, pb.ub1, pb.integer1)
     add_rows!(m, pb.A * x, pb.senses1, pb.b)
     @objective(m, Min, dot(pb.c, x))
     return MasterTemplate(m, x)
@@ -512,8 +513,8 @@ solutions are checked against.
 """
 function extensive_form(pb::TwoStageProblem; optimizer, kwargs...)
     m = new_model(optimizer; kwargs...)
-    x = declare_box!(m, @variable(m, [1:n_x(pb)]), pb.lb1, pb.ub1, pb.integer1)
-    y = [recourse_variables!(m, pb) for _ in 1:n_scenarios(pb)]
+    x = declare_box!(m, @variable(m, [1:n_x(pb)], base_name = "x"), pb.lb1, pb.ub1, pb.integer1)
+    y = [recourse_variables!(m, pb; base_name = "y_$s") for s in 1:n_scenarios(pb)]
     add_rows!(m, pb.A * x, pb.senses1, pb.b)
     for s in 1:n_scenarios(pb)
         add_rows!(m, pb.T(pb.ξ[s]) * x + pb.W * y[s], pb.senses2, pb.h(pb.ξ[s]))
@@ -571,7 +572,7 @@ function JuMPTwoStageProblem(; n_scenarios::Integer, master_builder::Function,
                              cut_intercept::Union{Nothing,Function} = nothing,
                              elastic_builder::Union{Nothing,Function} = nothing,
                              probabilities = s -> 1 / n_scenarios,
-                             data = s -> s)
+                             data = _scenario_index)
     n_scenarios > 0 || error("at least one scenario is required")
     tight = cut_intercept === nothing ?
             (s, x, π, v) -> v + dot(cut_coefficients(s, x, π), x) : cut_intercept
@@ -579,6 +580,8 @@ function JuMPTwoStageProblem(; n_scenarios::Integer, master_builder::Function,
                                cut_coefficients, tight, elastic_builder,
                                probabilities, data)
 end
+
+_scenario_index(s) = s   # the default `data`: the scenario index, which says nothing of ξ
 
 n_scenarios(md::JuMPTwoStageProblem) = md.n_scenarios
 scenario_probability(md::JuMPTwoStageProblem, s) = md.probabilities(s)
@@ -649,8 +652,10 @@ tolerance would ask more of the solvers than they deliver on objectives of large
 The upper bound is that of the **incumbent**, the best first-stage solution met so far: the value
 `c'xᵏ + Q(xᵏ)` of the current iterate does not decrease monotonically. Returns a named tuple with
 the incumbent `x` and its `objective`, the last `lower_bound`, the `gap` between them,
-`converged`, the counters of both kinds of cut, the models, and the `history`, whose entries
-record per iteration the bounds and the `value` of the iterate `x`.
+`converged`, the counters of both kinds of cut, the `problem` `md` and the models, and the
+`history`, whose entries record per iteration the bounds and the `value` of the iterate `x`.
+[`first_stage_decision`](@ref), [`second_stage_decision`](@ref), [`print_first_stage`](@ref) and
+[`print_second_stage`](@ref) read the decisions off this result.
 """
 function lshaped(md::AbstractTwoStageModel;
                  optimizer = nothing,
@@ -811,13 +816,96 @@ function lshaped(md::AbstractTwoStageModel;
     end
     return (x = xstar, objective = upper, lower_bound = lower, gap = upper - lower,
             converged = converged, iterations = iteration, optimality_cuts = n_optimality,
-            feasibility_cuts = n_feasibility, master = master, recourse = recourse,
-            history = history)
+            feasibility_cuts = n_feasibility, problem = md, master = master,
+            recourse = recourse, history = history)
 end
 
 _num(v) = isfinite(v) ? @sprintf("%.6f", v) : "-Inf"
 
 single_cut_lshaped(md; kwargs...) = lshaped(md; kwargs..., cuts = :single)
 multi_cut_lshaped(md; kwargs...) = lshaped(md; kwargs..., cuts = :multi)
+
+# --------------------------------------------------------------------------------------------
+# the decisions
+# --------------------------------------------------------------------------------------------
+
+"""
+    first_stage_decision(res)
+
+The first-stage decision of the result `res` of [`lshaped`](@ref): the incumbent, the best
+first-stage solution met.
+"""
+first_stage_decision(res::NamedTuple) = res.x
+
+"""
+    second_stage_decision(res, s)
+
+The second-stage decision of scenario `s` for the first-stage decision of `res`, obtained by solving
+the recourse problem of that scenario at `res.x`.
+
+The recourse models `res.recourse` were last solved at the last iterate of the method, which need
+not be the incumbent `res.x`: reading their solution directly could give the recourse of another
+first-stage decision. When the recourse problem has several optimal solutions, this is one of them.
+"""
+function second_stage_decision(res::NamedTuple, s::Integer)
+    r = _solve_recourse_at_incumbent!(res, s)
+    return JuMP.value.(r.y)
+end
+
+function _solve_recourse_at_incumbent!(res::NamedTuple, s::Integer)
+    md = res.problem
+    1 <= s <= n_scenarios(md) ||
+        throw(ArgumentError("there is no scenario $s: the scenarios are numbered 1 to $(n_scenarios(md))"))
+    all(isfinite, res.x) || error("no feasible first-stage decision was found")
+    r = res.recourse[s]
+    set_recourse_rhs!(md, r, res.x, s)
+    optimize!(r.model)
+    status = termination_status(r.model)
+    status == MOI.OPTIMAL ||
+        error("scenario $s: the recourse problem is $status at the first-stage decision")
+    return r
+end
+
+"""
+    print_first_stage([io,] res; digits = 6)
+
+Display the first-stage decision of `res`, variable by variable, with its objective value.
+"""
+function print_first_stage(io::IO, res::NamedTuple; digits::Integer = 6)
+    @printf(io, "First-stage decision, objective %s\n", _round(res.objective, digits))
+    _print_values(io, res.master.x, first_stage_decision(res), "x", digits)
+end
+print_first_stage(res::NamedTuple; kwargs...) = print_first_stage(stdout, res; kwargs...)
+
+"""
+    print_second_stage([io,] res, s; digits = 6)
+
+Display the second-stage decision of scenario `s` for the first-stage decision of `res`, with the
+scenario, its probability and the value `Q(x, ξₛ)` of its recourse problem.
+"""
+function print_second_stage(io::IO, res::NamedTuple, s::Integer; digits::Integer = 6)
+    md = res.problem
+    r = _solve_recourse_at_incumbent!(res, s)
+    @printf(io, "Second-stage decision, scenario %d of %d: %sprobability %s, Q(x, ξ) = %s\n",
+            s, n_scenarios(md), _scenario_label(md, s), _round(scenario_probability(md, s), digits),
+            _round(recourse_value(r), digits))
+    _print_values(io, r.y, JuMP.value.(r.y), "y", digits)
+end
+print_second_stage(res::NamedTuple, s::Integer; kwargs...) = print_second_stage(stdout, res, s; kwargs...)
+
+_round(v, digits) = string(round(v; digits = digits) + 0.0)   # + 0.0 turns -0.0 into 0.0
+
+_scenario_label(md::TwoStageProblem, s) = "ξ = $(scenario_data(md, s)), "
+_scenario_label(md::JuMPTwoStageProblem, s) =
+    md.data === _scenario_index ? "" : "ξ = $(scenario_data(md, s)), "
+
+"""One line per variable, named as in its model, or `fallback[j]` if it has no name."""
+function _print_values(io::IO, variables, values, fallback, digits)
+    labels = [isempty(JuMP.name(v)) ? "$fallback[$j]" : JuMP.name(v) for (j, v) in enumerate(variables)]
+    width = maximum(length, labels; init = 0)
+    for (label, v) in zip(labels, values)
+        println(io, "  ", rpad(label, width), " = ", _round(v, digits))
+    end
+end
 
 end # module

@@ -454,6 +454,57 @@ end
 end
 
 # --------------------------------------------------------------------------------------------
+# the decisions
+# --------------------------------------------------------------------------------------------
+
+"""`Wy ⋛ h(ξ) - T(ξ)x`, row by row, with the senses of `pb`."""
+function satisfies_recourse_rows(pb, x, y, ξ; atol = 1e-7)
+    lhs, rhs = pb.W * y, pb.h(ξ) - pb.T(ξ) * x
+    return all(zip(pb.senses2, lhs, rhs)) do (sense, l, r)
+        sense == LShaped.LEQ ? l <= r + atol : sense == LShaped.GEQ ? l >= r - atol : abs(l - r) <= atol
+    end
+end
+
+@testset "first- and second-stage decisions" begin
+    for (pb, cuts) in ((icecream(), :single), (icecream(), :multi), (icecream(ub = 3.0), :single))
+        res = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = cuts, verbose = false)
+        @test first_stage_decision(res) == res.x
+        x = first_stage_decision(res)
+        expected = dot(pb.c, x)
+        for s in eachindex(pb.ξ)
+            y = second_stage_decision(res, s)
+            @test length(y) == length(pb.lb)
+            @test all(pb.lb .- 1e-7 .<= y .<= pb.ub .+ 1e-7)
+            @test satisfies_recourse_rows(pb, x, y, pb.ξ[s])
+            expected += pb.p[s] * dot(pb.q(pb.ξ[s]), y)
+        end
+        # each yₛ is feasible, and together they reach the optimal value: each is optimal
+        @test expected ≈ res.objective atol = 1e-6
+    end
+    res = lshaped(icecream(); optimizer = HiGHS.Optimizer, verbose = false)
+    @test_throws ArgumentError second_stage_decision(res, 0)
+    @test_throws ArgumentError second_stage_decision(res, length(DEMAND_SCENARIOS) + 1)
+end
+
+@testset "the decisions are displayed" begin
+    res = lshaped(icecream(); optimizer = HiGHS.Optimizer, verbose = false)
+    first = sprint(print_first_stage, res)
+    @test startswith(first, "First-stage decision, objective 381.853333")
+    @test count(==('\n'), first) == 1 + NPLANTS
+    @test occursin("  x[1] = 2.666667", first) && occursin("  x[4] = 2.0", first)
+    second = sprint((io, r) -> print_second_stage(io, r, 2), res)
+    @test startswith(second, "Second-stage decision, scenario 2 of 3: ξ = 5.0, probability 0.4, Q(x, ξ) = ")
+    @test count(==('\n'), second) == 1 + NPLANTS * NFLAVORS
+    @test occursin("  y[12] = ", second)
+    @test !occursin("-0.0", second)
+    # a JuMP model keeps its own names; without `data`, nothing is known of ξ
+    resj = lshaped(icecream_jump(); optimizer = HiGHS.Optimizer, verbose = false)
+    secondj = sprint((io, r) -> print_second_stage(io, r, 1; digits = 3), resj)
+    @test startswith(secondj, "Second-stage decision, scenario 1 of 3: probability 0.3, Q(x, ξ) = ")
+    @test occursin("  y[1]  = ", secondj)
+end
+
+# --------------------------------------------------------------------------------------------
 # diagnostics
 # --------------------------------------------------------------------------------------------
 
