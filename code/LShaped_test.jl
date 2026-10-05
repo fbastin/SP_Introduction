@@ -505,6 +505,85 @@ end
 end
 
 # --------------------------------------------------------------------------------------------
+# the value of perfect information and of the stochastic solution
+# --------------------------------------------------------------------------------------------
+
+# The example of deck 03: Q(x, ξ) = |x - ξ| with ξ uniform over {1, 2, 4} and c = 0, written
+# y⁺ - y⁻ = ξ - x. RP = 1, WS = 0, EV = 0 at x̄ = 7/3, EEV = 10/9.
+absolute_deviation() = TwoStageProblem(
+    c = [0.0], A = ones(1, 1), senses1 = ['<'], b = [10.0],
+    q = [1.0, 1.0], W = [1.0 -1.0], senses2 = ['='], T = ones(1, 1), h = ξ -> [ξ],
+    ξ = [1.0, 2.0, 4.0], p = fill(1 / 3, 3))
+
+# The farmer of Birge and Louveaux (2011, Section 1.1): 500 acres of wheat, corn and sugar beets,
+# random yields. Second stage: wheat and corn bought (w) or sold (y₁, y₂) to cover the cattle feed
+# requirements, beets sold at 36 up to the quota of 6000 tons (y₃), at 10 beyond it (y₄).
+# WS = -115405.56, RP = -108390, EV = -118600, EEV = -107240: EVPI = 7015.56 and VSS = 1150.
+birge_louveaux_farmer() = TwoStageProblem(
+    c = [150.0, 230.0, 260.0], A = ones(1, 3), senses1 = ['<'], b = [500.0],
+    q = [238.0, 210.0, -170.0, -150.0, -36.0, -10.0],          # w₁, w₂, y₁, y₂, y₃, y₄
+    W = [1.0 0.0 -1.0 0.0 0.0 0.0;                              # t₁x₁ + w₁ - y₁ ≥ 200
+         0.0 1.0 0.0 -1.0 0.0 0.0;                              # t₂x₂ + w₂ - y₂ ≥ 240
+         0.0 0.0 0.0 0.0 1.0 1.0;                               # y₃ + y₄ ≤ t₃x₃
+         0.0 0.0 0.0 0.0 1.0 0.0],                              # y₃ ≤ 6000
+    senses2 = ['>', '>', '<', '<'],
+    T = t -> [t[1] 0.0 0.0; 0.0 t[2] 0.0; 0.0 0.0 -t[3]; 0.0 0.0 0.0],   # rows Wy ⋛ h - Tx
+    h = [200.0, 240.0, 0.0, 6000.0],
+    ξ = [[3.0, 3.6, 24.0], [2.5, 3.0, 20.0], [2.0, 2.4, 16.0]], p = fill(1 / 3, 3))
+
+@testset "EVPI and VSS: the example of the slides" begin
+    pb = absolute_deviation()
+    ws = wait_and_see(pb; optimizer = HiGHS.Optimizer)
+    @test ws.value ≈ 0 atol = 1e-6
+    @test ws.decisions ≈ [[1.0], [2.0], [4.0]] atol = 1e-6
+    ev = expected_value_problem(pb; optimizer = HiGHS.Optimizer)
+    @test ev.value ≈ 0 atol = 1e-6
+    @test ev.x ≈ [7 / 3] atol = 1e-6
+    @test expected_result(pb, ev.x; optimizer = HiGHS.Optimizer) ≈ 10 / 9 atol = 1e-6
+    @test evpi(pb; optimizer = HiGHS.Optimizer) ≈ 1 atol = 1e-6
+    @test vss(pb; optimizer = HiGHS.Optimizer) ≈ 1 / 9 atol = 1e-6
+end
+
+@testset "EVPI and VSS: the farmer of Birge and Louveaux" begin
+    pb = birge_louveaux_farmer()
+    rp = reference(pb)
+    @test rp ≈ -108390 atol = 1e-6
+    @test wait_and_see(pb; optimizer = HiGHS.Optimizer).value ≈ -115405.5555555 atol = 1e-4
+    ev = expected_value_problem(pb; optimizer = HiGHS.Optimizer)
+    @test ev.value ≈ -118600 atol = 1e-6
+    @test ev.x ≈ [120, 80, 300] atol = 1e-6
+    @test expected_result(pb, ev.x; optimizer = HiGHS.Optimizer) ≈ -107240 atol = 1e-6
+    for cuts in (:single, :multi)
+        @test evpi(pb; optimizer = HiGHS.Optimizer, cuts = cuts) ≈ 7015.5555555 atol = 1e-4
+        @test vss(pb; optimizer = HiGHS.Optimizer, cuts = cuts) ≈ 1150 atol = 1e-4
+    end
+    # given RP is used as is
+    @test evpi(pb; rp = rp, optimizer = HiGHS.Optimizer) ≈ 7015.5555555 atol = 1e-4
+    @test vss(pb; rp = rp + 1, optimizer = HiGHS.Optimizer) ≈ 1149 atol = 1e-4
+end
+
+@testset "EVPI and VSS: a JuMP model, and an infeasible mean-value decision" begin
+    # the same instance, as data and as JuMP models
+    data, jump = icecream(), icecream_jump()
+    @test wait_and_see(jump; optimizer = HiGHS.Optimizer).value ≈
+          wait_and_see(data; optimizer = HiGHS.Optimizer).value atol = 1e-6
+    x̄ = expected_value_problem(data; optimizer = HiGHS.Optimizer).x
+    @test vss(jump, x̄; optimizer = HiGHS.Optimizer) ≈ vss(data; optimizer = HiGHS.Optimizer) atol = 1e-6
+    @test evpi(jump; optimizer = HiGHS.Optimizer) ≈ evpi(data; optimizer = HiGHS.Optimizer) atol = 1e-6
+    @test evpi(data; optimizer = HiGHS.Optimizer) >= -1e-6
+    @test vss(data; optimizer = HiGHS.Optimizer) >= -1e-6
+    # without the minimum capacity, the capacity bought for the mean demand is too small for the
+    # largest one: EEV, and VSS, are infinite
+    pb = icecream(min_capacity = 0.0)
+    x̄ = expected_value_problem(pb; optimizer = HiGHS.Optimizer).x
+    @test sum(x̄) < 12
+    @test expected_result(pb, x̄; optimizer = HiGHS.Optimizer) == Inf
+    @test vss(pb; optimizer = HiGHS.Optimizer) == Inf
+    # the scenarios of a JuMP model cannot be averaged
+    @test_throws MethodError expected_value_problem(jump; optimizer = HiGHS.Optimizer)
+end
+
+# --------------------------------------------------------------------------------------------
 # diagnostics
 # --------------------------------------------------------------------------------------------
 

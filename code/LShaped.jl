@@ -46,6 +46,7 @@ export Sense, LEQ, EQ, GEQ, to_sense,
        lshaped, single_cut_lshaped, multi_cut_lshaped,
        extensive_form, multipliers, feasibility_certificate, new_model,
        first_stage_decision, second_stage_decision, print_first_stage, print_second_stage,
+       wait_and_see, expected_value_problem, expected_result, evpi, vss,
        sample_scenarios, substream
 
 # --------------------------------------------------------------------------------------------
@@ -898,6 +899,155 @@ _round(v, digits) = string(round(v; digits = digits) + 0.0)   # + 0.0 turns -0.0
 _scenario_label(md::TwoStageProblem, s) = "ξ = $(scenario_data(md, s)), "
 _scenario_label(md::JuMPTwoStageProblem, s) =
     md.data === _scenario_index ? "" : "ξ = $(scenario_data(md, s)), "
+
+# --------------------------------------------------------------------------------------------
+# the value of perfect information and of the stochastic solution
+# --------------------------------------------------------------------------------------------
+
+"""
+    ScenarioRestriction(md, s)
+
+The two-stage problem `md` restricted to its scenario `s`, taken with probability one: what the
+decision maker would solve knowing that `ξ = ξₛ`. It is solved by [`lshaped`](@ref) like any other
+modelization, which makes [`wait_and_see`](@ref) work on both.
+"""
+struct ScenarioRestriction{M <: AbstractTwoStageModel} <: AbstractTwoStageModel
+    md::M
+    s::Int
+end
+
+n_scenarios(::ScenarioRestriction) = 1
+scenario_probability(::ScenarioRestriction, _) = 1.0
+scenario_data(r::ScenarioRestriction, _) = scenario_data(r.md, r.s)
+build_master(r::ScenarioRestriction, optimizer) = build_master(r.md, optimizer)
+build_recourse(r::ScenarioRestriction, optimizer, _) = build_recourse(r.md, optimizer, r.s)
+build_elastic(r::ScenarioRestriction, optimizer, _) = build_elastic(r.md, optimizer, r.s)
+cut_coefficients(r::ScenarioRestriction, rec, _, x, π) = cut_coefficients(r.md, rec, r.s, x, π)
+cut_intercept(r::ScenarioRestriction, rec, _, x, π, v) = cut_intercept(r.md, rec, r.s, x, π, v)
+
+function _solve_converged(md; kwargs...)
+    res = lshaped(md; kwargs..., verbose = false)
+    res.converged || error("the L-shaped method did not converge, gap $(res.gap)")
+    return res
+end
+
+"""
+    wait_and_see(md; optimizer, kwargs...)
+
+The **wait-and-see** value `WS = E[min_x z(x, ξ)]` of the two-stage problem `md`: the expected
+optimal value if `ξ` were known before deciding `x`, each scenario being solved on its own by
+[`lshaped`](@ref), to which `kwargs` are passed. Returns a named tuple with the `value` `WS`, and
+per scenario the optimal `values` and first-stage `decisions`.
+"""
+function wait_and_see(md::AbstractTwoStageModel; kwargs...)
+    results = [_solve_converged(ScenarioRestriction(md, s); kwargs...) for s in 1:n_scenarios(md)]
+    values = [res.objective for res in results]
+    p = [scenario_probability(md, s) for s in 1:n_scenarios(md)]
+    return (value = dot(p, values), values = values, decisions = [res.x for res in results])
+end
+
+"""
+    expected_value_problem(pb::TwoStageProblem; optimizer, kwargs...)
+
+The **expected value problem**: `pb` with its scenarios replaced by their mean `ξ̄ = Σₛ pₛ ξₛ`, solved
+by [`extensive_form`](@ref). Returns a named tuple with its optimal `value` `EV` and its optimal
+first-stage decision `x`, the mean-value decision `x̄(ξ̄)`.
+
+The scenarios must support averaging (numbers or vectors); for a [`JuMPTwoStageProblem`](@ref),
+whose scenarios are opaque, compute `x̄(ξ̄)` yourself and pass it to [`expected_result`](@ref) or
+[`vss`](@ref).
+"""
+function expected_value_problem(pb::TwoStageProblem; optimizer, kwargs...)
+    ξ̄ = try
+        sum(pb.p[s] * pb.ξ[s] for s in eachindex(pb.ξ))
+    catch err
+        err isa MethodError || rethrow()
+        error("the scenarios of this problem cannot be averaged; compute the mean-value " *
+              "decision yourself and pass it to `expected_result` or `vss`")
+    end
+    ev = TwoStageProblem(pb.c, pb.A, pb.senses1, pb.b, pb.q, pb.W, pb.senses2, pb.T, pb.h,
+                         [ξ̄], [1.0], pb.lb1, pb.ub1, pb.integer1, pb.lb, pb.ub, pb.intercept)
+    _, x̄, value = extensive_form(ev; optimizer, kwargs...)
+    return (value = value, x = x̄)
+end
+
+"""
+    expected_result(md, x; optimizer, master_optimizer = optimizer, recourse_optimizer = optimizer)
+
+The expected cost `c'x + Σₛ pₛ Q(x, ξₛ)` of the first-stage decision `x`: with the mean-value
+decision `x̄(ξ̄)` of [`expected_value_problem`](@ref), the **expected result of the EV solution**
+`EEV`. It is `+Inf` if `x` leaves the recourse problem of some scenario infeasible. `x` is assumed
+to satisfy the first-stage constraints.
+"""
+function expected_result(md::AbstractTwoStageModel, x::AbstractVector;
+                         optimizer = nothing, master_optimizer = optimizer,
+                         recourse_optimizer = optimizer)
+    (master_optimizer === nothing || recourse_optimizer === nothing) &&
+        error("pass `optimizer`, or both `master_optimizer` and `recourse_optimizer`")
+    c, constant = master_cost(build_master(md, master_optimizer))
+    length(x) == length(c) ||
+        error("x has $(length(x)) components, the first stage $(length(c)) variables")
+    total = dot(c, x) + constant
+    for s in 1:n_scenarios(md)
+        total += scenario_probability(md, s) * _recourse_value(md, recourse_optimizer, s, x)
+        isinf(total) && return total
+    end
+    return total
+end
+
+"""`Q(x, ξₛ)`, `+Inf` if the recourse problem is infeasible, `-Inf` if it is unbounded."""
+function _recourse_value(md, optimizer, s, x)
+    r = check_recourse(build_recourse(md, optimizer, s), s)
+    set_recourse_rhs!(md, r, x, s)
+    optimize!(r.model)
+    status = termination_status(r.model)
+    status == MOI.OPTIMAL && return recourse_value(r)
+    status == MOI.INFEASIBLE && return Inf
+    status == MOI.DUAL_INFEASIBLE && return -Inf
+    # the solver could not tell infeasible from unbounded: the elastic model decides
+    e = build_elastic(md, optimizer, s)
+    e === nothing && error("scenario $s: the recourse problem is $status, and no elastic model " *
+                           "is available to tell whether it is infeasible")
+    set_recourse_rhs!(md, e, x, s)
+    optimize!(e.model)
+    return recourse_value(e) > 1e-7 ? Inf : -Inf
+end
+
+"""
+    evpi(md; rp = nothing, optimizer, kwargs...)
+
+The **expected value of perfect information** `EVPI = RP - WS`: the most the decision maker should
+pay for a perfect forecast of `ξ`. `RP`, the optimal value of `md`, is computed by
+[`lshaped`](@ref) unless given as `rp`; `kwargs` are passed to `lshaped`.
+"""
+function evpi(md::AbstractTwoStageModel; rp = nothing, kwargs...)
+    rp = rp === nothing ? _solve_converged(md; kwargs...).objective : rp
+    return rp - wait_and_see(md; kwargs...).value
+end
+
+"""
+    vss(pb::TwoStageProblem; rp = nothing, optimizer, kwargs...)
+    vss(md, x̄; rp = nothing, optimizer, kwargs...)
+
+The **value of the stochastic solution** `VSS = EEV - RP`: what is gained by modelling the
+uncertainty rather than replacing `ξ` by its mean. The mean-value decision `x̄` is computed by
+[`expected_value_problem`](@ref), or given, which is the only way for a
+[`JuMPTwoStageProblem`](@ref). `VSS` is `+Inf` when `x̄` is infeasible for some scenario. `RP` is
+computed by [`lshaped`](@ref) unless given as `rp`.
+"""
+function vss(md::AbstractTwoStageModel, x̄::AbstractVector; rp = nothing, kwargs...)
+    rp = rp === nothing ? _solve_converged(md; kwargs...).objective : rp
+    return expected_result(md, x̄; _optimizers(; kwargs...)...) - rp
+end
+vss(pb::TwoStageProblem; rp = nothing, kwargs...) =
+    vss(pb, expected_value_problem(pb; optimizer = _optimizers(; kwargs...).master_optimizer).x;
+        rp = rp, kwargs...)
+
+"""The optimizer keywords among `kwargs`, as `expected_result` takes them."""
+function _optimizers(; optimizer = nothing, master_optimizer = optimizer,
+                     recourse_optimizer = optimizer, kwargs...)
+    return (master_optimizer = master_optimizer, recourse_optimizer = recourse_optimizer)
+end
 
 """One line per variable, named as in its model, or `fallback[j]` if it has no name."""
 function _print_values(io::IO, variables, values, fallback, digits)

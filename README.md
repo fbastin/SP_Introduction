@@ -137,7 +137,10 @@ of deck 04, in its single-cut and multicut versions, with feasibility cuts:
   `substream`;
 - the first-stage decision, and the second-stage decision of any given scenario,
   are read with `first_stage_decision` and `second_stage_decision`, and displayed
-  with `print_first_stage` and `print_second_stage`.
+  with `print_first_stage` and `print_second_stage`;
+- the wait-and-see value, the expected value problem and the expected result of
+  its solution give the EVPI and the VSS (`wait_and_see`,
+  `expected_value_problem`, `expected_result`, `evpi`, `vss`).
 
 `code/LShaped_usage.ipynb` walks through these features one at a time.
 `code/LShaped_test.jl` checks every method against the extensive form, on the
