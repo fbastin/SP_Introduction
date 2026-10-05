@@ -8,6 +8,7 @@ using .LShaped
 using Test
 using JuMP
 using HiGHS
+using Ipopt
 using GLPK
 using LinearAlgebra
 using Statistics
@@ -655,6 +656,163 @@ end
     @test vss(pb; optimizer = HiGHS.Optimizer) == Inf
     # the scenarios of a JuMP model cannot be averaged
     @test_throws MethodError expected_value_problem(jump; optimizer = HiGHS.Optimizer)
+end
+
+# --------------------------------------------------------------------------------------------
+# partial aggregation, regularization, starting point, callback
+# --------------------------------------------------------------------------------------------
+
+# Birge and Louveaux (2011), Section 5.1, Exercise 5: two scenarios, -20 ≤ x ≤ 20, c = 0, and the
+# second stage Wy = h - Tx with W, q and h given; the example of regularized decomposition of
+# deck 04.
+exercise_5() = TwoStageProblem(
+    c = [0.0], A = zeros(0, 1), senses1 = Char[], b = Float64[],
+    q = ξ -> ξ[1], W = [1.0 -1 -1 -1 0 0; 0 1 0 0 1 0; 0 0 1 0 0 1], senses2 = ['=', '=', '='],
+    T = reshape([1.0, 0, 0], 3, 1), h = ξ -> ξ[2],
+    ξ = [([1.0, 0, 0, 0, 0, 0], [-1.0, 2, 7]), ([1.5, 0, 2 / 7, 1, 0, 0], [0.0, 2, 7])],
+    p = [0.5, 0.5], lb1 = -20.0, ub1 = 20.0)
+
+# Exercise 6: Example 2 of the same section, Q(x, ξ) = |x - ξ| on 0 ≤ x ≤ 10, ξ taking the values
+# 0.5, 1, 1.5, 3, 4, 5 with probability 1/9 and 2 with probability 1/3.
+exercise_6() = TwoStageProblem(
+    c = [0.0], A = ones(1, 1), senses1 = ['<'], b = [10.0],
+    q = [1.0, 1.0], W = [1.0 -1.0], senses2 = ['='], T = ones(1, 1), h = ξ -> [ξ],
+    ξ = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0], p = [1, 1, 1, 3, 1, 1, 1] ./ 9)
+
+@testset "partial aggregation: Exercise 6(c) of Birge and Louveaux" begin
+    res = lshaped(exercise_6(); optimizer = HiGHS.Optimizer, cuts = [[1, 2, 3], [4], [5, 6, 7]],
+                  x0 = [0.0], verbose = false)
+    # the cuts θ₁ ≥ 1 - x, θ₂ ≥ 2 - x, θ₃ ≥ 4 - x at x¹ = 0, then x² = 10 and the cuts θ₁ ≥ x - 1,
+    # θ₂ ≥ x - 2, θ₃ ≥ x - 4; "only two major iterations are needed"
+    @test [h.x[1] for h in res.history] ≈ [0, 10, 2] atol = 1e-9
+    @test res.converged && res.iterations == 3 && res.optimality_cuts == 6
+    @test res.objective ≈ 1 atol = 1e-9
+    @test count_theta_rows(res.master.model) == 6
+    # the partitions `cuts` describes
+    clusters = LShaped.scenario_clusters
+    @test clusters(:single, 4) == [[1, 2, 3, 4]]
+    @test clusters(:multi, 3) == [[1], [2], [3]]
+    @test clusters(3, 7) == [[1, 2], [3, 4, 5], [6, 7]]
+    @test clusters([[2, 1], [3]], 3) == [[2, 1], [3]]
+    @test_throws ErrorException clusters(0, 3)
+    @test_throws ErrorException clusters([[1, 2], [2, 3]], 3)
+    @test_throws ErrorException clusters([[1], [3]], 3)
+    # any partition gives the same optimum, with as many θ as clusters
+    pb = sampled_demand()
+    for C in (2, 10, 50)
+        res = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = C, verbose = false)
+        @test res.converged
+        @test length(res.clusters) == C
+        @test res.objective ≈ reference(pb) atol = 1e-6
+    end
+end
+
+@testset "regularized decomposition: the example of deck 04" begin
+    # from a¹ = -0.5, the solution of the expected value problem, and ρ = 1: x² = 0.25, a serious
+    # step, then x³ = 0.25, whose model value reaches f(a³) = 0: a³ is optimal
+    res = lshaped(exercise_5(); optimizer = HiGHS.Optimizer, cuts = :multi, x0 = [-0.5],
+                  regularization = :regularized_decomposition, rho = 1.0, verbose = false)
+    @test [h.x[1] for h in res.history] ≈ [-0.5, 0.25] atol = 1e-6
+    @test res.converged && res.iterations == 3
+    @test res.x ≈ [0.25] atol = 1e-6
+    @test res.objective ≈ 0 atol = 1e-9
+    @test res.lower_bound ≈ 0 atol = 1e-6            # computed once at the end, without ρ
+    # the plain method from x¹ = -2 follows the path of the book: x² = 20, x³ = 12/7
+    res = lshaped(exercise_5(); optimizer = HiGHS.Optimizer, x0 = [-2.0], verbose = false)
+    @test [h.x[1] for h in res.history][1:3] ≈ [-2, 20, 12 / 7] atol = 1e-9
+end
+
+@testset "regularizations reach the optimum" begin
+    instances = [("ice cream", icecream()), ("feasibility cuts", icecream(min_capacity = 0.0)),
+                 ("bounded recourse", icecream(ub = 3.0)), ("farmer", birge_louveaux_farmer()),
+                 ("exercise 5", exercise_5())]
+    # HiGHS's QP solver is not reliable on the masters of regularized decomposition: Ipopt solves
+    # them, if it does not relax the constraints
+    ipopt = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)
+    for (name, pb) in instances, regularization in (:regularized_decomposition, :trust_region),
+        cuts in (:single, :multi)
+        master = regularization == :trust_region ? HiGHS.Optimizer : ipopt
+        res = lshaped(pb; master_optimizer = master, recourse_optimizer = HiGHS.Optimizer, cuts = cuts,
+                      regularization = regularization, maxiter = 2000, tol = 1e-7, verbose = false)
+        @test res.converged
+        optimal = reference(pb)
+        @test res.objective ≈ optimal rtol = 1e-6 atol = 1e-6
+        @test res.lower_bound <= optimal + 1e-6 * (1 + abs(optimal))
+    end
+    # a small trust region keeps the first step close to the starting point
+    res = lshaped(exercise_5(); optimizer = HiGHS.Optimizer, x0 = [-2.0],
+                  regularization = :trust_region, radius = 0.5, verbose = false)
+    @test abs(res.history[2].x[1] - (-2.0)) <= 0.5 + 1e-9
+    @test res.converged
+    @test res.objective ≈ 0 atol = 1e-9
+    # what is wrong with the parameters is reported
+    pb = icecream()
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, regularization = :proximal)
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, rho = 0)
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, eta1 = 0.5, eta2 = 0.1)
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, gamma = 1)
+end
+
+@testset "regularized decomposition: a quadratic master solved, or an error" begin
+    # HiGHS's QP solver may declare a wrong solution of the master optimal: the method checks the
+    # last master before stopping, and raises an error rather than return a wrong decision
+    # the farmer with three scenarios of sampled yields, on which HiGHS 1.15 fails
+    rng = substream(2)
+    yields = [[2.5, 3.0, 20.0] .* rand(rng, Uniform(0.8, 1.2), 3) for _ in 1:3]
+    sampled_farmer = TwoStageProblem(
+        c = [150.0, 230.0, 260.0], A = ones(1, 3), senses1 = ['<'], b = [500.0],
+        q = [238.0, 210.0, -170.0, -150.0, -36.0, -10.0],
+        W = [1.0 0 -1 0 0 0; 0 1 0 -1 0 0; 0 0 0 0 1 1; 0 0 0 0 1 0], senses2 = ['>', '>', '<', '<'],
+        T = t -> [t[1] 0 0; 0 t[2] 0; 0 0 -t[3]; 0 0 0], h = [200.0, 240.0, 0.0, 6000.0],
+        ξ = yields, p = fill(1 / 3, 3))
+    for pb in (sampled_demand(), farm(), birge_louveaux_farmer(), sampled_farmer)
+        res = try
+            lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi,
+                    regularization = :regularized_decomposition, verbose = false)
+        catch e
+            e
+        end
+        if res isa Exception
+            @test occursin("the quadratic master problem was not solved", sprint(showerror, res))
+        else
+            @test res.converged
+            @test res.objective ≈ reference(pb) rtol = 1e-6
+        end
+    end
+    ipopt = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)
+    res = lshaped(sampled_farmer; master_optimizer = ipopt, recourse_optimizer = HiGHS.Optimizer,
+                  cuts = :multi, regularization = :regularized_decomposition, verbose = false)
+    @test res.converged
+    @test res.objective ≈ reference(sampled_farmer) rtol = 1e-6
+end
+
+@testset "starting point, callback, and bounds on the EVPI and the VSS" begin
+    pb = birge_louveaux_farmer()
+    # x0 = :mean_value starts from the solution of the expected value problem
+    res = lshaped(pb; optimizer = HiGHS.Optimizer, x0 = :mean_value, verbose = false)
+    @test res.history[1].x ≈ [120, 80, 300] atol = 1e-6
+    @test res.converged
+    @test res.objective ≈ -108390 atol = 1e-6
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, x0 = [1.0, 2.0])
+    @test_throws ErrorException lshaped(icecream_jump(); optimizer = HiGHS.Optimizer, x0 = :mean_value)
+    # the bounds bracket the EVPI and the VSS at every iteration, and the method can stop as soon
+    # as the VSS is known to be positive
+    ws = wait_and_see(pb; optimizer = HiGHS.Optimizer).value
+    eev = expected_result(pb, expected_value_problem(pb; optimizer = HiGHS.Optimizer).x;
+                          optimizer = HiGHS.Optimizer)
+    full = lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false)
+    for entry in full.history
+        lo, hi = evpi_bounds(entry, ws)
+        @test lo - 1e-6 <= 7015.5555555 <= hi + 1e-6
+        lo, hi = vss_bounds(entry, eev)
+        @test lo - 1e-6 <= 1150 <= hi + 1e-6
+    end
+    @test all(isapprox.(evpi_bounds(full, ws), 7015.5555555; atol = 1e-4))
+    early = lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false,
+                    callback = entry -> vss_bounds(entry, eev)[1] > 0)
+    @test early.stopped && !early.converged
+    @test early.iterations < full.iterations
+    @test vss_bounds(early, eev)[1] > 0
 end
 
 # --------------------------------------------------------------------------------------------

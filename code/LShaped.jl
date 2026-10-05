@@ -46,6 +46,7 @@ export Sense, LEQ, EQ, GEQ, to_sense,
        lshaped, single_cut_lshaped, multi_cut_lshaped,
        extensive_form, multipliers, feasibility_certificate, new_model,
        first_stage_decision, second_stage_decision, print_first_stage, print_second_stage,
+       evpi_bounds, vss_bounds,
        wait_and_see, expected_value_problem, expected_result, evpi, vss,
        sample_scenarios, substream
 
@@ -654,42 +655,77 @@ cut_intercept(md::JuMPTwoStageProblem, r, s, x, π, v) = md.cut_intercept(s, x, 
     lshaped(md; optimizer, master_optimizer = optimizer, recourse_optimizer = optimizer,
               cuts = :single, maxiter = 500, tol = 1e-8, feastol = 1e-7,
               threads = false, drop_inactive = nothing,
-              verbose = true, log = stdout)
+              regularization = :none, rho = 1.0, radius = nothing, max_radius = Inf,
+              eta1 = 1e-4, eta2 = 1e-4, gamma = 2.0, patience = 3,
+              x0 = nothing, callback = nothing, verbose = true, log = stdout)
 
 Solve a two-stage stochastic linear program by L-shaped decomposition, on the modelization `md`.
 
 At iteration `k` the master problem is
 
-    min  c'x + θ   s.t.  Ax ⋛ b,  cuts
+    min  c'x + Σₖ Pₖ θₖ   s.t.  Ax ⋛ b,  cuts
 
-`θ` joins the objective with the first optimality cut. Solving the second stage at `xᵏ` gives, per
-scenario, either the multipliers `πₛ` of an optimal solution or — should the recourse problem be
-infeasible — an elastic model proving it, and its multipliers `σₛ`. Both are assembled into cuts
-by `cut_coefficients` and `cut_intercept`: `Q(·, ξ)` and the total violation are convex in `x`,
-and the cuts are their supporting hyperplanes at `xᵏ`.
+where the scenarios are partitioned into clusters `𝒮ₖ` of probability `Pₖ = Σ_{s ∈ 𝒮ₖ} pₛ`, and
+`θₖ` approximates `Σ_{s ∈ 𝒮ₖ} (pₛ / Pₖ) Q(x, ξₛ)`, the expected recourse within the cluster;
+`θₖ` joins the objective with its first cut. Solving the second stage at `xᵏ` gives, per scenario,
+either the multipliers `πₛ` of an optimal solution or — should the recourse problem be infeasible —
+an elastic model proving it, and its multipliers `σₛ`. Both are assembled into cuts by
+`cut_coefficients` and `cut_intercept`: `Q(·, ξ)` and the total violation are convex in `x`, and
+the cuts are their supporting hyperplanes at `xᵏ`. The cut of cluster `k` averages those of its
+scenarios,
 
-`cuts = :single` averages over the scenarios and adds **one** optimality cut per iteration,
+    Eₖ = Σ_{s ∈ 𝒮ₖ} (pₛ / Pₖ) T(ξₛ)'πₛ ,  Eₖ'x + θₖ ≥ Eₖ'xᵏ + Σ_{s ∈ 𝒮ₖ} (pₛ / Pₖ) Q(xᵏ, ξₛ),
 
-    E = Σₛ pₛ T(ξₛ)'πₛ ,  E'x + θ ≥ E'xᵏ + Q(xᵏ),
+and is only added if it is violated at `xᵏ`, that is if `θₖ` falls short of the expected recourse
+within the cluster beyond the tolerance (always, at the first round, which bounds every `θₖ`).
 
-`cuts = :multi` keeps one `θₛ` per scenario, weighted by `pₛ` in the objective, and adds **one cut
-per scenario**,
+`cuts` sets the partition (Birge and Louveaux, 2011, Section 5.1.d, and the "hybrid approaches" of
+deck 04):
+* `:single`, one cluster: **one** optimality cut per iteration, `E = Σₛ pₛ T(ξₛ)'πₛ`;
+* `:multi`, one cluster per scenario: up to **one cut per scenario**, a larger master and usually
+  fewer iterations;
+* an integer `C`: `C` clusters of consecutive scenarios, of sizes as equal as possible;
+* a vector of vectors: the clusters themselves, a partition of `1:S`.
 
-    Eₛ'x + θₛ ≥ Eₛ'xᵏ + Q(xᵏ, ξₛ),
+`regularization` stabilizes the iterates around a centre `a`, the first second-stage-feasible
+iterate to begin with (`x0`, if given and feasible), as presented in deck 04:
+* `:regularized_decomposition` (Ruszczyński, 1986; Birge and Louveaux, Section 5.2) adds
+  `‖x - a‖² / (2 rho)` to the objective of the master, which then is a quadratic program. GLPK
+  cannot solve it, and HiGHS 1.15's QP solver often returns wrong solutions, declared optimal, even
+  on small masters: before stopping, `lshaped` checks that the last master was solved, and
+  raises an error if not. Ipopt solves them, provided it is not allowed to relax the constraints, or the
+  iterates violate the feasibility cuts slightly and the same cut comes back forever:
+  `master_optimizer = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)`.
+  A feasibility cut is a null step; when no cut is violated at `xᵏ`, or when `xᵏ` is not worse than
+  `a`, `xᵏ` becomes the centre.
+* `:trust_region` (Linderoth and Wright, 2003) restricts the master to `‖x - a‖∞ ≤ Δ`, starting
+  from `radius`, by default `0.1 max(1, ‖a‖∞)`. The step is judged by the ratio `τ` of the actual
+  reduction `f(a) - f(xᵏ)` to the reduction `m(a) - m(xᵏ)` the model predicted, `f` being the
+  objective and `m` the master's model: if `τ ≥ eta1`, `xᵏ` becomes the centre, and if moreover
+  `τ ≥ eta2`, the radius grows to `min(max_radius, gamma Δ)`; after `patience` unsuccessful
+  iterations in a row, the radius is halved (deck 04 leaves this rule open).
+Both stop when the model value of the master solution reaches `f(a)`, up to `tol`: then `a` is
+optimal. The master of a regularized iteration gives no lower bound; a valid one is computed once at
+the end, by solving the master without the regularization.
 
-which is the multicut version of Birge and Louveaux (2011, Section 5.1.d): the same subproblems per
-iteration, a larger master, and usually a better approximation of `Q` around `xᵏ`. After the first
-round, which bounds every `θₛ`, a scenario's cut is only added if it is violated, that is if
-`θₛ < Q(xᵏ, ξₛ)` beyond the tolerance: a cut satisfied at `xᵏ` would not change the master there.
+`x0` is a first-stage decision at which the subproblems are evaluated before the first master
+problem, instead of the solution of a master without any cut. `x0 = :mean_value` takes the solution
+of the expected value problem (a [`TwoStageProblem`](@ref) only), as in the example of regularized
+decomposition of deck 04. It must satisfy the first-stage constraints.
+
+`callback(entry)` is called with each new entry of the `history` (below); if it returns `true`, the
+method stops there, with `stopped = true` in the result. [`evpi_bounds`](@ref) and
+[`vss_bounds`](@ref) turn an entry into intervals containing the EVPI and the VSS, so that the method
+can stop as soon as these intervals answer the question asked.
 
 `threads = true` solves the recourse problems of an iteration in parallel, on the threads Julia was
 started with (`julia -t N`). The master is only modified once all of them are solved, in the order
 of the scenarios, so the results do not depend on it. The recourse solver must be thread-safe when
 its instances are solved concurrently: HiGHS is, GLPK is not and crashes. GLPK is unsafe even
 unused here: its models are freed by finalizers, which crash Julia when the garbage collector runs
-them on a worker thread; call `GC.gc()` before `lshaped` once GLPK models have been discarded. The callbacks of a
-[`JuMPTwoStageProblem`](@ref) must also be safe to call from several threads at once, which they
-are if they only build and read their own models.
+them on a worker thread; call `GC.gc()` before `lshaped` once GLPK models have been discarded. The
+callbacks of a [`JuMPTwoStageProblem`](@ref) must also be safe to call from several threads at
+once, which they are if they only build and read their own models.
 
 `drop_inactive = k` deletes an optimality cut from the master once it has been slack at `k`
 consecutive iterates, which keeps the master small on long runs (Linderoth and Wright, 2003).
@@ -701,35 +737,52 @@ the stopping test remain valid, but the finite convergence of the method is no l
 grows, the recourse problems are small and re-solved at every iterate, so the two rarely deserve
 the same solver; both accept anything [`new_model`](@ref) accepts.
 
-Convergence is declared when no cut separates `θ` from `Q(xᵏ)` any more, up to `tol` relative to
-`1 + |Q(xᵏ)|` (`θₛ` and `Q(xᵏ, ξₛ)` scenario by scenario for the multicut version): an absolute
-tolerance would ask more of the solvers than they deliver on objectives of large magnitude.
-`feastol` is the total violation below which the elastic model counts as proof of feasibility.
+Without regularization, convergence is declared when no cut is violated any more, up to `tol`
+relative to `1 + |·|`: an absolute tolerance would ask more of the solvers than they deliver on
+objectives of large magnitude. `feastol` is the total violation below which the elastic model counts
+as proof of feasibility.
 
 The upper bound is that of the **incumbent**, the best first-stage solution met so far: the value
 `c'xᵏ + Q(xᵏ)` of the current iterate does not decrease monotonically. Returns a named tuple with
 the incumbent `x` and its `objective`, the last `lower_bound`, the `gap` between them,
-`converged`, the counters of both kinds of cut and of the `dropped_cuts`, the `problem` `md` and the
-models, and the
-`history`, whose entries record per iteration the bounds and the `value` of the iterate `x`.
-[`first_stage_decision`](@ref), [`second_stage_decision`](@ref), [`print_first_stage`](@ref) and
-[`print_second_stage`](@ref) read the decisions off this result.
+`converged`, `stopped`, the counters of both kinds of cut and of the `dropped_cuts`, the
+`clusters`, the `regularization`, the `problem` `md` and the models, and the `history`, whose
+entries record per iteration the bounds, the `value` of the iterate `x`, and the `model` value of
+the master solution. [`first_stage_decision`](@ref), [`second_stage_decision`](@ref),
+[`print_first_stage`](@ref) and [`print_second_stage`](@ref) read the decisions off this result.
 """
 function lshaped(md::AbstractTwoStageModel;
                  optimizer = nothing,
                  master_optimizer = optimizer,
                  recourse_optimizer = optimizer,
-                 cuts::Symbol = :single,
+                 cuts = :single,
                  maxiter::Integer = 500,
                  tol::Real = 1e-8,
                  feastol::Real = 1e-7,
                  threads::Bool = false,
                  drop_inactive::Union{Nothing,Integer} = nothing,
+                 regularization::Symbol = :none,
+                 rho::Real = 1.0,
+                 radius::Union{Nothing,Real} = nothing,
+                 max_radius::Real = Inf,
+                 eta1::Real = 1e-4,
+                 eta2::Real = 1e-4,
+                 gamma::Real = 2.0,
+                 patience::Integer = 3,
+                 x0 = nothing,
+                 callback = nothing,
                  verbose::Bool = true,
                  log::IO = stdout)
-    cuts in (:single, :multi) || error("`cuts` must be :single or :multi, got :$cuts")
     drop_inactive === nothing || drop_inactive >= 1 ||
         error("`drop_inactive` must be a positive number of iterations, got $drop_inactive")
+    regularization in (:none, :regularized_decomposition, :trust_region) ||
+        error("`regularization` must be :none, :regularized_decomposition or :trust_region, " *
+              "got :$regularization")
+    rho > 0 || error("`rho` must be positive, got $rho")
+    radius === nothing || radius > 0 || error("`radius` must be positive, got $radius")
+    0 < eta1 <= eta2 < 1 || error("0 < eta1 ≤ eta2 < 1 is required, got $eta1 and $eta2")
+    gamma > 1 || error("`gamma` must exceed 1, got $gamma")
+    patience >= 1 || error("`patience` must be positive, got $patience")
     master_optimizer === nothing &&
         error("pass `optimizer`, or both `master_optimizer` and `recourse_optimizer`")
     recourse_optimizer === nothing &&
@@ -738,6 +791,9 @@ function lshaped(md::AbstractTwoStageModel;
     p = [scenario_probability(md, s) for s in 1:scenarios]
     isapprox(sum(p), 1; atol = 1e-9) ||
         error("the probabilities must sum up to one, they sum up to $(sum(p))")
+    clusters = scenario_clusters(cuts, scenarios)
+    C = length(clusters)
+    P = [sum(p[s] for s in cluster) for cluster in clusters]
 
     master = build_master(md, master_optimizer)
     recourse = [check_recourse(build_recourse(md, recourse_optimizer, s), s) for s in 1:scenarios]
@@ -745,42 +801,138 @@ function lshaped(md::AbstractTwoStageModel;
     c, constant = master_cost(master)
     x = master.x
     n = length(x)
+    if x0 === :mean_value
+        md isa TwoStageProblem ||
+            error("`x0 = :mean_value` needs a TwoStageProblem, whose scenarios can be averaged")
+        x0 = expected_value_problem(md; optimizer = master_optimizer).x
+    elseif x0 !== nothing
+        length(x0) == n || error("x0 has $(length(x0)) components, the first stage $n variables")
+        x0 = Float64.(collect(x0))
+    end
+    regularized = regularization != :none
 
     # anonymous, so that a master model of the user's may have a variable of its own named θ
-    θ = @variable(master.model, [1:(cuts == :single ? 1 : scenarios)], base_name = "θ")
-    bounded = falses(length(θ))
-    function set_objective!()
-        f = dot(c, x) + constant        # the constant too, or the lower bound would miss it
-        for t in eachindex(θ)
-            bounded[t] && (f += (cuts == :single ? 1.0 : p[t]) * θ[t])
+    θ = @variable(master.model, [1:C], base_name = "θ")
+    bounded = falses(C)
+    center, f_center = Float64[], Inf          # the centre `a` of a regularization, and f(a)
+    Δ = radius === nothing ? NaN : Float64(radius)
+    box = Any[]                                # the trust region, once there is a centre
+    unsuccessful = 0
+    stale = true                               # whether the master objective must be rebuilt
+    function set_objective!(; proximal::Bool = true)
+        f = dot(c, x) + constant               # the constant too, or the lower bound would miss it
+        for k in 1:C
+            bounded[k] && (f += P[k] * θ[k])
+        end
+        if proximal && regularization == :regularized_decomposition && !isempty(center)
+            f += sum((x[j] - center[j])^2 for j in 1:n) / (2rho)
         end
         @objective(master.model, Min, f)
     end
+    function set_center!(a, fa)
+        center, f_center = copy(a), fa
+        if regularization == :trust_region
+            isnan(Δ) && (Δ = 0.1 * max(1.0, norm(a, Inf)))
+            set_box!()
+        end
+        stale = true
+    end
+    function set_box!()
+        if isempty(box)
+            for j in 1:n
+                push!(box, @constraint(master.model, x[j] >= center[j] - Δ))
+                push!(box, @constraint(master.model, x[j] <= center[j] + Δ))
+            end
+        else
+            for j in 1:n
+                JuMP.set_normalized_rhs(box[2j-1], center[j] - Δ)
+                JuMP.set_normalized_rhs(box[2j], center[j] + Δ)
+            end
+        end
+    end
+    function unsuccessful!()                   # the trust region shrinks after `patience` of them
+        unsuccessful += 1
+        if unsuccessful >= patience
+            Δ /= 2
+            unsuccessful = 0
+            set_box!()
+        end
+    end
+    # Certify that xᵏ solves the proximal master, before stopping on it: the master is convex, so
+    # xᵏ minimizes m(x) + ‖x - a‖²/(2ρ) if and only if it minimizes the LP m(x) + g'x, where
+    # g = (xᵏ - a)/ρ is the gradient of the quadratic term at xᵏ. A wrong solution of the QP,
+    # declared optimal, would otherwise stop the method at a wrong point.
+    function check_proximal_step(xk, model)
+        g = (xk .- center) ./ rho
+        f = dot(c, x) + constant + dot(g, x)
+        for k in 1:C
+            f += P[k] * θ[k]
+        end
+        @objective(master.model, Min, f)
+        stale = true
+        optimize!(master.model)
+        termination_status(master.model) in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED) || return nothing
+        expected, best = model + dot(g, xk), objective_value(master.model)
+        best >= expected - 1e-6 * (1 + abs(expected)) && return nothing
+        error("""the quadratic master problem was not solved: $(solver_label(master_optimizer)) \
+                 reports it optimal, but its solution does not minimize it (the linearized master \
+                 reaches $best < $expected). Pass another quadratic programming solver as \
+                 `master_optimizer`, such as \
+                 `optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)`, or use \
+                 `regularization = :trust_region`, whose master is linear.""")
+    end
+    """The value of the model of the master at `a`: the cuts, not yet those of this iteration."""
+    function model_value(a)
+        θa = fill(-Inf, C)
+        for cut in stored
+            θa[cut.cluster] = max(θa[cut.cluster], cut.e - dot(cut.E, a))
+        end
+        return dot(c, a) + constant + dot(P, θa)
+    end
 
     if verbose
-        @printf(log, "%s-cut L-shaped method\n", cuts == :single ? "Single" : "Multi")
+        label = C == 1 ? "Single-cut" : C == scenarios ? "Multi-cut" : "Hybrid ($C clusters)"
+        extra = regularization == :regularized_decomposition ? ", regularized decomposition (rho = $rho)" :
+                regularization == :trust_region ? ", trust region" : ""
+        @printf(log, "%s L-shaped method%s\n", label, extra)
         @printf(log, "  master: %s | recourse: %s | scenarios: %d\n\n",
                 solver_label(master_optimizer), solver_label(recourse_optimizer), scenarios)
-        @printf(log, " iter      lower bound   upper bound          gap %14s %14s\n",
-                cuts == :single ? "θ" : "min θₛ", "Q(x)")
+        @printf(log, " iter %16s   upper bound          gap %14s %14s\n",
+                regularized ? "model value" : "lower bound", C == 1 ? "θ" : "min θₖ", "Q(x)")
     end
 
     n_optimality = n_feasibility = n_dropped = 0
-    optimality_cuts = Tuple{Any,Int}[]     # each cut and the last iteration at which it was tight
+    stored = StoredCut[]                       # the optimality cuts in the master
     history = NamedTuple[]
-    lower, upper, xstar, converged = -Inf, Inf, fill(NaN, n), false
+    lower, upper, xstar, converged, stopped = -Inf, Inf, fill(NaN, n), false, false
     iteration = 0
 
-    for k in 1:maxiter
-        iteration = k
-        optimize!(master.model)
-        status = termination_status(master.model)
-        status == MOI.OPTIMAL || error("master problem: $status")
-        xk = value.(x)
-        lower = any(bounded) ? objective_value(master.model) : -Inf
-        θk = [bounded[t] ? value(θ[t]) : -Inf for t in eachindex(θ)]
-        if drop_inactive !== nothing
-            n_dropped += drop_inactive_cuts!(master.model, optimality_cuts, k, drop_inactive)
+    for it in 1:maxiter
+        iteration = it
+        if it == 1 && x0 !== nothing            # start from x0 rather than from a master
+            xk, θk, model = x0, fill(-Inf, C), -Inf
+        else
+            stale && (set_objective!(); stale = false)
+            optimize!(master.model)
+            status = termination_status(master.model)
+            # a local optimum of the convex master, as Ipopt reports it, is a global one
+            status in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED) ||
+                error("master problem: $status" *
+                      (regularization == :regularized_decomposition && !isempty(center) ?
+                       "; this quadratic master may need another solver, see `regularization`" : ""))
+            xk = value.(x)
+            θk = [bounded[k] ? value(θ[k]) : -Inf for k in 1:C]
+            model = all(bounded) ? dot(c, xk) + constant + dot(P, θk) : -Inf
+            lower = !regularized && any(bounded) ? objective_value(master.model) : -Inf
+            if drop_inactive !== nothing
+                n_dropped += drop_inactive_cuts!(master.model, stored, it, drop_inactive)
+            end
+            # the stopping test of the regularized methods: the model reaches f(a) (deck 04)
+            if regularized && !isempty(center) && model >= f_center - tol * (1 + abs(f_center))
+                regularization == :regularized_decomposition && check_proximal_step(xk, model)
+                converged = true
+                break
+            end
         end
 
         # the subproblems, in parallel or not; the master is only modified afterwards, in the
@@ -794,75 +946,149 @@ function lshaped(md::AbstractTwoStageModel;
             @constraint(master.model, dot(pieces[s].E, x) >= pieces[s].e)
             n_feasibility += 1
         end
-        Qs = [pieces[s].feasible ? pieces[s].Q : 0.0 for s in 1:scenarios]
-        Es = [pieces[s].E for s in 1:scenarios]
-        es = [pieces[s].e for s in 1:scenarios]
-        if !isempty(infeasible)
+        if !isempty(infeasible)                # a null step for the regularizations
+            regularization == :trust_region && !isempty(center) && unsuccessful!()
             verbose && @printf(log, "%5d   feasibility cut(s) on scenario(s) %s\n",
-                               k, join(infeasible, ", "))
+                               it, join(infeasible, ", "))
             continue
         end
-
+        Qs = [pieces[s].Q for s in 1:scenarios]
         Q = dot(p, Qs)
         current = dot(c, xk) + constant + Q
-        if current < upper              # a new incumbent
+        if current < upper                     # a new incumbent
             upper, xstar = current, xk
         end
-        push!(history, (iteration = k, lower_bound = lower, upper_bound = upper,
-                        gap = upper - lower, value = current, Q = Q, x = xk))
-        verbose && @printf(log, "%5d   %12s %12.6f %12.4g %14s %14.6f\n", k, _num(lower),
-                           upper, upper - lower, _num(minimum(θk)), Q)
+        push!(history, (iteration = it, lower_bound = lower, upper_bound = upper,
+                        gap = upper - lower, value = current, Q = Q, x = xk, model = model))
+        verbose && @printf(log, "%5d   %14s %12.6f %12.4g %14s %14.6f\n", it,
+                           _num(regularized ? model : lower), upper,
+                           (regularized ? f_center : upper) - (regularized ? model : lower),
+                           _num(minimum(θk)), Q)
 
         # checked before convergence: crossing bounds often show up on the very iteration where
         # the invalid cuts make θ look converged
-        if lower > upper + tol * (1 + abs(upper))
+        if !regularized && lower > upper + tol * (1 + abs(upper))
             @warn """the lower bound exceeds the upper bound ($lower > $upper): the cuts are \
                      invalid, which `intercept = :textbook` causes on bounded recourse variables"""
         end
-        done = cuts == :single ? θk[1] >= Q - tol * (1 + abs(Q)) :
-                              all(bounded) && all(θk .>= Qs .- tol .* (1 .+ abs.(Qs)))
-        if done
+        Qk = [sum(p[s] * Qs[s] for s in cluster) / P[k] for (k, cluster) in enumerate(clusters)]
+        violated = [!bounded[k] || θk[k] < Qk[k] - tol * (1 + abs(Qk[k])) for k in 1:C]
+        if !regularized && !any(violated)
             converged = true
             break
         end
+        if callback !== nothing && callback(history[end]) === true
+            stopped = true
+            break
+        end
 
-        if cuts == :single
-            E, e = zeros(n), 0.0
-            for s in 1:scenarios
-                E .+= p[s] .* Es[s]
-                e += p[s] * es[s]
+        # the centre of a regularization, before the cuts of this iteration change the model
+        if regularized && isempty(center)
+            set_center!(xk, current)           # the first feasible iterate
+        elseif regularization == :regularized_decomposition
+            # exact serious step if no cut is violated, approximate if xᵏ is not worse than a
+            (!any(violated) || current <= f_center) && set_center!(xk, current)
+        elseif regularization == :trust_region
+            predicted = model_value(center) - model
+            τ = predicted > 0 ? (f_center - current) / predicted : -Inf
+            if τ >= eta1                       # successful: move the centre
+                unsuccessful = 0
+                τ >= eta2 && (Δ = min(max_radius, gamma * Δ))
+                set_center!(xk, current)
+            else
+                unsuccessful!()
             end
-            push!(optimality_cuts, (@constraint(master.model, dot(E, x) + θ[1] >= e), k))
+        end
+
+        for (k, cluster) in enumerate(clusters)
+            violated[k] || continue
+            E = sum(p[s] / P[k] * pieces[s].E for s in cluster)
+            e = sum(p[s] / P[k] * pieces[s].e for s in cluster)
+            con = @constraint(master.model, dot(E, x) + θ[k] >= e)
+            push!(stored, StoredCut(con, it, k, E, e))
             n_optimality += 1
-        else
-            for s in 1:scenarios
-                # the first round bounds every θₛ; afterwards, only the violated cuts are added
-                bounded[s] && θk[s] >= Qs[s] - tol * (1 + abs(Qs[s])) && continue
-                push!(optimality_cuts, (@constraint(master.model, dot(Es[s], x) + θ[s] >= es[s]), k))
-                n_optimality += 1
-            end
         end
         # the objective only changes when some θ is bounded for the first time
         if !all(bounded)
             bounded .= true
-            set_objective!()
+            stale = true
         end
     end
 
+    # a regularized master gives no lower bound: solve it once without the regularization
+    if regularized && any(bounded)
+        foreach(con -> JuMP.delete(master.model, con), box)
+        empty!(box)
+        set_objective!(proximal = false)
+        optimize!(master.model)
+        termination_status(master.model) == MOI.OPTIMAL && (lower = objective_value(master.model))
+    end
     if verbose
         if converged
             @printf(log, "converged in %d iteration(s): %d optimality cut(s), %d feasibility cut(s)%s\n",
                     iteration, n_optimality, n_feasibility,
                     drop_inactive === nothing ? "" : ", $n_dropped dropped")
+        elseif stopped
+            @printf(log, "stopped by the callback at iteration %d\n", iteration)
         else
             @printf(log, "no convergence in %d iteration(s), last gap %g\n", maxiter, upper - lower)
         end
     end
     return (x = xstar, objective = upper, lower_bound = lower, gap = upper - lower,
-            converged = converged, iterations = iteration, optimality_cuts = n_optimality,
-            feasibility_cuts = n_feasibility, dropped_cuts = n_dropped, problem = md, master = master,
-            recourse = recourse, history = history)
+            converged = converged, stopped = stopped, iterations = iteration,
+            optimality_cuts = n_optimality, feasibility_cuts = n_feasibility,
+            dropped_cuts = n_dropped, clusters = clusters, regularization = regularization,
+            problem = md, master = master, recourse = recourse, history = history)
 end
+
+"""An optimality cut `E'x + θₖ ≥ e` of the master, and the last iteration at which it was tight."""
+mutable struct StoredCut
+    con::Any
+    last::Int
+    cluster::Int
+    E::Vector{Float64}
+    e::Float64
+end
+
+"""
+    scenario_clusters(cuts, S)
+
+The partition of the scenarios `1:S` that `cuts` describes: one cluster for `:single`, one per
+scenario for `:multi`, `C` clusters of consecutive scenarios for an integer `C`, or the given
+vector of clusters, checked to be a partition.
+"""
+function scenario_clusters(cuts, S::Integer)
+    cuts === :single && return [collect(1:S)]
+    cuts === :multi && return [[s] for s in 1:S]
+    if cuts isa Integer
+        1 <= cuts <= S || error("the number of clusters must be between 1 and $S, got $cuts")
+        bounds = [round(Int, k * S / cuts) for k in 0:cuts]
+        return [collect(bounds[k]+1:bounds[k+1]) for k in 1:cuts]
+    end
+    if cuts isa AbstractVector && all(cluster -> cluster isa AbstractVector{<:Integer}, cuts)
+        clusters = [collect(Int, cluster) for cluster in cuts]
+        all(!isempty, clusters) && sort(reduce(vcat, clusters)) == 1:S ||
+            error("the clusters must be a partition of the scenarios 1:$S")
+        return clusters
+    end
+    error("`cuts` must be :single, :multi, a number of clusters or a vector of clusters, got $cuts")
+end
+
+"""
+    evpi_bounds(entry, ws)
+    vss_bounds(entry, eev)
+
+Intervals containing the EVPI and the VSS, from the bounds `L ≤ RP ≤ U` of an entry of the
+`history` of [`lshaped`](@ref), or of its result, and the wait-and-see value `ws` or the expected
+result `eev` of the mean-value decision (deck 04, "Using the L-shaped iterations"):
+
+    L - WS ≤ EVPI ≤ U - WS,      EEV - U ≤ VSS ≤ EEV - L.
+
+Before the first optimality cut, and along a regularized run, `L` is `-Inf`.
+"""
+evpi_bounds(entry, ws::Real) = (entry.lower_bound - ws, _upper(entry) - ws)
+vss_bounds(entry, eev::Real) = (eev - _upper(entry), eev - entry.lower_bound)
+_upper(entry) = hasproperty(entry, :upper_bound) ? entry.upper_bound : entry.objective
 
 """
     solve_scenario!(md, recourse, elastic, optimizer, s, xk, n, feastol)
@@ -935,22 +1161,20 @@ end
     drop_inactive_cuts!(model, cuts, k, window)
 
 Record which of the optimality `cuts` are tight at the current solution of the master `model`, and
-delete those slack at the last `window` iterations; returns how many were deleted. `cuts` holds each
-cut and the last iteration at which it was tight.
+delete those slack at the last `window` iterations; returns how many were deleted.
 """
-function drop_inactive_cuts!(model::JuMP.Model, cuts::Vector{Tuple{Any,Int}}, k::Integer,
-                             window::Integer)
+function drop_inactive_cuts!(model::JuMP.Model, cuts::Vector{StoredCut}, k::Integer, window::Integer)
     # all the slacks are read first: deleting a row invalidates the solution of the model
-    tight = map(cuts) do (con, _)
-        rhs = JuMP.normalized_rhs(con)
-        return JuMP.value(con) - rhs <= 1e-7 * (1 + abs(rhs))
+    tight = map(cuts) do cut
+        rhs = JuMP.normalized_rhs(cut.con)
+        return JuMP.value(cut.con) - rhs <= 1e-7 * (1 + abs(rhs))
     end
     keep = trues(length(cuts))
-    for (i, (con, last)) in enumerate(cuts)
+    for (i, cut) in enumerate(cuts)
         if tight[i]
-            cuts[i] = (con, k)
-        elseif k - last >= window
-            JuMP.delete(model, con)
+            cut.last = k
+        elseif k - cut.last >= window
+            JuMP.delete(model, cut.con)
             keep[i] = false
         end
     end

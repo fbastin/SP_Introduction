@@ -32,6 +32,7 @@ end
 using .Ours.LShaped: TwoStageProblem, lshaped, extensive_form, substream
 using StochasticPrograms
 using HiGHS
+using Ipopt
 using Distributions
 using LinearAlgebra
 using Printf
@@ -202,13 +203,23 @@ function extensive(inst::Instance)
     return Outcome("extensive form (HiGHS)", "OPTIMAL", obj, 0, 0)
 end
 
-function ours(inst::Instance, cuts::Symbol; threads::Bool = false, drop_inactive = nothing)
-    res = lshaped(inst.ours; optimizer = HiGHS.Optimizer, cuts = cuts, tol = 1e-6,
+# HiGHS's QP solver fails on the masters of regularized decomposition: Ipopt solves them, without
+# relaxing the constraints
+const QP_MASTER = optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)
+
+function ours(inst::Instance, cuts; threads::Bool = false, drop_inactive = nothing,
+              regularization::Symbol = :none, x0 = nothing)
+    master = regularization == :regularized_decomposition ? QP_MASTER : HiGHS.Optimizer
+    res = lshaped(inst.ours; master_optimizer = master, recourse_optimizer = HiGHS.Optimizer,
+                  cuts = cuts, tol = 1e-6,
                   maxiter = 10_000, threads = threads, drop_inactive = drop_inactive,
-                  verbose = false)
-    label = "LShaped.jl, $(cuts)-cut" *
+                  regularization = regularization, x0 = x0, verbose = false)
+    label = "LShaped.jl, " * (cuts isa Integer ? "$cuts clusters" : "$(cuts)-cut") *
             (threads ? ", $(Threads.nthreads()) threads" : "") *
-            (drop_inactive === nothing ? "" : ", drop $drop_inactive")
+            (drop_inactive === nothing ? "" : ", drop $drop_inactive") *
+            (regularization == :regularized_decomposition ? ", RD (Ipopt)" :
+             regularization == :trust_region ? ", trust region" : "") *
+            (x0 === :mean_value ? ", from x̄" : "")
     return Outcome(label, res.converged ? "converged" : "not converged",
                    res.objective, res.iterations, res.optimality_cuts + res.feasibility_cuts)
 end
@@ -234,7 +245,12 @@ end
 # the parallel variant only when Julia has several threads (`julia -t N`)
 const METHODS = [extensive,
                  inst -> ours(inst, :single), inst -> ours(inst, :single; drop_inactive = 5),
+                 inst -> ours(inst, :single; x0 = :mean_value),
+                 inst -> ours(inst, :single; regularization = :trust_region),
+                 inst -> ours(inst, min(10, Ours.LShaped.n_scenarios(inst.ours))),
                  inst -> ours(inst, :multi),
+                 inst -> ours(inst, :multi; regularization = :regularized_decomposition),
+                 inst -> ours(inst, :multi; regularization = :trust_region),
                  (Threads.nthreads() > 1 ? [inst -> ours(inst, :multi; threads = true)] : [])...,
                  inst -> theirs(inst, :single), inst -> theirs(inst, :multi)]
 
@@ -264,11 +280,11 @@ function measure(inst::Instance, method, reference, reps::Integer)
 end
 
 function report(io::IO, measures::Vector{Measure})
-    @printf(io, "  %-36s %-14s %16s %10s %7s %7s %10s %10s\n", "method", "status", "objective",
+    @printf(io, "  %-40s %-14s %16s %10s %7s %7s %10s %10s\n", "method", "status", "objective",
             "rel. error", "iter.", "cuts", "time (s)", "alloc (MB)")
     for m in measures
         o = m.outcome
-        @printf(io, "  %-36s %-14s %16.4f %10.1e %7s %7s %10.3f %10.1f\n", o.method, o.status,
+        @printf(io, "  %-40s %-14s %16.4f %10.1e %7s %7s %10.3f %10.1f\n", o.method, o.status,
                 o.objective, m.error, o.iterations == 0 ? "-" : string(o.iterations),
                 o.cuts == 0 ? "-" : string(o.cuts), m.time, m.memory)
     end

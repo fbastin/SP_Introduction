@@ -127,7 +127,7 @@ drop another `.tex` in `exercises/` following the same pattern and
 ### The L-shaped module
 
 `code/LShaped.jl` is a stand-alone Julia module implementing the L-shaped method
-of deck 04, in its single-cut and multicut versions, with feasibility cuts:
+of deck 04, in its single-cut, multicut and hybrid versions, with feasibility cuts:
 
 - a problem is given either as **data** (`TwoStageProblem`: `c`, `A`, `b`, `q`,
   `W`, `T(ξ)`, `h(ξ)`, each row with its own sense `≤`, `=` or `≥`, bounds on both
@@ -143,11 +143,19 @@ of deck 04, in its single-cut and multicut versions, with feasibility cuts:
   with `print_first_stage` and `print_second_stage`;
 - the wait-and-see value, the expected value problem and the expected result of
   its solution give the EVPI and the VSS (`wait_and_see`,
-  `expected_value_problem`, `expected_result`, `evpi`, `vss`).
+  `expected_value_problem`, `expected_result`, `evpi`, `vss`);
+- as in deck 04, the scenarios may be grouped into clusters with one `θ` each
+  (`cuts = C` or explicit clusters), the iterates stabilized by regularized
+  decomposition or a trust region (`regularization = ...`), and the method started
+  at the mean-value decision (`x0 = :mean_value`); a `callback` sees every
+  iteration and may stop the method, for instance once `evpi_bounds` or
+  `vss_bounds` answer the question asked. Regularized decomposition solves
+  quadratic masters: HiGHS's QP solver is not reliable on them, use Ipopt
+  (`optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)`).
 
 `code/LShaped_usage.ipynb` walks through these features one at a time.
 `code/LShaped_test.jl` checks every method against the extensive form, on the
-ice-cream, newsvendor and farm instances among others. It needs JuMP, HiGHS, GLPK,
+ice-cream, newsvendor and farm instances among others. It needs JuMP, HiGHS, Ipopt, GLPK,
 Distributions and RandomDataStreams:
 
 ```bash
