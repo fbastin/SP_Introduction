@@ -13,6 +13,7 @@ using GLPK
 using LinearAlgebra
 using Statistics
 using Distributions
+using SparseArrays
 
 const DEMAND_SCENARIOS = [3.0, 5.0, 7.0]
 const SCENARIOS_ICECREAM = length(DEMAND_SCENARIOS)
@@ -534,7 +535,7 @@ end
 
 """`Wy ⋛ h(ξ) - T(ξ)x`, row by row, with the senses of `pb`."""
 function satisfies_recourse_rows(pb, x, y, ξ; atol = 1e-7)
-    lhs, rhs = pb.W * y, pb.h(ξ) - pb.T(ξ) * x
+    lhs, rhs = pb.W(ξ) * y, pb.h(ξ) - pb.T(ξ) * x
     return all(zip(pb.senses2, lhs, rhs)) do (sense, l, r)
         sense == LShaped.LEQ ? l <= r + atol : sense == LShaped.GEQ ? l >= r - atol : abs(l - r) <= atol
     end
@@ -818,6 +819,308 @@ end
 end
 
 # --------------------------------------------------------------------------------------------
+# sparse data, a random recourse matrix, SMPS files
+# --------------------------------------------------------------------------------------------
+
+@testset "sparse matrices, and a recourse matrix that depends on the scenario" begin
+    pb = sampled_demand(n = 50)
+    sp = TwoStageProblem(c = pb.c, A = sparse(pb.A), senses1 = pb.senses1, b = pb.b,
+                         q = pb.q, W = sparse(pb.W(nothing)), senses2 = pb.senses2,
+                         T = ξ -> sparse(pb.T(ξ)), h = pb.h, ξ = pb.ξ, p = pb.p)
+    @test sp.A isa SparseMatrixCSC
+    dense, sparse_ = (lshaped(q; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+                      for q in (pb, sp))
+    @test sparse_.objective ≈ dense.objective rtol = 1e-9
+    @test sparse_.x ≈ dense.x atol = 1e-7
+    # W(ξ): the yield of the second-stage technology is random
+    random_W = TwoStageProblem(c = [1.0], A = zeros(0, 1), senses1 = Char[], b = Float64[],
+        q = [3.0], W = ξ -> fill(ξ, 1, 1), senses2 = ['>'], T = ones(1, 1), h = [10.0],
+        ξ = [1.0, 2.0], p = [0.5, 0.5], ub1 = 20.0)
+    res = lshaped(random_W; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+    @test res.converged
+    @test res.objective ≈ reference(random_W) atol = 1e-8
+    @test res.x ≈ [10.0] atol = 1e-8        # x = 10 costs 10, the recourse 0.5(30 + 15) = 22.5
+    # without the bound on x, the first cuts leave the master unbounded: it is solved in a box,
+    # which yields cuts but no lower bound, until they bound θ
+    unbounded = TwoStageProblem(c = [1.0], A = zeros(0, 1), senses1 = Char[], b = Float64[],
+        q = [3.0], W = ξ -> fill(ξ, 1, 1), senses2 = ['>'], T = ones(1, 1), h = [10.0],
+        ξ = [1.0, 2.0], p = [0.5, 0.5])
+    for cuts in (:single, :multi)
+        res = lshaped(unbounded; optimizer = HiGHS.Optimizer, cuts = cuts, verbose = false)
+        @test res.converged
+        @test res.objective ≈ 10 atol = 1e-8
+        @test res.history[1].lower_bound == -Inf
+    end
+end
+
+# A small instance written in the SMPS format: an integer first-stage variable, a bound on each
+# stage, rows of the three senses, and four random elements — a right-hand side (INDEP), and in one
+# BLOCKS block a cost, a coefficient of T and one of W.
+const TOY_CORE = """
+NAME          TOY
+ROWS
+ N  COST
+ L  BUDGET
+ G  DEMAND
+ L  CAP1
+ E  BAL
+COLUMNS
+    MARKER                 'MARKER'                 'INTORG'
+    X1        COST         2.0   BUDGET       1.0
+    X1        CAP1        -1.0
+    MARKER                 'MARKER'                 'INTEND'
+    X2        COST         3.0   BUDGET       1.0
+    X2        BAL         -1.0
+    Y1        COST         4.0   DEMAND       1.0
+    Y1        CAP1         1.0
+    Y2        COST         6.0   DEMAND       1.0
+    Y2        BAL          1.0
+    Y3        COST        10.0   DEMAND       1.0
+RHS
+    RHS       BUDGET      10.0   DEMAND       5.0
+BOUNDS
+ UP BND       X1           6.0
+ UP BND       Y3          20.0
+ENDATA
+"""
+const TOY_TIME = """
+TIME          TOY
+PERIODS       LP
+    X1        BUDGET                   STAGE1
+    Y1        DEMAND                   STAGE2
+ENDATA
+"""
+const TOY_TIME_EXPLICIT = """
+TIME          TOY
+PERIODS       EXPLICIT
+    STAGE1
+    STAGE2
+COLUMNS
+    X1        STAGE1
+    X2        STAGE1
+    Y1        STAGE2
+    Y2        STAGE2
+    Y3        STAGE2
+ROWS
+    BUDGET    STAGE1
+    DEMAND    STAGE2
+    CAP1      STAGE2
+    BAL       STAGE2
+ENDATA
+"""
+const TOY_STOCH = """
+STOCH         TOY
+* the demand, and the prices of the second stage, independent of it
+INDEP         DISCRETE
+    RHS       DEMAND       4.0   STAGE2   0.3
+    RHS       DEMAND       7.0   STAGE2   0.7
+BLOCKS        DISCRETE
+ BL PRICES    STAGE2       0.5
+    Y3        COST        10.0
+    X1        CAP1        -1.0
+ BL PRICES    STAGE2       0.5
+    Y3        COST        14.0
+    X1        CAP1        -0.5
+    Y1        CAP1         2.0
+ENDATA
+"""
+const TOY_SCENARIOS = """
+STOCH         TOY
+SCENARIOS     DISCRETE
+ SC SCEN1     ROOT         0.4       STAGE2
+    RHS       DEMAND       4.0
+    Y3        COST        12.0
+ SC SCEN2     ROOT         0.6       STAGE2
+    RHS       DEMAND       8.0
+ENDATA
+"""
+
+"""The toy instance written by hand; ξ = (demand, cost of y₃, T entry, W entry)."""
+toy_by_hand(ξ, p) = TwoStageProblem(
+    c = [2.0, 3.0], A = [1.0 1.0], senses1 = ['<'], b = [10.0], ub1 = [6.0, Inf],
+    integer1 = [true, false],
+    q = ξ -> [4.0, 6.0, ξ[2]], W = ξ -> [1.0 1.0 1.0; ξ[4] 0.0 0.0; 0.0 1.0 0.0],
+    senses2 = ['>', '<', '='], T = ξ -> [0.0 0.0; ξ[3] 0.0; 0.0 -1.0], h = ξ -> [ξ[1], 0.0, 0.0],
+    ub = [Inf, Inf, 20.0], ξ = ξ, p = p)
+
+function write_toy(dir, stoch; time = TOY_TIME)
+    for (ext, text) in (("cor", TOY_CORE), ("tim", time), ("sto", stoch))
+        write(joinpath(dir, "toy.$ext"), text)
+    end
+    return joinpath(dir, "toy")
+end
+
+@testset "SMPS files: the core, the time file, INDEP and BLOCKS sections" begin
+    mktempdir() do dir
+        smps = read_smps(write_toy(dir, TOY_STOCH))
+        @test smps.name == "TOY"
+        @test smps.columns1 == ["X1", "X2"] && smps.columns2 == ["Y1", "Y2", "Y3"]
+        @test smps.rows1 == ["BUDGET"] && smps.rows2 == ["DEMAND", "CAP1", "BAL"]
+        @test smps.integer1 == [true, false]
+        @test smps.ub1 == [6.0, Inf] && smps.ub == [Inf, Inf, 20.0]
+        @test smps.elements == [(:h, 1, 0), (:q, 3, 0), (:T, 2, 1), (:W, 2, 1)]
+        @test smps.law.base == [5.0, 10.0, -1.0, 1.0]
+        @test support_size(smps.law) == 4
+        ξ, p = enumerate_scenarios(smps.law)
+        @test sort(collect(zip(ξ, p))) == sort([([4.0, 10.0, -1.0, 1.0], 0.15),
+                                                ([4.0, 14.0, -0.5, 2.0], 0.15),
+                                                ([7.0, 10.0, -1.0, 1.0], 0.35),
+                                                ([7.0, 14.0, -0.5, 2.0], 0.35)])
+        # the problem read, and the same written by hand, have the same optimum
+        pb = TwoStageProblem(smps; ξ = ξ, p = p)
+        @test pb.A isa SparseMatrixCSC
+        _, x, value = extensive_form(pb; optimizer = HiGHS.Optimizer)
+        _, xh, valueh = extensive_form(toy_by_hand(ξ, p); optimizer = HiGHS.Optimizer)
+        @test value ≈ valueh atol = 1e-9
+        @test x ≈ xh atol = 1e-9
+        res = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+        @test res.converged
+        @test res.objective ≈ value atol = 1e-7
+        # the explicit time format reads the same
+        explicit = read_smps(joinpath(dir, "toy.cor"),
+                             (write(joinpath(dir, "toy2.tim"), TOY_TIME_EXPLICIT); joinpath(dir, "toy2.tim")),
+                             joinpath(dir, "toy.sto"))
+        @test explicit.rows2 == smps.rows2 && explicit.columns2 == smps.columns2
+        @test explicit.T == smps.T && explicit.W == smps.W
+        # the law is a sampler: reproducible, with the right frequencies
+        sample = rand(substream(5), smps.law, 4000)
+        @test sample == rand(substream(5), smps.law, 4000)
+        @test 0.27 < count(v -> v[1] == 4.0, sample) / 4000 < 0.33
+        @test all(v -> (v[2] == 10.0) == (v[3] == -1.0) == (v[4] == 1.0), sample)   # one block
+        ξs, ps = sample_scenarios(smps.law, 100; rng = substream(2))
+        @test length(ξs) == 100 && ps == fill(0.01, 100)
+        @test TwoStageProblem(smps; ξ = ξs, p = ps) isa TwoStageProblem
+        # the mean-value problem averages each element
+        ev = expected_value_problem(pb; optimizer = HiGHS.Optimizer)
+        evh = expected_value_problem(toy_by_hand(ξ, p); optimizer = HiGHS.Optimizer)
+        @test ev.value ≈ evh.value atol = 1e-9
+    end
+end
+
+@testset "SMPS files: SCENARIOS, and what is not supported" begin
+    mktempdir() do dir
+        smps = read_smps(write_toy(dir, TOY_SCENARIOS))
+        ξ, p = enumerate_scenarios(smps.law)
+        @test ξ == [[4.0, 12.0], [8.0, 10.0]] && p ≈ [0.4, 0.6]
+        @test smps.elements == [(:h, 1, 0), (:q, 3, 0)]
+        @test_throws ErrorException enumerate_scenarios(smps.law; limit = 1)
+        # three stages
+        three = replace(TOY_TIME, "ENDATA" => "    Y3        BAL                      STAGE3\nENDATA")
+        @test_throws ErrorException read_smps(write_toy(dir, TOY_STOCH; time = three))
+        # a random first-stage cost, a continuous distribution, probabilities not summing to one
+        for stoch in (replace(TOY_SCENARIOS, "Y3        COST        12.0" => "X1        COST        12.0"),
+                      replace(TOY_STOCH, "INDEP         DISCRETE" => "INDEP         NORMAL"),
+                      replace(TOY_STOCH, "STAGE2   0.7" => "STAGE2   0.6"))
+            @test_throws ErrorException read_smps(write_toy(dir, stoch))
+        end
+    end
+end
+
+# --------------------------------------------------------------------------------------------
+# integer recourse: the integer L-shaped method
+# --------------------------------------------------------------------------------------------
+
+# Birge and Louveaux (2011), Section 7.2, Example 1: binary x, the second stage
+# min -2y₁ - 3y₂ s.t. y₁ + 2y₂ ≤ ξ₁ - x₁, y₁ ≤ ξ₂ - x₂, y integer, ξ = (2, 2) or (4, 3); the
+# first-stage costs `c` are ours.
+integer_example(c) = TwoStageProblem(
+    c = c, A = zeros(0, 2), senses1 = Char[], b = Float64[],
+    q = [-2.0, -3.0], W = [1.0 2.0; 1.0 0.0], senses2 = ['<', '<'], T = [1.0 0.0; 0.0 1.0],
+    h = ξ -> ξ, ξ = [[2.0, 2.0], [4.0, 3.0]], p = [0.5, 0.5], ub1 = 1.0, integer1 = true,
+    integer2 = true)
+
+# A server location problem in the spirit of SSLP (Ntaimo and Sen, 2005): open servers j (binary
+# x, cost f), clients i present at random; each present client assigned to one server (binary y,
+# revenue r), d per client on a server of capacity u xⱼ, an overflow z ≥ 0 at a penalty.
+function server_location(J, I, S; seed = 1)
+    rng = substream(seed)
+    f = rand(rng, 40:80, J) .* 1.0
+    r = rand(rng, 5:25, I, J) .* 1.0
+    d = rand(rng, 5:25, I) .* 1.0
+    u = sum(d) / 2
+    yi(i, j) = (i - 1) * J + j
+    W, T = zeros(J + I, I * J + J), zeros(J + I, J)
+    for j in 1:J
+        for i in 1:I
+            W[j, yi(i, j)] = d[i]
+            W[J + i, yi(i, j)] = 1.0
+        end
+        W[j, I * J + j] = -1.0
+        T[j, j] = -u
+    end
+    return TwoStageProblem(c = f, A = zeros(0, J), senses1 = Char[], b = Float64[],
+        q = vcat([-r[i, j] for i in 1:I for j in 1:J], fill(1000.0, J)), W = W,
+        senses2 = vcat(fill('<', J), fill('=', I)), T = T, h = ξ -> vcat(zeros(J), ξ),
+        ξ = [Float64.(rand(rng, I) .< 0.5) for _ in 1:S], p = fill(1 / S, S),
+        ub1 = 1.0, integer1 = true, ub = vcat(ones(I * J), fill(Inf, J)),
+        integer2 = vcat(trues(I * J), falses(J)))
+end
+
+@testset "integer recourse: the cut of Birge and Louveaux, Section 7.2" begin
+    # at x = (0, 1): L = -5.75, q_S = Q(x) = -5, and the cut θ ≥ 0.75(x₂ - x₁) - 5.75
+    res = lshaped(integer_example([-1.0, -1.0]); optimizer = HiGHS.Optimizer, x0 = [0.0, 1.0],
+                  maxiter = 1, verbose = false)
+    @test res.history[1].Q ≈ -5
+    @test res.integer_cuts == 1
+    cuts = [constraint_object(con) for con in all_constraints(res.master.model, AffExpr,
+                                                               MOI.GreaterThan{Float64})]
+    integer_cut = only(filter(o -> length(o.func.terms) == 3 &&
+                                   any(v -> name(v) == "x[1]" && o.func.terms[v] > 0, keys(o.func.terms)), cuts))
+    coefficient(o, label) = only(a for (v, a) in o.func.terms if name(v) == label)
+    @test coefficient(integer_cut, "x[1]") ≈ 0.75
+    @test coefficient(integer_cut, "x[2]") ≈ -0.75
+    @test coefficient(integer_cut, "θ[1]") ≈ 1
+    @test MOI.constant(integer_cut.set) ≈ -5.75
+    # and the optimum, for several first-stage costs
+    for c in ([-1.0, -1.0], [-0.5, -2.5], [-3.0, -0.2], [0.0, 0.0]), cuts in (:single, :multi)
+        pb = integer_example(c)
+        res = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = cuts, verbose = false)
+        @test res.converged
+        @test res.objective ≈ reference(pb) atol = 1e-9
+        @test res.lower_bound ≈ res.objective atol = 1e-9
+    end
+end
+
+@testset "integer recourse: server location, a feasibility cut, given bounds" begin
+    for (J, I, S) in ((3, 8, 10), (5, 15, 20)), cuts in (:single, :multi, 4)
+        pb = server_location(J, I, S)
+        res = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = cuts, verbose = false)
+        @test res.converged
+        @test res.objective ≈ reference(pb) rtol = 1e-6
+        @test all(isinteger, res.x)
+        @test res.integer_cuts > 0
+        # the second-stage decisions are integer, and their cost is the recourse value
+        y = second_stage_decision(res, 1)
+        @test all(isinteger, round.(y[1:(I * J)], digits = 6))
+    end
+    GC.gc()
+    pb = server_location(3, 8, 10)
+    @test lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, threads = true,
+                  verbose = false).objective ≈ reference(pb) rtol = 1e-6
+    # 2y = ξ - x with y integer: x = 1 leaves the LP relaxation feasible and the integer program
+    # not; the integer feasibility cut x ≤ 0 removes it, although x = 1 is cheaper
+    parity = TwoStageProblem(c = [-1.0], A = zeros(0, 1), senses1 = Char[], b = Float64[],
+        q = [1.0], W = fill(2.0, 1, 1), senses2 = ['='], T = ones(1, 1), h = ξ -> [ξ],
+        ξ = [2.0, 4.0], p = [0.5, 0.5], ub1 = 1.0, integer1 = true, integer2 = true)
+    res = lshaped(parity; optimizer = HiGHS.Optimizer, verbose = false)
+    @test res.converged && res.x == [0.0] && res.feasibility_cuts == 1
+    @test res.objective ≈ reference(parity) atol = 1e-9
+    # the bounds L, given rather than computed
+    pb = integer_example([-1.0, -1.0])
+    for bound in ([-4.0, -7.5], -100.0)
+        res = lshaped(pb; optimizer = HiGHS.Optimizer, recourse_bound = bound, verbose = false)
+        @test res.converged
+        @test res.objective ≈ -6 atol = 1e-9
+    end
+    # what the method cannot do
+    general = integer_example([-1.0, -1.0])
+    general.integer1 .= false            # continuous tender variables
+    @test_throws ErrorException lshaped(general; optimizer = HiGHS.Optimizer, verbose = false)
+    @test_throws ErrorException lshaped(pb; optimizer = HiGHS.Optimizer, verbose = false,
+                                        regularization = :trust_region)
+end
+
+# --------------------------------------------------------------------------------------------
 # diagnostics
 # --------------------------------------------------------------------------------------------
 
@@ -844,8 +1147,9 @@ end
     # a recourse problem MOI would return multipliers of the wrong sign for, or none at all
     @test_throws ErrorException lshaped(one_variable(sense = MAX_SENSE); optimizer = HiGHS.Optimizer,
                                         verbose = false)
-    @test_throws ErrorException lshaped(one_variable(integer = true); optimizer = HiGHS.Optimizer,
-                                        verbose = false)
+    # integer recourse needs binary tender variables, here continuous
+    @test_throws "must be binary" lshaped(one_variable(integer = true); optimizer = HiGHS.Optimizer,
+                                          verbose = false)
     # a master objective term outside x would be left out of both bounds
     @test_throws ErrorException lshaped(one_variable(extra_master_variable = true);
                                         optimizer = HiGHS.Optimizer, verbose = false)

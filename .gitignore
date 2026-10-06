@@ -27,3 +27,6 @@ exercises/**/*.pdf
 
 # Jupyter
 .ipynb_checkpoints/
+
+# SMPS instances downloaded by the L-shaped benchmarks
+code/smps/

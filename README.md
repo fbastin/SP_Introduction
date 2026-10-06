@@ -129,10 +129,13 @@ drop another `.tex` in `exercises/` following the same pattern and
 `code/LShaped.jl` is a stand-alone Julia module implementing the L-shaped method
 of deck 04, in its single-cut, multicut and hybrid versions, with feasibility cuts:
 
-- a problem is given either as **data** (`TwoStageProblem`: `c`, `A`, `b`, `q`,
-  `W`, `T(ξ)`, `h(ξ)`, each row with its own sense `≤`, `=` or `≥`, bounds on both
-  stages, optionally integer first-stage variables) or as **JuMP models of your
-  own** (`JuMPTwoStageProblem`, for instance when `W` or `q` depend on the scenario);
+- a problem is given either as **data** (`TwoStageProblem`: `c`, `A`, `b`, `q(ξ)`,
+  `W(ξ)`, `T(ξ)`, `h(ξ)`, dense or sparse, each row with its own sense `≤`, `=` or
+  `≥`, bounds on both stages, optionally integer variables in either), read from
+  **SMPS files** (`read_smps`, whose law of `ξ` is a sampler: `enumerate_scenarios`
+  or `sample_scenarios`), or as **JuMP models of your own** (`JuMPTwoStageProblem`);
+- **integer recourse** is solved by the integer L-shaped method of Laporte and
+  Louveaux (Birge and Louveaux, Section 7.2), on binary first-stage variables;
 - the master and the recourse problems may use different solvers, and the recourse
   problems of an iteration may be solved in parallel (`threads = true`, with a
   thread-safe solver such as HiGHS);
@@ -172,6 +175,18 @@ on generated instances of growing size, all checked against the extensive form;
 ```bash
 cd code
 julia [-t 6] --project=@v1.12 LShaped_benchmark.jl [quick] [rd] [reps=3] [csv=results.csv]
+```
+
+`code/LShaped_scaling.jl` asks when decomposition pays off: the extensive form
+against the multicut method, at 1 and 6 cores (HiGHS's threads fixed on both
+sides, each measure in a process of its own), with the peak memory of the process,
+as the number of scenarios grows, on generated instances and on samples of the
+SMPS instances storm and SSN of Linderoth, Shapiro and Wright (2006), downloaded
+into `code/smps/` on first use. `code/LShaped_scaling_results.md` records a run.
+
+```bash
+cd code
+julia --project=@v1.12 LShaped_scaling.jl [quick] [cores=1,6] [limit=1800] [memory=12000] [families=capacity,storm,ssn] [csv=scaling.csv]
 ```
 
 ---

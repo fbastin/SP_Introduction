@@ -30,7 +30,7 @@ module Ours
 include(joinpath(@__DIR__, "LShaped.jl"))
 end
 
-using .Ours.LShaped: TwoStageProblem, lshaped, extensive_form, substream
+using .Ours.LShaped: TwoStageProblem, lshaped, extensive_form, substream, read_smps
 using StochasticPrograms
 using HiGHS
 using Ipopt
@@ -38,6 +38,8 @@ using Distributions
 using LinearAlgebra
 using Printf
 using Statistics
+
+include(joinpath(@__DIR__, "LShaped_instances.jl"))
 
 const SPL = StochasticPrograms.LShaped
 const MOI = StochasticPrograms.MOI
@@ -56,22 +58,10 @@ end
 """
     farmer(S; seed)
 
-The farmer of Birge and Louveaux (2011, Section 1.1), with `S` equally likely scenarios whose three
-yields are drawn independently, uniformly within ±20% of their mean: the randomness is in the
-technology matrix `T`. A small first stage, many scenarios.
+The farmer of `farmer_problem` (in `LShaped_instances.jl`), written for both libraries.
 """
 function farmer(S::Integer; seed::Integer = 1)
-    rng = substream(seed)
-    mean_yield = [2.5, 3.0, 20.0]
-    yields = [mean_yield .* rand(rng, Uniform(0.8, 1.2), 3) for _ in 1:S]
-    ours = TwoStageProblem(
-        c = [150.0, 230.0, 260.0], A = ones(1, 3), senses1 = ['<'], b = [500.0],
-        q = [238.0, 210.0, -170.0, -150.0, -36.0, -10.0],
-        W = [1.0 0.0 -1.0 0.0 0.0 0.0; 0.0 1.0 0.0 -1.0 0.0 0.0;
-             0.0 0.0 0.0 0.0 1.0 1.0; 0.0 0.0 0.0 0.0 1.0 0.0],
-        senses2 = ['>', '>', '<', '<'],
-        T = t -> [t[1] 0.0 0.0; 0.0 t[2] 0.0; 0.0 0.0 -t[3]; 0.0 0.0 0.0],
-        h = [200.0, 240.0, 0.0, 6000.0], ξ = yields, p = fill(1 / S, S))
+    ours, yields = farmer_problem(S; seed = seed)
     model = @stochastic_model begin
         @stage 1 begin
             @decision(model, x[1:3] >= 0)
@@ -97,34 +87,11 @@ end
 """
     capacity(P, F, S; shortage = true, seed)
 
-Capacity expansion, after the ice-cream example: capacity `xᵢ` bought for each of `P` plants, then
-`F` products made, `yᵢⱼ`, to meet random demands `dⱼ`, drawn from a log-normal distribution around
-a mean of their own; the randomness is in `h`. With `shortage`, unmet demand `uⱼ` costs a penalty
-(complete recourse); without, the demand must be met, the recourse problem is infeasible whenever
-the capacity falls short, and the methods need feasibility cuts.
+The capacity expansion of `capacity_problem` (in `LShaped_instances.jl`), written for both
+libraries.
 """
 function capacity(P::Integer, F::Integer, S::Integer; shortage::Bool = true, seed::Integer = 2)
-    rng = substream(seed)
-    c = rand(rng, Uniform(5.0, 15.0), P)                     # capacity costs
-    a = rand(rng, Uniform(1.0, 10.0), P, F)                  # production costs
-    mean_demand = rand(rng, Uniform(10.0, 50.0), F)
-    demands = [mean_demand .* rand(rng, LogNormal(0.0, 0.3), F) for _ in 1:S]
-    penalty = 100.0
-    total = 2 * maximum(sum, demands)                         # a loose bound on the capacity
-    nu = shortage ? F : 0
-    idx(i, j) = F * (i - 1) + j
-    W = zeros(P + F, P * F + nu)
-    for i in 1:P, j in 1:F
-        W[i, idx(i, j)] = 1.0                                 # Σⱼ yᵢⱼ ≤ xᵢ
-        W[P + j, idx(i, j)] = 1.0                             # Σᵢ yᵢⱼ (+ uⱼ) ≥ dⱼ
-    end
-    shortage && (W[P+1:end, P*F+1:end] = Matrix(1.0I, F, F))
-    ours = TwoStageProblem(
-        c = c, A = ones(1, P), senses1 = ['<'], b = [total],
-        q = vcat(vec(permutedims(a)), fill(penalty, nu)),
-        W = W, senses2 = vcat(fill('<', P), fill('>', F)),
-        T = vcat(-Matrix(1.0I, P, P), zeros(F, P)), h = d -> vcat(zeros(P), d),
-        ξ = demands, p = fill(1 / S, S))
+    ours, c, a, demands, penalty, total = capacity_problem(P, F, S; shortage = shortage, seed = seed)
     model = if shortage
         @stochastic_model begin
             @stage 1 begin

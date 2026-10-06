@@ -1,23 +1,27 @@
 """
     LShaped
 
-A general L-shaped method for two-stage stochastic linear programs with recourse,
+A general L-shaped method for two-stage stochastic programs with recourse,
 
     min  c'x + E_ξ[Q(x, ξ)]   s.t.  Ax ⋛ b,  x ∈ X
 
     Q(x, ξ) = min  q(ξ)'y   s.t.  Wy ⋛ h(ξ) - T(ξ)x,  y ∈ Y,
 
 where `⋛` is read row by row (`≤`, `=`, `≥` in any mix, in both stages), `X` and `Y` are boxes,
-and `ξ` is a finite vector of scenarios with probabilities `p`.
+possibly with integrality constraints, and `ξ` is a finite vector of scenarios with probabilities
+`p`. A linear second stage gives the L-shaped method of the course; an integer one, the integer
+L-shaped method of Laporte and Louveaux, on binary first-stage variables.
 
 Three things are meant to be independent of each other, and are:
 
-* **the modelization** — either the data of the problem, given to [`TwoStageProblem`](@ref), or
-  any JuMP model you like, plugged in through [`JuMPTwoStageProblem`](@ref);
+* **the modelization** — either the data of the problem, given to [`TwoStageProblem`](@ref) or
+  read from SMPS files by [`read_smps`](@ref), or any JuMP model you like, plugged in through
+  [`JuMPTwoStageProblem`](@ref);
 * **the solver** — `master_optimizer` and `recourse_optimizer` are independent, and any JuMP
   optimizer or `MOI.OptimizerWithAttributes` is accepted;
-* **the algorithm** — one cut per iteration, [`lshaped`](@ref) with `cuts = :single`, or one cut
-  per scenario, with `cuts = :multi`.
+* **the algorithm** — one cut per iteration, [`lshaped`](@ref) with `cuts = :single`, one cut
+  per scenario, with `cuts = :multi`, or one per cluster of scenarios; with or without a
+  regularization.
 
 The scenarios themselves may be tabulated or drawn: [`sample_scenarios`](@ref) turns a sampler into
 the `(ξ, p)` pair both modelizations take, and [`substream`](@ref) is the reproducible stream it
@@ -36,7 +40,9 @@ module LShaped
 using JuMP
 using LinearAlgebra
 using Printf
+using Random
 using RandomDataStreams
+using SparseArrays
 
 const MOI = JuMP.MOI
 
@@ -48,7 +54,8 @@ export Sense, LEQ, EQ, GEQ, to_sense,
        first_stage_decision, second_stage_decision, print_first_stage, print_second_stage,
        evpi_bounds, vss_bounds,
        wait_and_see, expected_value_problem, expected_result, evpi, vss,
-       sample_scenarios, substream
+       sample_scenarios, substream,
+       read_smps, SMPSProblem, SMPSLaw, enumerate_scenarios, support_size
 
 # --------------------------------------------------------------------------------------------
 # row senses
@@ -341,20 +348,64 @@ end
     check_recourse(r, s)
 
 The cuts rely on `Q(·, ξₛ)` being the value of a linear program, minimized: its multipliers are
-then subgradients. A `Max` objective flips their sign under the MOI convention, and an integer
-recourse variable leaves no multiplier at all, so both are refused rather than turned into wrong
-cuts.
+then subgradients. A `Max` objective flips their sign under the MOI convention, and is refused
+rather than turned into wrong cuts. So are integer recourse variables, which leave no multiplier
+at all, unless `integer = true`: the integer L-shaped method takes its subgradients from the
+relaxed models, and only needs the values of these.
 """
-function check_recourse(r::RecourseTemplate, s)
+function check_recourse(r::RecourseTemplate, s; integer::Bool = false)
     JuMP.objective_sense(r.model) == MOI.MIN_SENSE ||
         error("scenario $s: the recourse problem must be a minimization; write `Min -f` for `Max f`")
-    integers = JuMP.num_constraints(r.model, JuMP.VariableRef, MOI.Integer) +
-               JuMP.num_constraints(r.model, JuMP.VariableRef, MOI.ZeroOne)
-    integers == 0 ||
-        error("scenario $s: the recourse problem has $integers integer variable(s); " *
+    integer || !has_integers(r.model) ||
+        error("scenario $s: the recourse problem has integer variables; " *
               "the L-shaped cuts need a linear recourse problem")
     return r
 end
+
+"""Whether `model` has integer or binary variables."""
+has_integers(model::JuMP.Model) =
+    JuMP.num_constraints(model, JuMP.VariableRef, MOI.Integer) +
+    JuMP.num_constraints(model, JuMP.VariableRef, MOI.ZeroOne) > 0
+
+"""Whether the variable `v` can only take the values 0 and 1."""
+_is_binary(v::JuMP.VariableRef) =
+    JuMP.is_binary(v) ||
+    (JuMP.is_integer(v) && JuMP.has_lower_bound(v) && JuMP.lower_bound(v) >= 0 &&
+     JuMP.has_upper_bound(v) && JuMP.upper_bound(v) <= 1) ||
+    (JuMP.is_integer(v) && JuMP.is_fixed(v) && JuMP.fix_value(v) in (0, 1))
+
+"""
+    relaxed_recourse(md, optimizer, s)
+
+The recourse model of scenario `s` with its integrality relaxed: the multipliers of this linear
+program give the cuts of the LP relaxation, which are valid for the integer recourse function
+since they bound it from below. Built from [`build_recourse`](@ref) by `relax_integrality`.
+"""
+function relaxed_recourse(md::AbstractTwoStageModel, optimizer, s)
+    r = build_recourse(md, optimizer, s)
+    JuMP.relax_integrality(r.model)
+    return r
+end
+
+"""
+    tender_variables(md, master)
+
+The indices of the first-stage variables on which the second stage depends, which the integer
+L-shaped method requires to be binary: those with a nonzero column in some `T(ξ)` for a
+[`TwoStageProblem`](@ref), all of them otherwise.
+"""
+tender_variables(md::AbstractTwoStageModel, master) = collect(eachindex(master.x))
+
+"""
+    recourse_lower_bound(md, optimizer, s)
+
+A lower bound `Lₛ` on `Q(x, ξₛ)` over the first-stage decisions, as the integer L-shaped method
+needs (Birge and Louveaux, 2011, Assumption 2 of Section 7.2): for a [`TwoStageProblem`](@ref), the
+minimum of `q(ξₛ)'y` over the LP relaxation of both stages, with `x` free in its own constraints.
+Other modelizations must give it, through the `recourse_bound` keyword of [`lshaped`](@ref).
+"""
+recourse_lower_bound(md::AbstractTwoStageModel, optimizer, s) =
+    error("integer recourse: pass a lower bound on the recourse function as `recourse_bound`")
 
 cut_intercept(md::AbstractTwoStageModel, r, s, x, π, v) =
     v + dot(cut_coefficients(md, r, s, x, π), x)
@@ -394,14 +445,17 @@ end
 """
     TwoStageProblem(; c, A, senses1, b, q, W, senses2, T, h, ξ, p,
                       lb1 = 0, ub1 = Inf, lb = 0, ub = Inf,
-                      integer1 = false, intercept = :tight)
+                      integer1 = false, integer2 = false, intercept = :tight)
 
 The two-stage stochastic linear program of the docstring of the module, given as data. Every row
 of `A` and of `W` carries its own sense, given by `senses1` and `senses2` as `Sense` values or as
-`'<'`, `'='`, `'>'`; `T`, `h` and `q` are functions of the scenario or constants; `lb1`, `ub1` are
+`'<'`, `'='`, `'>'`; `W`, `T`, `h` and `q` are functions of the scenario or constants, and the
+matrices may be dense or sparse (the L-shaped method does not need a fixed recourse matrix: a
+random `W` only changes the recourse problems, not the cuts); `lb1`, `ub1` are
 the bounds of `x` and `lb`, `ub` those of `y`, scalars or vectors, and `integer1` — a boolean or a
 vector of them — asks for some of the `x` to be integer, which makes the master a mixed-integer
-program and nothing else change.
+program and nothing else change. `integer2` does the same for the `y`: the recourse problems are
+then integer programs, which [`lshaped`](@ref) solves by the integer L-shaped method.
 
 `intercept = :tight` (the default) builds both cuts as supporting hyperplanes, tight at the current
 iterate, which stays valid with bounded recourse variables. `intercept = :textbook` uses instead
@@ -411,11 +465,11 @@ makes the method stop at a point that is not optimal.
 """
 struct TwoStageProblem <: AbstractTwoStageModel
     c::Vector{Float64}
-    A::Matrix{Float64}
+    A::AbstractMatrix{Float64}        # dense or sparse, as given
     senses1::Vector{Sense}
     b::Vector{Float64}
     q::Function
-    W::Matrix{Float64}
+    W::Function
     senses2::Vector{Sense}
     T::Function
     h::Function
@@ -426,19 +480,20 @@ struct TwoStageProblem <: AbstractTwoStageModel
     integer1::Vector{Bool}
     lb::Vector{Float64}
     ub::Vector{Float64}
+    integer2::Vector{Bool}
     intercept::Symbol
 end
 
 function TwoStageProblem(; c, A, senses1, b, q, W, senses2, T, h, ξ, p,
                            lb1 = 0.0, ub1 = Inf, lb = 0.0, ub = Inf,
-                           integer1 = false, intercept::Symbol = :tight)
+                           integer1 = false, integer2 = false, intercept::Symbol = :tight)
     intercept in (:tight, :textbook) || error("unknown intercept: $intercept")
     nx = length(c)
-    ny = q isa AbstractVector ? length(q) : size(W, 2)
+    ny = q isa AbstractVector ? length(q) : size(W isa AbstractMatrix ? W : W(first(ξ)), 2)
     pb = TwoStageProblem(
         Float64.(c), Float64.(A), to_sense.(collect(senses1)), Float64.(b),
         q isa Function ? q : (qc = Float64.(q); _ -> qc),     # converted once, not at every call
-        Float64.(W), to_sense.(collect(senses2)),
+        W isa AbstractMatrix ? (Wc = Float64.(W); _ -> Wc) : W, to_sense.(collect(senses2)),
         T isa AbstractMatrix ? (Tc = Float64.(T); _ -> Tc) : T,
         h isa AbstractVector ? (hc = Float64.(h); _ -> hc) : h,
         collect(ξ), Float64.(p),
@@ -447,17 +502,19 @@ function TwoStageProblem(; c, A, senses1, b, q, W, senses2, T, h, ξ, p,
         integer1 isa Bool ? fill(integer1, nx) : Bool.(integer1),
         lb isa Number ? fill(Float64(lb), ny) : Float64.(lb),
         ub isa Number ? fill(Float64(ub), ny) : Float64.(ub),
+        integer2 isa Bool ? fill(integer2, ny) : Bool.(integer2),
         intercept)
     @assert length(pb.integer1) == nx "integer1 and c disagree on the number of variables"
+    @assert length(pb.integer2) == ny "integer2 and q disagree on the number of variables"
     @assert size(pb.A, 2) == nx "A and c disagree on the number of columns"
     @assert size(pb.A, 1) == length(pb.b) == length(pb.senses1) "A, b and senses1 disagree"
-    @assert size(pb.W, 2) == ny "W and q disagree on the number of columns"
-    @assert size(pb.W, 1) == length(pb.senses2) "W and senses2 disagree"
+
     @assert length(pb.ξ) == length(pb.p) "one probability per scenario is required"
     @assert isapprox(sum(pb.p), 1; atol = 1e-9) "the probabilities must sum up to one"
     for s in eachindex(pb.ξ)
-        @assert size(pb.T(pb.ξ[s])) == (size(pb.W, 1), nx) "T(ξ) has a wrong size"
-        @assert length(pb.h(pb.ξ[s])) == size(pb.W, 1) "h(ξ) has a wrong length"
+        @assert size(pb.W(pb.ξ[s])) == (length(pb.senses2), ny) "W(ξ) has a wrong size"
+        @assert size(pb.T(pb.ξ[s])) == (length(pb.senses2), nx) "T(ξ) has a wrong size"
+        @assert length(pb.h(pb.ξ[s])) == length(pb.senses2) "h(ξ) has a wrong length"
         @assert length(pb.q(pb.ξ[s])) == ny "q(ξ) has a wrong length"
     end
     return pb
@@ -465,7 +522,7 @@ end
 
 n_x(pb::TwoStageProblem)         = length(pb.c)
 n_y(pb::TwoStageProblem)         = length(pb.lb)
-n_rows(pb::TwoStageProblem)      = size(pb.W, 1)
+n_rows(pb::TwoStageProblem)      = length(pb.senses2)
 n_scenarios(pb::TwoStageProblem) = length(pb.ξ)
 scenario_probability(pb::TwoStageProblem, s) = pb.p[s]
 scenario_data(pb::TwoStageProblem, s) = pb.ξ[s]
@@ -473,8 +530,9 @@ scenario_data(pb::TwoStageProblem, s) = pb.ξ[s]
 """Right-hand side of the second stage at `(x, ξ)`."""
 recourse_rhs(pb::TwoStageProblem, x, ξ) = pb.h(ξ) - pb.T(ξ) * x
 
-recourse_variables!(m::JuMP.Model, pb::TwoStageProblem; base_name = "y") =
-    declare_box!(m, @variable(m, [1:n_y(pb)], base_name = base_name), pb.lb, pb.ub)
+recourse_variables!(m::JuMP.Model, pb::TwoStageProblem; base_name = "y", integer = true) =
+    declare_box!(m, @variable(m, [1:n_y(pb)], base_name = base_name), pb.lb, pb.ub,
+                 integer ? pb.integer2 : falses(n_y(pb)))
 
 function build_master(pb::TwoStageProblem, optimizer)
     m = new_model(optimizer; direct = true)
@@ -488,7 +546,7 @@ function build_recourse(pb::TwoStageProblem, optimizer, s)
     ξ = pb.ξ[s]
     m = new_model(optimizer; direct = true)
     y = recourse_variables!(m, pb)
-    con = add_rows!(m, pb.W * y, pb.senses2, zeros(n_rows(pb)))
+    con = add_rows!(m, pb.W(ξ) * y, pb.senses2, zeros(n_rows(pb)))
     @objective(m, Min, dot(pb.q(ξ), y))
     return RecourseTemplate(m, y, con, (x, _) -> recourse_rhs(pb, x, ξ))
 end
@@ -512,9 +570,9 @@ function build_elastic(pb::TwoStageProblem, optimizer, s)
     ξ, rows, senses = pb.ξ[s], n_rows(pb), pb.senses2
     equalities = count(==(EQ), senses)
     m = new_model(optimizer; direct = true)
-    y = recourse_variables!(m, pb)
+    y = recourse_variables!(m, pb; integer = false)  # the cuts come from the LP relaxation
     @variable(m, w[1:(rows + 2equalities)] >= 0)   # one per row, two for an `=` row
-    lhs = pb.W * y
+    lhs = pb.W(ξ) * y
     con, row, sign = Vector{Any}(undef, 0), Int[], Float64[]
     k = 0
     for i in 1:rows
@@ -544,6 +602,31 @@ cut_intercept(pb::TwoStageProblem, r, s, x, π, v) =
     pb.intercept == :textbook ? dot(π, pb.h(pb.ξ[s])) :
                                v + dot(cut_coefficients(pb, r, s, x, π), x)
 
+function tender_variables(pb::TwoStageProblem, master)
+    used = falses(n_x(pb))
+    for ξ in pb.ξ
+        T = pb.T(ξ)
+        for j in 1:n_x(pb)
+            used[j] |= any(!iszero, view(T, :, j))
+        end
+    end
+    return findall(used)
+end
+
+function recourse_lower_bound(pb::TwoStageProblem, optimizer, s)
+    ξ = pb.ξ[s]
+    m = new_model(optimizer)
+    x = declare_box!(m, @variable(m, [1:n_x(pb)]), pb.lb1, pb.ub1)
+    y = recourse_variables!(m, pb; integer = false)
+    add_rows!(m, pb.A * x, pb.senses1, pb.b)
+    add_rows!(m, pb.T(ξ) * x + pb.W(ξ) * y, pb.senses2, pb.h(ξ))
+    @objective(m, Min, dot(pb.q(ξ), y))
+    optimize!(m)
+    status = termination_status(m)
+    status == MOI.OPTIMAL && return objective_value(m)
+    error("scenario $s: the bound on the recourse function is $status; pass `recourse_bound`")
+end
+
 """
     extensive_form(pb::TwoStageProblem; optimizer, kwargs...)
 
@@ -557,7 +640,7 @@ function extensive_form(pb::TwoStageProblem; optimizer, kwargs...)
     y = [recourse_variables!(m, pb; base_name = "y_$s") for s in 1:n_scenarios(pb)]
     add_rows!(m, pb.A * x, pb.senses1, pb.b)
     for s in 1:n_scenarios(pb)
-        add_rows!(m, pb.T(pb.ξ[s]) * x + pb.W * y[s], pb.senses2, pb.h(pb.ξ[s]))
+        add_rows!(m, pb.T(pb.ξ[s]) * x + pb.W(pb.ξ[s]) * y[s], pb.senses2, pb.h(pb.ξ[s]))
     end
     @objective(m, Min, dot(pb.c, x) +
                        sum(pb.p[s] * dot(pb.q(pb.ξ[s]), y[s]) for s in 1:n_scenarios(pb)))
@@ -657,7 +740,8 @@ cut_intercept(md::JuMPTwoStageProblem, r, s, x, π, v) = md.cut_intercept(s, x, 
               threads = false, drop_inactive = nothing,
               regularization = :none, rho = 1.0, radius = nothing, max_radius = Inf,
               eta1 = 1e-4, eta2 = 1e-4, gamma = 2.0, patience = 3,
-              x0 = nothing, callback = nothing, verbose = true, log = stdout)
+              x0 = nothing, callback = nothing, recourse_bound = nothing, box = 1e6,
+              verbose = true, log = stdout)
 
 Solve a two-stage stochastic linear program by L-shaped decomposition, on the modelization `md`.
 
@@ -736,6 +820,29 @@ Feasibility cuts are kept. A master with fewer cuts is still a relaxation, so th
 the stopping test remain valid, but the finite convergence of the method is no longer guaranteed:
 `maxiter` then matters.
 
+**Integer recourse.** If the recourse problems have integer variables, `Q(·, ξ)` is not convex and
+their multipliers give no cut: `lshaped` then runs the integer L-shaped method of Laporte and
+Louveaux (Birge and Louveaux, 2011, Section 7.2), which requires the first-stage variables the
+second stage depends on (`tender_variables`) to be binary. At a binary iterate `xᵏ`, with `S` its
+set of ones, it adds per cluster the optimality cut
+
+    θₖ ≥ (qₖ - Lₖ)(Σ_{i ∈ S} xᵢ - Σ_{i ∉ S} xᵢ - |S| + 1) + Lₖ,
+
+exact at `xᵏ`, where `qₖ` is the expected recourse within the cluster, and no stronger than the
+lower bound `Lₖ` at every other binary point; and the cuts of the LP relaxation of the recourse
+problems, which bound `Q` from below and are therefore valid too. The master, a mixed-integer
+program, is solved anew at each iteration: the solver does the branching of the method. A binary
+iterate whose relaxations are feasible but some integer recourse problem is not is cut off on its
+own, `Σ_{i ∈ S} xᵢ - Σ_{i ∉ S} xᵢ ≤ |S| - 1`. The bounds `Lₛ ≤ min_x Q(x, ξₛ)` are computed from the
+LP relaxation of both stages ([`recourse_lower_bound`](@ref)) for a [`TwoStageProblem`](@ref);
+`recourse_bound` gives them otherwise, one per scenario or one for all. The integer recourse
+problems are only solved up to the gap of their solver: the cuts use its bound, the upper bound its
+solution, and the gap reported accounts for both.
+
+If the master is unbounded — the cuts do not bound `θ` yet, along a first-stage variable without
+a bound — it is solved again in a box `|xⱼ| ≤ box` on these variables, which gives an iterate and
+cuts but no lower bound; should no cut be violated there, the box grows tenfold.
+
 `master_optimizer` and `recourse_optimizer` are independent — the master is a sequence of LPs that
 grows, the recourse problems are small and re-solved at every iterate, so the two rarely deserve
 the same solver; both accept anything [`new_model`](@ref) accepts.
@@ -748,7 +855,8 @@ as proof of feasibility.
 The upper bound is that of the **incumbent**, the best first-stage solution met so far: the value
 `c'xᵏ + Q(xᵏ)` of the current iterate does not decrease monotonically. Returns a named tuple with
 the incumbent `x` and its `objective`, the last `lower_bound`, the `gap` between them,
-`converged`, `stopped`, the counters of both kinds of cut and of the `dropped_cuts`, the
+`converged`, `stopped`, the counters of the cuts — `optimality_cuts`, `integer_cuts`,
+`feasibility_cuts` — and of the `dropped_cuts`, the
 `clusters`, the `regularization`, the `problem` `md` and the models, and the `history`, whose
 entries record per iteration the bounds, the `value` of the iterate `x`, and the `model` value of
 the master solution. [`first_stage_decision`](@ref), [`second_stage_decision`](@ref),
@@ -774,6 +882,8 @@ function lshaped(md::AbstractTwoStageModel;
                  patience::Integer = 3,
                  x0 = nothing,
                  callback = nothing,
+                 recourse_bound = nothing,
+                 box::Real = 1e6,
                  verbose::Bool = true,
                  log::IO = stdout)
     drop_inactive === nothing || drop_inactive >= 1 ||
@@ -799,7 +909,8 @@ function lshaped(md::AbstractTwoStageModel;
     P = [sum(p[s] for s in cluster) for cluster in clusters]
 
     master = build_master(md, master_optimizer)
-    recourse = [check_recourse(build_recourse(md, recourse_optimizer, s), s) for s in 1:scenarios]
+    recourse = [check_recourse(build_recourse(md, recourse_optimizer, s), s; integer = true)
+                for s in 1:scenarios]
     elastic = Any[nothing for _ in 1:scenarios]
     c, constant = master_cost(master)
     x = master.x
@@ -813,6 +924,29 @@ function lshaped(md::AbstractTwoStageModel;
         x0 = Float64.(collect(x0))
     end
     regularized = regularization != :none
+
+    # integer recourse: the integer L-shaped method of Laporte and Louveaux, on binary tender
+    # variables; the cuts of the LP relaxation come from relaxed copies of the recourse models
+    integer_recourse = any(r -> has_integers(r.model), recourse)
+    relaxed, tender, Lk = recourse, Int[], Float64[]
+    if integer_recourse
+        regularized && error("integer recourse: the regularizations are not supported")
+        relaxed = [check_recourse(relaxed_recourse(md, recourse_optimizer, s), s) for s in 1:scenarios]
+        tender = tender_variables(md, master)
+        for j in tender
+            _is_binary(x[j]) || error("""integer recourse: the first-stage variable $(x[j]) on \
+                which the second stage depends must be binary (the integer L-shaped method)""")
+        end
+        Ls = recourse_bound === nothing ?
+             [recourse_lower_bound(md, master_optimizer, s) for s in 1:scenarios] :
+             recourse_bound isa Real ? fill(Float64(recourse_bound), scenarios) :
+             Float64.(collect(recourse_bound))
+        length(Ls) == scenarios || error("`recourse_bound` needs one bound per scenario")
+        Lk = [sum(p[s] * Ls[s] for s in cluster) / P[k] for (k, cluster) in enumerate(clusters)]
+        x0 === nothing || (x0[tender] .= round.(x0[tender]))
+    end
+    mip_master = has_integers(master.model)
+    M, boxed = Float64(box), false             # the temporary box of an unbounded master
 
     # anonymous, so that a master model of the user's may have a variable of its own named θ
     θ = @variable(master.model, [1:C], base_name = "θ")
@@ -885,27 +1019,29 @@ function lshaped(md::AbstractTwoStageModel;
                  `optimizer_with_attributes(Ipopt.Optimizer, "bound_relax_factor" => 0.0)`, or use \
                  `regularization = :trust_region`, whose master is linear.""")
     end
-    """The value of the model of the master at `a`: the cuts, not yet those of this iteration."""
-    function model_value(a)
+    """The value of each `θₖ` the cuts in the master give at `a`."""
+    function cut_model(a)
         θa = fill(-Inf, C)
         for cut in stored
             θa[cut.cluster] = max(θa[cut.cluster], cut.e - dot(cut.E, a))
         end
-        return dot(c, a) + constant + dot(P, θa)
+        return θa
     end
+    """The value of the model of the master at `a`: the cuts, not yet those of this iteration."""
+    model_value(a) = dot(c, a) + constant + dot(P, cut_model(a))
 
     if verbose
         label = C == 1 ? "Single-cut" : C == scenarios ? "Multi-cut" : "Hybrid ($C clusters)"
         extra = regularization == :regularized_decomposition ? ", regularized decomposition (rho = $rho)" :
                 regularization == :trust_region ? ", trust region" : ""
-        @printf(log, "%s L-shaped method%s\n", label, extra)
+        @printf(log, "%s %sL-shaped method%s\n", label, integer_recourse ? "integer " : "", extra)
         @printf(log, "  master: %s | recourse: %s | scenarios: %d\n\n",
                 solver_label(master_optimizer), solver_label(recourse_optimizer), scenarios)
         @printf(log, " iter %16s   upper bound          gap %14s %14s\n",
                 regularized ? "model value" : "lower bound", C == 1 ? "θ" : "min θₖ", "Q(x)")
     end
 
-    n_optimality = n_feasibility = n_dropped = 0
+    n_optimality = n_feasibility = n_dropped = n_integer = 0
     stored = StoredCut[]                       # the optimality cuts in the master
     history = NamedTuple[]
     lower, upper, xstar, converged, stopped = -Inf, Inf, fill(NaN, n), false, false
@@ -919,6 +1055,15 @@ function lshaped(md::AbstractTwoStageModel;
             stale && (set_objective!(); stale = false)
             optimize!(master.model)
             status = termination_status(master.model)
+            # The cuts do not bound the master yet, along a first-stage variable without a bound:
+            # its solution in a box |xⱼ| ≤ M gives an iterate, whose cuts will bound θ in that
+            # direction. Such a master is a restriction, which gives no lower bound.
+            boxed = !regularized && status in (MOI.DUAL_INFEASIBLE, MOI.INFEASIBLE_OR_UNBOUNDED)
+            if boxed
+                undo = box_master!(x, M)
+                optimize!(master.model)
+                status = termination_status(master.model)
+            end
             # a local optimum of the convex master, as Ipopt reports it, is a global one
             status in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED) ||
                 error("master problem: $status" *
@@ -926,8 +1071,19 @@ function lshaped(md::AbstractTwoStageModel;
                        "; this quadratic master may need another solver, see `regularization`" : ""))
             xk = value.(x)
             θk = [bounded[k] ? value(θ[k]) : -Inf for k in 1:C]
+            master_value = objective_value(master.model)
+            master_bound = mip_master ? JuMP.objective_bound(master.model) : master_value
+            boxed && undo()
+            if integer_recourse
+                # the tender variables are binary up to the tolerance of the MIP solver: rounded,
+                # with θ read off the cuts at the rounded point, where the integer cut is exact
+                # (its slope q - L amplifies the slightest deviation from 0 or 1)
+                xk[tender] .= round.(xk[tender])
+                all(bounded) && (θk = cut_model(xk))
+            end
             model = all(bounded) ? dot(c, xk) + constant + dot(P, θk) : -Inf
-            lower = !regularized && any(bounded) ? objective_value(master.model) : -Inf
+            # a mixed-integer master is only solved up to a gap: its bound is the lower bound
+            lower = regularized || !any(bounded) || boxed ? -Inf : master_bound
             if drop_inactive !== nothing
                 n_dropped += drop_inactive_cuts!(master.model, stored, it, drop_inactive)
             end
@@ -956,7 +1112,11 @@ function lshaped(md::AbstractTwoStageModel;
         # order of the scenarios, so that the results do not depend on the threads
         pieces = Vector{Any}(undef, scenarios)
         foreach_scenario(threads, scenarios) do s
-            pieces[s] = solve_scenario!(md, recourse, elastic, recourse_optimizer, s, xk, n, feastol)
+            piece = solve_scenario!(md, relaxed, elastic, recourse_optimizer, s, xk, n, feastol)
+            if integer_recourse && piece.feasible
+                piece = merge(piece, integer_recourse_value!(md, recourse[s], s, xk))
+            end
+            pieces[s] = piece
         end
         infeasible = [s for s in 1:scenarios if !pieces[s].feasible]
         for s in infeasible
@@ -969,7 +1129,24 @@ function lshaped(md::AbstractTwoStageModel;
                                it, join(infeasible, ", "))
             continue
         end
-        Qs = [pieces[s].Q for s in 1:scenarios]
+        if integer_recourse                    # the relaxation is feasible, the integer program not
+            lost = [s for s in 1:scenarios if !isfinite(pieces[s].value)]
+            if !isempty(lost)
+                # a feasibility cut of the integer L-shaped method: binary tender variables, so
+                # that xᵏ can be cut off on its own, δ(x, S) ≤ |S| - 1
+                ones_ = [j for j in tender if xk[j] > 0.5]
+                @constraint(master.model, sum(x[j] for j in ones_; init = JuMP.AffExpr(0.0)) -
+                                          sum(x[j] for j in tender if xk[j] <= 0.5;
+                                              init = JuMP.AffExpr(0.0)) <= length(ones_) - 1)
+                n_feasibility += 1
+                verbose && @printf(log, "%5d   integer feasibility cut, scenario(s) %s\n",
+                                   it, join(lost, ", "))
+                continue
+            end
+        end
+        # with integer recourse, the value of the integer programs; the cuts of the relaxation
+        # are judged against the value of the relaxation
+        Qs = [integer_recourse ? pieces[s].value : pieces[s].Q for s in 1:scenarios]
         Q = dot(p, Qs)
         current = dot(c, xk) + constant + Q
         if current < upper                     # a new incumbent
@@ -990,11 +1167,25 @@ function lshaped(md::AbstractTwoStageModel;
         end
         Qk = [sum(p[s] * Qs[s] for s in cluster) / P[k] for (k, cluster) in enumerate(clusters)]
         violated = [!bounded[k] || θk[k] < Qk[k] - tol * (1 + abs(Qk[k])) for k in 1:C]
+        if integer_recourse
+            # the integer cut forces θₖ up to the bound of the integer programs, not to their
+            # value, which a solver stopping at a MIP gap overestimates: the test follows it
+            Bk = [sum(p[s] * pieces[s].bound for s in cluster) / P[k] for (k, cluster) in enumerate(clusters)]
+            Rk = [sum(p[s] * pieces[s].Q for s in cluster) / P[k] for (k, cluster) in enumerate(clusters)]
+            violated = [!bounded[k] || θk[k] < Bk[k] - tol * (1 + abs(Bk[k])) for k in 1:C]
+            relaxation_violated = [!bounded[k] || θk[k] < Rk[k] - tol * (1 + abs(Rk[k])) for k in 1:C]
+        end
         # the stopping test of the regularizations, f(a) - m(x) ≤ tol × scale, must not ask more
         # than the cuts: without a violated cut, m(xᵏ) may still fall short of f(xᵏ) by up to
         # Σₖ Pₖ tol (1 + |Qₖ|), and the method would neither cut nor stop
         scale = 1 + abs(current) + dot(P, abs.(Qk))
         if !regularized && !any(violated)
+            # in a box, the iterate is only optimal there: a larger one, unless it is absurd
+            if boxed
+                M *= 10
+                M <= 1e12 || error("the master problem is unbounded: so is, apparently, the problem")
+                continue
+            end
             converged = true
             break
         end
@@ -1022,12 +1213,30 @@ function lshaped(md::AbstractTwoStageModel;
         end
 
         for (k, cluster) in enumerate(clusters)
-            violated[k] || continue
+            (integer_recourse ? relaxation_violated[k] : violated[k]) || continue
             E = sum(p[s] / P[k] * pieces[s].E for s in cluster)
             e = sum(p[s] / P[k] * pieces[s].e for s in cluster)
             con = @constraint(master.model, dot(E, x) + θ[k] >= e)
             push!(stored, StoredCut(con, it, k, E, e))
             n_optimality += 1
+        end
+        if integer_recourse
+            # the optimality cut (2.1) of Birge and Louveaux (2011, Section 7.2), per cluster:
+            # θₖ ≥ (q - L)(δ(x, S) - |S| + 1) + L, with S the tender variables at one in xᵏ and
+            # δ(x, S) = Σ_{i ∈ S} xᵢ - Σ_{i ∉ S} xᵢ; it gives θₖ ≥ q at xᵏ and θₖ ≥ L elsewhere
+            ones_ = [j for j in tender if xk[j] > 0.5]
+            for k in 1:C
+                violated[k] || continue
+                slope = max(Bk[k] - Lk[k], 0.0)
+                E = zeros(n)
+                for j in tender
+                    E[j] = j in ones_ ? -slope : slope
+                end
+                e = Lk[k] - slope * (length(ones_) - 1)
+                con = @constraint(master.model, dot(E, x) + θ[k] >= e)
+                push!(stored, StoredCut(con, it, k, E, e))
+                n_integer += 1
+            end
         end
         # the objective only changes when some θ is bounded for the first time
         if !all(bounded)
@@ -1047,8 +1256,9 @@ function lshaped(md::AbstractTwoStageModel;
     end
     if verbose
         if converged
-            @printf(log, "converged in %d iteration(s): %d optimality cut(s), %d feasibility cut(s)%s\n",
-                    iteration, n_optimality, n_feasibility,
+            @printf(log, "converged in %d iteration(s): %d optimality cut(s), %s%d feasibility cut(s)%s\n",
+                    iteration, n_optimality,
+                    integer_recourse ? "$n_integer integer optimality cut(s), " : "", n_feasibility,
                     drop_inactive === nothing ? "" : ", $n_dropped dropped")
         elseif stopped
             @printf(log, "stopped by the callback at iteration %d\n", iteration)
@@ -1058,9 +1268,32 @@ function lshaped(md::AbstractTwoStageModel;
     end
     return (x = xstar, objective = upper, lower_bound = lower, gap = upper - lower,
             converged = converged, stopped = stopped, iterations = iteration,
-            optimality_cuts = n_optimality, feasibility_cuts = n_feasibility,
+            optimality_cuts = n_optimality, integer_cuts = n_integer, feasibility_cuts = n_feasibility,
             dropped_cuts = n_dropped, clusters = clusters, regularization = regularization,
             problem = md, master = master, recourse = recourse, history = history)
+end
+
+"""
+    box_master!(x, M)
+
+Bound by `±M` the variables of `x` without a lower or an upper bound; returns a function that
+removes these bounds again. Fixed and binary variables are left alone.
+"""
+function box_master!(x, M)
+    added = Tuple{JuMP.VariableRef,Symbol}[]
+    for v in x
+        (JuMP.is_fixed(v) || JuMP.is_binary(v)) && continue
+        if !JuMP.has_lower_bound(v)
+            JuMP.set_lower_bound(v, -M)
+            push!(added, (v, :lower))
+        end
+        if !JuMP.has_upper_bound(v)
+            JuMP.set_upper_bound(v, M)
+            push!(added, (v, :upper))
+        end
+    end
+    return () -> foreach(((v, side),) -> side == :lower ? JuMP.delete_lower_bound(v) :
+                                                        JuMP.delete_upper_bound(v), added)
 end
 
 """An optimality cut `E'x + θₖ ≥ e` of the master, and the last iteration at which it was tight."""
@@ -1153,6 +1386,30 @@ function solve_scenario!(md, recourse, elastic, optimizer, s, xk, n, feastol)
     E = cut_coefficients(md, r, s, xk, π)
     length(E) == n || error("`cut_coefficients` returned $(length(E)) coefficients, expected $n")
     return (feasible = true, Q = Q, E = E, e = cut_intercept(md, r, s, xk, π, Q))
+end
+
+"""
+    integer_recourse_value!(md, r, s, xk)
+
+Solve the integer recourse problem `r` of scenario `s` at `xk`. Returns `(value, bound)`: its
+optimal value, the cost of the solution found, and the bound of the solver, which is below `Q(xk, ξₛ)`
+when it stops at a MIP gap; both are `+Inf` if it is infeasible.
+"""
+function integer_recourse_value!(md, r, s, xk)
+    set_recourse_rhs!(md, r, xk, s)
+    optimize!(r.model)
+    status = termination_status(r.model)
+    # an integer program whose relaxation has an optimum is infeasible, not unbounded
+    status in (MOI.INFEASIBLE, MOI.INFEASIBLE_OR_UNBOUNDED) && return (value = Inf, bound = Inf)
+    status == MOI.OPTIMAL ||
+        error("scenario $s: the integer recourse problem is $status")
+    value = recourse_value(r)
+    bound = try
+        min(JuMP.objective_bound(r.model), value)
+    catch                                      # a solver that does not report it
+        value
+    end
+    return (value = value, bound = bound)
 end
 
 """
@@ -1307,6 +1564,9 @@ build_recourse(r::ScenarioRestriction, optimizer, _) = build_recourse(r.md, opti
 build_elastic(r::ScenarioRestriction, optimizer, _) = build_elastic(r.md, optimizer, r.s)
 cut_coefficients(r::ScenarioRestriction, rec, _, x, π) = cut_coefficients(r.md, rec, r.s, x, π)
 cut_intercept(r::ScenarioRestriction, rec, _, x, π, v) = cut_intercept(r.md, rec, r.s, x, π, v)
+relaxed_recourse(r::ScenarioRestriction, optimizer, _) = relaxed_recourse(r.md, optimizer, r.s)
+tender_variables(r::ScenarioRestriction, master) = tender_variables(r.md, master)
+recourse_lower_bound(r::ScenarioRestriction, optimizer, _) = recourse_lower_bound(r.md, optimizer, r.s)
 
 function _solve_converged(md; kwargs...)
     res = lshaped(md; kwargs..., verbose = false)
@@ -1349,7 +1609,8 @@ function expected_value_problem(pb::TwoStageProblem; optimizer, kwargs...)
               "decision yourself and pass it to `expected_result` or `vss`")
     end
     ev = TwoStageProblem(pb.c, pb.A, pb.senses1, pb.b, pb.q, pb.W, pb.senses2, pb.T, pb.h,
-                         [ξ̄], [1.0], pb.lb1, pb.ub1, pb.integer1, pb.lb, pb.ub, pb.intercept)
+                         [ξ̄], [1.0], pb.lb1, pb.ub1, pb.integer1, pb.lb, pb.ub, pb.integer2,
+                         pb.intercept)
     _, x̄, value = extensive_form(ev; optimizer, kwargs...)
     return (value = value, x = x̄)
 end
@@ -1380,13 +1641,15 @@ end
 
 """`Q(x, ξₛ)`, `+Inf` if the recourse problem is infeasible, `-Inf` if it is unbounded."""
 function _recourse_value(md, optimizer, s, x)
-    r = check_recourse(build_recourse(md, optimizer, s), s)
+    r = check_recourse(build_recourse(md, optimizer, s), s; integer = true)
     set_recourse_rhs!(md, r, x, s)
     optimize!(r.model)
     status = termination_status(r.model)
     status == MOI.OPTIMAL && return recourse_value(r)
     status == MOI.INFEASIBLE && return Inf
     status == MOI.DUAL_INFEASIBLE && return -Inf
+    # an integer program whose relaxation is bounded is infeasible, not unbounded
+    status == MOI.INFEASIBLE_OR_UNBOUNDED && has_integers(r.model) && return Inf
     # the solver could not tell infeasible from unbounded: the elastic model decides
     e = build_elastic(md, optimizer, s)
     e === nothing && error("scenario $s: the recourse problem is $status, and no elastic model " *
@@ -1425,6 +1688,422 @@ end
 vss(pb::TwoStageProblem; rp = nothing, kwargs...) =
     vss(pb, expected_value_problem(pb; optimizer = _optimizers(; kwargs...).master_optimizer).x;
         rp = rp, kwargs...)
+
+# --------------------------------------------------------------------------------------------
+# reading SMPS files
+# --------------------------------------------------------------------------------------------
+
+"""
+    SMPSLaw
+
+The law of `ξ` described by the `STOCH` file of an SMPS instance: independent **blocks**, each
+taking one of finitely many outcomes, which set the values of some of the random elements. An
+`INDEP` element is a block of its own, whose outcomes set that element only; a `BLOCKS` block
+sets several elements at once, and a two-stage `SCENARIOS` section is a single block whose
+outcomes are the scenarios. Elements an outcome leaves out keep their value in the core file.
+
+`ξ` is the vector of the values of all the random elements, in the order of `SMPSProblem.elements`:
+averaging two of them averages each element, so that the mean-value problem of
+[`expected_value_problem`](@ref) replaces each one by its expectation. It is a sampler:
+`rand(rng, law)` draws one `ξ`, `rand(rng, law, n)` draws `n` independent ones, and
+[`sample_scenarios`](@ref) takes it as it is.
+"""
+struct SMPSLaw
+    base::Vector{Float64}                              # the values of the core file
+    probabilities::Vector{Vector{Float64}}             # per block, per outcome
+    outcomes::Vector{Vector{Vector{Pair{Int,Float64}}}} # per block, per outcome: element => value
+end
+
+"""The number of points of the support of `law`, as a `BigInt`: the product of the numbers of
+outcomes of its blocks."""
+support_size(law::SMPSLaw) = prod(BigInt(length(p)) for p in law.probabilities; init = BigInt(1))
+
+function Base.rand(rng::AbstractRNG, law::SMPSLaw)
+    ξ = copy(law.base)
+    for (p, outcomes) in zip(law.probabilities, law.outcomes)
+        u, k = rand(rng), 1
+        while k < length(p) && u > p[k]
+            u -= p[k]
+            k += 1
+        end
+        for (e, v) in outcomes[k]
+            ξ[e] = v
+        end
+    end
+    return ξ
+end
+Base.rand(rng::AbstractRNG, law::SMPSLaw, n::Integer) = [rand(rng, law) for _ in 1:n]
+
+"""
+    enumerate_scenarios(law::SMPSLaw; limit = 100_000)
+
+Every point of the support of `law` and its probability, as the named tuple `(ξ = ..., p = ...)`
+[`TwoStageProblem`](@ref) takes; an error if there are more than `limit` of them, in which case
+[`sample_scenarios`](@ref) draws a sample instead.
+"""
+function enumerate_scenarios(law::SMPSLaw; limit::Integer = 100_000)
+    size = support_size(law)
+    size <= limit || error("the law has $size points, more than the limit of $limit: sample it " *
+                           "with `sample_scenarios`, or raise `limit`")
+    ξ, p = [copy(law.base)], [1.0]
+    for (probabilities, outcomes) in zip(law.probabilities, law.outcomes)
+        ξ = [(η = copy(point); foreach(((e, v),) -> (η[e] = v), outcome); η)
+             for point in ξ for outcome in outcomes]
+        p = [w * pk for w in p for pk in probabilities]
+    end
+    return (ξ = ξ, p = p)
+end
+
+"""
+    SMPSProblem
+
+A two-stage instance read by [`read_smps`](@ref): the data of the core file split into its two
+stages, the random elements, and their `law`. [`TwoStageProblem`](@ref)`(smps; ξ, p)` turns it into
+a problem with the scenarios `ξ` and their probabilities `p`, given by [`enumerate_scenarios`](@ref) or
+[`sample_scenarios`](@ref).
+
+`elements` lists the random elements as `(kind, i, j)`: `(:h, i, 0)` for the right-hand side of
+the second-stage row `i`, `(:T, i, j)` for the coefficient of the first-stage variable `j` in that
+row, `(:W, i, j)` for that of the second-stage variable `j`, `(:q, j, 0)` for the cost of the
+second-stage variable `j`. `names` gives, for each one, the
+column and row names of the files. `constant` is the constant of the objective, which the
+problem built leaves out.
+"""
+struct SMPSProblem
+    name::String
+    c::Vector{Float64}
+    A::SparseMatrixCSC{Float64,Int}
+    senses1::Vector{Sense}
+    b::Vector{Float64}
+    lb1::Vector{Float64}
+    ub1::Vector{Float64}
+    integer1::Vector{Bool}
+    q::Vector{Float64}
+    W::SparseMatrixCSC{Float64,Int}
+    senses2::Vector{Sense}
+    h::Vector{Float64}
+    T::SparseMatrixCSC{Float64,Int}
+    lb::Vector{Float64}
+    ub::Vector{Float64}
+    integer2::Vector{Bool}
+    constant::Float64
+    columns1::Vector{String}
+    columns2::Vector{String}
+    rows1::Vector{String}
+    rows2::Vector{String}
+    elements::Vector{Tuple{Symbol,Int,Int}}
+    names::Vector{Tuple{String,String}}
+    law::SMPSLaw
+end
+
+function Base.show(io::IO, smps::SMPSProblem)
+    print(io, "SMPS instance ", smps.name, ": ", length(smps.c), " first-stage variables and ",
+          length(smps.b), " rows, ", length(smps.q), " second-stage variables and ",
+          length(smps.h), " rows, ", length(smps.elements), " random elements in ",
+          length(smps.law.probabilities), " independent blocks, ", support_size(smps.law),
+          " scenarios")
+end
+
+function TwoStageProblem(smps::SMPSProblem; ξ, p, intercept::Symbol = :tight)
+    # where each random element goes: its index in h or q, or its position among the stored
+    # entries of T, which a copy of T then only has to overwrite
+    hk = [k for (k, e) in enumerate(smps.elements) if e[1] == :h]
+    qk = [k for (k, e) in enumerate(smps.elements) if e[1] == :q]
+    hi = [smps.elements[k][2] for k in hk]
+    qi = [smps.elements[k][2] for k in qk]
+    function stored(M, kind)                   # the random entries of M, and where they are
+        ks = [k for (k, e) in enumerate(smps.elements) if e[1] == kind]
+        positions = map(ks) do k
+            _, i, j = smps.elements[k]
+            r = M.colptr[j]:(M.colptr[j+1] - 1)
+            return r[findfirst(==(i), M.rowval[r])]
+        end
+        return isempty(ks) ? M : (ξ -> (R = copy(M); R.nzval[positions] .= ξ[ks]; R))
+    end
+    h = isempty(hk) ? smps.h : (ξ -> (v = copy(smps.h); v[hi] .= ξ[hk]; v))
+    q = isempty(qk) ? smps.q : (ξ -> (v = copy(smps.q); v[qi] .= ξ[qk]; v))
+    return TwoStageProblem(c = smps.c, A = smps.A, senses1 = smps.senses1, b = smps.b,
+                           q = q, W = stored(smps.W, :W), senses2 = smps.senses2,
+                           T = stored(smps.T, :T), h = h,
+                           ξ = ξ, p = p, lb1 = smps.lb1, ub1 = smps.ub1, integer1 = smps.integer1,
+                           lb = smps.lb, ub = smps.ub, integer2 = smps.integer2,
+                           intercept = intercept)
+end
+
+"""
+    read_smps(core, time, stoch)
+    read_smps(prefix)
+
+Read a two-stage instance in the SMPS format (Birge et al., 1987; Gassmann's description of the
+format): the **core** file, a deterministic LP in MPS format; the **time** file, which says where
+the second stage starts among its rows and columns; the **stoch** file, the law of the random
+data. `read_smps(prefix)` looks for `prefix` followed by `.cor` or `.core`, `.tim` or `.time`, and
+`.sto` or `.stoch`. Returns an [`SMPSProblem`](@ref).
+
+Supported: the free (blank-separated) MPS format, with `ROWS`, `COLUMNS` (with integer markers
+on both stages, the second stage then solved by the integer L-shaped method), `RHS` and `BOUNDS`; the implicit and explicit `PERIODS` formats; `INDEP`,
+`BLOCKS` and two-stage `SCENARIOS` sections, all `DISCRETE`. The random elements may be
+right-hand sides of the second stage, coefficients of second-stage rows (`T` and `W`), and costs
+of second-stage variables (`q`). Not supported, and refused: more than two stages, continuous
+distributions, random elements in the first stage or in the bounds, `RANGES`.
+"""
+function read_smps(prefix::AbstractString)
+    find(exts) = (i = findfirst(e -> isfile(prefix * e), exts);
+                  i === nothing ? error("no file $prefix$(join(exts, " or "))") : prefix * exts[i])
+    return read_smps(find([".cor", ".core", ".COR"]), find([".tim", ".time", ".TIM"]),
+                     find([".sto", ".stoch", ".STO"]))
+end
+
+const _SMPS_SECTIONS = ("NAME", "ROWS", "COLUMNS", "RHS", "RANGES", "BOUNDS", "ENDATA", "TIME",
+                        "PERIODS", "STOCH", "INDEP", "BLOCKS", "SCENARIOS")
+
+"""The fields of the meaningful lines of an SMPS file: no comments (`*`), no blank lines."""
+function _smps_lines(path)
+    lines = Tuple{Bool,Vector{String}}[]           # (is a section header, fields)
+    for line in eachline(path)
+        stripped = strip(line)
+        (isempty(stripped) || startswith(stripped, '*')) && continue
+        fields = split(stripped)
+        # a header starts the line, or is a lone keyword indented by mistake, as in stocfor1
+        header = !isspace(line[1]) || (length(fields) <= 2 && fields[1] in _SMPS_SECTIONS)
+        push!(lines, (header, fields))
+    end
+    return lines
+end
+
+function read_smps(core::AbstractString, time::AbstractString, stoch::AbstractString)
+    # ---- the core file
+    name, objective = "", ""
+    rows, senses, columns = String[], Sense[], String[]
+    rowindex, colindex = Dict{String,Int}(), Dict{String,Int}()
+    entries = Dict{Tuple{Int,Int},Float64}()        # (row, column) => coefficient
+    cost = Dict{Int,Float64}()
+    rhs = Dict{Int,Float64}()
+    lower, upper, integer = Dict{Int,Float64}(), Dict{Int,Float64}(), Set{Int}()
+    constant, section, intmarker = 0.0, "", false
+    ignored = Set{String}()                         # the other free rows
+    for (header, f) in _smps_lines(core)
+        if header
+            section = f[1]
+            section == "NAME" && (name = length(f) > 1 ? f[2] : "")
+            section in ("NAME", "ROWS", "COLUMNS", "RHS", "BOUNDS", "ENDATA") ||
+                error("$core: section $section is not supported")
+            continue
+        end
+        if section == "ROWS"
+            kind, row = f[1], f[2]
+            if kind == "N"
+                isempty(objective) ? (objective = row) : push!(ignored, row)
+            else
+                push!(rows, row)
+                push!(senses, kind == "L" ? LEQ : kind == "G" ? GEQ : kind == "E" ? EQ :
+                              error("$core: unknown row type $kind"))
+                rowindex[row] = length(rows)
+            end
+        elseif section == "COLUMNS"
+            if length(f) >= 3 && f[2] == "'MARKER'"
+                intmarker = f[3] == "'INTORG'"
+                continue
+            end
+            col = f[1]
+            if !haskey(colindex, col)
+                push!(columns, col)
+                colindex[col] = length(columns)
+                intmarker && push!(integer, length(columns))
+            end
+            j = colindex[col]
+            for k in 2:2:(length(f) - 1)
+                row, value = f[k], parse(Float64, f[k+1])
+                if row == objective
+                    cost[j] = value
+                elseif !(row in ignored)
+                    entries[(rowindex[row], j)] = value
+                end
+            end
+        elseif section == "RHS"
+            start = isodd(length(f)) ? 2 : 1        # the name of the RHS vector is optional
+            for k in start:2:(length(f) - 1)
+                row, value = f[k], parse(Float64, f[k+1])
+                if row == objective
+                    constant = -value               # MPS: the RHS of the objective is −constant
+                elseif !(row in ignored)
+                    rhs[rowindex[row]] = value
+                end
+            end
+        elseif section == "BOUNDS"
+            kind = f[1]
+            col, value = if kind in ("FR", "MI", "PL", "BV")
+                f[end] in keys(colindex) ? (f[end], NaN) : (f[end-1], NaN)
+            else
+                length(f) >= 4 ? (f[3], parse(Float64, f[4])) : (f[2], parse(Float64, f[3]))
+            end
+            j = colindex[col]
+            kind == "UP" && (upper[j] = value)
+            kind == "LO" && (lower[j] = value)
+            kind == "FX" && (lower[j] = upper[j] = value)
+            kind == "FR" && (lower[j] = -Inf; upper[j] = Inf)
+            kind == "MI" && (lower[j] = -Inf)
+            kind == "PL" && (upper[j] = Inf)
+            kind == "BV" && (lower[j] = 0.0; upper[j] = 1.0; push!(integer, j))
+            kind == "LI" && (lower[j] = value; push!(integer, j))
+            kind == "UI" && (upper[j] = value; push!(integer, j))
+            kind in ("UP", "LO", "FX", "FR", "MI", "PL", "BV", "LI", "UI") ||
+                error("$core: bound type $kind is not supported")
+        end
+    end
+
+    # ---- the time file: where the second stage starts
+    starts, periods, section, explicit = Tuple{String,String}[], String[], "", false
+    colperiod, rowperiod = Dict{String,String}(), Dict{String,String}()
+    for (header, f) in _smps_lines(time)
+        if header
+            section = f[1]
+            section == "PERIODS" && (explicit = length(f) > 1 && uppercase(f[2]) == "EXPLICIT")
+            continue
+        end
+        if section == "PERIODS" && !explicit
+            push!(starts, (f[1], f[2]))
+            push!(periods, f[3])
+        elseif section == "PERIODS"
+            push!(periods, f[1])
+        elseif section == "COLUMNS"
+            colperiod[f[1]] = f[2]
+        elseif section == "ROWS"
+            rowperiod[f[1]] = f[2]
+        end
+    end
+    length(periods) == 2 || error("$time: $(length(periods)) stages; only two are supported")
+    stage2col, stage2row = if explicit
+        Set(colindex[c] for (c, t) in colperiod if t == periods[2]),
+        Set(rowindex[r] for (r, t) in rowperiod if t == periods[2] && haskey(rowindex, r))
+    else
+        Set(colindex[starts[2][1]]:length(columns)), Set(rowindex[starts[2][2]]:length(rows))
+    end
+    cols1 = [j for j in eachindex(columns) if !(j in stage2col)]
+    cols2 = [j for j in eachindex(columns) if j in stage2col]
+    rows1 = [i for i in eachindex(rows) if !(i in stage2row)]
+    rows2 = [i for i in eachindex(rows) if i in stage2row]
+    position = Dict{Int,Int}()                     # an index of the core => its index in its stage
+    foreach(((k, j),) -> position[j] = k, enumerate(cols1))
+    foreach(((k, j),) -> position[j] = k, enumerate(cols2))
+    rowposition = Dict{Int,Int}()
+    foreach(((k, i),) -> rowposition[i] = k, enumerate(rows1))
+    foreach(((k, i),) -> rowposition[i] = k, enumerate(rows2))
+    for ((i, j), v) in entries
+        i in rows1 || continue
+        j in stage2col && error("$core: second-stage variable $(columns[j]) in first-stage row $(rows[i])")
+    end
+    function matrix(rowset, colset)
+        I, J, V = Int[], Int[], Float64[]
+        for ((i, j), v) in entries
+            (i in rowset && j in colset) || continue
+            push!(I, rowposition[i]); push!(J, position[j]); push!(V, v)
+        end
+        return sparse(I, J, V, length(rowset), length(colset))
+    end
+    rowset1, rowset2, colset1 = Set(rows1), Set(rows2), Set(cols1)
+    A, T, W = matrix(rowset1, colset1), matrix(rowset2, colset1), matrix(rowset2, stage2col)
+
+    # ---- the stoch file: the random elements and their law
+    elements, names = Tuple{Symbol,Int,Int}[], Tuple{String,String}[]
+    elementindex = Dict{Tuple{String,String},Int}()
+    function element(col, row)
+        haskey(elementindex, (col, row)) && return elementindex[(col, row)]
+        e = if haskey(colindex, col)
+            j = colindex[col]
+            if row == objective
+                j in stage2col || error("$stoch: random first-stage cost of $col")
+                (:q, position[j], 0)
+            else
+                haskey(rowindex, row) || error("$stoch: unknown row $row")
+                i = rowindex[row]
+                i in rowset2 || error("$stoch: random entry in the first-stage row $row")
+                haskey(entries, (i, j)) || error("$stoch: random entry ($row, $col) absent from the core file")
+                (j in stage2col ? :W : :T, rowposition[i], position[j])
+            end
+        else                                        # the name of a right-hand side vector
+            haskey(rowindex, row) || error("$stoch: unknown row $row")
+            rowindex[row] in rowset2 || error("$stoch: random right-hand side of the first-stage row $row")
+            (:h, rowposition[rowindex[row]], 0)
+        end
+        push!(elements, e)
+        push!(names, (col, row))
+        return elementindex[(col, row)] = length(elements)
+    end
+    probabilities, outcomes = Vector{Float64}[], Vector{Vector{Pair{Int,Float64}}}[]
+    indep = Dict{Int,Int}()                         # element => its block, for INDEP
+    blockindex = Dict{String,Int}()
+    section, current = "", nothing
+    for (header, f) in _smps_lines(stoch)
+        if header
+            section = f[1]
+            if section in ("INDEP", "BLOCKS", "SCENARIOS")
+                kind = length(f) > 1 ? f[2] : "DISCRETE"
+                kind == "DISCRETE" || error("$stoch: $section $kind is not supported, only DISCRETE")
+            elseif !(section in ("STOCH", "ENDATA"))
+                error("$stoch: section $section is not supported")
+            end
+            continue
+        end
+        if section == "INDEP"
+            col, row, value = f[1], f[2], parse(Float64, f[3])
+            prob = parse(Float64, f[end])
+            e = element(col, row)
+            if !haskey(indep, e)
+                push!(probabilities, Float64[]); push!(outcomes, Vector{Pair{Int,Float64}}[])
+                indep[e] = length(probabilities)
+            end
+            push!(probabilities[indep[e]], prob)
+            push!(outcomes[indep[e]], [e => value])
+        elseif section in ("BLOCKS", "SCENARIOS") && f[1] in ("BL", "SC")
+            if f[1] == "SC"
+                length(f) >= 4 && f[3] in ("ROOT", "'ROOT'") ||
+                    error("$stoch: scenario $(f[2]) does not branch from the root: not two-stage")
+                prob = parse(Float64, f[4])
+                key = "SCENARIOS"
+            else
+                prob = parse(Float64, f[4])
+                key = f[2]
+            end
+            if !haskey(blockindex, key)
+                push!(probabilities, Float64[]); push!(outcomes, Vector{Pair{Int,Float64}}[])
+                blockindex[key] = length(probabilities)
+            end
+            current = blockindex[key]
+            push!(probabilities[current], prob)
+            push!(outcomes[current], Pair{Int,Float64}[])
+        elseif section in ("BLOCKS", "SCENARIOS")
+            current === nothing && error("$stoch: an entry before the first BL or SC line")
+            for k in 2:2:(length(f) - 1)
+                push!(outcomes[current][end], element(f[1], f[k]) => parse(Float64, f[k+1]))
+            end
+        end
+    end
+    for (k, p) in enumerate(probabilities)
+        isapprox(sum(p), 1; atol = 1e-6) ||
+            error("$stoch: the probabilities of block $k sum up to $(sum(p)), not 1")
+        probabilities[k] = p ./ sum(p)
+    end
+
+    # ---- assembling
+    c = [get(cost, j, 0.0) for j in eachindex(columns)]
+    lb = [get(lower, j, 0.0) for j in eachindex(columns)]
+    ub = [get(upper, j, Inf) for j in eachindex(columns)]
+    for j in eachindex(columns)                     # MPS: a negative upper bound alone frees x
+        !haskey(lower, j) && ub[j] < 0 && (lb[j] = -Inf)
+    end
+    b = [get(rhs, i, 0.0) for i in eachindex(rows)]
+    h0 = b[rows2]
+    q0 = c[cols2]
+    base = map(elements) do (kind, i, j)
+        kind == :h ? h0[i] : kind == :q ? q0[i] : kind == :T ? T[i, j] : W[i, j]
+    end
+    return SMPSProblem(name, c[cols1], A, senses[rows1], b[rows1], lb[cols1], ub[cols1],
+                       [j in integer for j in cols1], q0, W, senses[rows2], h0, T,
+                       lb[cols2], ub[cols2], [j in integer for j in cols2], constant,
+                       columns[cols1], columns[cols2], rows[rows1], rows[rows2],
+                       elements, names, SMPSLaw(base, probabilities, outcomes))
+end
 
 """The optimizer keywords among `kwargs`, as `expected_result` takes them."""
 function _optimizers(; optimizer = nothing, master_optimizer = optimizer,
