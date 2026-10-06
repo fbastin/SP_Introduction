@@ -50,7 +50,7 @@ export Sense, LEQ, EQ, GEQ, to_sense,
        TwoStageProblem, JuMPTwoStageProblem,
        MasterTemplate, RecourseTemplate,
        lshaped, single_cut_lshaped, multi_cut_lshaped,
-       extensive_form, multipliers, feasibility_certificate, new_model, PerThread,
+       extensive_form, multipliers, feasibility_certificate, new_model,
        first_stage_decision, second_stage_decision, print_first_stage, print_second_stage,
        evpi_bounds, vss_bounds,
        wait_and_see, expected_value_problem, expected_result, evpi, vss,
@@ -107,30 +107,6 @@ solver_label(optimizer::Function) = string(nameof(optimizer))
 solver_label(optimizer) = string(nameof(typeof(optimizer)))
 
 _label(s) = strip(replace(s, "Optimizer" => ""), ['.', ' '])
-
-"""
-    PerThread(f)
-
-A recourse optimizer given per task: `f(k)` is the optimizer of the recourse models of the
-scenarios that the `k`-th task solves, `k` in `1:Threads.nthreads()` with `threads = true`, `k = 1`
-otherwise. The scenarios are split into contiguous blocks, one per task, solved in order by it
-([`foreach_scenario`](@ref)), so that two models with the same `k` are never solved at the same
-time. This is what a solver whose environments must not be used from two threads at once needs,
-such as Gurobi, the more so when each environment takes a license token:
-
-    envs = [Gurobi.Env() for _ in 1:Threads.nthreads()]
-    lshaped(pb; master_optimizer = Gurobi.Optimizer, threads = true,
-            recourse_optimizer = PerThread(k -> () -> Gurobi.Optimizer(envs[k])))
-"""
-struct PerThread{F}
-    f::F
-end
-
-"""The optimizer of the models of task `k`."""
-task_optimizer(optimizer, k) = optimizer
-task_optimizer(optimizer::PerThread, k) = optimizer.f(k)
-
-solver_label(optimizer::PerThread) = "one per thread"
 
 # --------------------------------------------------------------------------------------------
 # scenario sets
@@ -832,8 +808,7 @@ can stop as soon as these intervals answer the question asked.
 `threads = true` solves the recourse problems of an iteration in parallel, on the threads Julia was
 started with (`julia -t N`). The master is only modified once all of them are solved, in the order
 of the scenarios, so the results do not depend on it. The recourse solver must be thread-safe when
-its instances are solved concurrently: HiGHS is; Gurobi is, provided each of its environments
-serves one thread, which [`PerThread`](@ref) arranges; GLPK is not and crashes. GLPK is unsafe even
+its instances are solved concurrently: HiGHS is, GLPK is not and crashes. GLPK is unsafe even
 unused here: its models are freed by finalizers, which crash Julia when the garbage collector runs
 them on a worker thread; call `GC.gc()` before `lshaped` once GLPK models have been discarded. The
 callbacks of a [`JuMPTwoStageProblem`](@ref) must also be safe to call from several threads at
@@ -927,10 +902,6 @@ function lshaped(md::AbstractTwoStageModel;
         error("pass `optimizer`, or both `master_optimizer` and `recourse_optimizer`")
     scenarios = n_scenarios(md)
     p = [scenario_probability(md, s) for s in 1:scenarios]
-    blocks = scenario_blocks(scenarios, threads ? Threads.nthreads() : 1)
-    task = zeros(Int, scenarios)               # the task that solves each scenario
-    foreach(((k, block),) -> task[block] .= k, enumerate(blocks))
-    recourse_opt(s) = task_optimizer(recourse_optimizer, task[s])
     isapprox(sum(p), 1; atol = 1e-9) ||
         error("the probabilities must sum up to one, they sum up to $(sum(p))")
     clusters = scenario_clusters(cuts, scenarios)
@@ -938,7 +909,7 @@ function lshaped(md::AbstractTwoStageModel;
     P = [sum(p[s] for s in cluster) for cluster in clusters]
 
     master = build_master(md, master_optimizer)
-    recourse = [check_recourse(build_recourse(md, recourse_opt(s), s), s; integer = true)
+    recourse = [check_recourse(build_recourse(md, recourse_optimizer, s), s; integer = true)
                 for s in 1:scenarios]
     elastic = Any[nothing for _ in 1:scenarios]
     c, constant = master_cost(master)
@@ -960,7 +931,7 @@ function lshaped(md::AbstractTwoStageModel;
     relaxed, tender, Lk = recourse, Int[], Float64[]
     if integer_recourse
         regularized && error("integer recourse: the regularizations are not supported")
-        relaxed = [check_recourse(relaxed_recourse(md, recourse_opt(s), s), s) for s in 1:scenarios]
+        relaxed = [check_recourse(relaxed_recourse(md, recourse_optimizer, s), s) for s in 1:scenarios]
         tender = tender_variables(md, master)
         for j in tender
             _is_binary(x[j]) || error("""integer recourse: the first-stage variable $(x[j]) on \
@@ -1140,8 +1111,8 @@ function lshaped(md::AbstractTwoStageModel;
         # the subproblems, in parallel or not; the master is only modified afterwards, in the
         # order of the scenarios, so that the results do not depend on the threads
         pieces = Vector{Any}(undef, scenarios)
-        foreach_scenario(blocks) do s
-            piece = solve_scenario!(md, relaxed, elastic, recourse_opt(s), s, xk, n, feastol)
+        foreach_scenario(threads, scenarios) do s
+            piece = solve_scenario!(md, relaxed, elastic, recourse_optimizer, s, xk, n, feastol)
             if integer_recourse && piece.feasible
                 piece = merge(piece, integer_recourse_value!(md, recourse[s], s, xk))
             end
@@ -1442,39 +1413,22 @@ function integer_recourse_value!(md, r, s, xk)
 end
 
 """
-    scenario_blocks(scenarios, tasks)
+    foreach_scenario(f, threads, scenarios)
 
-`1:scenarios` split into at most `tasks` contiguous blocks of nearly equal sizes.
+`f(s)` for every scenario, on Julia's threads if `threads` and there are several. An error is
+raised once all the scenarios are done, that of the first scenario in which one occurred.
 """
-function scenario_blocks(scenarios::Integer, tasks::Integer)
-    tasks = clamp(tasks, 1, max(scenarios, 1))
-    size, extra = divrem(scenarios, tasks)
-    stops = cumsum(size + (k <= extra) for k in 1:tasks)
-    return [(k == 1 ? 1 : stops[k-1] + 1):stops[k] for k in 1:tasks]
-end
-
-"""
-    foreach_scenario(f, blocks)
-
-`f(s)` for every scenario, the `blocks` of [`scenario_blocks`](@ref) in parallel, one task per block
-on Julia's threads, the scenarios of a block in order: the models of a block, built with the same
-optimizer of a [`PerThread`](@ref), are never solved at the same time. An error is raised once all
-the scenarios are done, that of the first scenario in which one occurred.
-"""
-function foreach_scenario(f, blocks::AbstractVector)
-    if length(blocks) == 1
-        foreach(f, blocks[1])
+function foreach_scenario(f, threads::Bool, scenarios::Integer)
+    if !threads || Threads.nthreads() == 1
+        foreach(f, 1:scenarios)
         return nothing
     end
-    scenarios = last(blocks[end])
     errors = Vector{Any}(nothing, scenarios)
-    @sync for block in blocks
-        Threads.@spawn for s in block
-            try
-                f(s)
-            catch err
-                errors[s] = err
-            end
+    Threads.@threads for s in 1:scenarios
+        try
+            f(s)
+        catch err
+            errors[s] = err
         end
     end
     i = findfirst(!isnothing, errors)
@@ -1679,8 +1633,7 @@ function expected_result(md::AbstractTwoStageModel, x::AbstractVector;
         error("x has $(length(x)) components, the first stage $(length(c)) variables")
     total = dot(c, x) + constant
     for s in 1:n_scenarios(md)
-        total += scenario_probability(md, s) *
-                 _recourse_value(md, task_optimizer(recourse_optimizer, 1), s, x)
+        total += scenario_probability(md, s) * _recourse_value(md, recourse_optimizer, s, x)
         isinf(total) && return total
     end
     return total
