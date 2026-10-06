@@ -509,6 +509,29 @@ end
     @info "threads tested with $(Threads.nthreads()) thread(s)"
 end
 
+@testset "PerThread: one recourse optimizer per block of scenarios" begin
+    @test LShaped.scenario_blocks(10, 3) == [1:4, 5:7, 8:10]
+    @test LShaped.scenario_blocks(2, 4) == [1:1, 2:2]
+    @test LShaped.scenario_blocks(5, 1) == [1:5]
+    pb = icecream(min_capacity = 0.0)          # feasibility cuts: elastic models built in the loop
+    S = length(pb.ξ)
+    serial = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
+    for threads in (false, true)
+        lock = ReentrantLock()
+        asked = Int[]                          # the task of each model built, in order
+        optimizer = PerThread(k -> (Base.@lock lock push!(asked, k); HiGHS.Optimizer))
+        res = lshaped(pb; master_optimizer = HiGHS.Optimizer, recourse_optimizer = optimizer,
+                      cuts = :multi, threads = threads, verbose = false)
+        @test res.objective == serial.objective
+        @test res.x == serial.x
+        tasks = threads ? min(Threads.nthreads(), S) : 1
+        # the recourse models, built in the order of the scenarios, each with its block's optimizer
+        blocks = LShaped.scenario_blocks(S, tasks)
+        @test asked[1:S] == [k for (k, block) in enumerate(blocks) for _ in block]
+        @test all(in(1:tasks), asked)
+    end
+end
+
 @testset "inactive cuts are dropped" begin
     pb = icecream(ub = 3.0)
     kept = lshaped(pb; optimizer = HiGHS.Optimizer, cuts = :multi, verbose = false)
