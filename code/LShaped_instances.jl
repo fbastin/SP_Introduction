@@ -1,5 +1,6 @@
 # The instances of the benchmarks of LShaped.jl, as `TwoStageProblem`s: generated ones, and the
-# SMPS instances of Linderoth, Shapiro and Wright (2006), downloaded on first use. Included by
+# SMPS instances of Linderoth, Shapiro and Wright (2006), kept in `smps/` and downloaded again if
+# missing. Included by
 # `LShaped_benchmark.jl` and `LShaped_scaling.jl`, after `TwoStageProblem`, `substream` and
 # `read_smps` have been brought into scope, with Distributions and LinearAlgebra loaded.
 
@@ -74,8 +75,8 @@ const LSW = Dict("20term" => (archive = "20term", prefix = "data-20/20", value =
     lsw_instance(name; dir = joinpath(@__DIR__, "smps"))
 
 The SMPS instance `name` of Linderoth, Shapiro and Wright — `"20term"`, `"gbd"`, `"LandS"`, `"ssn"`
-or `"storm"` — read by `read_smps`, after downloading and unpacking it into `dir` if it is not
-there yet. Their supports are far too large to enumerate: sample them with `sample_scenarios`.
+or `"storm"` — read by `read_smps` from `dir`, where it is kept, after downloading and unpacking it
+if it is missing. Their supports are far too large to enumerate: sample them with `sample_scenarios`.
 """
 function lsw_instance(name::AbstractString; dir::AbstractString = joinpath(@__DIR__, "smps"))
     entry = LSW[name]

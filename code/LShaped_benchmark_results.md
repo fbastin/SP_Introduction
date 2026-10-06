@@ -1,5 +1,7 @@
 # LShaped.jl vs StochasticPrograms.jl: benchmark results
 
+The raw measures are in `LShaped_benchmark_results.csv`.
+
 Results of `LShaped_benchmark.jl` (all instances, best of 3 runs), started with 6 threads
 (`julia -t 6`), on 5 October 2026:
 

@@ -28,5 +28,8 @@ exercises/**/*.pdf
 # Jupyter
 .ipynb_checkpoints/
 
-# SMPS instances downloaded by the L-shaped benchmarks
-code/smps/
+# SMPS instances of the L-shaped benchmarks: kept, except the multistage bonds instances, the
+# PostScript documentation and the CVS bookkeeping of Felt's test set
+code/smps/slptestset/bonds/
+code/smps/slptestset/doc.ps
+code/smps/**/CVS/

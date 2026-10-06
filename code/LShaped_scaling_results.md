@@ -1,5 +1,7 @@
 # When does decomposition pay off? Scaling results
 
+The raw measures are in `LShaped_scaling_results.csv`.
+
 Results of `LShaped_scaling.jl`, on 5 October 2026: Intel Core i5-8500 (6 cores), 23 GB of memory,
 Julia 1.12.5, JuMP 1.31.2, HiGHS.jl 1.25.1. The time limit was 900 s per measure, the memory limit
 12 GB. The interior-point method, the slowest at every size of the capacity family, was not run on
@@ -71,19 +73,20 @@ telecommunication network design: 89 first-stage variables, 175 rows and 706 col
   the largest sizes the extensive form exceeds 15 minutes where the decomposition takes 2 to 8
   (storm, 4000 scenarios: 490 s on one core; ssn, 2000 scenarios: 138 s), and on ssn with 1000
   scenarios it is 4 times slower on one core, 9 times on six.
-- **The extensive form gains nothing from more cores**: HiGHS's dual simplex is essentially
+- **The extensive form gains nothing from more cores, with HiGHS**: its dual simplex is essentially
   sequential, and its interior-point method, which uses the threads, is 2 to 5 times slower than
   the simplex here (36.5 s against 8.7 s for 500 scenarios of the capacity family, 852 s against
-  423 s for 4000).
+  423 s for 4000). The multithreaded barrier of a commercial solver would likely do better.
 - **Decomposition gains less and less from more cores as the size grows**: ×1.9 to ×2.5 with 6 cores
-  at 250–500 scenarios, ×1.2 to ×1.4 at 2000–4000. The master problem becomes the bottleneck, and it
-  is solved on one core: on the capacity family with 2000 scenarios, it ends with 42 353 cuts, its
-  iterations grow from 1 to 5 s while the 2000 recourse problems take about 1 s, and the time of an
+  at 250–500 scenarios, ×1.2 to ×1.4 at 2000–4000. The sequential part of each iteration — solving
+  the master, and building and adding its cuts, not yet measured apart — becomes the bottleneck:
+  on the capacity family with 2000 scenarios, the master ends with 42 353 cuts, the iterations grow
+  from 1 to 5 s while the 2000 recourse problems take about 1 s, and the time of an
   iteration is nearly the same on one thread and on six. Partial aggregation (`cuts = C`), a smaller
-  master, is the natural answer.
+  master, and dropping inactive cuts are the candidates, to be measured on a larger machine (see the
+  roadmap).
 - **The memory argument does not hold as the module stands.** The multicut method uses about as much
   memory as the extensive form — 10 to 60% more on the capacity family, 9 to 20% more on ssn, 7 to
-  15% less on storm — because
-  it keeps a JuMP model and a HiGHS instance per scenario, so as to warm-start each recourse problem
+  15% less on storm — because it keeps a JuMP model and a HiGHS instance per scenario, so as to warm-start each recourse problem
   from its last basis. Reusing one model per thread, retargeted to each scenario, would make the
   memory of the decomposition independent of the number of scenarios.

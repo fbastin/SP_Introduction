@@ -181,8 +181,11 @@ julia [-t 6] --project=@v1.12 LShaped_benchmark.jl [quick] [rd] [reps=3] [csv=re
 against the multicut method, at 1 and 6 cores (HiGHS's threads fixed on both
 sides, each measure in a process of its own), with the peak memory of the process,
 as the number of scenarios grows, on generated instances and on samples of the
-SMPS instances storm and SSN of Linderoth, Shapiro and Wright (2006), downloaded
-into `code/smps/` on first use. `code/LShaped_scaling_results.md` records a run.
+SMPS instances storm and SSN of Linderoth, Shapiro and Wright (2006), kept in
+`code/smps/` with Felt's test set (sources in `code/smps/README.md`). `code/LShaped_scaling_results.md` records a run,
+`code/LShaped_scaling_results.csv` its raw measures (as `code/LShaped_benchmark_results.csv` for
+the benchmark). `code/LShaped_smps_validation.jl` checks the SMPS reader against published
+results, `code/LShaped_smps_validation_results.md` records its output.
 
 ```bash
 cd code

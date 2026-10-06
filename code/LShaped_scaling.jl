@@ -24,7 +24,7 @@
 #
 # The families: the capacity expansion of `LShaped_instances.jl` with 20 plants and 20 products,
 # and samples of the SMPS instances storm and ssn of Linderoth, Shapiro and Wright (2006),
-# downloaded into `smps/` on first use.
+# kept in `smps/` (downloaded again if missing).
 
 module Ours
 include(joinpath(@__DIR__, "LShaped.jl"))
