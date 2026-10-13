@@ -33,3 +33,6 @@ exercises/**/*.pdf
 code/smps/slptestset/bonds/
 code/smps/slptestset/doc.ps
 code/smps/**/CVS/
+
+# Projects: kept out of the repository
+/projets/
