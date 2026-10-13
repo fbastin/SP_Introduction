@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.5"
+julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "a32a3ce75809393be131d9eeef0255520f865198"
+project_hash = "581cd587479a7950143352a79b83a354fb024ab4"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -560,6 +560,18 @@ version = "2.11.3"
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 version = "1.11.0"
+
+[[deps.RandomDataStreams]]
+deps = ["Random"]
+git-tree-sha1 = "df83d2c6f57de682cacd46aeac3f625ef68ff8c6"
+uuid = "dc077566-edc2-11e8-0ce0-7d758bb9a5d1"
+version = "0.3.0"
+
+    [deps.RandomDataStreams.extensions]
+    RandomDataStreamsCUDAExt = "CUDA"
+
+    [deps.RandomDataStreams.weakdeps]
+    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"

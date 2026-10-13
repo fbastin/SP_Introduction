@@ -43,6 +43,7 @@ SP_Introduction/
 │   └── mathlist.sty               # Custom list environment for math slides
 ├── imgs/                          # Figure, diagram, and plot assets (EPS, PNG, PDF, JPG)
 └── code/                          # Associated notebooks and scripts
+    ├── Project.toml                          # Julia environment of the notebooks and scripts
     ├── random.ipynb                          # Generators, LFSR, ziggurat (deck 02)
     ├── lfsr.jl, lfsr_test.jl                 # LFSR in Julia, with its tests (deck 02)
     ├── Farmer.ipynb                          # The farmer problem (decks 01, 03)
@@ -60,7 +61,7 @@ SP_Introduction/
     ├── SDDP_hydro.ipynb                      # Hydro-thermal examples with SDDP.jl (deck 07)
     ├── simulation_callcenter.ipynb           # Call-centre simulation (deck 12)
     ├── simulation_portfolio.ipynb            # Portfolio simulation (decks 10, 12)
-    ├── StochasticPrograms/                   # Julia project: Farmer and L-shaped examples
+    ├── StochasticPrograms/                   # Julia project (fork of StochasticPrograms.jl): Farmer and L-shaped examples, and newsvendor.ipynb
     └── cp.plot                               # Gnuplot script
 ```
 
@@ -124,6 +125,23 @@ To add a section or an exercise, edit that file; to start a second collection,
 drop another `.tex` in `exercises/` following the same pattern and
 `make exercises` picks it up automatically.
 
+### Julia environment
+
+The notebooks and scripts of `code/` share one environment, `code/Project.toml`,
+which lists their packages: JuMP and the solvers HiGHS, GLPK, Ipopt and Clarabel,
+Distributions, RandomDataStreams, Plots, SDDP, among others. Install them once:
+
+```bash
+cd code
+julia --project=. -e 'import Pkg; Pkg.instantiate()'
+```
+
+A Jupyter kernel installed by IJulia starts Julia with `--project=@.`, so the
+notebooks of `code/` find this environment by themselves. The notebooks that use
+StochasticPrograms.jl, those of `code/StochasticPrograms/` and `newsvendor.ipynb`,
+activate the environment of that folder instead, which pins the fixed fork
+(https://github.com/fbastin/StochasticPrograms.jl).
+
 ### The L-shaped module
 
 `code/LShaped.jl` is a stand-alone Julia module implementing the L-shaped method
@@ -158,12 +176,11 @@ of deck 04, in its single-cut, multicut and hybrid versions, with feasibility cu
 
 `code/LShaped_usage.ipynb` walks through these features one at a time.
 `code/LShaped_test.jl` checks every method against the extensive form, on the
-ice-cream, newsvendor and farm instances among others. It needs JuMP, HiGHS, Ipopt, GLPK,
-Distributions and RandomDataStreams:
+ice-cream, newsvendor and farm instances among others:
 
 ```bash
 cd code
-julia --project=@v1.12 LShaped_test.jl
+julia --project=. LShaped_test.jl
 ```
 
 `code/LShaped_benchmark.jl` compares the module with the L-shaped method of
