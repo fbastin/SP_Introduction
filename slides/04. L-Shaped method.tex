@@ -930,19 +930,20 @@ We know that $Q(x,\xi_s)$ is convex and piecewise linear, and since $\Xi$ is fin
 \begin{frame}
 	\frametitle{Optimality cut (cont'd)}
 	
-	If {\red the second-stage problem is feasible} for a given $\xi$, we can consider its dual
+	For $x \in K_2$, {\red the second-stage problem is feasible} for every $\xi$; its dual is
 	\[
 	\max \lbrace \pi^T(h(\xi)-T(\xi)x) \mid W^T\pi \leq q(\xi) \rbrace.
 	\]
-	
+
 	\begin{itemize}
-		\item 
-		If $q(\xi)$ is fixed, the dual is feasible or infeasible for all $x$ and $\xi$, as $x$ and $\xi$ do not enter the constraints.
 		\item
-		If $q$ depends on the realization $\xi$, given $\xi$, if the dual is feasible for some $x$, it is feasible for any value of $x$.
+		The dual feasible set $\lbrace \pi \mid W^T\pi \leq q(\xi) \rbrace$ does not involve $x$, as the recourse matrix $W$ is fixed: given $\xi$, the dual is either feasible for every $x$, or for none.
+		If $q$ does not depend on $\xi$, the dual is feasible for every $(x, \xi)$, or for none.
 		\item
-		From duality properties, if the primal is unbounded, then the dual is infeasible (the possible primal--dual situations are tabulated in the background notes).
-		Assume that we know that our problem is bounded.
+		As the primal is feasible, only two primal--dual situations remain (background notes): either the dual is feasible, and both problems have optimal solutions with equal values, or the dual is infeasible, and the primal is unbounded.
+		\item
+		Hence $Q(x,\xi_s)$ is either finite on all of $K_2$, or $-\infty$ on all of $K_2$.
+		We assume the first case: $\lbrace \pi \mid W^T\pi \leq q_s \rbrace \ne \emptyset$ for every $s$, a condition on the data only, as for a single scenario.
 	\end{itemize}
 	
 \end{frame}
@@ -1089,20 +1090,22 @@ When $\bsxi$ has finite support, the $L$-shaped algorithm converges in a finite 
 \begin{frame}
 	\frametitle{Subgradients and optimality cuts}
 	
-	The optimality cuts can also be read in terms of subgradients: they are supporting hyperplanes to the epigraph of $\mathcal{Q}$, while the feasibility cuts define outer approximations of $K_2$.
-	$\mathcal{Q}$ is convex and piecewise linear, hence not differentiable everywhere, and subgradients replace gradients at the kinks.
-	
+	$\mathcal{Q}$ is convex and piecewise linear: at the kinks, subgradients replace gradients.
+
 	\mbox{}
-	
-	The background notes give the result we need: an optimal dual solution of a linear program is a subgradient of its value function with respect to the right-hand side.
-	Here the right-hand side is $h_s-T_sx$, an affine function of $x$, so the chain rule transports the subgradient $\pi_s^{\nu}$ to
+
+	An optimal dual solution of a linear program is a subgradient of its value function with respect to the right-hand side (background notes).
+	For $x^{\nu} \in K_2$, as the right-hand side $h_s-T_sx$ is affine in $x$,
 	\[
-	-T_s^T\pi_s^{\nu} \in \partial Q(x^{\nu}, \xi_s).
+	-T_s^T\pi_s^{\nu} \in \partial Q(x^{\nu}, \xi_s),
+	\qquad \text{hence} \qquad
+	\beta = -\textstyle\sum_{s=1}^S p_s T_s^T\pi_s^{\nu} \in \partial \mathcal{Q}(x^{\nu}).
 	\]
-	
+
 	\mbox{}
-	
-	Taking the expectation, $- \sum_{s=1}^S p_s T_s^T\pi_s^{\nu} \in \partial \mathcal{Q}(x^{\nu})$: {\red the optimality cut of the previous frames is exactly the supporting hyperplane built on that subgradient}.
+
+	As $\alpha + \beta^Tx^{\nu} = \mathcal{Q}(x^{\nu})$, the boundary of the optimality cut, $\theta = \mathcal{Q}(x^{\nu}) + \beta^T(x - x^{\nu})$, is {\red a supporting hyperplane to the epigraph of $\mathcal{Q}$ at $(x^{\nu}, \mathcal{Q}(x^{\nu}))$}.
+	Together, the optimality cuts build an outer approximation of the epigraph of $\mathcal{Q}$, and the feasibility cuts one of $K_2$.
 	
 \end{frame}
 
