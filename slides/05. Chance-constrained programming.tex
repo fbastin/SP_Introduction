@@ -12,6 +12,7 @@
 
 \usepackage{graphicx}
 \usepackage{epstopdf}
+\usepackage{tikz}
 
 \setbeamercovered{dynamic}
 
@@ -74,7 +75,7 @@ Source: \url{https://www.informs.org/Explore/History-of-O.R.-Excellence/Biograph
 \begin{center}
 \includegraphics[width=0.4\textwidth,height=0.62\textheight,keepaspectratio]{coopercharnes.png}
 
-INFORMS John Von Neumann prize (with Richard J. Duffin)
+John von Neumann Theory Prize, 1982 (with Richard J. Duffin)
 \end{center}
 
 \end{frame}
@@ -93,7 +94,7 @@ where:
 	\item \( \xi \in \RR^p \) is a random vector with known probability distribution \( P \);
 	\item \( x \in \RR^n \) is the vector of decision variables;
 	\item \( \calX \subseteq \RR^n \) is a convex deterministic set;
-	\item \( f(x, \xi) \) is the cost (or utility) function;
+	\item \( f(x, \xi) \) is the cost function;
 	\item \( g_i(x, \xi) \) are random constraint functions;
 	\item \( \alpha_i \in (0, 1) \) specifies the acceptable risk level for constraint \( i \).
 \end{itemize}
@@ -159,13 +160,13 @@ Instead of requiring that a constraint holds for all the scenarios, we can requi
 \item 
 Separate chance constraints
 \begin{align*}
-P [ \xi_1x_1 + x_2 \geq 7 ] &\geq \alpha_1 \\
-P [ \xi_2x_1 + x_2 \geq 4 ] &\geq \alpha_2
+P [ \xi_1x_1 + x_2 \geq 7 ] &\geq 1-\alpha_1 \\
+P [ \xi_2x_1 + x_2 \geq 4 ] &\geq 1-\alpha_2
 \end{align*}
 \item
 Joint chance constraint
 \[
-P [ \xi_1x_1 + x_2 \geq 7, \; \xi_2x_1 + x_2 \geq 4 ] \geq \alpha
+P [ \xi_1x_1 + x_2 \geq 7, \; \xi_2x_1 + x_2 \geq 4 ] \geq 1-\alpha
 \]
 \end{enumerate}
 
@@ -175,22 +176,22 @@ P [ \xi_1x_1 + x_2 \geq 7, \; \xi_2x_1 + x_2 \geq 4 ] \geq \alpha
 \frametitle{Example: joint chance constraints}
 
 \begin{align}
-P[(\xi_1, \xi_2) = (1,1)] &= 0.1 \\
-P[(\xi_1, \xi_2) = (2,5/9)] &= 0.4 \\
-P[(\xi_1, \xi_2) = (3,7/9)] &= 0.4 \\
-P[(\xi_1, \xi_2) = (4,1/3)] &= 0.1
+P[(\xi_1, \xi_2) = (1,1)] &= 0.1 \label{eq:scen1} \\
+P[(\xi_1, \xi_2) = (2,5/9)] &= 0.4 \label{eq:scen2} \\
+P[(\xi_1, \xi_2) = (3,7/9)] &= 0.4 \label{eq:scen3} \\
+P[(\xi_1, \xi_2) = (4,1/3)] &= 0.1 \label{eq:scen4}
 \end{align}
 
 \mbox{}
 
-Assume that $\alpha \in (0.8,0.9]$, and we have the joint constraint
+Assume that $\alpha \in [0.1,0.2)$, and we have the joint constraint
 \[
-P [ \xi_1x_1 + x_2 \geq 7, \; \xi_2x_1 + x_2 \geq 4 ] \geq \alpha
+P [ \xi_1x_1 + x_2 \geq 7, \; \xi_2x_1 + x_2 \geq 4 ] \geq 1-\alpha
 \]
 
 \mbox{}
 
-We then have to satisfy constraints (2) and (3) and either (1) or (4).
+We then have to satisfy the constraints in scenarios \eqref{eq:scen2} and \eqref{eq:scen3}, and in either \eqref{eq:scen1} or \eqref{eq:scen4}.
 
 \end{frame}
 
@@ -213,7 +214,7 @@ K_1(\alpha) = \lbrace x \,|\, P[g_i(x,\bxi) \leq 0] \geq 1-\alpha_i,\ i=1,\ldots
 
 \mbox{}
 
-$K_1(\alpha)$ is not necessarily convex, even if $g_i(x,\bxi)$, $i=1,\ldots,m$, are linear in $x$.
+$K_1(\alpha)$ is not necessarily convex, even if $g_i(x,\bxi)$, $i=1,\ldots,m$, are linear in $x$: the joint constraint of the example yields a union of two polyhedra.
 
 \end{frame}
 
@@ -221,9 +222,9 @@ $K_1(\alpha)$ is not necessarily convex, even if $g_i(x,\bxi)$, $i=1,\ldots,m$, 
 \frametitle{Quasi-concavity}
 
 \begin{definition}[Quasi-Concavity]
-	A function $f: S \to \mathbb{R}$, where $S \subseteq \mathbb{R}^n$ is a convex set, is \textbf{quasi-concave} if for all $\mathbf{x}, \mathbf{y} \in S$ and all $\lambda \in [0,1]$:
+	A function $f: S \to \mathbb{R}$, where $S \subseteq \mathbb{R}^n$ is a convex set, is \textbf{quasi-concave} if for all $\bsx, \bsy \in S$ and all $\lambda \in [0,1]$:
 	\[
-	f(\lambda\mathbf{x} + (1-\lambda)\mathbf{y}) \geq \min\{f(\mathbf{x}), f(\mathbf{y})\}
+	f(\lambda\bsx + (1-\lambda)\bsy) \geq \min\{f(\bsx), f(\bsy)\}
 	\]
 \end{definition}
 
@@ -244,9 +245,9 @@ P[(1-\lambda)A+\lambda B] \geq \min \lbrace P[A], P[B] \rbrace.
 \frametitle{Applications in optimization}
 
 \begin{theorem}[Convexity of Upper Level Sets]
-	Let $f: S \to \RR$ be a quasi-concave function, where $S \subseteq \RR^n$ is a convex set. Then for any $\alpha \in \RR$, the upper level set
+	Let $f: S \to \RR$ be a quasi-concave function, where $S \subseteq \RR^n$ is a convex set. Then for any $t \in \RR$, the upper level set
 	\[
-	U_\alpha = \{\bsx \in S \mid f(\bsx) \geq \alpha\}
+	U_t = \{\bsx \in S \mid f(\bsx) \geq t\}
 	\]
 	is convex.
 \end{theorem}
@@ -254,9 +255,9 @@ P[(1-\lambda)A+\lambda B] \geq \min \lbrace P[A], P[B] \rbrace.
 \begin{corollary}[Feasible Set Convexity]
 	If $f$ is quasi-concave, then the constraint:
 	\[
-	f(\bsx) \geq \alpha
+	f(\bsx) \geq t
 	\]
-	defines a \textbf{convex feasible set} for any $\alpha \in \mathbb{R}$.
+	defines a \textbf{convex feasible set} for any $t \in \mathbb{R}$.
 \end{corollary}
 
 \end{frame}
@@ -269,7 +270,11 @@ For chance-constrained programming problems of the form:
 P[g(\bsx,\bsxi) \leq 0] \geq 1-\alpha,
 \]
 if $P[g(\bsx,\bsxi)\leq 0]$ is quasi-concave in $\bsx$, 
-then $\{ \bsx \mid P[g(\bsx,\bsxi) \leq 0] \geq 1-\alpha\}$ is \textbf{convex}, making the optimization problem \textbf{tractable}.
+then $\{ \bsx \mid P[g(\bsx,\bsxi) \leq 0] \geq 1-\alpha\}$ is \textbf{convex}: with a convex objective, the problem is a convex program.
+
+\smallskip
+
+Convexity is not tractability, though: evaluating the probability and its gradient still requires multivariate integration.
 
 \end{frame}
 
@@ -283,9 +288,11 @@ then $\{ \bsx \mid P[g(\bsx,\bsxi) \leq 0] \geq 1-\alpha\}$ is \textbf{convex}, 
 	\]
 \end{definition}
 
-\begin{theorem}
-	If $f$ is log-concave and $f > 0$, then $f$ is quasi-concave.
-\end{theorem}
+A log-concave function is quasi-concave, as $f(\bsx)^\lambda \, f(\bsy)^{1-\lambda} \geq \min\{f(\bsx), f(\bsy)\}$.
+
+\smallskip
+
+A probability measure $P$ is \textbf{log-concave} if $P[\lambda A + (1-\lambda) B] \geq P[A]^{\lambda} P[B]^{1-\lambda}$ for all convex sets $A$, $B$ and $\lambda \in [0,1]$; this holds as soon as $P$ has a log-concave density (Prékopa, 1973).
 
 \end{frame}
 
@@ -293,7 +300,7 @@ then $\{ \bsx \mid P[g(\bsx,\bsxi) \leq 0] \geq 1-\alpha\}$ is \textbf{convex}, 
 	\frametitle{Jointly Convex Constraint Function}
 
 \begin{definition}
-	A constraint function $g: \RR^n \times \RR^m \to \RR$ is \textbf{jointly convex} in $(\bsx, \bsxi)$ if for all $(\bsx_1, \bsxi_1), (\bsx_2, \bsxi_2) \in \RR^n \times \RR^m$ and all $\lambda \in [0,1]$:
+	A constraint function $g: \RR^n \times \RR^p \to \RR$ is \textbf{jointly convex} in $(\bsx, \bsxi)$ if for all $(\bsx_1, \bsxi_1), (\bsx_2, \bsxi_2) \in \RR^n \times \RR^p$ and all $\lambda \in [0,1]$:
 	\[
 	g(\lambda \bsx_1 + (1-\lambda)\bsx_2, \lambda \bsxi_1 + (1-\lambda)\bsxi_2) \leq \lambda g(\bsx_1, \bsxi_1) + (1-\lambda) g(\bsx_2, \bsxi_2)
 	\]
@@ -305,7 +312,7 @@ then $\{ \bsx \mid P[g(\bsx,\bsxi) \leq 0] \geq 1-\alpha\}$ is \textbf{convex}, 
 \frametitle{Prékopa's fundamental theorem}
 
 \begin{theorem}
-Let $\bsxi \in \RR^m$ be a random vector with log-concave probability distribution, and let $g: \RR^n \times \mathbb{R}^m \to \mathbb{R}$ be quasi-convex in $(\bsx, \bsxi)$. Then the probability function
+Let $\bsxi \in \RR^p$ be a random vector with log-concave probability distribution, and let $g: \RR^n \times \RR^p \to \RR$ be jointly quasi-convex in $(\bsx, \bsxi)$. Then the probability function
 \[
 	\phi(\bsx) = P[ g(\bsx, \bsxi) \leq 0 ]
 \]
@@ -322,7 +329,7 @@ Acta Scientiarum Mathematicarum 34, 335--343)
 \frametitle{Examples of jointly quasi-convex functions}
 
 \begin{example}[Affine in $(\bsx, \bsxi)$]
-	If $g(\bsx, \bsxi) = \mathbf{a}^\top \bsx + \mathbf{b}^\top \bsxi + c$, where $\mathbf{a} \in \mathbb{R}^n$, $\mathbf{b} \in \mathbb{R}^m$, $c \in \mathbb{R}$, then $g$ is jointly quasi-convex (in fact, jointly convex).
+	If $g(\bsx, \bsxi) = \mathbf{a}^\top \bsx + \mathbf{b}^\top \bsxi + c$, where $\mathbf{a} \in \mathbb{R}^n$, $\mathbf{b} \in \mathbb{R}^p$, $c \in \mathbb{R}$, then $g$ is jointly quasi-convex (in fact, jointly convex).
 \end{example}
 
 \begin{example}[Maximum]
@@ -339,8 +346,8 @@ The maximum of quasi-convex functions is quasi-convex.
 	\text{Normal:} &\quad f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right) \\
 	\text{Exponential:} &\quad f(x) = \lambda \exp(-\lambda x), \quad x \geq 0 \\
 	\text{Uniform on convex } S: &\quad f(x) = \frac{1}{\operatorname{vol}(S)}, \quad x \in S \\
-	\text{Gamma (shape $\alpha \geq 1$):} &\quad f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}, \quad x > 0, \; \beta > 0 \\
-	\text{Beta ($\alpha \geq 1, \beta \geq 1$):} &\quad f(x) = \frac{x^{\alpha-1}(1-x)^{\beta-1}}{B(\alpha,\beta)}, \quad x \in [0,1]\\
+	\text{Gamma (shape $k \geq 1$):} &\quad f(x) = \frac{\lambda^k}{\Gamma(k)} x^{k-1} e^{-\lambda x}, \quad x > 0, \; \lambda > 0 \\
+	\text{Beta ($a \geq 1, b \geq 1$):} &\quad f(x) = \frac{x^{a-1}(1-x)^{b-1}}{B(a,b)}, \quad x \in [0,1]\\
 	\text{Multivariate normal:} &\quad f(x) = \frac{1}{\sqrt{(2\pi)^n \det(\Sigma)}} \exp\left( -\frac{1}{2}(x-\mu)^T \Sigma^{-1} (x-\mu) \right)
 \end{align*}
 }
@@ -348,9 +355,9 @@ The maximum of quasi-convex functions is quasi-convex.
 \end{frame}
 
 \begin{frame}
-\frametitle{Quasi-concave probability distributions}
+\frametitle{Solution methods for log-concave distributions}
 
-If you have such a density, you can
+With such a distribution, the feasible set is convex, and you can
 \begin{itemize}
 \item
 use Lagrangian techniques
@@ -366,11 +373,10 @@ use a reduced-gradient technique (see Kall \& Wallace, Section~4.1)
 \begin{theorem}[Prékopa's Theorem for Joint Constraints]
 	If
 	\begin{enumerate}
-		\item $\bsxi$ has a log-concave probability distribution
-		\item Each $g_i(\bsx, \bsxi)$ is jointly quasi-convex in $(\bsx, \bsxi)$
-		\item The set $\{(\bsx, \bsxi) \mid g_i(\bsx, \bsxi) \leq 0, \ i=1,\dots,m\}$ is convex
+		\item $\bsxi$ has a log-concave probability distribution, and
+		\item the set $\{(\bsx, \bsxi) \mid g_i(\bsx, \bsxi) \leq 0, \ i=1,\dots,m\}$ is convex, for instance because each $g_i$ is jointly quasi-convex in $(\bsx, \bsxi)$,
 	\end{enumerate}
-	Then the function
+	then the function
 	\[
 	\phi(\bsx) = P\left[ g_i(\bsx, \bsxi) \leq 0, \ i=1,\dots,m \right]
 	\]
@@ -384,12 +390,13 @@ use a reduced-gradient technique (see Kall \& Wallace, Section~4.1)
 
 For joint constraints $P[g_j(\bsx, \bsxi) \leq 0,\ j=1,\ldots,m] \geq 1-\alpha$, define:
 \[
-h(\bsx, \bsxi) = \max_{j=1,\dots,m} g_j(\bsx, \bsxi)
+G(\bsx, \bsxi) = \max_{j=1,\dots,m} g_j(\bsx, \bsxi)
 \]
 Then the constraint becomes:
 \[
-P[ h(\bsx, \bsxi) \leq 0 ] \geq 1-\alpha
+P[ G(\bsx, \bsxi) \leq 0 ] \geq 1-\alpha
 \]
+If every $g_j$ is jointly quasi-convex, so is $G$: Prékopa's theorem for a single constraint then covers joint constraints.
 
 \end{frame}
 
@@ -405,7 +412,7 @@ For a more complete analysis of convexity in chance-constrained programming, see
 	
 Assume that the chance constraint can be written in the form
 	$$
-	P[T(\bxi)x \geq h(\bxi)] \geq \alpha.
+	P[T(\bxi)x \geq h(\bxi)] \geq 1-\alpha.
 	$$
 	
 	\begin{theorem}
@@ -424,17 +431,17 @@ The situation in the single constraint case is sometimes simple.
 \item 
 Suppose again that $T_i (\bxi) = T_i$ is constant. Then
 \[
-P[T_i x \geq h_i (\bxi)] = F_{h_i}(T_i x) \geq \alpha
+P[T_i x \geq h_i (\bxi)] = F_{h_i}(T_i x) \geq 1-\alpha
 \]
 so the deterministic equivalent is
 \[
-T_i x \geq F_{h_i}^{-1}(\alpha)
+T_i x \geq F_{h_i}^{-1}(1-\alpha)
 \]
-\ldots linear constraint! The resulting problem is still linear. We have simply relaxed the constraint.
-\item 
+\ldots linear constraint! The resulting problem is still linear: compared with requiring $T_i x \geq h_i(\xi)$ for every realization, the worst case of $h_i(\bxi)$ is replaced by its $(1-\alpha)$-quantile.
+\item
 Recall that the inverse of the cdf is defined as
 \[
-F_{h_i}^{-1}(\alpha) = \inf \lbrace t : F_{h_i} (t)  \geq \alpha \rbrace.
+F_{h_i}^{-1}(p) = \inf \lbrace t : F_{h_i} (t)  \geq p \rbrace, \quad p \in (0,1).
 \]
 \end{itemize}
 
@@ -443,22 +450,22 @@ F_{h_i}^{-1}(\alpha) = \inf \lbrace t : F_{h_i} (t)  \geq \alpha \rbrace.
 \begin{frame}
 \frametitle{Other ``solvable'' cases}
 
-Let $h(\bxi) = h$ be fixed, $T(\bxi) = \operatorname{diag}(\xi_1, \xi_2,\ldots, \xi_n)$, with $\xi = (\xi_1, \xi_2,\ldots, \xi_n)$ following a multivariate normal distribution with mean $\mu$ and covariance matrix $\Sigma$.
-Then
+Consider a single constraint $\bxi^T x \geq h$, with $h \in \RR$ fixed and $\bxi = (\xi_1, \xi_2,\ldots, \xi_n)$ following a multivariate normal distribution with mean $\mu$ and positive definite covariance matrix $\Sigma$.
+Then, for $x \neq 0$,
 \[
 \frac{\sum_{i = 1}^n \xi_i x_i - \mu^T x}{\sqrt{x^T\Sigma x}} \sim N(0,1),
 \]
 and
 \[
-K_1(\alpha) = \lbrace x \mid \mu^T x \geq h + \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} \rbrace,
+K_1(\alpha) = \lbrace x \mid \mu^T x \geq h + \Phi^{-1}(1-\alpha) \sqrt{x^T\Sigma x} \rbrace,
 \]
 where $\Phi$ is the standard normal cdf.
 
 \smallskip
 
-$K_1(\alpha)$ is a convex set for $\alpha \geq 0.5$. For $\alpha > 0.5$, it can be expressed as a second-order cone constraint:
+$K_1(\alpha)$ is a convex set for $\alpha \leq 0.5$. For $\alpha < 0.5$, it can be expressed as a second-order cone constraint:
 \[
-\| \Sigma^{1/2} x \|_2 \leq \frac{1}{\Phi^{-1}(\alpha)} (\mu^T x - h)
+\| \Sigma^{1/2} x \|_2 \leq \frac{1}{\Phi^{-1}(1-\alpha)} (\mu^T x - h)
 \]
 
 \end{frame}
@@ -482,7 +489,7 @@ SOCPs can be solved efficiently by interior point methods.
 \end{frame}
 
 \begin{frame}
-\frametitle{Example: robust portfolio optimization}
+\frametitle{Example: chance-constrained portfolio optimization}
 
 (Taken from S. Boyd and J. Linderoth)
 
@@ -501,30 +508,51 @@ We cannot guarantee it all the time, but we want it to occur most of the time.
 \end{frame}
 
 \begin{frame}
-\frametitle{Example: robust portfolio optimization (cont'd)}
+\frametitle{Example: chance-constrained portfolio optimization (cont'd)}
 
 Let $x_i \geq 0$ be the amount invested in asset $i$.
 Constraints:
 \begin{align}
-& P\left[ \sum_{i = 1}^n \beta_i x_i \geq b  \right] \geq \alpha \label{eq:var_constraint} \\
+& P\left[ \sum_{i = 1}^n \beta_i x_i \geq b  \right] \geq 1-\alpha \label{eq:var_constraint} \\
 & \sum_{i = 1}^n x_i \leq W \nonumber \\
 & x_i \geq 0,\ i = 1,\ldots,n.  \nonumber
 \end{align}
 
 \smallskip
 
-\eqref{eq:var_constraint} can be rewritten as
-\[
-\mu^Tx - \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} \geq b.
-\]
-If $b < 0$, \eqref{eq:var_constraint} is also known as a \textcolor{red}{Value-at-Risk constraint} (Ruszczyński and Shapiro, 2003).
+If $b < 0$, \eqref{eq:var_constraint} bounds the loss $-\beta^Tx$ by $-b$ with probability at least $1-\alpha$: a \textcolor{red}{Value-at-Risk constraint} (Ruszczyński and Shapiro, 2003).
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Example: robust portfolio optimization (cont'd)}
+\frametitle{Example: deterministic equivalent of the chance constraint}
 
-We can also interpret $x_i$ as the proportion of the portfolio invested in asset $i$, by normalizing $\| x \|_1 = 1$.
+The return $\beta^T x$ is normal, with mean $\mu^T x$ and variance $x^T \Sigma x$.
+For $x \neq 0$ and $\Sigma$ positive definite,
+\[
+Z = \frac{\beta^T x - \mu^T x}{\sqrt{x^T\Sigma x}} \sim N(0,1).
+\]
+Standardizing, then using the symmetry of $N(0,1)$, $1 - \Phi(-t) = \Phi(t)$:
+\[
+P\left[ \beta^T x \geq b \right]
+= P\left[ Z \geq \frac{b - \mu^T x}{\sqrt{x^T\Sigma x}} \right]
+= 1 - \Phi\left( \frac{b - \mu^T x}{\sqrt{x^T\Sigma x}} \right)
+= \Phi\left( \frac{\mu^T x - b}{\sqrt{x^T\Sigma x}} \right).
+\]
+As $\Phi$ is continuous and increasing, \eqref{eq:var_constraint} holds if and only if
+\[
+\frac{\mu^T x - b}{\sqrt{x^T\Sigma x}} \geq \Phi^{-1}(1-\alpha)
+\quad \Longleftrightarrow \quad
+\mu^Tx - \Phi^{-1}(1-\alpha) \sqrt{x^T\Sigma x} \geq b.
+\]
+For $\alpha < 0.5$, $\Phi^{-1}(1-\alpha) > 0$, and this is a {\red second-order cone constraint}.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: chance-constrained portfolio optimization (cont'd)}
+
+We can also interpret $x_i$ as the proportion of the portfolio invested in asset $i$, by normalizing $\sum_{i=1}^n x_i = 1$.
 Here $b$ is the minimum return rate of the portfolio and $x$ is the portfolio allocation vector.
 
 \smallskip
@@ -536,7 +564,7 @@ We can add constraints on $x$ to ensure diversification, summarized by requiring
 A complete program can now be expressed as:
 \begin{align*}
 \max_x \ & \EE[\beta^T x] = \mu^T x \\
-\text{s.t. } & P\left[ \beta^T x \geq b \right] \geq \alpha  \\
+\text{s.t. } & P\left[ \beta^T x \geq b \right] \geq 1-\alpha  \\
 & \sum_{i = 1}^n x_i = 1 \\
 & x \in \calC
 \end{align*}
@@ -546,13 +574,13 @@ A complete program can now be expressed as:
 \begin{frame}
 \frametitle{Example: loss constraint}
 
-Setting $b$ to 0 means that we want to ensure that we will not suffer a loss with high probability. Typically, $\alpha$ is set to 0.9, 0.95, 0.99,\ldots
+Setting $b$ to 0 means that we want to ensure that we will not suffer a loss with high probability. Typically, $\alpha$ is set to 0.1, 0.05, 0.01,\ldots
 
 \smallskip
 
-The chance constraint can also be expressed as
+As $\beta^T x$ has a continuous distribution, the chance constraint can also be expressed as
 \[
-P\left[ \beta^T x \leq 0 \right] \leq 1-\alpha = \gamma.
+P\left[ \beta^T x \leq 0 \right] \leq \alpha.
 \]
 
 \smallskip
@@ -565,7 +593,7 @@ We can also allow short selling by permitting some $x_i$ to be negative.
 
 (Taken from S. Boyd -- \url{http://ee364a.stanford.edu/lectures/chance_constr.pdf})
 
-$n = 10$ assets, $\alpha = 0.95$, $\gamma = 0.05$, $\mathcal{C} = \{x \mid x \succeq -0.1\}$
+$n = 10$ assets, $\alpha = 0.05$,$\mathcal{C} = \{x \mid x \succeq -0.1\}$
 
 \smallskip
 
@@ -597,17 +625,41 @@ uniform & 3.41 & 18.9\%
 \begin{frame}
 \frametitle{Short selling case}
 
-Let's ignore the non-negativity constraints and consider the program (Ruszczyński and Shapiro, 2003)
+Let's ignore the non-negativity and budget constraints and consider the program (Ruszczyński and Shapiro, 2003)
 \begin{align*}
 	\min_x \ & -\mu^T x \\
-	\text{s.t. } & \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \leq 0.
+	\text{s.t. } & z_{\alpha} \sqrt{x^T\Sigma x} - \mu^Tx + b \leq 0,
 \end{align*}
+with $z_{\alpha} = \Phi^{-1}(1-\alpha) > 0$, i.e., $\alpha < 0.5$.
 
 The Lagrangian is
 \begin{align*}
-L(x, \lambda) &= -\mu^T x + \lambda \left( \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \right) \\
-&= -(1+\lambda) \mu^T x + \lambda \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} + \lambda b
+L(x, \lambda) &= -\mu^T x + \lambda \left( z_{\alpha} \sqrt{x^T\Sigma x} - \mu^Tx + b \right) \\
+&= -(1+\lambda) \mu^T x + \lambda z_{\alpha} \sqrt{x^T\Sigma x} + \lambda b
 \end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Reminder: KKT conditions}
+
+For $\min_x f(x)$ s.t. $g(x) \leq 0$, with $f$ and $g$ continuously differentiable and $L(x,\lambda) = f(x) + \lambda g(x)$, the Karush-Kuhn-Tucker (KKT) conditions are
+\begin{align*}
+\nabla_x L(x,\lambda) &= 0 & \text{(stationarity)} \\
+g(x) &\leq 0 & \text{(primal feasibility)} \\
+\lambda g(x) &= 0 & \text{(complementarity)} \\
+\lambda &\geq 0 & \text{(dual feasibility)}
+\end{align*}
+\begin{itemize}
+\item
+{\red Necessary}: a local minimizer satisfies them, for some $\lambda$, under a constraint qualification. For a convex problem, the Slater condition suffices: $g(\bar{x}) < 0$ for some $\bar{x}$.
+\item
+{\red Sufficient} for a convex problem: a KKT point is a global minimizer.
+\end{itemize}
+
+\smallskip
+
+{\footnotesize (See the KKT background notes.)}
 
 \end{frame}
 
@@ -615,11 +667,18 @@ L(x, \lambda) &= -\mu^T x + \lambda \left( \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} 
 	\frametitle{Short selling case: KKT conditions}
 
 \begin{align*}
-&	\nabla_x L(x, \lambda) = 0 \\
-&	\Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \leq 0 \\
-&	\lambda \left( \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b \right) = 0 \\
-&	\lambda \geq 0.
+&	\nabla_x L(x, \lambda) = 0, && \lambda \geq 0, \\
+&	z_{\alpha} \sqrt{x^T\Sigma x} - \mu^Tx + b \leq 0, && \lambda \left( z_{\alpha} \sqrt{x^T\Sigma x} - \mu^Tx + b \right) = 0.
 \end{align*}
+
+\smallskip
+
+The problem is convex, as $z_{\alpha} > 0$ and $\sqrt{x^T\Sigma x} = \|\Sigma^{1/2}x\|_2$ is convex.
+If $b < 0$, $x = 0$ is strictly feasible (Slater condition): the KKT conditions are then {\red necessary and sufficient}.
+
+\smallskip
+
+The constraint is differentiable only where $x^T\Sigma x > 0$: $\sqrt{x^T\Sigma x}$ has a kink wherever it vanishes.
 
 \end{frame}
 
@@ -628,7 +687,7 @@ L(x, \lambda) &= -\mu^T x + \lambda \left( \Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} 
 
 We have
 \[
-\nabla_x L(x, \lambda) = -(1+\lambda)\mu+\frac{\lambda \Phi^{-1}(\alpha)\Sigma x}{\sqrt{x^T\Sigma x}}
+\nabla_x L(x, \lambda) = -(1+\lambda)\mu+\frac{\lambda z_{\alpha}\Sigma x}{\sqrt{x^T\Sigma x}}
 \]
 If $\lambda = 0$,
 \[
@@ -636,7 +695,7 @@ If $\lambda = 0$,
 \]
 Assuming $\mu \neq 0$, we must have $\lambda > 0$. Therefore:
 \[
-\Phi^{-1}(\alpha) \sqrt{x^T\Sigma x} - \mu^Tx + b = 0
+z_{\alpha} \sqrt{x^T\Sigma x} - \mu^Tx + b = 0
 \]
 
 \end{frame}
@@ -646,17 +705,87 @@ Assuming $\mu \neq 0$, we must have $\lambda > 0$. Therefore:
 
 (Ruszczyński and Shapiro, 2003)
 
-Assume $\Sigma$ is nonsingular and define
+\smallskip
+
+Without a risk-free asset, every portfolio $x \neq 0$ is risky: $\Sigma$ is positive definite.
+Assume also $b < 0$: a loss of at most $-b$ is tolerated.
+
+\begin{enumerate}
+\item
+{\red Direction.} Let $(x,\lambda)$ be an unknown KKT point. As $\lambda > 0$, stationarity gives
 \[
-\rho = \sqrt{ \mu^T \Sigma^{-1} \mu}
+\Sigma x = t\, \mu, \quad \text{where the number } t = \frac{(1+\lambda)\sqrt{x^T\Sigma x}}{\lambda z_{\alpha}} > 0,
+\quad \text{so} \quad x = t\, \Sigma^{-1}\mu.
 \]
-We can show:
+\item
+{\red Return and risk along this direction.} With $\rho = \sqrt{\mu^T\Sigma^{-1}\mu}$,
 \[
-\begin{cases}
-	\text{unbounded problem} & \text{if } \rho \geq \Phi^{-1}(\alpha); \\
-	x^* = \frac{b}{\rho(\Phi^{-1}(\alpha)-\rho)} \Sigma^{-1} \mu & \text{if } \rho < \Phi^{-1}(\alpha).
-\end{cases}
+\mu^T x = t \rho^2, \qquad \sqrt{x^T\Sigma x} = t\rho.
 \]
+\item
+{\red Step length.} The constraint is active, as $\lambda > 0$:
+\[
+z_{\alpha} t\rho - t\rho^2 + b = 0
+\quad \Longleftrightarrow \quad
+t\rho\,(z_{\alpha} - \rho) = -b.
+\]
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Short selling case: no risk-free asset (cont'd)}
+
+As $-b > 0$, the step length equation has a solution $t > 0$ if and only if $\rho < z_{\alpha}$.
+\begin{itemize}
+\item
+{\red $\rho < z_{\alpha}$}: with $\sqrt{x^T\Sigma x} = t\rho$, the definition of $t$ gives the multiplier: $t = (1+\lambda)t\rho/(\lambda z_{\alpha}) \iff \lambda = \rho/(z_{\alpha}-\rho) > 0$. All KKT conditions hold: the unique KKT point, hence the solution, is
+\[
+x^* = \frac{-b}{\rho(z_{\alpha}-\rho)}\, \Sigma^{-1}\mu,
+\qquad \text{with expected return } \mu^Tx^* = \frac{-b\,\rho}{z_{\alpha}-\rho}.
+\]
+\item
+{\red $\rho \geq z_{\alpha}$}: there is no KKT point. Along $x = t\, \Sigma^{-1}\mu$, the constraint value is $t\rho(z_{\alpha}-\rho) + b \leq b < 0$ for every $t \geq 0$, while $\mu^Tx = t\rho^2 \to \infty$: the problem is {\red unbounded}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Short selling case: interpretation}
+
+{\red Sharpe ratio} (Sharpe, 1966): expected return per unit of risk, $S(x) = \mu^Tx/\sigma(x)$, with $\sigma(x) = \sqrt{x^T\Sigma x}$ the standard deviation of the return (usually, of the return in excess of the risk-free rate). Scale-free: $S(tx) = S(x)$, $t > 0$.
+
+\smallskip
+
+{\red Best Sharpe ratio.} By Cauchy-Schwarz, $\mu^Tx = (\Sigma^{-1/2}\mu)^T(\Sigma^{1/2}x) \leq \rho\, \sigma(x)$, with equality iff $x = t\,\Sigma^{-1}\mu$, $t \geq 0$: $\rho = \max_x S(x)$, attained in the KKT direction.
+
+\smallskip
+
+\begin{columns}[T]
+\begin{column}{0.62\textwidth}
+{\red Chance constraint}: $\mu^Tx \geq b + z_{\alpha}\sigma(x)$, a safety margin of $z_{\alpha}$ standard deviations.
+Along $x = t\,\Sigma^{-1}\mu$, the return $\rho\,\sigma$ and the margin $z_{\alpha}\sigma$ grow linearly with $\sigma$:
+\begin{itemize}
+\item
+$\rho < z_{\alpha}$: the margin grows faster; scaling up stops at $x^*$.
+\item
+$\rho \geq z_{\alpha}$: the return grows at least as fast; nothing stops the scaling (the ignored budget constraint would).
+\end{itemize}
+\end{column}
+\begin{column}{0.36\textwidth}
+\begin{tikzpicture}[scale=0.75]
+\fill[red!8] (0,-1) -- (3.4,2.4) -- (0,2.4) -- cycle;
+\draw[->] (0,0) -- (4.4,0) node[below] {\footnotesize $\sigma(x)$};
+\draw[->] (0,-1.4) -- (0,2.9) node[left] {\footnotesize $\mu^Tx$};
+\draw[red, thick] (0,-1) -- (3.4,2.4) node[right] {\footnotesize $b + z_{\alpha}\sigma$};
+\draw[blue, thick] (0,0) -- (4,2) node[below right] {\footnotesize $\rho < z_{\alpha}$};
+\draw[blue, thick, dashed] (0,0) -- (1.6,2.4) node[above] {\footnotesize $\rho \geq z_{\alpha}$};
+\fill (2,1) circle (2pt) node[below right] {\footnotesize $x^*$};
+\node[left] at (0,-1) {\footnotesize $b$};
+\node[red] at (2.15,2.05) {\scriptsize feasible};
+\end{tikzpicture}
+\end{column}
+\end{columns}
 
 \end{frame}
 
@@ -666,22 +795,22 @@ We can show:
 A more general form is
 \begin{align*}
 	\min_x \ & h(x) \\
-	\text{s.t. } & P[ g_1(x, \bxi) \leq 0,\ldots, g_r(x, \bxi) \leq 0] \geq \alpha \\
+	\text{s.t. } & P[ g_1(x, \bxi) \leq 0,\ldots, g_r(x, \bxi) \leq 0] \geq 1-\alpha \\
 	& h_1(x) \leq 0,\ldots, h_m(x) \leq 0.
 \end{align*}
 Using $G(x, \bxi) = \max_{j=1,\dots,r} g_j(x, \bxi)$, the chance constraint can be expressed via the indicator of feasibility:
 \[
-\EE\left[ \mathbb{I}_{(-\infty, 0]} \left( G(x, \bxi) \right) \right] \geq \alpha, \quad \text{where} \quad
+\EE\left[ \mathbb{I}_{(-\infty, 0]} \left( G(x, \bxi) \right) \right] \geq 1-\alpha, \quad \text{where} \quad
 \mathbb{I}_{(-\infty,0]}(t) =
 \begin{cases}
 	1 & \text{if } t \leq 0,\\
 	0 & \text{if } t > 0,
 \end{cases}
 \]
-or equivalently via the violation indicator $\mathcal{I}_{(0,\infty)}$:
+or equivalently via the violation indicator $\mathbb{I}_{(0,\infty)}$:
 \[
-\EE\left[ \mathcal{I}_{(0,\infty)} \left( G(x, \bxi) \right) \right] \leq 1 - \alpha, \quad \text{where} \quad
-\mathcal{I}_{(0,\infty)}(t) =
+\EE\left[ \mathbb{I}_{(0,\infty)} \left( G(x, \bxi) \right) \right] \leq \alpha, \quad \text{where} \quad
+\mathbb{I}_{(0,\infty)}(t) =
 \begin{cases}
 	1 & \text{if } t > 0,\\
 	0 & \text{if } t \leq 0.
@@ -747,7 +876,7 @@ Source: \url{https://web.stanford.edu/class/ee364a/lectures/chance_constr.pdf}
 
 \mbox{}
 
-Value-at-risk of random variable $Z$, at level $\eta$:
+Value-at-risk of a loss $Z$ (large values are bad), at level $\eta \in (0,1)$:
 \[
 \text{VaR}(Z;\eta) = \inf \{ \gamma \mid P[Z \leq \gamma] \geq \eta \}
 \]
@@ -780,10 +909,11 @@ Solution $\beta^*$ obtained by solving
 = 1 - \frac{1}{1 - \eta} P[ Z \geq \beta ],
 \]
 leading to
-\begin{align*}
-& P[ Z \geq \beta^* ] = 1 - \eta \\
-\Longleftrightarrow \quad & P[ Z \leq \beta^* ] = \eta \quad \Longleftrightarrow \quad \beta^* = \text{VaR}(Z; \eta).
-\end{align*}
+\[
+P[ Z \geq \beta^* ] = 1 - \eta
+\quad \Longleftrightarrow \quad P[ Z \leq \beta^* ] = \eta,
+\]
+satisfied by $\beta^* = \text{VaR}(Z; \eta)$, and only by it if $F_Z$ is strictly increasing.
 
 \end{frame}
 
@@ -809,24 +939,52 @@ Conditional tail expectation (or expected shortfall):
 \end{frame}
 
 \begin{frame}
+\frametitle{CVaR and chance constraints}
+
+In the continuous case, $\text{CVaR}(Z;\eta)$ is the mean of $Z$ beyond $\text{VaR}(Z;\eta)$, hence $\text{VaR}(Z;\eta) \leq \text{CVaR}(Z;\eta)$ (true in general).
+With $Z = G(x,\bxi)$ and $\eta = 1-\alpha$:
+\[
+\text{CVaR}(G(x,\bxi); 1-\alpha) \leq 0
+\ \Longrightarrow\
+\text{VaR}(G(x,\bxi); 1-\alpha) \leq 0
+\ \Longleftrightarrow\
+P[G(x,\bxi) \leq 0] \geq 1-\alpha.
+\]
+By definition of the CVaR, the left-hand constraint holds if and only if, for some $\beta \in \RR$,
+\[
+\beta + \frac{1}{\alpha} \EE\left[ (G(x,\bxi) - \beta)_+ \right] \leq 0,
+\]
+{\red a convex constraint in $(x, \beta)$} when $G(\cdot,\xi)$ is convex: a conservative convex approximation of the chance constraint.
+With finitely many scenarios and affine $g_j$, it is a set of linear constraints, with one auxiliary variable per scenario.
+
+\smallskip
+
+{\footnotesize (Rockafellar and Uryasev, 2000; Nemirovski and Shapiro, 2006)}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Integrated chance constraints}
 
 \begin{itemize}
 \item 
 Consider the stochastic constraints
 \[
-g_i(x, \xi) \leq 0, \quad i = 1,\ldots, r.
+g_i(x, \bxi) \leq 0, \quad i = 1,\ldots, r.
 \]
 \item
 Integrated chance constraint:
 \[
 \EE \left[ \max_{i=1,\ldots,r} (g_i(x,\bxi))_+ \right] \leq d.
 \]
+\item
+Unlike a chance constraint, it defines a {\red convex set for any distribution} of $\bxi$, as soon as the $g_i$ are convex in $x$.
+With a finite discrete distribution and affine $g_i$, this set is a polyhedron: the constraint can be handled by linear programming.
 \end{itemize}
 
-\mbox{}
+\smallskip
 
-For more details, see Chapter 6, Willem K. Klein Haneveld, Maarten H. van der Vlerk, Ward Romeijnders (2020), ``Stochastic Programming - Modeling Decision Problems Under Uncertainty'', Springer.
+{\footnotesize For more details, see Chapter 6 (Section 6.3 for joint constraints), Willem K. Klein Haneveld, Maarten H. van der Vlerk, Ward Romeijnders (2020), ``Stochastic Programming - Modeling Decision Problems Under Uncertainty'', Springer.\par}
 \end{frame}
 
 %% More to read in Prékopa, starting from Section 2.
