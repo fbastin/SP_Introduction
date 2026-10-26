@@ -1,102 +1,24 @@
 \documentclass[aspectratio=169]{beamer}
-%\documentclass[xcolor=pst,dvips,epic,eepic]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usetheme{Singapore}
 \usepackage{xcolor}
 \setbeamertemplate{footline}[frame number]
 
-%\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
-%\usepackage[pst]{xcolor}
-%\usepackage{xxcolor}
-%\usepackage{../sty/mathlist}
-
 \input{../sty/macros}
 
-%\usepackage[french]{babel}
 \usepackage{amsmath,amssymb}
-%\usepackage{colortbl}
-%\usepackage[english]{babel}
 
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 
 \usepackage{times}
 
-\usepackage{ulem}
-
-\usepackage{listings}
-%\topmargin=-0.6in
-\lstloadlanguages{C++}
-\lstset{language=C++}
-%%}
-
 \setbeamercovered{dynamic}
 
-\def\bxi{\boldsymbol\xi}
-\def\bx{\boldsymbol{x}}
-\def\bu{\boldsymbol{u}}
-\def\bz{\boldsymbol{z}}
-\def\bomega{\boldsymbol\omega}
-
 %% ---------------------------------------------------------------------------
-%% Scenario-tree pictures, in TikZ (no PSTricks, no auto-pst-pdf).
+%% Scenario-tree pictures, in TikZ.
 %% ---------------------------------------------------------------------------
-
-% SDDP tree. #1 = level drawn in red (0 = none, 1, 2 or 3); #2-#8 = node
-% labels ($x_1$; second stage; third stage), each empty for no label.
-% Places a label under a tree node, unless it is empty.
-\newcommand{\sddplbl}[2]{\ifx&#2&\else\node[lbl,below=1pt of #1]{#2};\fi}
-
-\newcommand{\sddptree}[8]{%
-  \ifnum#1=1 \def\cA{red}\else\def\cA{black}\fi
-  \ifnum#1=2 \def\cB{red}\else\def\cB{black}\fi
-  \ifnum#1=3 \def\cC{red}\else\def\cC{black}\fi
-  \begin{tikzpicture}[scale=0.93,
-      nd/.style={circle,draw,line width=1pt,minimum size=5.5mm,inner sep=0pt},
-      lf/.style={circle,fill,inner sep=1.3pt},
-      lbl/.style={font=\footnotesize,inner sep=2pt,fill=white},
-      link/.style={densely dotted,line width=0.7pt}]
-    % nodes
-    \node[nd,draw=\cA] (s0)  at (0,0)     {};
-    \node[nd,draw=\cA] (s1a) at (3,1.6)   {};
-    \node[nd,draw=\cA] (s1b) at (3,-1.6)  {};
-    \node[nd,draw=\cB] (s2a) at (6,2.4)   {};
-    \node[nd,draw=\cB] (s2b) at (6,0.8)   {};
-    \node[nd,draw=\cB] (s2c) at (6,-0.8)  {};
-    \node[nd,draw=\cB] (s2d) at (6,-2.4)  {};
-    \node[lf,fill=\cC] (l1) at (8.4,2.82) {};
-    \node[lf,fill=\cC] (l2) at (8.4,1.98) {};
-    \node[lf,fill=\cC] (l3) at (8.4,1.22) {};
-    \node[lf,fill=\cC] (l4) at (8.4,0.38) {};
-    \node[lf,fill=\cC] (l5) at (8.4,-0.38){};
-    \node[lf,fill=\cC] (l6) at (8.4,-1.22){};
-    \node[lf,fill=\cC] (l7) at (8.4,-1.98){};
-    \node[lf,fill=\cC] (l8) at (8.4,-2.82){};
-    % edges
-    \draw[\cA] (s0)  -- (s1a);  \draw[\cA] (s0)  -- (s1b);
-    \draw[\cB] (s1a) -- (s2a);  \draw[\cB] (s1a) -- (s2b);
-    \draw[\cB] (s1b) -- (s2c);  \draw[\cB] (s1b) -- (s2d);
-    \draw[\cC,dashed] (s2a) -- (l1);  \draw[\cC,dashed] (s2a) -- (l2);
-    \draw[\cC,dashed] (s2b) -- (l3);  \draw[\cC,dashed] (s2b) -- (l4);
-    \draw[\cC,dashed] (s2c) -- (l5);  \draw[\cC,dashed] (s2c) -- (l6);
-    \draw[\cC,dashed] (s2d) -- (l7);  \draw[\cC,dashed] (s2d) -- (l8);
-    % nonanticipativity links between siblings
-    \draw[link] (s1a) -- (s1b);
-    \draw[link] (s2a) -- (s2b);  \draw[link] (s2c) -- (s2d);
-    \draw[link] (l1) -- (l2);    \draw[link] (l3) -- (l4);
-    \draw[link] (l5) -- (l6);    \draw[link] (l7) -- (l8);
-    % node labels (skipped when empty)
-    \sddplbl{s0}{#2}
-    \sddplbl{s1a}{#3}\sddplbl{s1b}{#4}
-    \sddplbl{s2a}{#5}\sddplbl{s2b}{#6}
-    \sddplbl{s2c}{#7}\sddplbl{s2d}{#8}
-    % stage identifiers
-    \node[font=\footnotesize] at (0,-3.9)   {First stage};
-    \node[font=\footnotesize] at (3,-3.9)   {Second stage};
-    \node[font=\footnotesize] at (6,-3.9)   {Third stage};
-    \node[font=\footnotesize] at (8.4,-3.9) {\ldots};
-  \end{tikzpicture}}
 
 % Full scenario tree: one root, four second-stage nodes, sixteen leaves.
 \newcommand{\fullscenariotree}{%
@@ -115,7 +37,7 @@
     }
   \end{tikzpicture}}
 
-% Nonanticipativity: the same tree bundled into three stage-two groups.
+% Nonanticipativity: a tree of six scenarios over three periods.
 \newcommand{\bundletree}{%
   \begin{tikzpicture}[scale=1,
       nd/.style={circle,draw,line width=0.6pt,minimum size=3mm,inner sep=0pt},
@@ -127,10 +49,11 @@
       \draw[line width=0.6pt] (g\gi) -- (s\k);
       \node[lbl] at (s\k.east) {scenario \k};
     }
+    \foreach \x/\t in {0/1,1.1/2,2.2/3} { \node[font=\scriptsize] at (\x,-2) {$t = \t$}; }
   \end{tikzpicture}}
 
-% Nonanticipativity, nodal view: six scenarios x three periods, with the
-% doubled bars marking the variables that must be bundled together.
+% Nonanticipativity, scenario view: six scenarios x three periods, with the
+% doubled bars marking the copies that must be equal.
 \newcommand{\nodalbundles}{%
   \begin{tikzpicture}[scale=0.78,
       nd/.style={circle,draw,line width=1pt,minimum size=4.2mm,inner sep=0pt}]
@@ -138,6 +61,8 @@
       \foreach \c/\x in {a/0,b/2,c/4} { \node[nd] (n\r\c) at (\x,\r) {}; }
       \draw[line width=0.7pt] (n\r a) -- (n\r b);
       \draw[line width=0.7pt] (n\r b) -- (n\r c);
+      \pgfmathtruncatemacro{\sc}{6-\r}
+      \node[font=\scriptsize] at (-0.8,\r) {\sc};
     }
     % left column: every consecutive pair is bundled
     \foreach \r/\rr in {5/4,4/3,3/2,2/1,1/0} {
@@ -149,55 +74,75 @@
       \draw[line width=0.7pt] (1.96,\r-0.24) -- (1.96,\rr+0.24);
       \draw[line width=0.7pt] (2.04,\r-0.24) -- (2.04,\rr+0.24);
     }
+    \foreach \x/\t in {0/1,2/2,4/3} { \node[font=\scriptsize] at (\x,-0.8) {$t = \t$}; }
   \end{tikzpicture}}
 
-\title[Multi-stage problems]{Stochastic programming\\Multi-stage problems}
+% Nested decomposition: trial decisions go down the tree, cuts go up.
+\newcommand{\passestree}{%
+  \begin{tikzpicture}[scale=0.9,
+      nd/.style={circle,draw,line width=0.8pt,minimum size=4mm,inner sep=0pt}]
+    \node[nd] (r)  at (0,0)      {};
+    \node[nd] (a)  at (1.7,1)    {};
+    \node[nd] (b)  at (1.7,-1)   {};
+    \node[nd] (a1) at (3.4,1.5)  {};
+    \node[nd] (a2) at (3.4,0.5)  {};
+    \node[nd] (b1) at (3.4,-0.5) {};
+    \node[nd] (b2) at (3.4,-1.5) {};
+    \draw (r) -- (a);   \draw (r) -- (b);
+    \draw (a) -- (a1);  \draw (a) -- (a2);
+    \draw (b) -- (b1);  \draw (b) -- (b2);
+    \draw[->,blue,thick] (0,2.2) -- (3.4,2.2) node[midway,above] {\footnotesize forward: trial decisions $\hat{x}$};
+    \foreach \x/\t in {0/1,1.7/2,3.4/3} { \node[font=\footnotesize] at (\x,-2.1) {$t = \t$}; }
+    \draw[<-,red,thick] (0,-2.7) -- (3.4,-2.7) node[midway,below] {\footnotesize backward: cuts};
+  \end{tikzpicture}}
 
-\author[Fabian Bastin]{Fabian Bastin \\ \url{bastin@iro.umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
+\title[Multistage problems]{Stochastic programming\texorpdfstring{\\}{: }Multistage problems}
+
+\author[Fabian Bastin]{Fabian Bastin \\ \texorpdfstring{\url{bastin@iro.umontreal.ca}}{bastin@iro.umontreal.ca} \\ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 
 \date{}
-
-\setbeamertemplate{footline}[frame number]
 
 \begin{document}
 
 \frame{\titlepage}
 
 \begin{frame}
-\frametitle{Motivation: example}
+\frametitle{Motivation: financial planning}
+
+(Birge and Louveaux, Section~1.2)
 
 \begin{itemize}
 \item
-Assume that we invest in the market.
-We would like to reach a nominal goal $G$ after $Y$ years.
+We invest an initial wealth $b$, and would like to reach a goal $G$ after $Y$ years.
 \item
-The portfolio is rebalanced every $v$ years, so there are $T = Y/v$ times where we have to decide what are the investments to do.\\
-There are $T$ stages in our problem.
+The portfolio is rebalanced every $v$ years: there are $H = Y/v$ investment periods, $\calT = \lbrace 1, \ldots, H \rbrace$, and an investment decision at the beginning of each period.
 \item
-We face a space of $N$ investment decisions (i.e. we have $N$ possible actions); we have a set $\mathcal{T} = \lbrace 1, 2,\ldots, T \rbrace$ of investment periods.
+$N$: set of available assets (stocks, bonds, \ldots).
 \item
-If we go over the target $G$, we will have an interest rate $q$ on the surplus.
+If the final wealth exceeds the goal $G$, the surplus earns interest at rate $q$.
 \item
-If we do not meet the target, we have to borrow the difference at an interest $r$.
-\item
-The initial wealth is $b$.
+If it falls short of $G$, the shortfall must be borrowed at rate $r$ (typically, $r > q$).
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Variables}
+\frametitle{Variables and data}
 
 \begin{itemize}
 \item
-$x_{it}$, $i \in N$, $t \in \mathcal{T}$: amount of money to invest in action $i$ during the period $t$;
+$x_{it}$, $i \in N$, $t \in \calT$: amount invested in asset $i$ at the beginning of period $t$;
 \item
-$y$: excess amount at the end of the horizon;
+$\omega_{it}$: return of asset $i$ during period $t$, i.e., the value at the end of the period of one dollar invested at its beginning;
 \item
-$w$: lack of money at the end of the horizon;
+$y$: surplus over the goal at the end of the horizon;
 \item
-In the current framework, we aim to take the corrective actions in order to reach the target of $G$ dollars.
+$w$: shortfall at the end of the horizon.
 \end{itemize}
+
+\mbox{}
+
+The decisions $x_{i2}, \ldots, x_{iH}$ rebalance the portfolio: they are corrective actions toward the goal $G$.
 
 \end{frame}
 
@@ -205,14 +150,14 @@ In the current framework, we aim to take the corrective actions in order to reac
 \frametitle{Deterministic formulation}
 
 \begin{align*}
-\max\ qy & - rw\\
-\mbox{s.t. } \sum_{i \in N} x_{i1} & = b,\\
-\sum_{i \in N} \omega_{it}x_{i,t-1} & = \sum_{i \in N} x_{it}, \quad
-\forall t \in \mathcal{T} \backslash 1, \\
-\sum_{i \in N} \omega_{iT}x_{iT} - y + w & = G,\\
-x_{it} & \geq 0, \quad \forall i \in N,\ t \in \mathcal{T}, \\
-y, w & \geq 0.
+\max\ & qy - rw \\
+\mbox{s.t. } & \sum_{i \in N} x_{i1} = b, \\
+& \sum_{i \in N} \omega_{i,t-1}x_{i,t-1} = \sum_{i \in N} x_{it}, \quad t = 2, \ldots, H, \\
+& \sum_{i \in N} \omega_{iH}x_{iH} - y + w = G, \\
+& x_{it} \geq 0, \quad i \in N,\ t \in \calT, \qquad y, w \geq 0.
 \end{align*}
+
+The wealth at the end of period $t-1$ is entirely reinvested at the beginning of period $t$.
 
 \end{frame}
 
@@ -221,27 +166,28 @@ y, w & \geq 0.
 
 \begin{itemize}
 \item
-The investment returns can be viewed as random variables, as we do not know their realizations in advance.
+The returns are not known in advance: they are random variables.
 \item
-Imagine that for each action, at each time $t$, there are $R$ possible realizations.
+Assume that, in each period $t$, the vector of returns $(\omega_{it})_{i \in N}$ takes one of $R$ possible values.
 \item
-The scenarios are made of all the possible sequences of realizations.
+A scenario is a sequence of realizations, one per period: there are $R^H$ scenarios.
 \end{itemize}
 
-Example: assume $R = 4$ and $T = 3$. Scenarios:
+Example: $R = 4$ and $H = 2$, hence 16 scenarios:
 \begin{small}
 \begin{center}
-\begin{tabular}{ccc}
+\begin{tabular}{cc}
 \hline
-$t = 1$ & $t = 2$ & $t = 3$ \\
+$t = 1$ & $t = 2$ \\
 \hline
-1 & 1 & 1 \\
-1 & 1 & 2 \\
-1 & 1 & 3 \\
-1 & 1 & 4 \\
-1 & 2 & 1 \\
-\vdots & \vdots & \vdots \\
-4 & 4 & 4 \\
+1 & 1 \\
+1 & 2 \\
+1 & 3 \\
+1 & 4 \\
+2 & 1 \\
+\vdots & \vdots \\
+4 & 4 \\
+\hline
 \end{tabular}
 \end{center}
 \end{small}
@@ -253,14 +199,18 @@ $t = 1$ & $t = 2$ & $t = 3$ \\
 
 \begin{itemize}
 \item
-Let $x_{its}$, $t \in \mathcal{T}$, $s \in S$ be the amount to invest in action $i$ during the period $t$ in scenario $s$;
+$S$: set of scenarios; $p_s$: probability of scenario $s \in S$;
 \item
-$y_s$: excess amount at the end of the horizon for scenario $s$;
+$\omega_{its}$: return of asset $i$ during period $t$ in scenario $s$;
 \item
-$w_s$: lack of money at the end of the horizon for scenario $s$.
+$x_{its}$: amount invested in asset $i$ at the beginning of period $t$ in scenario $s$;
 \item
-Let $\omega_{it}$ be the random return; it can be seen as function of the scenario $s$.
+$y_s$, $w_s$: surplus and shortfall at the end of the horizon in scenario $s$.
 \end{itemize}
+
+\mbox{}
+
+Each variable is copied once per scenario, and we maximize the expected value of $qy - rw$.
 
 \end{frame}
 
@@ -268,16 +218,11 @@ Let $\omega_{it}$ be the random return; it can be seen as function of the scenar
 \frametitle{Stochastic version}
 
 \begin{align*}
-\max\ \sum_{s=1}^S p_s(qy_{\red s} & - rw_{\red s})\\
-\mbox{s.t. } \sum_{i \in N} x_{i1} & = b,\\
-\sum_{i \in N} \omega_{it{\red s}}x_{i,t-1,{\red s}} & = \sum_{i \in
-  N} x_{it{\red s}}, \quad \forall t \in \mathcal{T} \backslash 1,
-{\red \forall s \in S} \\
-\sum_{i \in N} \omega_{iT{\red s}}x_{iT{\red s}} - y_{\red s} + w_{\red s} & = G,
-\quad {\red \forall s \in S}, \\
-x_{it{\red s}} & \geq 0, \quad \forall i \in N,\ t \in \mathcal{T},
-{\red \forall s \in S},\\
-y_{\red s}, w_{\red s} & \geq 0 \quad {\red \forall s \in S}.
+\max\ & \sum_{s \in S} p_s(qy_{\red s} - rw_{\red s}) \\
+\mbox{s.t. } & \sum_{i \in N} x_{i1{\red s}} = b, \quad {\red \forall s \in S}, \\
+& \sum_{i \in N} \omega_{i,t-1,{\red s}}\, x_{i,t-1,{\red s}} = \sum_{i \in N} x_{it{\red s}}, \quad t = 2, \ldots, H,\ {\red \forall s \in S}, \\
+& \sum_{i \in N} \omega_{iH{\red s}}\, x_{iH{\red s}} - y_{\red s} + w_{\red s} = G, \quad {\red \forall s \in S}, \\
+& x_{it{\red s}} \geq 0, \quad i \in N,\ t \in \calT,\ {\red s \in S}, \qquad y_{\red s}, w_{\red s} \geq 0, \quad {\red s \in S}.
 \end{align*}
 
 \end{frame}
@@ -285,13 +230,13 @@ y_{\red s}, w_{\red s} & \geq 0 \quad {\red \forall s \in S}.
 \begin{frame}
 \frametitle{Scenario tree}
 
-Conceptually, the sequence of events can be arranged in a tree.
-There is one leaf per scenario.
+Conceptually, the sequence of events can be arranged in a tree: the root is the first decision, each branching is the realization of the returns of a period, and each leaf is a scenario.
+Example ($R = 4$, $H = 2$):
 \begin{center}
 \fullscenariotree
 \end{center}
 
-The scenarios can have different probabilities, the variables can be correlated,\ldots
+The scenarios can have different probabilities, and the returns of successive periods can be dependent: the branching probabilities can differ from one node to another.
 
 \end{frame}
 
@@ -300,62 +245,65 @@ The scenarios can have different probabilities, the variables can be correlated,
 
 \begin{itemize}
 \item
-The conversion between the deterministic model and the stochastic version is easy\ldots
+Converting the deterministic model into the stochastic version is easy\ldots
 \item
-but the built model is wrong!!!
+but the resulting model is {\red wrong}: $x_{its}$ may depend on the whole scenario $s$, including the returns of periods $t, \ldots, H$, unknown when $x_{its}$ is decided. The model sees the future.
 \item
-We have to enforce the {\red non-anticipativity}:
+We have to enforce {\red non-anticipativity}: a decision may only depend on the information available when it is made.
 \end{itemize}
 
-Let $S_s^t$ be the set of scenarios that are identical to scenario $s$ at time $t$.
-We have to guarantee that
+Let $S_s^t$ be the set of scenarios identical to $s$ up to period $t-1$, i.e., indistinguishable from $s$ when the decisions of period $t$ are made ($S_s^1 = S$).
+We impose
 \[
-x_{its} = x_{its'},\ \forall i \in N,\ \forall t \in T,\ \forall s \in
-S,\ \forall s' \in S_s^t.
+x_{its} = x_{its'}, \quad \forall i \in N,\ t \in \calT,\ s \in S,\ s' \in S_s^t.
 \]
+The final $y_s$ and $w_s$ are decided once everything is known: they need no such constraint.
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Non-anticipativity (cont'd)}
 
-Equivalently,
+Equivalently, as every $p_s > 0$,
 \[
-\left( \sum_{s' \in S_s^t} p_{s'} \right) x_{its} = \sum_{s' \in S_s^t} p_{s'} x_{its'} \quad \forall\ i,t,s,
+\Bigl( \sum_{s' \in S_s^t} p_{s'} \Bigr) x_{its} = \sum_{s' \in S_s^t} p_{s'} x_{its'}, \quad \forall i, t, s,
 \]
-or
-\begin{align*}
- x_{its}
-&= \frac{\sum_{s' \in S_s^t} p_{s'} x_{its'}}{\sum_{s' \in S_s^t} p_{s'}} \quad \forall\ i,t,s \\
-&= \EE[ x_{its'} | s' \in S_s^t ] \quad \forall\ i,t,s.
-\end{align*}
+that is,
+\[
+x_{its} = \frac{\sum_{s' \in S_s^t} p_{s'} x_{its'}}{\sum_{s' \in S_s^t} p_{s'}} = \EE\left[ x_{its'} \mid s' \in S_s^t \right], \quad \forall i, t, s.
+\]
+Each decision equals its conditional expectation given the information available when it is made: if all the decisions of a group of indistinguishable scenarios equal the group average, they are all equal.
+This form underlies progressive hedging (Lagrangian methods slides).
 
-The amount invested in scenario $s$, multiplied by the probability to reach a scenario equivalent to $s$, has to be equal to the expected amount that would be invested in any scenario equivalent to $s$.
+\mbox{}
 
-There are many formulations of these conditions!
+There are many other formulations, for instance equalities between consecutive scenarios of each group (next slide).
 
 \end{frame}
 
 \begin{frame}
-	\frametitle{Back to the scenario tree}
-	
-	\begin{itemize}
-		\item
-		We have to enforce nonanticipativity as we have created copies of the variables for each scenario, at each period.
-		Graphically:
-	\end{itemize}
-	\begin{minipage}{0.45\textwidth}
-		\begin{center}
-			\bundletree
-		\end{center}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{0.45\textwidth}
-		\begin{center}
-			\nodalbundles
-		\end{center}
-	\end{minipage}
-   	
+\frametitle{Back to the scenario tree}
+
+In the scenario formulation, each decision is copied once per scenario, and non-anticipativity ties the copies together.
+
+\medskip
+
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+\bundletree
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+\nodalbundles
+\end{center}
+\end{minipage}
+
+\medskip
+
+{\small Right: one row per scenario, one column per period; a double bar is an equality $x_{its} = x_{its'}$ between two consecutive scenarios.}
+
 \end{frame}
 
 \begin{frame}
@@ -363,30 +311,29 @@ There are many formulations of these conditions!
 
 \begin{itemize}
 \item
-We can also create a vector of variables for each node in the tree.
+Alternatively, define one vector of decisions per node of the tree: the decision made given the realizations observed up to this node.
 \item
-This vector corresponds to what should be our decision given the known realizations of the random variables upon this stage (i.e. at this node).
+Non-anticipativity is then built in: all the scenarios going through a node share its decision.
 \item
-Index the nodes by $l = 1,2,\ldots,\mathcal{L}$.
+$\calL$: set of decision nodes, with root $1$; the leaves are the scenarios $s \in S$.
 \item
-We have to know the ancestor of each node.
-Let $A(l)$ be the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
+$a(\ell)$: parent of node $\ell$ (or of leaf $s$), i.e., its ancestor at the previous stage; $\omega_{i\ell}$: return of asset $i$ on the branch from $a(\ell)$ to $\ell$.
+\item
+Fewer variables, $|N|\,|\calL|$ instead of $|N|\,H\,|S|$, and no non-anticipativity constraint.
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Reformulation}
+\frametitle{Nodal formulation}
 
-\begin{alignat*}{2}
-\max\ & \sum_{s \in S} p_s (qy_{s} & - rw_{s})\\
-\mbox{s.t. } & \sum_{i \in N} x_{i1} & = b,\\
-& \sum_{i \in N} \omega_{il}x_{i,A(l)} & = \sum_{i \in N} x_{il}, \quad \forall l \in \mathcal{L} \backslash 1, \\
-& \sum_{i \in N} w_{iA(s)}x_{iA(s)} - y_{s} + w_{s} & = G,
-\quad {\forall s \in S}, \\
-& x_{il} & \geq 0, \quad \forall i \in N,\ \forall l \in \mathcal{L},\\
-& y_{s}, w_{s} & \geq 0 \quad {\forall s \in S}.
-\end{alignat*}
+\begin{align*}
+\max\ & \sum_{s \in S} p_s (qy_s - rw_s) \\
+\mbox{s.t. } & \sum_{i \in N} x_{i1} = b, \\
+& \sum_{i \in N} \omega_{i\ell}\, x_{i,a(\ell)} = \sum_{i \in N} x_{i\ell}, \quad \forall \ell \in \calL \setminus \lbrace 1 \rbrace, \\
+& \sum_{i \in N} \omega_{is}\, x_{i,a(s)} - y_s + w_s = G, \quad \forall s \in S, \\
+& x_{i\ell} \geq 0, \quad i \in N,\ \ell \in \calL, \qquad y_s, w_s \geq 0, \quad s \in S.
+\end{align*}
 
 \end{frame}
 
@@ -395,18 +342,15 @@ Let $A(l)$ be the ancestor of node $l \in \mathcal{L}$ in the scenarios tree.
 
 \begin{itemize}
 \item
-A firm produces various different goods.
+A firm produces several goods over several periods.
 \item
-Resources (for instances manual and machine work hours) are required.
-We assume that these requirements are known for each product.
+Production uses resources (for instance, labor and machine hours); the amount of each resource needed per unit of each product is known.
 \item
-The demand must be met at the end of each period, but this demand is not perfectly known.
+The demand of each period is random, and must be met: missing products are bought from an external source, and unsold ones are stored. Both have a cost.
 \item
-A too large or too small inventory induces costs (storage, additional purchases to satisfy the demand,\ldots).
+Additional resources (overtime, machine hours) can be bought, within limits.
 \item
-It is possible to add machine and work hours, within predefined limits.
-\item
-There is a hiring and firing cost related to changes in the workforce.
+Changes in the workforce from one period to the next have a cost (hiring, firing).
 \end{itemize}
 
 \end{frame}
@@ -416,48 +360,52 @@ There is a hiring and firing cost related to changes in the workforce.
 
 \begin{itemize}
 \item
-We have to decide now on
+We decide now, for every period:
 \begin{itemize}
 \item
-the quantity of each product to manufacture during each period;
+the quantity of each product to manufacture;
 \item
-the additional capacity to use during each period;
+the additional resources to use;
 \item
-to hire or to fire staff during each period;
+the hiring and firing of staff.
 \end{itemize}
 \item
-A random demand occurs. Conceptually, this happens at each period.
+At each period, the random demand is observed.
 \item
-After having observed the random demands, we can decide on how to stock the products in the inventory, or to buy from an external source.
+Then, we decide how much to store, and how much to buy from the external source.
 \end{itemize}
+
+\mbox{}
+
+The production plan is decided once, but the storage and purchase decisions of period $t$ may only use the demands of periods $1, \ldots, t$: the problem is {\red multistage}.
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Definitions}
+\frametitle{Sets and variables}
 
 \begin{enumerate}
 \item
 {\red Sets}:
 \begin{itemize}
 \item
-$T$: number of periods, also seen as a set;
+$\calT = \lbrace 1, \ldots, H \rbrace$: periods;
 \item
 $N$: products;
 \item
-$M$: resources.
+$M$: resources; $L \in M$ is the labor.
 \end{itemize}
 \item
 {\red Variables}:
 \begin{itemize}
 \item
-$x_{jt}$: production of product $j \in N$ during the period $t \in T$;
+$x_{jt}$: production of product $j \in N$ in period $t \in \calT$;
 \item
-$u_{it}$: additional amount of resource $i \in M$ to buy during the period  $t \in T$;
+$u_{it}$: additional amount of resource $i \in M$ bought for period $t$;
 \item
-$z_{t-1,t}^+$, $z_{t-1,t}^-$: planned augmentation or reduction of the labor force;
+$z_t^+$, $z_t^-$: increase and decrease of the workforce from period $t-1$ to period $t$;
 \item
-$y_{j,t}^+$, $y_{j,t}^-$: surplus, deficit of product $j \in N$ at the end of the period $t \in T$.
+$y_{jt}^+$: surplus of product $j$ at the end of period $t$, stored; $y_{jt}^-$: deficit, bought from the external source.
 \end{itemize}
 \end{enumerate}
 
@@ -468,16 +416,17 @@ $y_{j,t}^+$, $y_{j,t}^-$: surplus, deficit of product $j \in N$ at the end of th
 
 \begin{itemize}
 \item
-All the above variables have associated costs $(\alpha,\,\beta,\,\gamma,\,\delta)$.
+$\alpha_{jt}$, $\beta_{it}$, $\gamma_t^+$, $\gamma_t^-$, $\delta_{jt}^+$, $\delta_{jt}^-$: unit costs of the variables above;
 \item
-$\omega_{jt}$: demand of product $j \in N$ during the period $t
-\in T$.
+$\omega_{jt}$: random demand of product $j \in N$ in period $t \in \calT$;
 \item
-$U_{it}$: upper bound on $u_{it}$.
+$a_{ij}$: amount of resource $i \in M$ required to produce one unit of product $j \in N$;
 \item
-$a_{ij}$: amount of resource $i \in M$ required to produce one unit of the good $j \in N$.
+$b_{it}$: amount of resource $i \in M$ available in period $t \in \calT$;
 \item
-$b_{it}$: amount of resource $i \in M$ available at time $t \in T$.
+$U_{it}$: upper bound on $u_{it}$;
+\item
+$y_{j0}^+$: initial inventory of product $j$.
 \end{itemize}
 
 \end{frame}
@@ -487,23 +436,20 @@ $b_{it}$: amount of resource $i \in M$ available at time $t \in T$.
 
 {\small
 \begin{multline*}
-\min \sum_{j \in N} \sum_{t \in T} \alpha_{jt} x_{jt} + \sum_{i \in M}
-\sum_{t \in T} \beta_{it} u_{it} + \sum_{t \in T\backslash 1} \left(
-  \gamma^+_{t-1,t} z^+_{t-1,t} + \gamma^-_{t-1,t} z^-_{t-1,t} \right) \\
-+ E_{\bomega} \left[ \min \left( \sum_{j \in N} \sum_{t \in T}
-    ( \delta_{jt}^+y_{jt}^+ + \delta_{jt}^-y_{jt}^- ) \right) \right],
+\min \sum_{j \in N} \sum_{t \in \calT} \alpha_{jt} x_{jt} + \sum_{i \in M}
+\sum_{t \in \calT} \beta_{it} u_{it} + \sum_{t=2}^{H} \left(
+  \gamma^+_t z^+_t + \gamma^-_t z^-_t \right) \\
++ \EE_{\bsomega} \left[ \min \sum_{j \in N} \sum_{t \in \calT}
+    \left( \delta_{jt}^+y_{jt}^+ + \delta_{jt}^-y_{jt}^- \right) \right]
 \end{multline*}
-such that
 \begin{align*}
-\sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it} \quad \forall i \in
-M,\ \forall t \in T,\\
-u_{it} & \leq U_{it} \qquad \forall i \in M,\ \forall t \in T,\\
-z^+_{t-1,t} - z^-_{t-1,t} &= \sum_{j \in N} a_{jt}(x_{jt} - x_{j,
-  t-1}) \quad \forall t \in T\backslash 1, \\
-x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt} \qquad
-\forall j \in N,\ \forall t \in T\ \mbox{(demand satisfaction)}.
+\mbox{s.t. } \sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it}, \quad 0 \leq u_{it} \leq U_{it}, \quad \forall i \in M,\ t \in \calT,\\
+z^+_t - z^-_t &= \sum_{j \in N} a_{Lj}(x_{jt} - x_{j,t-1}), \quad t = 2, \ldots, H, \qquad x, z^{\pm} \geq 0, \\
+x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt}, \quad \forall j \in N,\ t \in \calT, \qquad y^{\pm} \geq 0 \quad \mbox{(demand satisfaction)}.
 \end{align*}
+Inner $\min$: $y_{jt}^{\pm}$ depends only on the demands up to period $t$.
 }
+
 \end{frame}
 
 \begin{frame}
@@ -511,24 +457,20 @@ x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt} \qquad
 
 {\small
 \begin{multline*}
-\min \sum_{j \in N} \sum_{t \in T} \alpha_{jt} \bx_{jt} + \sum_{i \in M}
-\sum_{t \in T} \beta_{it} \bu_{it} + \sum_{t \in T\backslash 1} \left(
-  \gamma^+_{t-1,t} \bz^+_{t-1,t} + \gamma^-_{t-1,t} \bz^-_{t-1,t} \right) \\
-+ {\red \sum_{s \in S}}\sum_{j \in N} \sum_{t \in T} p_s
-    ( \delta_{jt}^+y_{jt{\red s}}^+ + \delta_{jt}^-y_{jt{\red s}}^- ),
+\min \sum_{j \in N} \sum_{t \in \calT} \alpha_{jt} x_{jt} + \sum_{i \in M}
+\sum_{t \in \calT} \beta_{it} u_{it} + \sum_{t=2}^{H} \left(
+  \gamma^+_t z^+_t + \gamma^-_t z^-_t \right) \\
++ {\red \sum_{s \in S} p_s} \sum_{j \in N} \sum_{t \in \calT}
+    \left( \delta_{jt}^+y_{jt{\red s}}^+ + \delta_{jt}^-y_{jt{\red s}}^- \right)
 \end{multline*}
-such that
 \begin{align*}
-\sum_{j \in N} a_{ij} \bx_{jt} & \leq b_{it}+\bu_{it} \quad \forall i \in
-M,\ \forall t \in T,\\
-\bu_{it} & \leq U_{it} \qquad \forall i \in M,\ \forall t \in T,\\
-\bz^+_{t-1,t} - \bz^-_{t-1,t} &= \sum_{j \in N} a_{jt}(\bx_{jt} - \bx_{j,
-  t-1}) \quad \forall t \in T\backslash 1, \\
-\bx_{jt} + y_{j,t-1,{\red s}}^+ - y_{jt{\red s}}^+ + y_{jt{\red s}}^- &= \omega_{jt{\red s}} \qquad
-\forall j \in N,\ \forall t \in T,\\
-\mbox{nonanticipativity }& \mbox{constraints}.
+\mbox{s.t. } \sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it}, \quad 0 \leq u_{it} \leq U_{it}, \quad \forall i \in M,\ t \in \calT,\\
+z^+_t - z^-_t &= \sum_{j \in N} a_{Lj}(x_{jt} - x_{j,t-1}), \quad t = 2, \ldots, H, \qquad x, z^{\pm} \geq 0, \\
+x_{jt} + y_{j,t-1,{\red s}}^+ - y_{jt{\red s}}^+ + y_{jt{\red s}}^- &= \omega_{jt{\red s}}, \quad \forall j \in N,\ t \in \calT,\ {\red s \in S}, \qquad y^{\pm} \geq 0, \\
+{\red y_{jts}^{\pm}} &{\red = y_{jts'}^{\pm}} \quad \text{if } s \text{ and } s' \text{ have the same demands up to period } t.
 \end{align*}
 }
+
 \end{frame}
 
 \begin{frame}
@@ -537,224 +479,97 @@ M,\ \forall t \in T,\\
 Adapted from Jalal Kazempour, \url{https://www.jalalkazempour.com/teaching}
 
 \begin{itemize}
-\item 
-\textcolor{red}{Direct solution}:
-computational issues
-\item 
-\textcolor{red}{Linear decision rules}: 
-a non‐decomposition approach with approximation.
-Assumption of linear dependency between decision variables and uncertain
-parameters. Using this approximation, the number of constraints and variables grows
-only linearly with the number of stages.
-\item 
-\textcolor{red}{Nested Benders decomposition}: a decomposition approach based on fixing complicating variables.
-\item 
-\textcolor{red}{Lagrangian relaxation}: a decomposition approach based on relaxing the complicating (non‐anticipativity) constraints.
+\item
+{\red Direct solution}: solve the extensive form with a linear programming solver; its size grows exponentially with the number of stages.
+\item
+{\red Linear decision rules}: restrict each decision to an affine function of the uncertain parameters observed so far.
+This approximation (an upper bound, for a minimization) needs no decomposition: the size of the problem grows only polynomially with the number of stages.
+\item
+{\red Nested decomposition} (nested Benders): fixes the decisions of the earlier stages (complicating variables), and decomposes the problem by node of the tree.
+\item
+{\red Lagrangian relaxation}: relaxes the non-anticipativity constraints (complicating constraints), and decomposes the problem by scenario.
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Nested Benders decomposition}
+\frametitle{Nested decomposition}
+
+The nested L-shaped method (Birge, 1985) applies the L-shaped method recursively on the scenario tree, to solve
+\[
+\min_{x_1 \geq 0}\ c_1^T x_1 + \EE\Bigl[ \min_{x_2 \geq 0} c_2^T x_2 + \EE\bigl[ \cdots + \EE[ \min_{x_H \geq 0} c_H^T x_H ] \bigr] \Bigr]
+\]
+subject to $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2, \ldots, H$.
+The decision $x_t$ is made once $\xi_{[t]} = (\xi_2, \ldots, \xi_t)$ is known, before $\xi_{t+1}$ (non-anticipativity).
+Cost-to-go functions, with $\calQ_{H+1} \equiv 0$:
+\begin{align*}
+V_t(x_{t-1}, \xi_{[t]}) &= \min_{x_t \geq 0} \left\{ c_t^Tx_t + \calQ_{t+1}(x_t, \xi_{[t]}) \ :\ W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t)x_{t-1} \right\}, \\
+\calQ_{t+1}(x_t, \xi_{[t]}) &= \EE\left[ V_{t+1}(x_t, \xi_{[t+1]}) \mid \xi_{[t]} \right].
+\end{align*}
+On a finite tree, each $\calQ_{t+1}(\cdot, \xi_{[t]})$ is convex and piecewise linear.
+The SDDP slides give the details of the method.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nested decomposition: cuts}
+
+Node $k$ at stage $t$: {\red master problem} for its children, {\red subproblem} for its parent $a(k)$:
+\begin{align*}
+\min_{x_{t,k},\, \theta_{t,k}}\ c_{t,k}^T x_{t,k} + \theta_{t,k} \quad
+\mbox{s.t. } & W_t x_{t,k} = h_{t,k} - T_{t-1,k}\, \hat{x}_{t-1,a(k)}, \quad (\pi_{t,k}) \\
+& \text{feasibility and optimality cuts}, \quad x_{t,k} \geq 0,
+\end{align*}
+where $\hat{x}_{t-1,a(k)}$ is the parent's trial decision, and $\theta_{t,k}$ underestimates the expected cost-to-go at node $k$ ($\theta_{H,k} \equiv 0$).
+With $v_{t,k}$ the optimal value, the optimality cut of a node $j$ at stage $t-1$ averages the supporting hyperplanes of its children $k \in \calD_t(j)$:
+\[
+\theta_{t-1,j} \geq \sum_{k \in \calD_t(j)} p(k, t \mid j, t-1) \left( v_{t,k} - \pi_{t,k}^T T_{t-1,k} \left( x_{t-1,j} - \hat{x}_{t-1,j} \right) \right).
+\]
+$v_{t,k}$ includes the children's own cuts: information {\red propagates up the tree}.
+These values underestimate the true ones, so the cut is valid.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nested decomposition: forward and backward passes}
+
+\begin{columns}[T]
+\begin{column}{0.6\textwidth}
+{\red Forward pass}: solve the first-stage problem, send $\hat{x}_1$ to its children, solve them, and so on down to stage $H$.
+If every problem is feasible, these trial decisions form a policy, whose expected cost is an {\red upper bound}.
+
+\medskip
+
+{\red Backward pass}: from stage $H$ up to stage 2, each node receives a cut from its children (a feasibility cut if one is infeasible), is solved again, and sends a cut to its parent.
+The first-stage value is a {\red lower bound}.
+
+\medskip
+
+Stop when the bounds meet.
+On a finite tree, with bounded $x_t$, only finitely many distinct cuts exist: finite convergence (Birge and Louveaux, Section~6.1, Theorem~1).
+\end{column}
+\begin{column}{0.38\textwidth}
+\begin{center}
+\passestree
+\end{center}
+\end{column}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Beyond nested decomposition}
+
+The scenario tree grows exponentially with the number of stages, and so does the number of problems solved at each iteration of nested decomposition.
 
 \begin{itemize}
-	\item 
-Nested Benders decomposition, also called the \emph{multistage L-shaped method}, generalizes the classical two-stage Benders decomposition to stochastic linear programs with multiple decision stages.
-\item 
-It recursively applies (two-stage) Benders decomposition on a scenario tree, where each stage generates cuts for its parent stage.
+\item
+{\red Stochastic dual dynamic programming} (Pereira and Pinto, 1991; SDDP slides): under stagewise independence, all the nodes of a stage share the same expected cost-to-go function, hence the same cuts, and the forward pass samples scenarios instead of enumerating the tree.
+Extensions handle Markovian processes, on a lattice.
+\item
+{\red Lagrangian methods} (progressive hedging; Lagrangian methods slides): relax the non-anticipativity constraints, and decompose the problem by scenario, each subproblem being a deterministic multistage problem.
+They do not require a Markovian process, but there is one subproblem per scenario, and many iterations can be needed to restore non-anticipativity.
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Model structure}
-
-Consider a $T$-stage stochastic linear program of the form:
-\begin{align*}
-	\min_{x_1, \ldots, x_T} \quad & \mathbb{E} \left[ \sum_{t=1}^T c_t(\xi_t)^\top x_t \right] \\
-	\text{s.t.} \quad & A_1 x_1 = b_1, \quad x_1 \ge 0, \\
-	& A_t x_t = b_t(\xi_t) - T_t(\xi_t) x_{t-1}, \quad x_t \ge 0, \quad t = 2, \ldots, T.
-\end{align*}
-Each $\xi_t$ represents the random information revealed at stage $t$, defining a scenario tree.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Recursive value functions}
-
-Define recursively the cost-to-go function:
-\begin{align*}
-	Q_t(x_{t-1}, \xi_t) & = 
-	\min_{x_t \ge 0} c_t(\xi_t)^\top x_t + \EE[ Q_{t+1}(x_t, \xi_{t+1}) \mid \xi_t ] \\
-	& \mbox{s.t. } A_t x_t = b_t(\xi_t) - T_t(\xi_t) x_{t-1},
-\end{align*}
-with $Q_{T+1} \equiv 0$. The goal is to approximate $Q_t$ at each stage with a piecewise-linear function constructed from Benders cuts.
-
-\mbox{}
-
-Assume for simplicity the recourse is complete.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Cut generation (optimality cut)}
-
-At iteration $k$, for each scenario $\xi_t^s$, the subproblem is solved:
-\begin{align*}
-	\min_{x_t^s \ge 0} \quad & c_t^s{}^\top x_t^s + \sum_{s'} p_{s'|s} \theta_{t+1}^{s'} \\
-	\text{s.t.} \quad & A_t^s x_t^s = b_t^s - T_t^s x_{t-1}^{p(s)}.
-\end{align*}
-
-Let $\pi_t^s$ denote the optimal duals for the equality constraints. Then the expected cost-to-go can be approximated as:
-\begin{align}
-	Q_t(x_{t-1}) \ge \alpha_t + \beta_t^\top x_{t-1},
-\end{align}
-where
-\begin{align}
-	\alpha_t = \sum_s p_s (\pi_t^s)^\top b_t^s, \qquad
-	\beta_t = - \sum_s p_s (\pi_t^s)^\top T_t^s.
-\end{align}
-These $(\alpha_t, \beta_t)$ pairs define the Benders cuts for the parent stage.
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Algorithm outline}
-
-\begin{enumerate}
-	\item \textbf{Initialization:} Start with initial lower approximations $\theta_t$ for all stages.
-	\item \textbf{Forward pass:} Fix first-stage decision $x_1$ and recursively compute trial points $x_t$ through the scenario tree.
-	\item \textbf{Backward pass:} Starting from the leaves, solve subproblems, extract duals, and form cuts for each parent node.
-	\item \textbf{Master problem update:} Add the new cuts to each parent’s master problem and reoptimize.
-	\item \textbf{Convergence:} Stop when the expected gap between upper and lower bounds is within tolerance.
-\end{enumerate}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Remarks}
-
-\begin{itemize}
-	\item The algorithm is naturally parallelizable across scenarios.
-	\item Feasibility cuts are added if subproblems are infeasible, similar to two-stage Benders.
-	\item For convex piecewise-linear approximations, monotonic convergence to the optimal policy is guaranteed.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Illustration}
-	
-	\begin{center}
-		\sddptree{0}{$x_1$}{}{}{}{}{}{}
-	\end{center}
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Step 1: forward pass}
-	
-	\begin{center}
-		\sddptree{1}{$x_1$}{}{}{}{}{}{}
-	\end{center}
-	
-\end{frame}
-
-\begin{frame}
-\frametitle{Step 1: forward pass}
-
-Solve
-\begin{align*}
-\min_{x_1, \theta_1}\ & c_1^Tx_1 + \theta_1 \\
-\mbox{s.t. } & A_1x_1 = b_1 \\
-& \theta_1 \geq \theta_{1,\min} \\
-& \text{feasibility and optimality cuts} \\
-& x_1 \geq 0.
-\end{align*}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Step 2: forward pass}
-	
-	\begin{center}
-		\sddptree{2}{$x_1$}{$x_{2,1}$}{$x_{2,s_{n_2}}$}{}{}{}{}
-	\end{center}
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Step 2: forward pass}
-	
-	Solve
-	\begin{align*}
-		\min_{x_{2,i}, \theta_{2,i}}\ & c_{2,i}^Tx_{2,i} + \theta_{2,i} \\
-		\mbox{s.t. } % & A_{1,i}x_{1,i} = b_{1,i} \\
-		& A_{2,i}x_{2,i} = h_{2,i}-T_{2,i}x_{0} \\
-		& \theta_{2,i} \geq \theta_{2,i,\min} \\
-		& \text{feasibility and optimality cuts} \\
-		& x_{2,i} \geq 0.
-	\end{align*}
-\end{frame}
-
-
-\begin{frame}
-	\frametitle{Step 3: forward pass}
-	
-	\begin{center}
-		\sddptree{3}{$x_1$}{$x_{2,1}$}{$x_{2,s_1}$}{$x_{3,1}$}{$x_{3,s_i}$}{$x_{3,s_m}$}{$x_{3,s_{n_3}}$}
-	\end{center}
-	
-\end{frame}
-
-\begin{frame}
-\frametitle{Step 2: backward pass}
-
-The newly formed cuts are added to the Step 2 program and we solve again the program to determine cuts on the second-stage program.
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Step 2: backward pass}
-	
-	\begin{center}
-		\sddptree{2}{$x_1$}{$x_{2,1}$}{$x_{2,s_{n_2}}$}{}{}{}{}
-	\end{center}
-	
-\end{frame}
-
-\begin{frame}
-\frametitle{Step 1: backward pass}
-
-The newly formed cuts are added to the Step 1 program.
-
-\mbox{}
-
-This forms a new master program for the first stage, that is solved again in the forward pass.
-
-\end{frame}
-	
-\begin{frame}
-	\frametitle{Step 1: backward pass}
-	
-	\begin{center}
-		\sddptree{1}{$x_1$}{}{}{}{}{}{}
-	\end{center}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Scenario tree}
-
-The main issue is the construction of the scenario tree that is growing exponentially at each stage, and so the number of subproblems.
-
-\mbox{}
-
-The stochastic dual dynamic programming algorithm aims to solve the problem on a lattice rather than a tree, under the assumption that the underlying random process is Markovian.
-
-\mbox{}
-
-The augmented Lagrangian approaches will still rely on the scenario tree, but will consider the relaxation on the nonanticipativity constraints rather than solve a succession a two-stage problems. This limits the number of subproblems to the number of scenarios and can handle non-Markovian processes. The drawback is that it can take many iterations to restore non-anticipativity.
 
 \end{frame}
 

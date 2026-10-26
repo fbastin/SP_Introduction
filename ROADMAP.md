@@ -150,6 +150,29 @@ Liens :
 
 ---
 
+## Slides — `slides/06. Multistage.tex`
+
+- [x] **Révision complète (2026-10-25)** :
+  - **Notation** : horizon $H$ partout ($\mathcal{T} = \{1, \ldots, H\}$), comme le deck 07 et l'exemple de planification financière de Birge et Louveaux ; $T$ reste la matrice de technologie, qu'il désignait aussi dans la décomposition imbriquée. Titre « Multistage problems ».
+  - **Erreurs mathématiques** :
+    - Indices des rendements : $\omega_{it}$ multipliait $x_{i,t-1}$ dans la contrainte de bilan, mais $\omega_{iT}$ multipliait $x_{iT}$ dans la contrainte finale ; convention de Birge et Louveaux, $\omega_{i,t-1}x_{i,t-1}$.
+    - Version par scénarios : $x_{i1}$ sans indice de scénario dans la contrainte de budget, alors que la contrainte de bilan employait $x_{i1s}$ ; budget écrit pour chaque scénario, la non-anticipativité faisant le reste ($S_s^1 = S$).
+    - Exemple de scénarios : le tableau listait $4^3 = 64$ scénarios alors que l'arbre dessiné en compte 16 ; exemple ramené à $R = 4$, $H = 2$. « $R$ réalisations pour chaque actif » donnait en fait $R^{|N|}$ valeurs par période : ce sont $R$ valeurs du vecteur des rendements.
+    - Formulation nodale : `w_{iA(s)}` (collision avec le déficit $w_s$) $\to$ $\omega_{is}x_{i,a(s)}$ ; $\mathcal{L}$ servait à la fois de nombre et d'ensemble ; feuilles (scénarios) distinguées des nœuds de décision.
+    - Planification de production : $a_{jt}$ dans la variation de main-d'œuvre (indice de ressource perdu, indice de temps en trop) $\to$ $a_{Lj}$, $L \in M$ la main-d'œuvre ; non-négativité et stock initial $y_{j0}^+$ ajoutés ; le $\mathbb{E}[\min \ldots]$ précise que $y_{jt}$ ne dépend que des demandes jusqu'à $t$, et la forme étendue écrit les contraintes de non-anticipativité correspondantes ; variables en gras (sans signification) retirées.
+    - Coupe d'optimalité de la décomposition imbriquée : probabilités non conditionnelles sommées sur tous les nœuds de l'étape, et constante privée des duaux des coupes du sous-problème ; remplacée par la moyenne, avec les probabilités conditionnelles, des hyperplans d'appui des enfants, $v_{t,k} - \pi_{t,k}^T T_{t-1,k}(x_{t-1,j} - \hat{x}_{t-1,j})$.
+    - Fonction de coût futur conditionnée par $\xi_t$ seul (vrai seulement pour un processus markovien) $\to$ par l'historique $\xi_{[t]}$.
+    - « Monotonic convergence to the optimal policy » $\to$ convergence finie sur un arbre fini, les $x_t$ étant bornés (Birge et Louveaux, section 6.1, théorème 1, vérifié sur le livre ; la section 1.2 l'a été aussi pour l'exemple financier) ; borne inférieure par le problème de première étape, borne supérieure par la politique de la passe avant.
+    - SDDP présenté comme résolution « sur un treillis sous hypothèse markovienne » $\to$ indépendance entre étapes (coupes partagées par étape, passe avant échantillonnée), le cas markovien sur treillis étant une extension.
+    - Règles de décision linéaires : taille « linéaire » en le nombre d'étapes $\to$ polynomiale.
+  - **Restructuration** (choix en séance) : les quinze diapos de décomposition imbriquée (modèle, récursion, coupe, algorithme, remarques, illustration pas à pas), qui doublaient le deck 07 dans une autre notation, deviennent trois diapos dans la notation du deck 07 ($W_t$, $h_t$, $T_{t-1}$, $\xi_{[t]}$, $V_t$, $\mathcal{Q}_{t+1}$, $a(k)$, $\mathcal{D}_t(j)$, $p(k,t \mid j,t-1)$) : problème et récursion ; nœud à la fois maître et sous-problème, et coupe ; passes avant et arrière avec bornes, et figure TikZ (décisions d'essai qui descendent, coupes qui remontent). La macro `\sddptree` disparaît. Dernière diapo renommée « Beyond nested decomposition » (SDDP, méthodes lagrangiennes).
+  - **Clarté** : non-anticipativité motivée (le modèle « voit l'avenir »), $S_s^t$ défini précisément (scénarios identiques jusqu'à $t-1$), $y_s$ et $w_s$ sans contrainte ; forme en espérance conditionnelle interprétée et reliée à progressive hedging ; figures des faisceaux étiquetées (périodes, scénarios) et légendées ; approche nodale : non-anticipativité implicite, nombre de variables.
+  - **Anglais** : « actions » (calque des actions boursières) $\to$ assets ; « for instances », « various different », « upon this stage », « scenarios tree », « solve a succession a two-stage problems » ; traits d'union Unicode (U+2010) des techniques de résolution.
+  - **Préambule** : paquets inutilisés retirés (`ulem`, `listings` et sa configuration C++), commentaires morts, `\setbeamertemplate{footline}` en double, macros `\bxi`, `\bx`, `\bu`, `\bz`, `\bomega` ; `\texorpdfstring` sur le titre et l'auteur.
+  - **Compilation** : 24 pages (37 auparavant), 0 erreur, 0 overfull, PDF synchronisé.
+
+---
+
 ## Slides — `slides/07. SDDP.tex`
 
 - [x] **Révision complète effectuée** :
