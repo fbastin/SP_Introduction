@@ -380,6 +380,18 @@ Liens :
 
 ---
 
+## Notebook — `code/portfolio_stochastic_programming.ipynb` (réécrit pour le deck 09)
+
+- [x] **Réécriture complète (2026-10-25)**, notebook exécuté de bout en bout (Julia 1.12.6, HiGHS), métadonnées du noyau inchangées. L'ancienne version (arrivée avec la migration `f76e347`, absente de l'historique du dépôt `optim`, jamais exécutée) calculait RP, EEV et VSS, ce que `two_stages.ipynb` fait déjà pour le deck 03, et évaluait ses portefeuilles sur les jours mêmes qui avaient servi à les optimiser (« backtest » sur l'échantillon), avec une cible de $+0{,}2\,\%$ par jour ($\approx +65\,\%$ par an) et des données téléchargées à chaque exécution. Les decks 08, 09 et 11 n'avaient aucun notebook.
+  - **Données figées** : prix de clôture ajustés de huit FNB (SPY, EFA, EEM, TLT, IEF, LQD, GLD, VNQ : actions américaines, développées, émergentes, obligations du Trésor longues et intermédiaires, obligations de sociétés, or, immobilier), 2015–2024, 2515 rendements quotidiens, dans `code/portfolio_prices.csv` (195 Ko, téléchargé le 2026-10-25) ; `refresh_data = true` les télécharge à nouveau avec `YFinance.jl`. `DataFrames` n'est plus utilisé (`DelimitedFiles`).
+  - **Notations du deck 09** : $\min_{z \in S} g(z) = \mathbb{E}_P[G(z,\xi)]$, $\hat{g}_N$, $z_N^*$, $v_N$, $M$, $J$. Investisseur averse aux pertes (Kahneman et Tversky, $\lambda = 2$) : $G(z,\xi) = \max(-\xi^Tz, -\lambda\xi^Tz)$, programme linéaire à recours simple ; $S$ simplexe (pleinement investi, sans vente à découvert), compact. A.2 vérifiée, A.1 non (coude en $\xi^Tz = 0$), ce qui n'affecte pas les diapos « Overfitting » et « Out-of-sample validation ».
+  - **Vrai problème connu** : $P$ = loi empirique des 2515 jours, $g$ et $z^*$ calculés exactement ($g^* = 11{,}11$ bp/jour, $z^*$ = IEF 0,70, SPY 0,23, GLD 0,07), tirages par bootstrap (A.0 vraie par construction) ; solution en valeur moyenne (tout en SPY) et VSS $= 17{,}18$ bp ; poids égaux.
+  - **Biais** ($J = 100$ réplications, $N = 10$ à $2000$, un flux `RandomDataStreams` par réplication, échantillons emboîtés) : $\mathbb{E}[v_N] \le g^* \le \mathbb{E}[g(z_N^*)]$ vérifié ($-26{,}6$ et $29{,}2$ bp pour $N = 10$, $10{,}76$ et $11{,}28$ bp pour $N = 2000$), $\mathbb{E}\lVert z_N^* - z^*\rVert_1$ de 1,70 à 0,13, figure à trois panneaux.
+  - **Validation hors échantillon** ($N = 200$, $M = 100\,000$) : bornes supérieure et inférieure de $g^*$, écart estimé (Mak, Morton et Wood, 1999 ; Birge et Louveaux, section 9.5) conservateur (3,73 bp pour un écart vrai de 0,68 bp). **Sélection de candidats** : avec $M = 100\,000$, le candidat retenu est presque $z^*$ ; avec $M = 100$, malédiction du gagnant (estimation $-1{,}51$ bp, valeur vraie $15{,}40$ bp), révélée par un échantillon frais.
+  - **A.0 en pratique** : SAA sur 2015–2021, évaluée sur 2022–2024 : $7{,}18$ bp promis, $20{,}92$ bp obtenus ; le portefeuille rétrospectif coûte déjà $18{,}78$ bp (2022 : actions et obligations en baisse ensemble), d'où un changement de loi de $11{,}60$ bp et un coût de l'ignorance de $2{,}14$ bp ; VSS hors échantillon $13{,}70$ bp ; courbe de richesse (le portefeuille en valeur moyenne finit le plus riche mais est classé dernier par le critère d'aversion aux pertes).
+
+---
+
 ## Notebook — `code/two_stages.ipynb`
 
 - [x] **Réécriture générique** : l'implémentation L-shaped était entièrement spécialisée pour l'instance « crèmes glacées » — variables globales (`nFactories`, `nFlavors`, `cost`, `demands`, `minCapacity`, `solver`, `nmax`) lues dans les fonctions, matrices $T$ et $h$ écrites en dur (`sparse([1,2,3,4],[1,2,3,4],[-1,-1,-1,-1])`), second niveau reconstruit de zéro à chaque scénario et à chaque itération, et `secondstage_dual` défini deux fois.
