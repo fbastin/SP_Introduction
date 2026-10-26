@@ -338,6 +338,15 @@ Liens :
 
 ---
 
+## Notebook — `code/chance constrained toy example.ipynb`
+
+- [x] **Révision complète (2026-10-25)** : le notebook produit la figure de la diapo « Example: frontiers of constraints » du deck 05 (`imgs/chance_constraint_feasible_region.pdf`) ; il est gardé, nettoyé et complété. Réexécuté de bout en bout (Julia 1.12.6, HiGHS, Plots), métadonnées du noyau inchangées.
+  - **Défauts corrigés** : convention $\alpha$ = probabilité (`α = 0.85`, commentaire « Take α in (0.8,9.0] » avec coquille) $\to$ niveau de risque $\alpha = 0{,}15$, $P \ge 1-\alpha$, comme le deck ; cellule `Pkg.add("Plots")` exécutée dans l'environnement global de Julia 1.13 supprimée (Plots est dans `code/Project.toml`) ; figure enregistrée dans `code/` alors que le deck lit `imgs/` $\to$ écrite dans `../imgs/` ; fonction `is_feasible_grid` (point de grille le plus proche) remplacée par la frontière exacte ; deux cellules vides supprimées ; figure stockée en trois formats (342 Ko) $\to$ PNG seul.
+  - **Figure du deck refaite** : l'ancienne affichait la syntaxe Julia (`5//9x₁`, `1.0x₁`) et colorait les droites par contrainte. La nouvelle colore par scénario (tirets : $\xi_1x_1 + x_2 = 7$, pointillés : $\xi_2x_1 + x_2 = 4$, légende « scenario $s$, $p$, $\xi$ ») et trace l'ensemble admissible exact, dont l'encoche non convexe en $(4{,}5 ; 2{,}5)$ est visible. Deck 05 recompilé (50 pages, diapo 11 vérifiée).
+  - **Contenu ajouté** : ensemble admissible $=$ union des polyèdres $P_{\mathcal{S}}$ sur les ensembles de scénarios de probabilité $\ge 1-\alpha$ (énumérés : $\{1,2,3\}$, $\{2,3,4\}$, $\{1,2,3,4\}$), frontière exacte $x_2 \ge \min_{\mathcal{S}} \max(\ldots)$ ; non-convexité vérifiée ($(1{,}8 ; 3{,}4)$ et $(6{,}75 ; 0{,}25)$ admissibles, milieu non admissible) ; résolution par énumération (trois PL : 7, 5,2, 7) puis par PLNE à une binaire par scénario, le second membre servant de « big-M » ($x \ge 0$, $\xi \ge 0$) : optimum $(1{,}8 ; 3{,}4)$, valeur 5,2, scénario 1 abandonné, probabilité jointe 0,9 ; contraintes séparées ($\alpha_1 = \alpha_2 = 0{,}15$) : valeur $64/13 \approx 4{,}923$ en $(27/13 ; 37/13)$, scénario 1 abandonné pour la première contrainte et 4 pour la seconde, probabilité jointe 0,8 seulement, d'où des contraintes séparées moins conservatrices. Seconde figure (notebook seulement) : optimums joint et séparé, droite de niveau, segment sortant de l'ensemble.
+
+---
+
 ## Notebook — `code/two_stages.ipynb`
 
 - [x] **Réécriture générique** : l'implémentation L-shaped était entièrement spécialisée pour l'instance « crèmes glacées » — variables globales (`nFactories`, `nFlavors`, `cost`, `demands`, `minCapacity`, `solver`, `nmax`) lues dans les fonctions, matrices $T$ et $h$ écrites en dur (`sparse([1,2,3,4],[1,2,3,4],[-1,-1,-1,-1])`), second niveau reconstruit de zéro à chaque scénario et à chaque itération, et `secondstage_dual` défini deux fois.
