@@ -29,42 +29,10 @@
   nd/.style      = {circle, draw, minimum size=4.5mm, inner sep=0pt,
                     line width=0.6pt, font=\scriptsize},
   ndsel/.style   = {nd, draw=red, line width=1.2pt},
-  ndleaf/.style  = {circle, fill=black, minimum size=1.4mm, inner sep=0pt},
   edg/.style     = {line width=0.6pt},
   edgsel/.style  = {draw=red, line width=1.8pt},
-  edgd/.style    = {line width=0.5pt, dashed},
-  sib/.style     = {line width=0.6pt, dotted},
   stg/.style     = {font=\scriptsize},
 }
-
-% Three-stage scenario tree used in the nested decomposition illustrations.
-% #1/#2: style and content of the stage-1 node, #3: label below that node,
-% #4/#5: style and content of the stage-2 nodes,
-% #6/#7: style and content of the stage-3 nodes.
-\newcommand{\nlsdtree}[7]{%
-\begin{tikzpicture}[scale=0.88]
-  \node[#1] (r)  at (0,0)      {#2};
-  \node[stg] at (0,-0.55) {#3};
-  \node[#4] (a1) at (2.4,1.2)  {#5};
-  \node[#4] (a2) at (2.4,-1.2) {#5};
-  \node[#6] (b1) at (4.8,1.8)  {#7};
-  \node[#6] (b2) at (4.8,0.6)  {#7};
-  \node[#6] (b3) at (4.8,-0.6) {#7};
-  \node[#6] (b4) at (4.8,-1.8) {#7};
-  \draw[edg] (r) -- (a1) (r) -- (a2);
-  \draw[edg] (a1) -- (b1) (a1) -- (b2) (a2) -- (b3) (a2) -- (b4);
-  \foreach \n/\y in {b1/1.8, b2/0.6, b3/-0.6, b4/-1.8} {
-    \draw[edgd] (\n) -- (6.3,\y+0.28) node[ndleaf] {};
-    \draw[edgd] (\n) -- (6.3,\y-0.28) node[ndleaf] {};
-  }
-  \draw[sib] (a1) -- (a2);
-  \draw[sib] (b1) -- (b2);
-  \draw[sib] (b3) -- (b4);
-  \node[stg] at (0,-2.6)   {First stage};
-  \node[stg] at (2.4,-2.6) {Second stage};
-  \node[stg] at (4.8,-2.6) {Third stage};
-  \node[stg] at (6.3,-2.6) {$\ldots$};
-\end{tikzpicture}}
 
 % Recombining two-stage graph: every node of stage 2 is connected to every
 % node of stage 3. #1/#2: styles of the stage-2 and stage-3 nodes.
@@ -95,7 +63,7 @@ Université de Montréal -- CIRRELT -- IVADO -- Fin-ML}
 
 Introduced by Pereira and Pinto (1991), first designed to solve hydro-scheduling problems.
 
-\mbox{}
+\smallskip
 
 \begin{itemize}
 \item
@@ -105,13 +73,17 @@ Continuous, finite dimensional state and control.
 \item
 Convex cost, additive over stages -- we focus here on linear costs.
 \item
-Discrete, independent noises.
+Discrete, stagewise independent noises.
 \end{itemize}
+
+\smallskip
+
+SDDP builds on the nested L-shaped method of the Multistage slides, recalled in the next three slides.
 
 \mbox{}
 
-Julia implementations: the \texttt{SDDP.jl} package, and the step-by-step
-notebook \texttt{code/SDDP\_from\_scratch.ipynb} accompanying these slides.
+Julia implementations: the \texttt{SDDP.jl} package (examples: \texttt{code/SDDP\_hydro.ipynb}),
+and the step-by-step notebook \texttt{code/SDDP\_from\_scratch.ipynb}.
 
 \mbox{}
 
@@ -123,273 +95,73 @@ notebook \texttt{code/SDDP\_from\_scratch.ipynb} accompanying these slides.
 \begin{frame}
 \frametitle{Problem setting}
 
-We consider the multistage stochastic linear program over the horizon $t = 1,\ldots, H$
-(we write $H$, and not $T$, since $T$ denotes the technology matrix)
-$$
-\min_{x_1 \geq 0}\ c_1^T x_1 + \EE\left[ \min_{x_2 \geq 0} c_2^T x_2 + \EE\left[ \cdots +
-\EE\left[ \min_{x_H \geq 0} c_H^T x_H \right] \right] \right]
-$$
-subject to $W_1 x_1 = h_1$ and, for $t = 2,\ldots,H$,
-$$
-W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}.
-$$
-
-Equivalently, in dynamic programming form, with $\QQ_{H+1} \equiv 0$,
+We consider the multistage stochastic linear program of the Multistage slides, over the horizon
+$t = 1,\ldots, H$ (we write $H$, and not $T$, since $T$ denotes the technology matrix), with the
+constraints $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2,\ldots,H$.
+In dynamic programming form, with $\QQ_{H+1} \equiv 0$,
 \begin{align*}
 V_t(x_{t-1}, \xi_{[t]}) &= \min_{x_t \geq 0} \left\{ c_t^Tx_t + \QQ_{t+1}(x_t, \xi_{[t]}) \ :\
 W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t)x_{t-1} \right\}, \\
 \QQ_{t+1}(x_t, \xi_{[t]}) &= \EE\left[ V_{t+1}(x_t, \xi_{[t+1]}) \mid \xi_{[t]} \right].
 \end{align*}
 
-{\small The expected cost-to-go is convex and piecewise linear in $x_t$: SDDP builds it
+{\small The expected cost-to-go is convex in $x_t$, and piecewise linear on its domain: SDDP builds it
 from below, one supporting hyperplane at a time (background notes). Under stagewise independence, the
 conditioning disappears and a single $\QQ_{t+1}(x_t)$ serves the whole stage.}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{The nested L-shaped decomposition subproblem}
+\frametitle{Recap: nested L-shaped method}
 
-For each stage $t = 1,\ldots, H$ and node $k = 1,\ldots,N_t$ of the scenario tree, we
-consider the problem $NLSD(t,k)$
-\begin{align}
-\min_{x_{t,k}, \theta_{t,k}}\ & c_{t,k}^T x_{t,k} + \theta_{t,k} \notag \\
-\mbox{s.t. } &
-W_t x_{t,k} = h_{t,k} - T_{t-1,k} x_{t-1,a(k)}, \quad (\pi_{t,k})  \notag \\
-& D_{t,k,j}x_{t,k} \geq d_{t,k,j},\ j = 1,\ldots,r_{t,k}, \quad (\rho_{t,k,j}) \\
-& E_{t,k,j}x_{t,k} + \theta_{t,k} \geq e_{t,k,j},\ j = 1,\ldots, s_{t,k}, \quad (\sigma_{t,k,j}) \\
-& x_{t,k} \geq 0.  \notag
-\end{align}
+At node $k = 1, \ldots, N_t$ of stage $t$, nested decomposition solves the problem $NLSD(t,k)$
+\begin{align*}
+\min\nolimits_{x_{t,k} \geq 0,\, \theta_{t,k}}\ & c_{t,k}^T x_{t,k} + \theta_{t,k} \\
+\mbox{s.t. }\ & W_t x_{t,k} = h_{t,k} - T_{t-1,k}\, \hat{x}_{t-1,a(k)}, \quad (\pi_{t,k}) \\
+& D_{t,k,\ell}\, x_{t,k} \geq d_{t,k,\ell},\ \ell = 1, \ldots, r_{t,k}, \quad (\rho_{t,k,\ell}) \quad \text{feasibility cuts}, \\
+& E_{t,k,\ell}\, x_{t,k} + \theta_{t,k} \geq e_{t,k,\ell},\ \ell = 1, \ldots, s_{t,k}, \quad (\sigma_{t,k,\ell}) \quad \text{optimality cuts}.
+\end{align*}
 \begin{small}
 \begin{itemize}
 \item
-$N_t$: number of nodes at stage $t$; $a(k)$: ancestor of node $k$ at stage $t - 1$;
-$x_{t-1,a(k)}$: trial solution received from $a(k)$,
+$NLSD$: nested L-shaped decomposition subproblem; $N_t$: number of nodes at stage $t$; $a(k)$:
+ancestor of node $k$; $\theta_{t,k}$: approximation of the expected cost-to-go, bounded below until
+its first cut (by $0$ if the costs are nonnegative), $\theta_{H,k} \equiv 0$.
 \item
-$\theta_{t,k}$: epigraph variable approximating the cost-to-go at node $k$; $\theta_{H,k} \equiv 0$,
-\item
-Constraints (1): feasibility cuts, constraints (2): optimality cuts.
+Forward pass: the trial decisions go down the tree. Backward pass: for $t = H, \ldots, 2$, the
+nodes of stage $t$ send cuts to their parents. The first-stage value is a lower bound, the expected
+cost of the policy an upper bound. A feasibility cut comes from a certificate of infeasibility of
+a child; none is needed with relatively complete recourse.
 \end{itemize}
 \end{small}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Nested L-shaped method}
+\frametitle{Recap: optimality cuts}
 
-Building block: $NLSD(t, k)$, the problem at stage $t$, node $k$.
-\begin{itemize}
-	\item
-Repeated application of the L-shaped method.
-	\item
-	Parent nodes send proposals for solutions to their children nodes.
-\item
-Child nodes send cuts to their parents.
-\item
-There are different sequencing protocols that determine in which
-order the problems corresponding to different nodes in the
-scenario tree are solved.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Nested L-shaped method}
-
-\begin{center}
-\begin{tikzpicture}[>=Stealth]
-  \node[draw, minimum width=2.6cm, minimum height=1.1cm] (b) at (0,0) {$NLSD(t, k)$};
-  \draw[->, line width=0.8pt] (b.west) -- node[above, font=\scriptsize] {$\pi_{t,k}$, $\rho_{t,k}$, $\sigma_{t,k}$}
-                                          node[below, font=\scriptsize] {$t-1$, $a(k)$} ++(-3.2,0)
-                                          node[left, font=\scriptsize] {Cut};
-  \draw[->, line width=0.8pt] (b.east) -- node[above, font=\scriptsize] {$x_{t,k}$}
-                                          node[below, font=\scriptsize] {$t+1$, $\DD_{t+1}(k)$} ++(3.2,0)
-                                          node[right, font=\scriptsize] {Trial solution};
-\end{tikzpicture}
-\end{center}
-
-\mbox{}
-
-\begin{itemize}
-	\item
-$a(k)$: ancestor of node $k$.
-	\item
-$\DD_{t+1}(k)$: descendants of node $k$ in period $t + 1$.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Illustration: forward pass, stage 1}
-
-	\begin{center}
-	\nlsdtree{ndsel}{}{$x_1$}{nd}{}{nd}{}
-	\end{center}
+For a node $j$ at stage $t-1$, solve $NLSD(t,k)$ at $\hat{x}_{t-1,j}$ for each of its children
+$k \in \DD_t(j)$, with optimal value $v_{t,k}$, and compute
+\begin{align*}
+E &= \sum\nolimits_{k \in \DD_t(j)} p(k, t\,|\,j, t - 1)\, \pi_{t,k}^T T_{t-1,k}, \\
+e &= \sum\nolimits_{k \in \DD_t(j)} p(k, t\,|\,j, t - 1) \left( v_{t,k} + \pi_{t,k}^T T_{t-1,k}\, \hat{x}_{t-1,j} \right),
+\end{align*}
+with $p(k, t\,|\,j, t - 1)$ the probability of moving from $j$ to $k$, then add the cut
+$E x_{t-1,j} + \theta_{t-1,j} \geq e$ to $NLSD(t-1,j)$.
 
 \begin{small}
 \begin{itemize}
-	\item
-Node: $(t = 1, k = 1)$.
-	\item
-Direction: forward.
-	\item
-Output: the trial solution $x_1$, sent to every node of stage 2.
+\item
+This is the cut of the Multistage slides: $e - E\hat{x}_{t-1,j}$ is the average of the $v_{t,k}$.
+By linear programming duality,
+$v_{t,k} + \pi_{t,k}^T T_{t-1,k} \hat{x}_{t-1,j} = \pi_{t,k}^T h_{t,k} + \sum_{\ell} \rho_{t,k,\ell}\, d_{t,k,\ell}
++ \sum_{\ell} \sigma_{t,k,\ell}\, e_{t,k,\ell}$ as long as the lower bound on $\theta_{t,k}$ is inactive.
+\item
+It supports, at $\hat{x}_{t-1,j}$, the average of the children's current approximations, which lie
+below $V_t$: it is \textcolor{red}{valid}. It touches $\QQ_t$ at $\hat{x}_{t-1,j}$ only if
+$v_{t,k} = V_t(\hat{x}_{t-1,j}, \xi_{[t]})$ for every child, as at stage $H$, where
+$\theta_{H,k} \equiv 0$.
 \end{itemize}
-\end{small}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Illustration: forward pass, stage 2}
-
-	\begin{center}
-	\nlsdtree{nd}{}{$x_1$}{ndsel}{}{nd}{}
-	\end{center}
-
-	\begin{small}
-	\begin{itemize}
-		\item
-		Node: $(t = 2, k)$, $k \in \{ 1,\ldots,N_2 \}$.
-		\item
-		Direction: forward.
-		\item
-		Output: $x_{2,k}$, $k \in \{ 1,\ldots,N_2 \}$.
-	\end{itemize}
-	\end{small}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Illustration: forward pass, stage 3}
-
-	\begin{center}
-	\nlsdtree{nd}{}{$x_1$}{nd}{}{ndsel}{}
-	\end{center}
-
-	\begin{small}
-	\begin{itemize}
-		\item
-		Node: $(t = 3, k)$, $k \in \{ 1,\ldots,N_3 \}$.
-		\item
-		Direction: forward.
-		\item
-		Output: $x_{3,k}$, $k \in \{ 1,\ldots,N_3 \}$.
-	\end{itemize}
-	\end{small}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Illustration: backward pass, stage 3}
-
-	\begin{center}
-	\nlsdtree{nd}{}{$x_1$}{nd}{$/$}{ndsel}{}
-	\end{center}
-
-	\begin{small}
-	\begin{itemize}
-		\item
-		Node: $(t = 3, k)$, $k \in \{ 1,\ldots,N_3 \}$.
-		\item
-		Direction: backward.
-		\item
-		Output: $(\pi_{3,k}, \rho_{3,k}, \sigma_{3,k})$, turned into cuts for the
-		stage-2 nodes (marked $/$).
-	\end{itemize}
-	\end{small}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Illustration: backward pass, stage 2}
-
-	\begin{center}
-	\nlsdtree{nd}{$/$}{}{ndsel}{}{nd}{}
-	\end{center}
-
-	\begin{small}
-	\begin{itemize}
-		\item
-		Node: $(t = 2, k)$, $k \in \{ 1,\ldots,N_2 \}$.
-		\item
-		Direction: backward.
-		\item
-		Output: $(\pi_{2,k}, \rho_{2,k}, \sigma_{2,k})$, turned into a cut for the
-		first-stage problem (marked $/$).
-	\end{itemize}
-	\end{small}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Feasibility cuts}
-
-If $NLSD(t, k)$ is infeasible, we compute $\pi_{t,k}$ and $\rho_{t,k} \geq 0$ such that
-\begin{align*}
-\pi_{t,k}^T \left(h_{t,k} - T_{t-1,k} x_{t-1,a(k)}\right) + \rho_{t,k}^Td_{t,k} &> 0, \\
-\pi_{t,k}^T W_t + \rho_{t,k}^TD_{t,k} &\leq 0.
-\end{align*}
-{\small Such a pair is a Farkas certificate of infeasibility, obtained from the dual ray
-returned by the solver (Farkas' lemma and the extreme rays carrying such certificates are
-recalled in the linear programming background notes).} The following is a valid feasibility cut for $NLSD(t - 1, a(k))$:
-$$
-D_{t-1, a(k)} x_{t-1,a(k)} \geq d_{t-1, a(k)},
-$$
-where $D_{t-1, a(k)} = \pi_{t,k}^TT_{t-1,k}$ and
-$d_{t-1, a(k)} = \pi_{t,k}^Th_{t,k} + \rho_{t,k}^Td_{t,k}$.
-
-\mbox{}
-
-{\small No feasibility cut is needed when the problem has relatively complete recourse.}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Optimality cuts}
-
-For a node $j$ at stage $t-1$, solve $NLSD(t, k)$ for every descendant
-$k \in \DD_t(j)$, and compute
-\begin{align*}
-E &= \sum_{k \in \DD_t(j)} p(k, t\,|\,j, t - 1)\, \pi_{t,k}^T T_{t-1,k}, \\
-e &= \sum_{k \in \DD_t(j)} p(k, t\,|\,j, t - 1) \left( \pi_{t,k}^T h_{t,k}
-+ \sum_{i=1}^{r_{t,k}} \rho_{t,k,i} d_{t,k,i} + \sum_{i=1}^{s_{t,k}} \sigma_{t,k,i} e_{t,k,i} \right),
-\end{align*}
-then add the cut $E x_{t-1,j} + \theta_{t-1,j} \geq e$ to $NLSD(t-1,j)$.
-
-\begin{itemize}
-\item
-$\DD_t(j)$: descendants at stage $t$ of a node $j$ at period $t - 1$;
-\item
-conditional probabilities: $p(k, t\,|\,j, t - 1) = p_{k,t} / p_{j,t-1}$.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Optimality cuts: interpretation}
-
-By linear programming duality (background notes), the optimal value of $NLSD(t,k)$
-evaluated at the trial solution $\hat{x}_{t-1}$ is
-$$
-Q_{t,k}(\hat{x}_{t-1}) = \pi_{t,k}^T\left(h_{t,k} - T_{t-1,k}\hat{x}_{t-1}\right)
- + \rho_{t,k}^Td_{t,k} + \sigma_{t,k}^Te_{t,k},
-$$
-so that, taking the expectation over the descendants,
-$
-e - E\hat{x}_{t-1} = \QQ_t(\hat{x}_{t-1})
-$
-and $-E \in \partial \QQ_t(\hat{x}_{t-1})$.
-
-\begin{small}
-The cut $\theta_{t-1} \geq e - E x_{t-1}$ is therefore the supporting hyperplane of the
-expected cost-to-go at the trial point:
-\begin{itemize}
-\item
-it is \textcolor{red}{valid} everywhere, since $\QQ_t$ is convex;
-\item
-it is \textcolor{red}{tight} at $\hat{x}_{t-1}$.
-\end{itemize}
-The approximation is thus refined exactly where the trial solutions are located.
 \end{small}
 
 \end{frame}
@@ -438,7 +210,7 @@ each node $k$ of stage $t$?
 \begin{frame}
 \frametitle{Nested decomposition is non-scalable}
 
-Assume $H$ time steps, $M_t$ discrete outcomes in each stage, and relatively complete
+Assume $H$ stages, $M_t$ discrete outcomes at stage $t$ ($M_1 = 1$), and relatively complete
 recourse (no feasibility cut needed). The tree then has $N_t = \prod_{j=1}^t M_j$ nodes at
 stage $t$.
 
@@ -526,7 +298,7 @@ this requires an assumption of \textcolor{red}{stagewise independence}.
 
 \mbox{}
 
-{\small \textcolor{red}{Stagewise independence}: the random vector $\xi_{t+1}$ is independent of $\xi_{[t]} = (\xi_1,\ldots, \xi_t)$ for $t = 1,\ldots, H-1$ (see for instance A. Shapiro, ``Analysis of stochastic dual dynamic programming'', European Journal of Operational Research, 209(1), 2011, pp. 63--72). Here, $\xi_1$ has a unique realization.}
+{\small \textcolor{red}{Stagewise independence}: the random vector $\xi_{t+1}$ is independent of $\xi_{[t]} = (\xi_1,\ldots, \xi_t)$ for $t = 1,\ldots, H-1$ (see for instance A. Shapiro, ``Analysis of stochastic dual dynamic programming method'', European Journal of Operational Research, 209(1), 2011, pp. 63--72). Here, $\xi_1$ has a unique realization.}
 
 \end{frame}
 
@@ -598,7 +370,8 @@ With stagewise independence, we can
 	\item
 get rid of the scenario tree;
 	\item
-work with a continuous distribution of $\xi_t$.
+work with a continuous distribution of $\xi_t$, replaced by a sample of it in the backward pass
+(Shapiro, 2011).
 \end{itemize}
 An intermediate solution consists in adding $\xi_{t}$ to the state vector, for instance
 when the noise follows an autoregressive model.
@@ -616,8 +389,8 @@ Initialize $\hat{x}_{1,i} = x_{1,1}$ for $i = 1,\ldots,K$.
 For $t = 2,\ldots, H$, $i = 1,\ldots, K$,
 \begin{itemize}
 	\item
-sample a realization $\xi_{t,i}$ among $\xi_{t,k}$, $k = 1,\ldots,M_t$, which
-determines $(c_{t,i}, h_{t,i}, T_{t-1,i})$;
+sample a realization $\xi_{t,i}$ among $\xi_{t,k}$, $k = 1,\ldots,M_t$, with probabilities
+$p_{t,k}$, which determines $(c_{t,i}, h_{t,i}, T_{t-1,i})$;
 \item
 solve $NLSD(t, i)$ with the trial decision $\hat{x}_{t-1,i}$;
 \item
@@ -628,6 +401,8 @@ $c_{t,i}^T\hat{x}_{t,i}$.
 
 \mbox{}
 
+With shared cuts, $NLSD(t,k)$ depends on the node only through its realization: $k$ now indexes the
+$M_t$ realizations of $\xi_t$, and $NLSD(t,i)$ is the problem of the realization drawn in scenario $i$.
 The stage costs exclude $\theta_{t,i}$: otherwise the future would be counted twice.
 
 \end{frame}
@@ -640,23 +415,24 @@ The stage costs exclude $\theta_{t,i}$: otherwise the future would be counted tw
 For $t = H, H - 1,\ldots, 2$, for $i = 1,\ldots, K$,
 \begin{itemize}
 	\item
-solve $NLSD(t, k)$ with the trial decision $\hat{x}_{t-1,i}$, for $k = 1,\ldots, M_t$;
+solve $NLSD(t, k)$ with the trial decision $\hat{x}_{t-1,i}$, for $k = 1,\ldots, M_t$, with
+optimal value $v_{t,k,i}$ and multipliers $\pi_{t,k,i}$;
 \item
 compute
 \begin{align*}
-E_{t-1} &= \sum_{k = 1}^{M_t} p_{t,k} \pi_{t,k,i}^T T_{t-1,k}, \\
-e_{t-1} &= \sum_{k = 1}^{M_t} p_{t,k} \left( \pi_{t,k,i}^T h_{t,k}
-+ \sum_j \rho_{t,k,i,j} d_{t,k,j} + \sum_j \sigma_{t,k,i,j} e_{t,k,j} \right);
+E_{t-1,i} &= \sum_{k = 1}^{M_t} p_{t,k}\, \pi_{t,k,i}^T T_{t-1,k}, &
+e_{t-1,i} &= \sum_{k = 1}^{M_t} p_{t,k} \left( v_{t,k,i} + \pi_{t,k,i}^T T_{t-1,k}\, \hat{x}_{t-1,i} \right);
 \end{align*}
 \item
 add the optimality cut
 $
-E_{t-1}x_{t-1} + \theta_{t-1} \geq e_{t-1}
+E_{t-1,i}\, x_{t-1} + \theta_{t-1} \geq e_{t-1,i}
 $
 to $NLSD(t - 1, k)$, $k = 1,\ldots, M_{t-1}$.
 \end{itemize}
 \end{itemize}
-The same cut is added to every node of stage $t-1$: this is cut sharing.
+The same cut is added to every node of stage $t-1$: this is cut sharing. Under stagewise
+independence, $p_{t,k}$ is the probability $p(k, t\,|\,j, t-1)$ of the recap, whatever the node $j$.
 
 \end{frame}
 
@@ -700,12 +476,12 @@ expected cost-to-go, hence $NLSD(1,1)$ is a relaxation of the original problem.
 
 \mbox{}
 
-Terminate if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K}, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K})$, where $\Phi(\cdot)$ is the cumulative distribution of a Normal(0,1), and $\alpha$ is a confidence level set by the user. Typically, $\alpha = 0.05$. Since $z_{LB}$ is a lower bound, only the left inequality really matters.
+Terminate if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K}, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K})$, where $\Phi(\cdot)$ is the cumulative distribution of a Normal(0,1), and $1 - \alpha$ is the confidence level set by the user. Typically, $\alpha = 0.05$. Since $z_{LB}$ is a lower bound, only the left inequality really matters.
 
 \mbox{}
 
-How to ensure a $1\%$ optimality gap with $95\%$ confidence?
-Choose $K$ such that $\Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K} \approx 0.01 \overline{z}_K$. Using the empirical standard deviation
+How large should $K$ be?
+If the half-width $\Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K}$ is about $0.01\, \overline{z}_K$, the test only stops when $\overline{z}_K - z_{LB} < 0.01\, \overline{z}_K$. Using the empirical standard deviation
 $
 \hat{s} = \sqrt{\frac{1}{K-1} \sum_{i=1}^K (z_i - \overline{z}_K)^2},
 $
@@ -724,7 +500,7 @@ lower bound enters it long before the policy is optimal.
 
 \begin{small}
 \begin{algorithmic}[1]
-\State Set $K$, $\alpha$, the maximum number of iterations, and start with no cut.
+\State Set $K$, $\alpha$, the maximum number of iterations; start with no cut, each $\theta_t$ bounded below.
 \Repeat
   \State \textbf{Forward pass}: solve $NLSD(1,1)$, set $z_{LB}$ to its optimal value;
   \State \quad simulate $K$ scenarios, collect the trial solutions $\hat{x}_{t,i}$ and the costs $z_i$;
@@ -764,8 +540,8 @@ iterations, while the simulated cost keeps oscillating around it.}
 \includegraphics[height=0.50\textheight]{sddp_value_function.pdf}
 \end{center}
 
-{\small Each cut lies below the exact expected cost-to-go, and the approximation is tight
-only where the forward passes went: the value function is never learned everywhere.
+{\small Exact expected cost-to-go $\QQ_5$ and the cuts of stage 4. Each cut lies below $\QQ_5$, and the
+approximation is tight only where the forward passes went: the value function is never learned everywhere.
 Computed with \texttt{code/SDDP\_from\_scratch.ipynb}.}
 
 \end{frame}
@@ -782,7 +558,7 @@ A. Shapiro, ``Analysis of stochastic dual dynamic programming method'', \emph{Eu
 Journal of Operational Research} 209(1), 63--72, 2011.
 \item
 J.R. Birge and F. Louveaux, \emph{Introduction to Stochastic Programming}, 2nd edition,
-Springer, 2011 (Chapter 7).
+Springer, 2011 (Section 6.1, nested L-shaped decomposition).
 \item
 O. Dowson and L. Kapelevich, ``SDDP.jl: a Julia package for stochastic dual dynamic
 programming'', \emph{INFORMS Journal on Computing} 33(1), 27--33, 2021.

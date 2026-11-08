@@ -570,19 +570,22 @@ On a finite tree, there is one function $\calQ_{t+1}(\cdot, \xi_{[t]})$ per node
 \begin{frame}
 \frametitle{Nested decomposition}
 
-The nested L-shaped method (Birge, 1985; details in the SDDP slides) applies the L-shaped method recursively on the scenario tree: each node builds its expected cost-to-go from below, by cuts.
-Node $k$ at stage $t$ is the {\red master problem} of its children, and a {\red subproblem} of its parent $a(k)$:
+The nested L-shaped method (Birge, 1985) applies the L-shaped method recursively on the tree.
+Node $k$ at stage $t$, {\red master} of its children and {\red subproblem} of its parent $a(k)$, solves the nested L-shaped decomposition subproblem $NLSD(t,k)$:
 \begin{align*}
-\min_{x_{t,k},\, \theta_{t,k}}\ & c_{t,k}^T x_{t,k} + \theta_{t,k} \\
+\min\nolimits_{x_{t,k} \geq 0,\, \theta_{t,k}}\ & c_{t,k}^T x_{t,k} + \theta_{t,k} \\
 \mbox{s.t. }\ & W_t x_{t,k} = h_{t,k} - T_{t-1,k}\, \hat{x}_{t-1,a(k)}, \quad (\pi_{t,k}) \\
-& \text{feasibility and optimality cuts}, \quad x_{t,k} \geq 0.
+& D_{t,k,\ell}\, x_{t,k} \geq d_{t,k,\ell},\ \ell = 1, \ldots, r_{t,k}, \quad (\rho_{t,k,\ell}) \quad \text{feasibility cuts}, \\
+& E_{t,k,\ell}\, x_{t,k} + \theta_{t,k} \geq e_{t,k,\ell},\ \ell = 1, \ldots, s_{t,k}, \quad (\sigma_{t,k,\ell}) \quad \text{optimality cuts}.
 \end{align*}
+\begin{small}
 \begin{itemize}
 \item
-$c_{t,k}$, $h_{t,k}$, $T_{t-1,k}$: values of $c_t$, $h_t$, $T_{t-1}$ at node $k$; $\hat{x}_{t-1,a(k)}$: trial decision of the parent;
+$c_{t,k}$, $h_{t,k}$, $T_{t-1,k}$: values of $c_t$, $h_t$, $T_{t-1}$ at node $k$; $\hat{x}_{t-1,a(k)}$: trial decision of the parent; $r_{t,k}$, $s_{t,k}$: numbers of cuts received so far;
 \item
-$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$; it is bounded below until its first optimality cut, as in the L-shaped method, and $\theta_{H,k} \equiv 0$.
+$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$; bounded below until its first optimality cut, as in the L-shaped method; $\theta_{H,k} \equiv 0$.
 \end{itemize}
+\end{small}
 
 \end{frame}
 
@@ -590,7 +593,7 @@ $\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(
 \frametitle{Nested decomposition: cuts}
 
 Let $v_{t,k}$ be the optimal value of node $k$, and $p(k, t \mid j, t-1)$ the probability of moving from node $j$ to its child $k \in \calD_t(j)$.
-The optimality cut of node $j$ at stage $t-1$ averages the supporting hyperplanes of its children:
+The optimality cut of node $j$ at stage $t-1$, a new row of $NLSD(t-1,j)$, averages the supporting hyperplanes of its children:
 \[
 \theta_{t-1,j} \geq \sum_{k \in \calD_t(j)} p(k, t \mid j, t-1) \left( v_{t,k} - \pi_{t,k}^T T_{t-1,k} \left( x_{t-1,j} - \hat{x}_{t-1,j} \right) \right).
 \]
@@ -606,10 +609,38 @@ The slope only involves the multipliers $\pi_{t,k}$ of the constraints linking n
 \end{frame}
 
 \begin{frame}
+\frametitle{Nested decomposition: feasibility cuts}
+
+If $NLSD(t,k)$ is infeasible for the trial decision $\hat{x}_{t-1,j}$ of its parent $j = a(k)$, the solver returns a {\red certificate of infeasibility} (Farkas' lemma, linear programming background notes): $\pi_{t,k}$ and $\rho_{t,k} \geq 0$ such that
+\[
+\pi_{t,k}^T W_t + \rho_{t,k}^T D_{t,k} \leq 0
+\quad \text{and} \quad
+\pi_{t,k}^T \left( h_{t,k} - T_{t-1,k}\, \hat{x}_{t-1,j} \right) + \rho_{t,k}^T d_{t,k} > 0,
+\]
+where $D_{t,k}$ and $d_{t,k}$ stack the feasibility cuts of node $k$ ($\theta_{t,k}$ plays no role).
+\begin{small}
+\begin{itemize}
+\item
+If $x_{t,k} \geq 0$ solves node $k$ for some $x_{t-1}$, then $\pi_{t,k}^T (h_{t,k} - T_{t-1,k} x_{t-1}) + \rho_{t,k}^T d_{t,k} \leq (\pi_{t,k}^T W_t + \rho_{t,k}^T D_{t,k})\, x_{t,k} \leq 0$.
+Hence the {\red feasibility cut}, a new row of $NLSD(t-1,j)$,
+\[
+\pi_{t,k}^T T_{t-1,k}\, x_{t-1,j} \geq \pi_{t,k}^T h_{t,k} + \rho_{t,k}^T d_{t,k},
+\]
+satisfied by every decision that keeps node $k$ feasible, and violated by $\hat{x}_{t-1,j}$.
+\item
+If the parent becomes infeasible, it sends a feasibility cut to its own parent; if the first stage does, the problem is infeasible.
+None is needed with relatively complete recourse, as in the financial example.
+\end{itemize}
+\end{small}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Nested decomposition: forward and backward passes}
 
 \begin{columns}[T]
-\begin{column}{0.6\textwidth}
+\begin{column}{0.62\textwidth}
+\small
 {\red Forward pass}: solve the first-stage problem, send $\hat{x}_1$ to its children, solve them, and so on down to stage $H$.
 If every problem is feasible, these trial decisions form a nonanticipative policy, whose expected cost is an {\red upper bound}.
 
@@ -622,8 +653,13 @@ The first-stage value is then a {\red lower bound}.
 
 Stop when the bounds meet.
 On a finite tree, with bounded $x_t$, only finitely many distinct cuts exist: finite convergence (Birge and Louveaux, Section~6.1, Theorem~1).
+Other sequencing protocols change direction before reaching the last or the first stage.
+
+\smallskip
+
+Julia code: \texttt{code/nested\_benders.ipynb}.
 \end{column}
-\begin{column}{0.38\textwidth}
+\begin{column}{0.36\textwidth}
 \begin{center}
 \passestree
 \end{center}
