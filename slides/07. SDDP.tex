@@ -96,8 +96,8 @@ and the step-by-step notebook \texttt{code/SDDP\_from\_scratch.ipynb}.
 \frametitle{Problem setting}
 
 We consider the multistage stochastic linear program of the Multistage slides, over the horizon
-$t = 1,\ldots, H$ (we write $H$, and not $T$, since $T$ denotes the technology matrix), with the
-constraints $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2,\ldots,H$.
+$t = 1,\ldots, H$ (we write $H$, and not $T$, since $T$ denotes the technology matrix), with the history
+$\xi_{[t]} = (\xi_1, \ldots, \xi_t)$, $\xi_1$ deterministic, and the constraints $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2,\ldots,H$.
 In dynamic programming form, with $\QQ_{H+1} \equiv 0$,
 \begin{align*}
 V_t(x_{t-1}, \xi_{[t]}) &= \min_{x_t \geq 0} \left\{ c_t^Tx_t + \QQ_{t+1}(x_t, \xi_{[t]}) \ :\
@@ -125,8 +125,8 @@ At node $k = 1, \ldots, N_t$ of stage $t$, nested decomposition solves the probl
 \begin{itemize}
 \item
 $NLSD$: nested L-shaped decomposition subproblem; $N_t$: number of nodes at stage $t$; $a(k)$:
-parent of node $k$; $\theta_{t,k}$: approximation of the expected cost-to-go, bounded below until
-its first cut (by $0$ if the costs are nonnegative), $\theta_{H,k} \equiv 0$.
+parent of node $k$; $\theta_{t,k}$: approximation of the expected cost-to-go, bounded below by a constant
+($0$ if the costs are nonnegative), which matters until its first cut; $\theta_{H,k} \equiv 0$.
 \item
 Forward pass: the trial decisions go down the tree. Backward pass: for $t = H, \ldots, 2$, the
 nodes of stage $t$ send cuts to their parents. The first-stage value is a lower bound, the expected
@@ -455,10 +455,11 @@ $
 $
 By the Central Limit Theorem,
 $$
-\sqrt{K}\,(\overline{z}_K - \mu) \overset{\mathcal{D}}{\rightarrow} N(0, \sigma^2),
+\sqrt{K}\,(\overline{z}_K - \mu) \overset{\mathcal{D}}{\rightarrow} N(0, \sigma_z^2),
 % central limit theorem and the resulting interval: probability background notes
-\quad \text{i.e., } \overline{z}_K \approx N\left(\mu, \frac{\sigma^2}{K}\right).
+\quad \text{i.e., } \overline{z}_K \approx N\left(\mu, \frac{\sigma_z^2}{K}\right),
 $$
+where $\sigma_z^2$ is the variance of $z_i$.
 \item
 $\overline{z}_K$ only estimates that upper bound: a realization of $\overline{z}_K$ may well
 fall below the optimal value.
@@ -476,12 +477,12 @@ expected cost-to-go, hence $NLSD(1,1)$ is a relaxation of the original problem.
 
 \mbox{}
 
-Terminate if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K}, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K})$, where $\Phi(\cdot)$ is the cumulative distribution of a Normal(0,1), and $1 - \alpha$ is the confidence level set by the user. Typically, $\alpha = 0.05$. Since $z_{LB}$ is a lower bound, only the left inequality really matters.
+Terminate if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K}, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K})$, where $\hat{s}$ is the empirical standard deviation of the $z_i$, $\Phi(\cdot)$ the cumulative distribution of a Normal(0,1), and $1 - \alpha$ the confidence level set by the user. Typically, $\alpha = 0.05$. Since $z_{LB}$ is a lower bound, only the left inequality really matters.
 
 \mbox{}
 
 How large should $K$ be?
-If the half-width $\Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K}$ is about $0.01\, \overline{z}_K$, the test only stops when $\overline{z}_K - z_{LB} < 0.01\, \overline{z}_K$. Using the empirical standard deviation
+If the half-width $\Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K}$ is about $0.01\, \overline{z}_K$, the test only stops when $\overline{z}_K - z_{LB} < 0.01\, \overline{z}_K$. With
 $
 \hat{s} = \sqrt{\frac{1}{K-1} \sum_{i=1}^K (z_i - \overline{z}_K)^2},
 $
@@ -521,7 +522,7 @@ lower bound enters it long before the policy is optimal.
 \begin{frame}
 \frametitle{Numerical illustration}
 
-{\small Hydro-thermal scheduling, $H = 6$ stages, $M_t = 4$ inflow outcomes
+{\small Hydro-thermal scheduling, $H = 6$ stages, $M_1 = 1$ and $M_t = 4$ inflow outcomes for $t \geq 2$
 ($1024$ scenarios), $K = 5$ forward passes per iteration.}
 
 \begin{center}
@@ -542,7 +543,7 @@ iterations, while the simulated cost keeps oscillating around it.}
 
 {\small Exact expected cost-to-go $\QQ_5$ and the cuts of stage 4. Each cut lies below $\QQ_5$, and the
 approximation is tight only where the forward passes went: the value function is never learned everywhere.
-Computed with \texttt{code/SDDP\_from\_scratch.ipynb}.}
+Both figures: \texttt{code/SDDP\_from\_scratch.ipynb}, appendix.}
 
 \end{frame}
 

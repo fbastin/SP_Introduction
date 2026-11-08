@@ -315,7 +315,7 @@ Alternatively, define one vector of decisions per node of the tree: the decision
 \item
 Nonanticipativity is then built in: all the scenarios going through a node share its decision.
 \item
-$\calL$: set of decision nodes, with root $1$; the leaves are the scenarios $s \in S$.
+$\calL$: set of the nodes where investments are decided, with root $1$; the leaves are the scenarios $s \in S$, where $y_s$ and $w_s$ are decided.
 \item
 $a(k)$: parent of node $k$ (or of leaf $s$), i.e., its ancestor at the previous stage; $\omega_{ik}$: return of asset $i$ on the branch from $a(k)$ to $k$.
 \item
@@ -583,7 +583,7 @@ Node $k$ at stage $t$, {\red master} of its children and {\red subproblem} of it
 \item
 $c_{t,k}$, $h_{t,k}$, $T_{t-1,k}$: values of $c_t$, $h_t$, $T_{t-1}$ at node $k$; $\hat{x}_{t-1,a(k)}$: trial decision of the parent; $r_{t,k}$, $s_{t,k}$: numbers of cuts received so far;
 \item
-$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$; bounded below until its first optimality cut, like $\theta^0$ in the L-shaped method; $\theta_{H,k} \equiv 0$.
+$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$, and is bounded below by a constant, like $\theta^0$ in the L-shaped dual decomposition; $\theta_{H,k} \equiv 0$.
 \end{itemize}
 \end{small}
 
