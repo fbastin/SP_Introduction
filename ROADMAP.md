@@ -493,6 +493,16 @@ Par ordre de priorité ; chaque point se mesure avec `LShaped_benchmark.jl`.
 
 ---
 
+## Code — `code/nested_benders.jl` et `code/nested_benders.ipynb` (nouveaux, 2026-11-07)
+
+- [x] **Implémentation pédagogique de la décomposition de Benders imbriquée** (méthode $L$-shaped imbriquée de Birge, 1985), à la notation du deck 06 ; le but est d'exposer la méthode, pas l'efficacité. Le script et le notebook portent le même code : les cellules de code du notebook sont extraites du `.jl`, bloc par bloc.
+  - **Compatibilité JuMP** : l'utilisateur écrit le problème d'un nœud comme un modèle JuMP ordinaire, par une fonction `build!(model, node, xin) -> xout` ; l'algorithme ajoute une copie `xin = x̂` de la décision du parent, la variable $\theta$ (bornée inférieurement jusqu'à sa première coupe, comme au deck 04) et les coupes. Le multiplicateur de la contrainte de copie est la pente de la coupe, $\lambda = -T^T\pi$, sans jamais former $T$. Le même constructeur donne la forme extensive (formulation nodale), qui sert de référence.
+  - **Algorithme** : un modèle par nœud, arbre quelconque (aucune indépendance entre étapes requise), passe avant sur tout l'arbre (borne inférieure par la première étape, borne supérieure exacte par le coût de la politique), passe arrière de l'étape $H$ à 2 avec moyenne des hyperplans d'appui par les probabilités conditionnelles. Coupes de réalisabilité par une phase 1 qui ne relâche que les contraintes de copie : $w(\hat{x})$ est la distance en norme 1 aux décisions du parent qui rendent le nœud réalisable, d'où la coupe $w(\hat{x}) + \mu^T(x - \hat{x}) \le 0$ ; le modèle de l'utilisateur reste intact.
+  - **Exemple** : planification financière de Birge et Louveaux (section 1.2), $H = 3$, 15 nœuds : valeur $1{,}514085$ en minimisation, soit l'utilité espérée $-1{,}514$ du livre, et première décision $(41{,}48 ; 13{,}52)$, en 6 itérations. Le notebook ajoute : vérification de $\lambda$ par différences finies sur une feuille ($\lambda = -r\omega$ ou $-q\omega$) ; politique optimale lue nœud par nœud ; coupes de la racine comparées à $\mathcal{Q}_2$ exact le long de la droite budgétaire (les premières coupes ne touchent pas $\mathcal{Q}_2$, l'approximation est exacte à la décision finale) ; plafond d'emprunt qui déclenche des coupes de réalisabilité, y compris jusqu'à la racine ; rendements markoviens ; croissance du nombre de PL avec l'horizon ($H = 3$ à 8, jusqu'à 511 nœuds) ; pistes (multicoupe, séquencement, partage de coupes vers SDDP, planification de production).
+  - **Vérifications** (hors dépôt) : 200 instances aléatoires (arbres irréguliers, 2 à 4 étapes) : les 53 réalisables donnent la valeur de la forme extensive (écart relatif $\le 1{,}5 \times 10^{-15}$), dont 33 avec coupes de réalisabilité ; les 147 irréalisables sont détectées. Notebook exécuté de bout en bout avec Julia 1.12 ; figures conservées en PNG seulement.
+
+---
+
 ## Notebook — `code/SDDP_from_scratch.ipynb`
 
 - [x] **Nouveau notebook** : implémentation pédagogique de SDDP en Julia (JuMP + HiGHS), écrite à la notation du deck 07 et destinée à être lue à côté de lui — `code/SDDP_hydro.ipynb` n'utilise que l'API de `SDDP.jl`, qui masque l'algorithme.

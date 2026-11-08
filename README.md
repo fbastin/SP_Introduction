@@ -58,6 +58,7 @@ SP_Introduction/
     ├── portfolio-chanceconstrainedprogramming.ipynb  # Chance-constrained portfolio (deck 05)
     ├── portfolio_stochastic_programming.ipynb # SAA on historical returns: bias, out-of-sample validation (deck 09)
     ├── portfolio_prices.csv                  # Daily ETF prices 2015-2024 (Yahoo Finance), data of the SAA notebook
+    ├── nested_benders.jl, nested_benders.ipynb  # Nested Benders decomposition step by step, nodes written in JuMP (deck 06)
     ├── SDDP_from_scratch.ipynb               # SDDP step by step (deck 07)
     ├── SDDP_hydro.ipynb                      # Hydro-thermal examples with SDDP.jl (deck 07)
     ├── simulation_callcenter.ipynb           # Call-centre simulation (deck 12)
