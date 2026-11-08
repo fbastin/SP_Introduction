@@ -1067,6 +1067,141 @@ Note the pattern: at $t = 2$ the four scenarios are all distinguishable, so no
 constraint is needed; at $t = 1$ they form two groups; at $t = 0$ a single one.
 \end{solution}
 
+\begin{exercise}\label{ex:production-planning}
+(Deck~06.) A firm produces the goods $j \in N$ over the periods
+$t \in \calT = \lbrace 1, \ldots, H \rbrace$, with the resources $i \in M$, among
+which the labor $L \in M$. One unit of $j$ requires $a_{ij}$ units of resource $i$,
+of which $b_{it}$ are available in period $t$; up to $U_{it}$ more can be bought,
+at the unit cost $\beta_{it}$. Producing one unit of $j$ in period $t$ costs
+$\alpha_{jt}$, and changing the workforce, identified with the labor required by
+the production, costs $\gamma_t^+$ per unit of increase and $\gamma_t^-$ per unit
+of decrease from period $t-1$ to period $t$. The demand $\omega_{jt}$ of each
+period is random and must be met: a missing unit is bought from an external
+source at the cost $\delta_{jt}^-$, an unsold unit is stored at the cost
+$\delta_{jt}^+$. The model is
+\begin{align*}
+\min\ & \sum_{j,t} \alpha_{jt} x_{jt} + \sum_{i,t} \beta_{it} u_{it}
+ + \sum_{t=2}^{H} \left( \gamma^+_t z^+_t + \gamma^-_t z^-_t \right)
+ + \EE_{\bsomega} \Bigl[ \min \sum_{j,t} \left( \delta_{jt}^+ y_{jt}^+ + \delta_{jt}^- y_{jt}^- \right) \Bigr] \\
+\text{s.t. } & \sum_{j \in N} a_{ij} x_{jt} \leq b_{it} + u_{it}, \quad 0 \leq u_{it} \leq U_{it}, \quad i \in M,\ t \in \calT, \\
+& z^+_t - z^-_t = \sum_{j \in N} a_{Lj} (x_{jt} - x_{j,t-1}), \quad t = 2, \ldots, H, \qquad x, z^{\pm} \geq 0, \\
+& x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- = \omega_{jt}, \quad j \in N,\ t \in \calT, \qquad y^{\pm} \geq 0,
+\end{align*}
+where $y_{jt}^+$ is the stock of product $j$ at the end of period $t$ (the initial
+stock $y_{j0}^+$ is given) and $y_{jt}^-$ the amount bought from the external source
+in period $t$. All the costs are nonnegative.
+\begin{enumerate}[(a)]
+\item Which decisions are made here and now, and which are recourse decisions?
+What information may each recourse decision use?
+\item Suppose that buying ahead never pays:
+$\delta_{jt}^- + \delta_{jt}^+ \geq \delta_{j,t+1}^-$ for every $j$ and $t < H$.
+Show that, for a fixed production plan, buying only the deficit,
+\[
+y_{jt}^- = \max\lbrace 0,\ \omega_{jt} - x_{jt} - y_{j,t-1}^+ \rbrace, \qquad
+y_{jt}^+ = \max\lbrace 0,\ y_{j,t-1}^+ + x_{jt} - \omega_{jt} \rbrace,
+\]
+is optimal in every scenario. What does this imply for the nonanticipativity
+constraints of the extensive form?
+\item Take one product, two periods, no production ($b = U = 0$, hence $x = 0$),
+no initial stock, $\omega_1 = 0$, and $\omega_2 = 0$ or $10$ with probability
+$1/2$; the purchase costs are $\delta_1^- = 1$ and $\delta_2^- = 4$, the storage
+costs $\delta_1^+ = \delta_2^+ = 0.5$. Compute the optimal purchase in period~1
+with nonanticipativity and with perfect information, and the cost of the policy
+of (b). Conclude.
+\item The balance of period $t$ involves $x_{jt}$, decided at the first stage, and
+$y_{j,t-1}^+$, decided at the previous stage. Write the problem in the form of the
+multistage linear programs of deck~06, written here
+$W_t X_t = h_t(\xi_t) - T_{t-1}(\xi_t) X_{t-1}$ with $X_t$ the decisions of stage $t$
+($x$ being the production), in which each stage depends on the previous one only.
+Where does the randomness enter?
+\item (Optional, Julia.) Write a builder for \texttt{code/nested\_benders.jl}, and
+solve a small instance on a scenario tree; compare with the extensive form.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} The production plan $x_{jt}$, the extra resources $u_{it}$ and the
+workforce changes $z_t^{\pm}$ are decided here and now, for every period. The
+stocks and purchases $y_{jt}^{\pm}$ are recourse decisions, made in period $t$ once
+$\omega_{1}, \ldots, \omega_{t}$ are known: they may use the demands observed so
+far, not the future ones. With the demands revealed period by period, there are
+$H + 1$ stages, the first one covering the whole plan.
+
+\textbf{(b)} Fix $x$, a scenario, and a product (dropped from the notation). The
+recourse problem is a bounded linear program (its costs are nonnegative), so it
+has an optimal solution $y$. Suppose that $y_t^- > 0$ and $y_t^+ > 0$ in some
+period $t$, i.e., that a unit is bought and stored, and let
+$\varepsilon = \min\lbrace y_t^-, y_t^+ \rbrace$. Decrease $y_t^-$ and $y_t^+$ by
+$\varepsilon$: the balance of period $t$ still holds. If $t < H$, the stock entering
+period $t + 1$ has dropped by $\varepsilon$; increase $y_{t+1}^-$ by $\varepsilon$
+to restore the balance of period $t+1$. The cost changes by
+$\varepsilon(\delta_{t+1}^- - \delta_t^- - \delta_t^+) \leq 0$, or by
+$-\varepsilon(\delta_H^- + \delta_H^+) \leq 0$ if $t = H$: the solution stays
+optimal. Applying this exchange for $t = 1, \ldots, H$ in turn (the exchange at $t$
+only modifies periods $t$ and $t + 1$) gives an optimal solution with
+$y_t^- y_t^+ = 0$ for every $t$. Together with the balance
+$y_t^+ - y_t^- = y_{t-1}^+ + x_t - \omega_t$, this determines $y$ uniquely: these
+are the formulas of the statement.
+
+These formulas only use $\omega_1, \ldots, \omega_t$: the decisions that are optimal
+with perfect information are already nonanticipative. The nonanticipativity
+constraints of the extensive form are therefore not binding: the recourse
+function can be computed scenario by scenario, and the problem behaves like a
+two-stage problem with a closed-form recourse.
+
+\textbf{(c)} Period 1 has no demand, so a purchase $q = y_1^-$ is stored:
+$y_1^+ = q$, at the cost $1.5\,q$. In period 2, the stock covers the demand up to $q$,
+the deficit costs $4$ per unit and the leftovers $0.5$.
+\begin{itemize}
+\item Perfect information: if $\omega_2 = 10$, buying $q = 10$ in period 1 costs
+$15$, against $40$ in period 2; if $\omega_2 = 0$, $q = 0$ costs nothing. The
+expected cost is $7.5$, with a purchase that depends on $\omega_2$.
+\item Nonanticipativity: $q$ cannot depend on $\omega_2$. For $0 \leq q \leq 10$,
+the expected cost is
+$1.5\,q + \tfrac{1}{2}\, 4(10 - q) + \tfrac{1}{2}\, 0.5\,q = 20 - 0.25\,q$, and it
+grows for $q > 10$; the optimum is $q = 10$, at the cost $17.5$.
+\item Policy of (b), buying only the deficit: $q = 0$, at the cost
+$\tfrac{1}{2} \cdot 40 = 20$.
+\end{itemize}
+Here buying ahead pays, $\delta_1^- + \delta_1^+ = 1.5 < 4 = \delta_2^-$, and the
+assumption of (b) fails. The nonanticipativity constraint is binding: the optimal
+purchase is a hedge, worse than the perfect-information decisions (the expected
+value of perfect information is $10$) and better than the myopic policy. Only
+then is the problem genuinely multistage.
+
+\textbf{(d)} The demands of period $t$ are observed before stage $t + 1$:
+$\xi_{t+1} = \omega_{\cdot t}$, and there are $H + 1$ stages, as in the financial
+example. Stage 1 decides the plan, with slack variables for the inequalities:
+$X_1 = (x, u, z^+, z^-, \text{slacks})$, $c_1 = (\alpha, \beta, \gamma^+, \gamma^-, 0)$,
+and $W_1$, $h_1$ collect the capacity, the bounds on $u$ and the workforce balance.
+The balance of period $t$ involves $x_{\cdot t}$, decided two or more stages before
+stage $t + 1$ when $t \geq 2$: the form of the deck requires to carry it. Let stage
+$t + 1$ decide
+\[
+X_{t+1} = \left( y_{\cdot t}^+,\ y_{\cdot t}^-,\ p_t \right),
+\qquad p_t = (x_{\cdot, t+1}, \ldots, x_{\cdot H}),
+\]
+the remaining plan, with $c_{t+1} = (\delta_{\cdot t}^+, \delta_{\cdot t}^-, 0)$ and
+the constraints
+\[
+-y_{\cdot t}^+ + y_{\cdot t}^- = \omega_{\cdot t} - y_{\cdot, t-1}^+ - x_{\cdot t},
+\qquad p_t = (x_{\cdot, t+1}, \ldots, x_{\cdot H}),
+\]
+where $x_{\cdot t}$ and the right-hand side of the copy are read from $p_{t-1}$, its
+first block being $x_{\cdot t}$ (from stage 1 when $t = 1$, with the given $y_{\cdot 0}^+$
+moved to $h_2$). Thus $W_{t+1}$ and $T_t$ are deterministic, and the randomness
+enters through $h_{t+1} = (\omega_{\cdot t}, 0)$ only. The state passed from one
+stage to the next is the stock and the remaining plan, of decreasing dimension.
+
+\textbf{(e)} The root builder creates $x$, $u$, $z^{\pm}$ and their constraints, and
+returns the whole plan; the builder of a node of stage $t + 1$ receives
+$x_{\mathrm{in}} = (y_{\cdot, t-1}^+, p_{t-1})$, creates $y_{\cdot t}^{\pm}$ and $p_t$,
+adds the balance and the copy constraints, sets the stage cost, and returns
+$(y_{\cdot t}^+, p_t)$. The function \texttt{extensive\_form} of the same file gives
+the reference value. With costs as in (c), the nested decomposition finds the
+hedge; with costs satisfying (b), the purchases are the deficits.
+\end{solution}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Random number generation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

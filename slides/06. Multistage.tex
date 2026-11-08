@@ -10,7 +10,7 @@
 \usepackage{amsmath,amssymb}
 
 \usepackage{tikz}
-\usetikzlibrary{positioning}
+\usetikzlibrary{positioning,decorations.pathreplacing}
 
 \usepackage{times}
 
@@ -75,6 +75,41 @@
       \draw[line width=0.7pt] (2.04,\r-0.24) -- (2.04,\rr+0.24);
     }
     \foreach \x/\t in {0/1,2/2,4/3} { \node[font=\scriptsize] at (\x,-0.8) {$t = \t$}; }
+  \end{tikzpicture}}
+
+% Nodal formulation on the tree of the financial example (H = 3 periods, two
+% outcomes per period): one decision vector per node, one pair (y_s, w_s) per
+% leaf; node 5, its parent 2 and the leaf s = 4 are highlighted.
+\newcommand{\nodaltree}{%
+  \begin{tikzpicture}[scale=0.55,
+      nd/.style={circle,draw,line width=0.7pt,minimum size=5.4mm,inner sep=0pt,font=\scriptsize},
+      lf/.style={rectangle,draw,line width=0.6pt,minimum size=3.4mm,inner sep=0pt,font=\tiny},
+      hl/.style={draw=red,line width=1.3pt},
+      ed/.style={line width=0.6pt}]
+    \node[nd] (n1) at (0,0) {$x_1$};
+    \node[nd,hl] (n2) at (2.6,2) {$x_2$};
+    \node[nd] (n3) at (2.6,-2) {$x_3$};
+    \node[nd] (n4) at (5.2,3) {$x_4$};
+    \node[nd,hl] (n5) at (5.2,1) {$x_5$};
+    \node[nd] (n6) at (5.2,-1) {$x_6$};
+    \node[nd] (n7) at (5.2,-3) {$x_7$};
+    \foreach \s/\p/\y in {1/4/3.5,2/4/2.5,3/5/1.5,4/5/0.5,5/6/-0.5,6/6/-1.5,7/7/-2.5,8/7/-3.5} {
+      \node[lf] (s\s) at (7.8,\y) {$\s$};
+      \draw[ed] (n\p) -- (s\s);
+    }
+    \draw[ed] (n1) -- (n2);
+    \draw[ed] (n1) -- (n3);
+    \draw[ed] (n2) -- (n4);
+    \draw[ed] (n3) -- (n6);
+    \draw[ed] (n3) -- (n7);
+    \draw[red,line width=1.3pt] (n2) -- node[above,font=\scriptsize,text=red] {$\omega_{k}$} (n5);
+    \node[lf,hl] at (s4) {$4$};
+    \draw[red,line width=1.3pt] (n5) -- node[below,font=\scriptsize,text=red] {$\omega_{s}$} (s4);
+    \draw[decorate,decoration={brace,amplitude=4pt},line width=0.6pt]
+      (8.5,3.75) -- node[right=5pt,font=\scriptsize,align=left] {share\\$x_1$, $x_2$} (8.5,0.25);
+    \foreach \x/\t in {0/{$t = 1$},2.6/{$t = 2$},5.2/{$t = 3$},7.8/{$(y_s, w_s)$}} {
+      \node[font=\scriptsize] at (\x,-4.4) {\t};
+    }
   \end{tikzpicture}}
 
 % Nested decomposition: trial decisions go down the tree, cuts go up.
@@ -338,144 +373,46 @@ Fewer variables, $|N|\,|\calL|$ instead of $|N|\,H\,|S|$, and no nonanticipativi
 \end{frame}
 
 \begin{frame}
-\frametitle{Multi-period production planning}
+\frametitle{Nodal formulation on the scenario tree}
 
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\begin{center}
+\nodaltree
+\end{center}
+\end{column}
+\begin{column}{0.51\textwidth}
+\small
+Financial example, $H = 3$ periods, two outcomes per period.
 \begin{itemize}
-\item
-A firm produces several goods over several periods.
-\item
-Production uses resources (for instance, labor and machine hours); the amount of each resource needed per unit of each product is known.
-\item
-The demand of each period is random, and must be met: missing products are bought from an external source, and unsold ones are stored. Both have a cost.
-\item
-Additional resources (overtime, machine hours) can be bought, within limits.
-\item
-Changes in the workforce from one period to the next have a cost (hiring, firing).
+\item One vector $x_k$ per node $k \in \calL$ (7 nodes), one pair $(y_s, w_s)$ per leaf $s \in S$ (8 scenarios).
+\item Node $k = 5$ reinvests the wealth of its parent $a(k) = 2$: \(\sum_i \omega_{ik}\, x_{i,a(k)} = \sum_i x_{ik}\).
+\item Leaf $s = 4$ checks the goal: \(\sum_i \omega_{is}\, x_{i,a(s)} - y_s + w_s = G\).
+\item Scenarios 1 to 4 share $x_1$ and $x_2$: nonanticipativity is built in.
+\item $7\,|N|$ investment variables, against $H\,|S|\,|N| = 24\,|N|$ in the scenario formulation.
 \end{itemize}
+\end{column}
+\end{columns}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Decision problem}
+\frametitle{Another example: multi-period production planning}
 
 \begin{itemize}
 \item
-We decide now, for every period:
-\begin{itemize}
+A firm produces several goods over $H$ periods, with limited resources (labor, machine hours), extra resources that can be bought, and a cost for changing the workforce.
 \item
-the quantity of each product to manufacture;
+The demand of each period is random and must be met: missing products are bought from an external source, unsold ones are stored, both at a cost.
 \item
-the additional resources to use;
+{\red Here and now}: the production plan of every period, the extra resources, the hiring and firing.
+{\red Recourse}: in each period, once its demand is known, how much to store and how much to buy; these decisions may only use the demands observed so far.
 \item
-the hiring and firing of staff.
-\end{itemize}
-\item
-At each period, the random demand is observed.
-\item
-Then, we decide how much to store, and how much to buy from the external source.
+Nonanticipativity only constrains the recourse if buying ahead can pay, for instance when purchase prices rise faster than storage costs.
+Otherwise, buying the deficit is optimal whatever the future demands, and the problem behaves like a two-stage problem.
 \end{itemize}
 
-\mbox{}
-
-The production plan is decided once, but the storage and purchase decisions of period $t$ may only use the demands of periods $1, \ldots, t$: the problem is {\red multistage}.
-
-\medskip
-
-This matters when buying ahead can pay, for instance if purchase prices rise faster than storage costs: how much to buy and store then depends on the forecast of the future demands.
-If buying ahead never pays, buying only the deficit is optimal, whatever the future demands.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Sets and variables}
-
-\begin{enumerate}
-\item
-{\red Sets}:
-\begin{itemize}
-\item
-$\calT = \lbrace 1, \ldots, H \rbrace$: periods;
-\item
-$N$: products;
-\item
-$M$: resources; $L \in M$ is the labor.
-\end{itemize}
-\item
-{\red Variables}:
-\begin{itemize}
-\item
-$x_{jt}$: production of product $j \in N$ in period $t \in \calT$;
-\item
-$u_{it}$: additional amount of resource $i \in M$ bought for period $t$;
-\item
-$z_t^+$, $z_t^-$: increase and decrease of the workforce from period $t-1$ to period $t$, the workforce being the labor required by the production;
-\item
-$y_{jt}^+$: surplus of product $j$ at the end of period $t$, stored; $y_{jt}^-$: deficit, bought from the external source.
-\end{itemize}
-\end{enumerate}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Parameters}
-
-\begin{itemize}
-\item
-$\alpha_{jt}$, $\beta_{it}$, $\gamma_t^+$, $\gamma_t^-$, $\delta_{jt}^+$, $\delta_{jt}^-$: unit costs of the variables above;
-\item
-$\omega_{jt}$: random demand of product $j \in N$ in period $t \in \calT$;
-\item
-$a_{ij}$: amount of resource $i \in M$ required to produce one unit of product $j \in N$;
-\item
-$b_{it}$: amount of resource $i \in M$ available in period $t \in \calT$;
-\item
-$U_{it}$: upper bound on $u_{it}$;
-\item
-$y_{j0}^+$: initial inventory of product $j$.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Model}
-
-{\small
-\begin{multline*}
-\min \sum_{j \in N} \sum_{t \in \calT} \alpha_{jt} x_{jt} + \sum_{i \in M}
-\sum_{t \in \calT} \beta_{it} u_{it} + \sum_{t=2}^{H} \left(
-  \gamma^+_t z^+_t + \gamma^-_t z^-_t \right) \\
-+ \EE_{\bsomega} \left[ \min \sum_{j \in N} \sum_{t \in \calT}
-    \left( \delta_{jt}^+y_{jt}^+ + \delta_{jt}^-y_{jt}^- \right) \right]
-\end{multline*}
-\begin{align*}
-\mbox{s.t. } \sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it}, \quad 0 \leq u_{it} \leq U_{it}, \quad \forall i \in M,\ t \in \calT,\\
-z^+_t - z^-_t &= \sum_{j \in N} a_{Lj}(x_{jt} - x_{j,t-1}), \quad t = 2, \ldots, H, \qquad x, z^{\pm} \geq 0, \\
-x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt}, \quad \forall j \in N,\ t \in \calT, \qquad y^{\pm} \geq 0.
-\end{align*}
-Last constraints: demand satisfaction (inventory balance).
-Inner $\min$: $y_{jt}^{\pm}$ depends only on the demands up to period $t$.
-}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Extensive form of the recourse model}
-
-{\small
-\begin{multline*}
-\min \sum_{j \in N} \sum_{t \in \calT} \alpha_{jt} x_{jt} + \sum_{i \in M}
-\sum_{t \in \calT} \beta_{it} u_{it} + \sum_{t=2}^{H} \left(
-  \gamma^+_t z^+_t + \gamma^-_t z^-_t \right) \\
-+ {\red \sum_{s \in S} p_s} \sum_{j \in N} \sum_{t \in \calT}
-    \left( \delta_{jt}^+y_{jt{\red s}}^+ + \delta_{jt}^-y_{jt{\red s}}^- \right)
-\end{multline*}
-\begin{align*}
-\mbox{s.t. } \sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it}, \quad 0 \leq u_{it} \leq U_{it}, \quad \forall i \in M,\ t \in \calT,\\
-z^+_t - z^-_t &= \sum_{j \in N} a_{Lj}(x_{jt} - x_{j,t-1}), \quad t = 2, \ldots, H, \qquad x, z^{\pm} \geq 0, \\
-x_{jt} + y_{j,t-1,{\red s}}^+ - y_{jt{\red s}}^+ + y_{jt{\red s}}^- &= \omega_{jt{\red s}}, \quad \forall j \in N,\ t \in \calT,\ {\red s \in S}, \qquad y^{\pm} \geq 0, \\
-{\red y_{jts}^{\pm}} &{\red = y_{jts'}^{\pm}} \quad \text{if } s \text{ and } s' \text{ have the same demands up to period } t.
-\end{align*}
-}
+{\small The model, these two cases, and its writing as a multistage linear program are an exercise (exercise collection, section ``Multistage problems'').}
 
 \end{frame}
 
