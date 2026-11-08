@@ -971,22 +971,22 @@ the new incumbent, but we already know it is not the answer and must keep going.
 (Decks~06 and~08; Heitsch, Römisch and Strugarek, \emph{Stability of multistage
 stochastic programs}, SIAM Journal on Optimization 17(2):511--525, 2006.)
 Consider the stylized multistage program below, seeking an optimal purchasing
-strategy under uncertain costs $\bsxi_t$ over the periods $t = 0,\ldots,T$. The
+strategy under uncertain costs $\bsxi_t$ over the stages $t = 1,\ldots,H$. The
 amounts purchased are $x_t$, and a prescribed amount $a$ must be reached at the
-horizon $T$:
+horizon $H$:
 \begin{align*}
-\min_{x}\ & \EE\left[ \sum_{t=0}^T \bsxi_t x_t \right], \\
-\text{s.t. } & s_t - s_{t-1} = x_t, \quad t = 0,\ldots,T, \\
-& s_{-1} = 0, \quad s_T = a, \quad x_t \geq 0, \quad s_t \geq 0,
+\min_{x}\ & \EE\left[ \sum_{t=1}^H \bsxi_t x_t \right], \\
+\text{s.t. } & s_t - s_{t-1} = x_t, \quad t = 1,\ldots,H, \\
+& s_0 = 0, \quad s_H = a, \quad x_t \geq 0, \quad s_t \geq 0,
 \end{align*}
-where $s_t$ is a state variable holding the amount accumulated at time $t$.
+where $s_t$ is a state variable holding the amount accumulated at the end of stage $t$.
 
-Take three stages ($t = 0, 1, 2$), a binary tree, and $\xi_0 = 10$; the cost goes
+Take three stages ($t = 1, 2, 3$), a binary tree, and $\xi_1 = 10$; the cost goes
 up by $1$ with probability $0.6$ and down by $1$ with probability $0.4$.
 \begin{enumerate}[(a)]
 \item Draw the scenario tree.
 \item Write the problem (i) in extensive form, (ii) using a scenario decomposition.
-\item In which of the two formulations must non-anticipativity constraints be
+\item In which of the two formulations must nonanticipativity constraints be
 written explicitly?
 \end{enumerate}
 \end{exercise}
@@ -1015,56 +1015,56 @@ written explicitly?
   \node[right,font=\scriptsize] at (7.0,0.95) {$s = 3$, $p = 0.24$};
   \node[right,font=\scriptsize] at (7.0,-0.95){$s = 2$, $p = 0.24$};
   \node[right,font=\scriptsize] at (7.0,-2.8) {$s = 1$, $p = 0.16$};
-  \node[font=\scriptsize,below] at (0,-3.6)   {$t = 0$};
-  \node[font=\scriptsize,below] at (3.2,-3.6) {$t = 1$};
-  \node[font=\scriptsize,below] at (6.4,-3.6) {$t = 2$};
+  \node[font=\scriptsize,below] at (0,-3.6)   {$t = 1$};
+  \node[font=\scriptsize,below] at (3.2,-3.6) {$t = 2$};
+  \node[font=\scriptsize,below] at (6.4,-3.6) {$t = 3$};
 \end{tikzpicture}
 \end{center}
 
 \textbf{(b)(i) Extensive form.} Attach one decision to each \emph{node} of the
-tree: $x_0$ at the root, $x_{1,1}$, $x_{1,2}$ at stage 1, and
-$x_{2,1}, \ldots, x_{2,4}$ at stage 2, with the states $s$ indexed likewise.
+tree: $x_1$ at the root, $x_{2,1}$, $x_{2,2}$ at stage 2, and
+$x_{3,1}, \ldots, x_{3,4}$ at stage 3, with the states $s$ indexed likewise.
 Writing the cost of a node times the probability of reaching it,
 \begin{align*}
-\min\ & 10x_0
- + 0.4\left(9x_{1,1} + 0.4 \cdot 8 x_{2,1} + 0.6 \cdot 10 x_{2,2}\right)
- + 0.6\left(11x_{1,2} + 0.4 \cdot 10 x_{2,3} + 0.6 \cdot 12 x_{2,4}\right) \\
-\text{s.t. } & s_0 = x_0, \\
-& s_{1,1} = s_0 + x_{1,1}, \qquad s_{1,2} = s_0 + x_{1,2}, \\
-& s_{2,1} = s_{1,1} + x_{2,1}, \quad s_{2,2} = s_{1,1} + x_{2,2}, \quad
-  s_{2,3} = s_{1,2} + x_{2,3}, \quad s_{2,4} = s_{1,2} + x_{2,4}, \\
-& s_{2,j} = a, \quad j = 1,\ldots,4, \\
+\min\ & 10x_1
+ + 0.4\left(9x_{2,1} + 0.4 \cdot 8 x_{3,1} + 0.6 \cdot 10 x_{3,2}\right)
+ + 0.6\left(11x_{2,2} + 0.4 \cdot 10 x_{3,3} + 0.6 \cdot 12 x_{3,4}\right) \\
+\text{s.t. } & s_1 = x_1, \\
+& s_{2,1} = s_1 + x_{2,1}, \qquad s_{2,2} = s_1 + x_{2,2}, \\
+& s_{3,1} = s_{2,1} + x_{3,1}, \quad s_{3,2} = s_{2,1} + x_{3,2}, \quad
+  s_{3,3} = s_{2,2} + x_{3,3}, \quad s_{3,4} = s_{2,2} + x_{3,4}, \\
+& s_{3,j} = a, \quad j = 1,\ldots,4, \\
 & x \geq 0, \quad s \geq 0,
 \end{align*}
-where node $(1,1)$ carries $\xi_1 = 9$ and node $(1,2)$ carries $\xi_1 = 11$.
+where node $(2,1)$ carries $\xi_2 = 9$ and node $(2,2)$ carries $\xi_2 = 11$.
 
 \textbf{(b)(ii) Scenario decomposition.} Attach instead one full decision path to
-each \emph{scenario}: $x_t^{(s)}$ and $s_t^{(s)}$, $t = 0,1,2$, $s = 1,\ldots,4$.
+each \emph{scenario}: $x_t^{(s)}$ and $s_t^{(s)}$, $t = 1,2,3$, $s = 1,\ldots,4$.
 With $p = (0.16, 0.24, 0.24, 0.36)$ and the cost paths $(10,9,8)$, $(10,9,10)$,
 $(10,11,10)$, $(10,11,12)$,
 \begin{align*}
-\min\ & 0.16\left(10x_0^{(1)} + 9x_1^{(1)} + 8x_2^{(1)}\right)
-      + 0.24\left(10x_0^{(2)} + 9x_1^{(2)} + 10x_2^{(2)}\right) \\
-& + 0.24\left(10x_0^{(3)} + 11x_1^{(3)} + 10x_2^{(3)}\right)
-  + 0.36\left(10x_0^{(4)} + 11x_1^{(4)} + 12x_2^{(4)}\right) \\
-\text{s.t. } & s_0^{(s)} = x_0^{(s)}, \quad
- s_t^{(s)} = s_{t-1}^{(s)} + x_t^{(s)}, \quad t = 1,2, \quad s = 1,\ldots,4, \\
-& s_2^{(s)} = a, \quad x_t^{(s)} \geq 0, \quad s_t^{(s)} \geq 0, \\
-& x_0^{(1)} = x_0^{(2)} = x_0^{(3)} = x_0^{(4)}, & \text{(non-anticipativity, $t=0$)} \\
-& x_1^{(1)} = x_1^{(2)}, \qquad x_1^{(3)} = x_1^{(4)}. & \text{(non-anticipativity, $t=1$)}
+\min\ & 0.16\left(10x_1^{(1)} + 9x_2^{(1)} + 8x_3^{(1)}\right)
+      + 0.24\left(10x_1^{(2)} + 9x_2^{(2)} + 10x_3^{(2)}\right) \\
+& + 0.24\left(10x_1^{(3)} + 11x_2^{(3)} + 10x_3^{(3)}\right)
+  + 0.36\left(10x_1^{(4)} + 11x_2^{(4)} + 12x_3^{(4)}\right) \\
+\text{s.t. } & s_1^{(s)} = x_1^{(s)}, \quad
+ s_t^{(s)} = s_{t-1}^{(s)} + x_t^{(s)}, \quad t = 2,3, \quad s = 1,\ldots,4, \\
+& s_3^{(s)} = a, \quad x_t^{(s)} \geq 0, \quad s_t^{(s)} \geq 0, \\
+& x_1^{(1)} = x_1^{(2)} = x_1^{(3)} = x_1^{(4)}, & \text{(nonanticipativity, $t=1$)} \\
+& x_2^{(1)} = x_2^{(2)}, \qquad x_2^{(3)} = x_2^{(4)}. & \text{(nonanticipativity, $t=2$)}
 \end{align*}
 
 \textbf{(c)} Only in the scenario decomposition. The extensive form attaches one
 variable per \emph{node}, so two scenarios that are indistinguishable at time $t$
-automatically share the same decision: non-anticipativity is built into the
+automatically share the same decision: nonanticipativity is built into the
 indexing. The scenario decomposition duplicates the decisions along each path,
 which is what makes the problem separable by scenario, and the coupling must
 then be restored explicitly. Those are precisely the constraints that deck~08
 dualizes, with multipliers $\pi$, and that progressive hedging enforces
 iteratively.
 
-Note the pattern: at $t = 2$ the four scenarios are all distinguishable, so no
-constraint is needed; at $t = 1$ they form two groups; at $t = 0$ a single one.
+Note the pattern: at $t = 3$ the four scenarios are all distinguishable, so no
+constraint is needed; at $t = 2$ they form two groups; at $t = 1$ a single one.
 \end{solution}
 
 \begin{exercise}\label{ex:production-planning}
