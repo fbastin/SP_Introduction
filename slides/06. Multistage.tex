@@ -317,7 +317,7 @@ Nonanticipativity is then built in: all the scenarios going through a node share
 \item
 $\calL$: set of decision nodes, with root $1$; the leaves are the scenarios $s \in S$.
 \item
-$a(\ell)$: parent of node $\ell$ (or of leaf $s$), i.e., its ancestor at the previous stage; $\omega_{i\ell}$: return of asset $i$ on the branch from $a(\ell)$ to $\ell$.
+$a(k)$: parent of node $k$ (or of leaf $s$), i.e., its ancestor at the previous stage; $\omega_{ik}$: return of asset $i$ on the branch from $a(k)$ to $k$.
 \item
 Fewer variables, $|N|\,|\calL|$ instead of $|N|\,H\,|S|$, and no nonanticipativity constraint.
 \end{itemize}
@@ -330,9 +330,9 @@ Fewer variables, $|N|\,|\calL|$ instead of $|N|\,H\,|S|$, and no nonanticipativi
 \begin{align*}
 \max\ & \sum_{s \in S} p_s (qy_s - rw_s) \\
 \mbox{s.t. } & \sum_{i \in N} x_{i1} = b, \\
-& \sum_{i \in N} \omega_{i\ell}\, x_{i,a(\ell)} = \sum_{i \in N} x_{i\ell}, \quad \forall \ell \in \calL \setminus \lbrace 1 \rbrace, \\
+& \sum_{i \in N} \omega_{ik}\, x_{i,a(k)} = \sum_{i \in N} x_{ik}, \quad \forall k \in \calL \setminus \lbrace 1 \rbrace, \\
 & \sum_{i \in N} \omega_{is}\, x_{i,a(s)} - y_s + w_s = G, \quad \forall s \in S, \\
-& x_{i\ell} \geq 0, \quad i \in N,\ \ell \in \calL, \qquad y_s, w_s \geq 0, \quad s \in S.
+& x_{ik} \geq 0, \quad i \in N,\ k \in \calL, \qquad y_s, w_s \geq 0, \quad s \in S.
 \end{align*}
 
 \end{frame}
@@ -583,7 +583,7 @@ Node $k$ at stage $t$, {\red master} of its children and {\red subproblem} of it
 \item
 $c_{t,k}$, $h_{t,k}$, $T_{t-1,k}$: values of $c_t$, $h_t$, $T_{t-1}$ at node $k$; $\hat{x}_{t-1,a(k)}$: trial decision of the parent; $r_{t,k}$, $s_{t,k}$: numbers of cuts received so far;
 \item
-$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$; bounded below until its first optimality cut, as in the L-shaped method; $\theta_{H,k} \equiv 0$.
+$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$; bounded below until its first optimality cut, like $\theta^0$ in the L-shaped method; $\theta_{H,k} \equiv 0$.
 \end{itemize}
 \end{small}
 
@@ -642,12 +642,13 @@ None is needed with relatively complete recourse, as in the financial example.
 \begin{column}{0.62\textwidth}
 \small
 {\red Forward pass}: solve the first-stage problem, send $\hat{x}_1$ to its children, solve them, and so on down to stage $H$.
-If every problem is feasible, these trial decisions form a nonanticipative policy, whose expected cost is an {\red upper bound}.
+An infeasible node sends a feasibility cut to its parent, and a new forward pass starts.
+Otherwise, the trial decisions form a nonanticipative policy, whose expected cost is an {\red upper bound}.
 
 \medskip
 
-{\red Backward pass}: for $t = H, \ldots, 2$, the nodes of stage $t$ send cuts to their parents (a feasibility cut if one is infeasible), and the parents are solved again with these cuts.
-The first-stage value is then a {\red lower bound}.
+{\red Backward pass}: for $t = H, \ldots, 2$, the nodes of stage $t$ send optimality cuts to their parents, solved again with these cuts.
+The first-stage value is a {\red lower bound}.
 
 \medskip
 

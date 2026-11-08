@@ -125,7 +125,7 @@ At node $k = 1, \ldots, N_t$ of stage $t$, nested decomposition solves the probl
 \begin{itemize}
 \item
 $NLSD$: nested L-shaped decomposition subproblem; $N_t$: number of nodes at stage $t$; $a(k)$:
-ancestor of node $k$; $\theta_{t,k}$: approximation of the expected cost-to-go, bounded below until
+parent of node $k$; $\theta_{t,k}$: approximation of the expected cost-to-go, bounded below until
 its first cut (by $0$ if the costs are nonnegative), $\theta_{H,k} \equiv 0$.
 \item
 Forward pass: the trial decisions go down the tree. Backward pass: for $t = H, \ldots, 2$, the
@@ -228,7 +228,7 @@ stage $t$.
 	\item
 Forward pass: $M_1 + M_1 \times M_2 + \ldots = \sum_{t = 1}^H \prod_{j = 1}^t M_j$ linear programs;
 	\item
-Backward pass:  $\sum_{t = 2}^{H} \prod_{j = 1}^t M_j$ linear programs.
+Backward pass: $\sum_{t = 1}^{H-1} \prod_{j = 1}^t M_j$ linear programs, the nodes with children solved again with their new cuts.
 \end{itemize}
 The effort grows \textcolor{red}{exponentially} with the horizon.
 \end{small}

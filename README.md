@@ -60,7 +60,7 @@ SP_Introduction/
     ├── portfolio_prices.csv                  # Daily ETF prices 2015-2024 (Yahoo Finance), data of the SAA notebook
     ├── nested_benders.jl, nested_benders.ipynb  # Nested Benders decomposition step by step, nodes written in JuMP (deck 06)
     ├── SDDP_from_scratch.ipynb               # SDDP step by step (deck 07)
-    ├── SDDP_hydro.ipynb                      # Hydro-thermal examples with SDDP.jl (deck 07)
+    ├── SDDP_hydro.ipynb                      # SDDP.jl: FAST, the instance of SDDP_from_scratch, an infinite horizon (deck 07)
     ├── simulation_callcenter.ipynb           # Call-centre simulation (deck 12)
     ├── simulation_portfolio.ipynb            # Portfolio simulation (decks 10, 12)
     ├── StochasticPrograms/                   # Julia project (fork of StochasticPrograms.jl): Farmer and L-shaped examples, and newsvendor.ipynb
