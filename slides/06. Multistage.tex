@@ -142,7 +142,7 @@ $w$: shortfall at the end of the horizon.
 
 \mbox{}
 
-The decisions $x_{i2}, \ldots, x_{iH}$ rebalance the portfolio: they are corrective actions toward the goal $G$.
+When the returns are random, $x_{i2}, \ldots, x_{iH}$ are decided after observing the returns of the previous periods: they rebalance the portfolio, and are recourse actions toward the goal $G$.
 
 \end{frame}
 
@@ -173,7 +173,7 @@ Assume that, in each period $t$, the vector of returns $(\omega_{it})_{i \in N}$
 A scenario is a sequence of realizations, one per period: there are $R^H$ scenarios.
 \end{itemize}
 
-Example: $R = 4$ and $H = 2$, hence 16 scenarios:
+Example: $R = 4$ and $H = 2$, hence 16 scenarios (one per row; each entry is the index of the realization in that period):
 \begin{small}
 \begin{center}
 \begin{tabular}{cc}
@@ -241,7 +241,7 @@ The scenarios can have different probabilities, and the returns of successive pe
 \end{frame}
 
 \begin{frame}
-\frametitle{Non-anticipativity}
+\frametitle{Nonanticipativity}
 
 \begin{itemize}
 \item
@@ -249,7 +249,7 @@ Converting the deterministic model into the stochastic version is easy\ldots
 \item
 but the resulting model is {\red wrong}: $x_{its}$ may depend on the whole scenario $s$, including the returns of periods $t, \ldots, H$, unknown when $x_{its}$ is decided. The model sees the future.
 \item
-We have to enforce {\red non-anticipativity}: a decision may only depend on the information available when it is made.
+We have to enforce {\red nonanticipativity}: a decision may only depend on the information available when it is made.
 \end{itemize}
 
 Let $S_s^t$ be the set of scenarios identical to $s$ up to period $t-1$, i.e., indistinguishable from $s$ when the decisions of period $t$ are made ($S_s^1 = S$).
@@ -262,7 +262,7 @@ The final $y_s$ and $w_s$ are decided once everything is known: they need no suc
 \end{frame}
 
 \begin{frame}
-\frametitle{Non-anticipativity (cont'd)}
+\frametitle{Nonanticipativity (cont'd)}
 
 Equivalently, as every $p_s > 0$,
 \[
@@ -284,7 +284,7 @@ There are many other formulations, for instance equalities between consecutive s
 \begin{frame}
 \frametitle{Back to the scenario tree}
 
-In the scenario formulation, each decision is copied once per scenario, and non-anticipativity ties the copies together.
+In the scenario formulation, each decision is copied once per scenario, and nonanticipativity ties the copies together.
 
 \medskip
 
@@ -302,7 +302,7 @@ In the scenario formulation, each decision is copied once per scenario, and non-
 
 \medskip
 
-{\small Right: one row per scenario, one column per period; a double bar is an equality $x_{its} = x_{its'}$ between two consecutive scenarios.}
+{\small Left: six scenarios, three periods. Right: one row per scenario, one column per period; a double bar is an equality $x_{its} = x_{its'}$.}
 
 \end{frame}
 
@@ -313,13 +313,13 @@ In the scenario formulation, each decision is copied once per scenario, and non-
 \item
 Alternatively, define one vector of decisions per node of the tree: the decision made given the realizations observed up to this node.
 \item
-Non-anticipativity is then built in: all the scenarios going through a node share its decision.
+Nonanticipativity is then built in: all the scenarios going through a node share its decision.
 \item
 $\calL$: set of decision nodes, with root $1$; the leaves are the scenarios $s \in S$.
 \item
 $a(\ell)$: parent of node $\ell$ (or of leaf $s$), i.e., its ancestor at the previous stage; $\omega_{i\ell}$: return of asset $i$ on the branch from $a(\ell)$ to $\ell$.
 \item
-Fewer variables, $|N|\,|\calL|$ instead of $|N|\,H\,|S|$, and no non-anticipativity constraint.
+Fewer variables, $|N|\,|\calL|$ instead of $|N|\,H\,|S|$, and no nonanticipativity constraint.
 \end{itemize}
 
 \end{frame}
@@ -379,6 +379,11 @@ Then, we decide how much to store, and how much to buy from the external source.
 
 The production plan is decided once, but the storage and purchase decisions of period $t$ may only use the demands of periods $1, \ldots, t$: the problem is {\red multistage}.
 
+\medskip
+
+This matters when buying ahead can pay, for instance if purchase prices rise faster than storage costs: how much to buy and store then depends on the forecast of the future demands.
+If buying ahead never pays, buying only the deficit is optimal, whatever the future demands.
+
 \end{frame}
 
 \begin{frame}
@@ -403,7 +408,7 @@ $x_{jt}$: production of product $j \in N$ in period $t \in \calT$;
 \item
 $u_{it}$: additional amount of resource $i \in M$ bought for period $t$;
 \item
-$z_t^+$, $z_t^-$: increase and decrease of the workforce from period $t-1$ to period $t$;
+$z_t^+$, $z_t^-$: increase and decrease of the workforce from period $t-1$ to period $t$, the workforce being the labor required by the production;
 \item
 $y_{jt}^+$: surplus of product $j$ at the end of period $t$, stored; $y_{jt}^-$: deficit, bought from the external source.
 \end{itemize}
@@ -445,15 +450,16 @@ $y_{j0}^+$: initial inventory of product $j$.
 \begin{align*}
 \mbox{s.t. } \sum_{j \in N} a_{ij} x_{jt} & \leq b_{it}+u_{it}, \quad 0 \leq u_{it} \leq U_{it}, \quad \forall i \in M,\ t \in \calT,\\
 z^+_t - z^-_t &= \sum_{j \in N} a_{Lj}(x_{jt} - x_{j,t-1}), \quad t = 2, \ldots, H, \qquad x, z^{\pm} \geq 0, \\
-x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt}, \quad \forall j \in N,\ t \in \calT, \qquad y^{\pm} \geq 0 \quad \mbox{(demand satisfaction)}.
+x_{jt} + y_{j,t-1}^+ - y_{jt}^+ + y_{jt}^- &= \omega_{jt}, \quad \forall j \in N,\ t \in \calT, \qquad y^{\pm} \geq 0.
 \end{align*}
+Last constraints: demand satisfaction (inventory balance).
 Inner $\min$: $y_{jt}^{\pm}$ depends only on the demands up to period $t$.
 }
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Extended form of the recourse model}
+\frametitle{Extensive form of the recourse model}
 
 {\small
 \begin{multline*}
@@ -474,6 +480,56 @@ x_{jt} + y_{j,t-1,{\red s}}^+ - y_{jt{\red s}}^+ + y_{jt{\red s}}^- &= \omega_{j
 \end{frame}
 
 \begin{frame}
+\frametitle{Multistage linear programs}
+
+A {\red stage} is a decision time.
+Decisions and observations alternate,
+\[
+x_1 \ \to\ \xi_2 \ \to\ x_2 \ \to\ \xi_3 \ \to\ \cdots \ \to\ \xi_H \ \to\ x_H,
+\]
+and $x_t$ may only depend on the history $\xi_{[t]} = (\xi_1, \ldots, \xi_t)$, $\xi_1$ being deterministic.
+Over the horizon $t = 1, \ldots, H$, the multistage stochastic linear program is
+\[
+\min_{x_1 \geq 0}\ c_1^T x_1 + \EE\Bigl[ \min_{x_2 \geq 0} c_2^T x_2 + \EE\bigl[ \cdots + \EE[ \min_{x_H \geq 0} c_H^T x_H ] \bigr] \Bigr]
+\]
+subject to $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2, \ldots, H$ ($c_t$ may also depend on $\xi_t$).
+\begin{itemize}
+\item
+Each expectation is conditional on the history, and each $\min$ over $x_t$ is taken once $\xi_t$ is observed, before $\xi_{t+1}$: the nesting enforces nonanticipativity.
+\item
+For $H = 2$, this is the two-stage recourse problem, with $A = W_1$, $b = h_1$, $y = x_2$, $q = c_2$, $W = W_2$, $h = h_2$, $T = T_1$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Financial planning as a multistage program}
+
+Stages $t = 1, \ldots, H$: the investments $x_t = (x_{it})_{i \in N}$; stage $H + 1$: $x_{H+1} = (y, w)$.
+Between stages $t-1$ and $t$, the returns of period $t-1$ are observed: $\xi_t = (\omega_{i,t-1})_{i \in N}$.
+With $\mathbf{1}$ the vector of ones (maximizing $qy - rw$ is minimizing $-qy + rw$):
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+stage & $c_t$ & $W_t$ & $h_t$ & $T_{t-1}(\xi_t)$ \\
+\hline
+$t = 1$ & $0$ & $\mathbf{1}^T$ & $b$ & -- \\
+$t = 2, \ldots, H$ & $0$ & $\mathbf{1}^T$ & $0$ & $-\xi_t^T$ \\
+$t = H + 1$ & $(-q, r)$ & $(-1, 1)$ & $G$ & $\xi_{H+1}^T$ \\
+\hline
+\end{tabular}
+\end{center}
+For instance, $W_t x_t = h_t - T_{t-1} x_{t-1}$ reads $\mathbf{1}^T x_t = \xi_t^T x_{t-1}$ for $2 \leq t \leq H$: the wealth is reinvested.
+\begin{itemize}
+\item
+$H$ periods, but $H + 1$ stages: the surplus and the shortfall are a last recourse decision, made once all the returns are known.
+\item
+The randomness lies in the technology matrices only.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
 \frametitle{Potential solution techniques}
 
 Adapted from Jalal Kazempour, \url{https://www.jalalkazempour.com/teaching}
@@ -482,12 +538,31 @@ Adapted from Jalal Kazempour, \url{https://www.jalalkazempour.com/teaching}
 \item
 {\red Direct solution}: solve the extensive form with a linear programming solver; its size grows exponentially with the number of stages.
 \item
-{\red Linear decision rules}: restrict each decision to an affine function of the uncertain parameters observed so far.
-This approximation (an upper bound, for a minimization) needs no decomposition: the size of the problem grows only polynomially with the number of stages.
+{\red Linear decision rules}: restrict each decision to an affine function of the uncertain parameters observed so far, which gives an upper bound, for a minimization.
+If the support of $\bsxi$ is a polytope, and the constraints must hold for every $\xi$ in it, duality yields a linear program whose size grows only polynomially with the number of stages (Kuhn, Wiesemann and Georghiou, 2011).
 \item
 {\red Nested decomposition} (nested Benders): fixes the decisions of the earlier stages (complicating variables), and decomposes the problem by node of the tree.
 \item
-{\red Lagrangian relaxation}: relaxes the non-anticipativity constraints (complicating constraints), and decomposes the problem by scenario.
+{\red Lagrangian relaxation}: relaxes the nonanticipativity constraints (complicating constraints), and decomposes the problem by scenario.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Dynamic programming recursion}
+
+Cost-to-go functions, with $\calQ_{H+1} \equiv 0$:
+\begin{align*}
+V_t(x_{t-1}, \xi_{[t]}) &= \min_{x_t \geq 0} \left\{ c_t^Tx_t + \calQ_{t+1}(x_t, \xi_{[t]}) \ :\ W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t)x_{t-1} \right\}, \\
+\calQ_{t+1}(x_t, \xi_{[t]}) &= \EE\left[ V_{t+1}(x_t, \xi_{[t+1]}) \mid \xi_{[t]} \right].
+\end{align*}
+\begin{itemize}
+\item
+$V_t$: optimal cost of stages $t, \ldots, H$, given the previous decision and the history; $\calQ_{t+1}$: the {\red expected cost-to-go}, its expectation given the history.
+\item
+The problem is $\min \lbrace c_1^T x_1 + \calQ_2(x_1, \xi_1) : W_1 x_1 = h_1,\ x_1 \geq 0 \rbrace$: a two-stage problem whose recourse function is itself defined by a multistage problem.
+\item
+On a finite tree, there is one function $\calQ_{t+1}(\cdot, \xi_{[t]})$ per node of stage $t$, convex and piecewise linear on its domain.
 \end{itemize}
 
 \end{frame}
@@ -495,38 +570,38 @@ This approximation (an upper bound, for a minimization) needs no decomposition: 
 \begin{frame}
 \frametitle{Nested decomposition}
 
-The nested L-shaped method (Birge, 1985) applies the L-shaped method recursively on the scenario tree, to solve
-\[
-\min_{x_1 \geq 0}\ c_1^T x_1 + \EE\Bigl[ \min_{x_2 \geq 0} c_2^T x_2 + \EE\bigl[ \cdots + \EE[ \min_{x_H \geq 0} c_H^T x_H ] \bigr] \Bigr]
-\]
-subject to $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2, \ldots, H$.
-The decision $x_t$ is made once $\xi_{[t]} = (\xi_2, \ldots, \xi_t)$ is known, before $\xi_{t+1}$ (non-anticipativity).
-Cost-to-go functions, with $\calQ_{H+1} \equiv 0$:
+The nested L-shaped method (Birge, 1985; details in the SDDP slides) applies the L-shaped method recursively on the scenario tree: each node builds its expected cost-to-go from below, by cuts.
+Node $k$ at stage $t$ is the {\red master problem} of its children, and a {\red subproblem} of its parent $a(k)$:
 \begin{align*}
-V_t(x_{t-1}, \xi_{[t]}) &= \min_{x_t \geq 0} \left\{ c_t^Tx_t + \calQ_{t+1}(x_t, \xi_{[t]}) \ :\ W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t)x_{t-1} \right\}, \\
-\calQ_{t+1}(x_t, \xi_{[t]}) &= \EE\left[ V_{t+1}(x_t, \xi_{[t+1]}) \mid \xi_{[t]} \right].
+\min_{x_{t,k},\, \theta_{t,k}}\ & c_{t,k}^T x_{t,k} + \theta_{t,k} \\
+\mbox{s.t. }\ & W_t x_{t,k} = h_{t,k} - T_{t-1,k}\, \hat{x}_{t-1,a(k)}, \quad (\pi_{t,k}) \\
+& \text{feasibility and optimality cuts}, \quad x_{t,k} \geq 0.
 \end{align*}
-On a finite tree, each $\calQ_{t+1}(\cdot, \xi_{[t]})$ is convex and piecewise linear.
-The SDDP slides give the details of the method.
+\begin{itemize}
+\item
+$c_{t,k}$, $h_{t,k}$, $T_{t-1,k}$: values of $c_t$, $h_t$, $T_{t-1}$ at node $k$; $\hat{x}_{t-1,a(k)}$: trial decision of the parent;
+\item
+$\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$; it is bounded below until its first optimality cut, as in the L-shaped method, and $\theta_{H,k} \equiv 0$.
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Nested decomposition: cuts}
 
-Node $k$ at stage $t$: {\red master problem} for its children, {\red subproblem} for its parent $a(k)$:
-\begin{align*}
-\min_{x_{t,k},\, \theta_{t,k}}\ c_{t,k}^T x_{t,k} + \theta_{t,k} \quad
-\mbox{s.t. } & W_t x_{t,k} = h_{t,k} - T_{t-1,k}\, \hat{x}_{t-1,a(k)}, \quad (\pi_{t,k}) \\
-& \text{feasibility and optimality cuts}, \quad x_{t,k} \geq 0,
-\end{align*}
-where $\hat{x}_{t-1,a(k)}$ is the parent's trial decision, and $\theta_{t,k}$ underestimates the expected cost-to-go at node $k$ ($\theta_{H,k} \equiv 0$).
-With $v_{t,k}$ the optimal value, the optimality cut of a node $j$ at stage $t-1$ averages the supporting hyperplanes of its children $k \in \calD_t(j)$:
+Let $v_{t,k}$ be the optimal value of node $k$, and $p(k, t \mid j, t-1)$ the probability of moving from node $j$ to its child $k \in \calD_t(j)$.
+The optimality cut of node $j$ at stage $t-1$ averages the supporting hyperplanes of its children:
 \[
 \theta_{t-1,j} \geq \sum_{k \in \calD_t(j)} p(k, t \mid j, t-1) \left( v_{t,k} - \pi_{t,k}^T T_{t-1,k} \left( x_{t-1,j} - \hat{x}_{t-1,j} \right) \right).
 \]
-$v_{t,k}$ includes the children's own cuts: information {\red propagates up the tree}.
-These values underestimate the true ones, so the cut is valid.
+\begin{itemize}
+\item
+{\red Why the cut is valid}: with its current cuts, node $k$ defines a convex function of $x_{t-1}$, below $V_t(\cdot, \xi_{[t]})$ since $\theta_{t,k}$ underestimates.
+By linear programming duality, $v_{t,k} - \pi_{t,k}^T T_{t-1,k}(x_{t-1} - \hat{x}_{t-1,j})$ supports this function at $\hat{x}_{t-1,j}$.
+Averaging over the children gives an affine function below $\calQ_t(\cdot, \xi_{[t-1]})$.
+\item
+The slope only involves the multipliers $\pi_{t,k}$ of the constraints linking node $k$ to its parent; the cuts of node $k$ enter through $v_{t,k}$: information {\red propagates up the tree}.
+\end{itemize}
 
 \end{frame}
 
@@ -536,12 +611,12 @@ These values underestimate the true ones, so the cut is valid.
 \begin{columns}[T]
 \begin{column}{0.6\textwidth}
 {\red Forward pass}: solve the first-stage problem, send $\hat{x}_1$ to its children, solve them, and so on down to stage $H$.
-If every problem is feasible, these trial decisions form a policy, whose expected cost is an {\red upper bound}.
+If every problem is feasible, these trial decisions form a nonanticipative policy, whose expected cost is an {\red upper bound}.
 
 \medskip
 
-{\red Backward pass}: from stage $H$ up to stage 2, each node receives a cut from its children (a feasibility cut if one is infeasible), is solved again, and sends a cut to its parent.
-The first-stage value is a {\red lower bound}.
+{\red Backward pass}: for $t = H, \ldots, 2$, the nodes of stage $t$ send cuts to their parents (a feasibility cut if one is infeasible), and the parents are solved again with these cuts.
+The first-stage value is then a {\red lower bound}.
 
 \medskip
 
@@ -567,8 +642,8 @@ The scenario tree grows exponentially with the number of stages, and so does the
 {\red Stochastic dual dynamic programming} (Pereira and Pinto, 1991; SDDP slides): under stagewise independence, all the nodes of a stage share the same expected cost-to-go function, hence the same cuts, and the forward pass samples scenarios instead of enumerating the tree.
 Extensions handle Markovian processes, on a lattice.
 \item
-{\red Lagrangian methods} (progressive hedging; Lagrangian methods slides): relax the non-anticipativity constraints, and decompose the problem by scenario, each subproblem being a deterministic multistage problem.
-They do not require a Markovian process, but there is one subproblem per scenario, and many iterations can be needed to restore non-anticipativity.
+{\red Lagrangian methods} (progressive hedging; Lagrangian methods slides): relax the nonanticipativity constraints, and decompose the problem by scenario, each subproblem being a deterministic multistage problem.
+They do not require a Markovian process, but there is one subproblem per scenario, and many iterations can be needed to restore nonanticipativity.
 \end{itemize}
 
 \end{frame}
