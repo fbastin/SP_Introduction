@@ -614,7 +614,7 @@ In particular $K_1 \subseteq K_2$, confirming (a).
 \section{Decomposition methods}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{exercise}
+\begin{exercise}\label{ex:dual-decomposition}
 (Deck~04 and LP background.) Apply the dual decomposition method (the
 $L$-shaped method with a single scenario) to
 \[
@@ -810,6 +810,125 @@ The master problem for the next iteration is therefore
 \min \lbrace 100x_1 + 150x_2 + \theta \mid x_1 + x_2 \leq 120,\ x_1 \geq 40,\ x_2 \geq 20,\
 \theta \geq -520 - 83.52x_1 - 180.48x_2 \rbrace .
 \]
+\end{solution}
+
+\begin{exercise}\label{ex:induced-constraints}
+(Deck~04; Birge and Louveaux, p.~174.) Consider the problem
+\begin{align*}
+\min_{x \geq 0}\ & 3x_1 + 2x_2 + \EE_{\bsxi}\left[\min_{y \geq 0}\ -15y_1 - 12y_2\right] \\
+\text{s.t. } & 3y_1 + 2y_2 \leq x_1, \qquad 2y_1 + 5y_2 \leq x_2, \\
+& 0.8\,\xi_1 \leq y_1 \leq \xi_1, \qquad 0.8\,\xi_2 \leq y_2 \leq \xi_2,
+\end{align*}
+where $\bsxi$ takes the values $\xi^{(1)} = (4, 6)$, $\xi^{(2)} = (4, 8)$,
+$\xi^{(3)} = (6, 6)$ and $\xi^{(4)} = (6, 8)$, each with probability $1/4$.
+Started from $x^1 = (0, 0)$, the $L$-shaped method needs three feasibility cuts,
+$3x_1 + x_2 \geq 123.2$, then $x_2 \geq 22.4$ and $x_2 \geq 41.6$, to reach a
+point of $K_2$, $x^4 = (27.2, 41.6)$.
+\begin{enumerate}[(a)]
+\item Show that every $x \in K_2$ satisfies $x_1 \geq 27.2$ and $x_2 \geq 41.6$.
+\item These two constraints are added to the first stage from the start. Can
+this exclude the optimal solution? Show that the recourse becomes relatively
+complete.
+\item Is the recourse then complete?
+\item The method, run without these two constraints, never generates
+$x_1 \geq 27.2$. Why does it still reach a point of $K_2$, and why does it need
+three cuts where two constraints suffice?
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} Every scenario must be feasible, in particular $\xi^{(4)} = (6, 8)$,
+which forces $y_1 \geq 4.8$ and $y_2 \geq 6.4$. Then
+\[
+x_1 \geq 3y_1 + 2y_2 \geq 14.4 + 12.8 = 27.2, \qquad
+x_2 \geq 2y_1 + 5y_2 \geq 9.6 + 32 = 41.6 .
+\]
+These are \emph{induced} constraints: they hold on $K_2$, although they appear
+nowhere in the first stage.
+
+\textbf{(b)} No: by (a), they are satisfied by every point of $K_2$, the optimal
+solution included, so they exclude nothing useful; the optimal solution,
+$x^* = (27.2, 41.6)$, even makes both active. This is a reformulation, not an
+approximation.
+
+Conversely, let $x_1 \geq 27.2$ and $x_2 \geq 41.6$, and take
+$y = 0.8\,\xi^{(s)}$ in scenario $s$. The bounds on $y$ hold, and since
+$\xi^{(4)}$ is the largest scenario componentwise,
+\[
+3y_1 + 2y_2 \leq 3(4.8) + 2(6.4) = 27.2 \leq x_1, \qquad
+2y_1 + 5y_2 \leq 2(4.8) + 5(6.4) = 41.6 \leq x_2 .
+\]
+Every scenario is feasible, hence
+$K_2 = \lbrace x \mid x_1 \geq 27.2,\ x_2 \geq 41.6 \rbrace$ exactly. With the new
+first-stage set $K_1 = \lbrace x \geq 0 \mid x_1 \geq 27.2,\ x_2 \geq 41.6 \rbrace$,
+$K_1 \subseteq K_2$: the recourse is relatively complete, and the method only
+generates optimality cuts.
+
+\textbf{(c)} No. Complete recourse asks the second stage to be feasible for
+\emph{every} $x$, whatever the first-stage constraints: it is a property of the
+second stage alone, which adding constraints to the first stage cannot change.
+Here $x = (0, 0)$ is still infeasible in every scenario, since the lower bounds on
+$y$ require some capacity. Relatively complete recourse only asks for
+feasibility on $K_1$, and that is what the new constraints achieve.
+
+\textbf{(d)} A feasibility cut comes from the current iterate and from the dual
+solution returned by the solver for one infeasible scenario. It is valid on
+$K_2$ and cuts off the iterate, but nothing makes it describe $K_2$ as a whole.
+Here the first cut, $3x_1 + x_2 \geq 123.2$, is $3$ times $x_1 \geq 27.2$ plus
+$x_2 \geq 41.6$: it cuts off $(0, 0)$, but the master moves to
+$x^2 = (41.067, 0)$, still outside $K_2$. The second cut,
+$x_2 \geq 22.4$, is even weaker than the induced constraint $x_2 \geq 41.6$, and
+leads to $x^3 = (33.6, 22.4)$; only the third gives $x^4 = (27.2, 41.6)$.
+
+The first and third cuts meet at $(27.2, 41.6)$, the corner of $K_2$, and the
+first-stage cost $3x_1 + 2x_2$ brings the master there. The method stops
+generating feasibility cuts as soon as the iterate lies in $K_2$, not when the
+master's feasible set equals $K_1 \cap K_2$. After the three cuts, the point
+$(20, 70)$ satisfies all of them, yet $x_1 < 27.2$: the cuts
+describe $K_2$ only where the iterates went, as optimality cuts describe $\calQ$
+only near the iterates. Exploiting the structure of the problem before running
+the method, here a scenario that dominates all the others componentwise, saves
+these iterations.
+\end{solution}
+
+\begin{exercise}
+(Deck~04.) True or false? Justify your answer.
+\begin{enumerate}[(a)]
+\item If two solvers, applied to the same phase-1 problem at the same point
+$x^{\nu}$, return two different feasibility cuts, one of them is wrong.
+\item Like a feasibility cut, an optimality cut removes first-stage decisions
+$x$ from the master problem.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+\textbf{(a)} False. The dual of the phase-1 problem may have several optimal
+solutions, one per optimal basis. Each of them satisfies $W^T\sigma \leq 0$ and
+$\sigma^T(h - Tx^{\nu}) = w^* > 0$, so each cut $\sigma^T(h - Tx) \leq 0$ is valid
+on $K_2$, by the argument of Exercise~\ref{ex:dual-decomposition}(b), and
+excludes $x^{\nu}$. Which cut is returned depends on the optimal basis the solver
+ends on, not on an error.
+
+In the example of Exercise~\ref{ex:induced-constraints}, at $x^1 = (0, 0)$ and for
+the scenario $\xi^{(4)}$, GLPK returns $x_1 + x_2 \geq 11.2$, while CPLEX or Gurobi
+return $3x_1 + x_2 \geq 123.2$, the cut reported by Birge and Louveaux. Both are
+correct: both follow from the induced constraints $x_1 \geq 27.2$ and
+$x_2 \geq 41.6$, and both exclude $(0, 0)$. They are not equally useful, though:
+on $x \geq 0$ the second implies the first. The master then moves to $(0, 11.2)$
+with the first and to $(41.067, 0)$ with the second: the next iterates, and the
+number of iterations, differ.
+
+\textbf{(b)} False. An optimality cut $\theta \geq \alpha + \beta^Tx$ involves the
+pair $(x, \theta)$: for every $x$, a large enough $\theta$ satisfies it. It removes
+$(x^{\nu}, \theta^{\nu})$, where $\theta^{\nu}$ underestimated $\calQ(x^{\nu})$, not
+$x^{\nu}$ itself. It makes $x^{\nu}$ less attractive by raising the model there,
+and $x^{\nu}$ may even be optimal and come back at the next iteration, with
+$\theta = \calQ(x^{\nu})$. In Exercise~\ref{ex:dual-decomposition}, the first
+optimality cut, $\theta \geq 6 - 3x$, leaves $x = 0$ in the master, with
+$\theta \geq 6 = f(0)$, whereas the feasibility cut $x \leq 4$ of part~(b)
+removes every $x > 4$. Only feasibility cuts, with no term in $\theta$, restrict the
+admissible $x$: they approximate $K_2$, while optimality cuts approximate the
+epigraph of $\calQ$.
 \end{solution}
 
 \begin{exercise}
