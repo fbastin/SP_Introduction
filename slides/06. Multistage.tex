@@ -10,7 +10,7 @@
 \usepackage{amsmath,amssymb}
 
 \usepackage{tikz}
-\usetikzlibrary{positioning,decorations.pathreplacing}
+\usetikzlibrary{positioning,decorations.pathreplacing,calc}
 
 \usepackage{times}
 
@@ -110,6 +110,26 @@
     \foreach \x/\t in {0/{$t = 1$},2.6/{$t = 2$},5.2/{$t = 3$},7.8/{$(y_s, w_s)$}} {
       \node[font=\scriptsize] at (\x,-4.4) {\t};
     }
+  \end{tikzpicture}}
+
+% Nested decomposition: what node k receives from and sends to its parent and
+% its children (trial decisions in blue, cuts in red, as in \passestree).
+\newcommand{\nodeexchange}{%
+  \begin{tikzpicture}[
+      nd/.style={circle,draw,line width=0.7pt,minimum size=5mm,inner sep=0pt},
+      fw/.style={->,blue,line width=1pt},
+      bw/.style={->,red,line width=1pt},
+      lb/.style={font=\scriptsize}]
+    \node[draw,line width=0.9pt,minimum width=2.4cm,minimum height=1.2cm] (b) at (0,0) {$NLSD(t,k)$};
+    \node[nd] (a) at (-5.0,0) {};
+    \node[lb,left=3pt of a,align=right] {parent $a(k)$\\stage $t-1$};
+    \foreach \c/\y in {1/0.8,2/0,3/-0.8} { \node[nd] (c\c) at (5.4,\y) {}; }
+    \node[lb,below=3pt of c3,align=center] {children $\calD_{t+1}(k)$\\stage $t+1$};
+    \draw[decorate,decoration={brace,amplitude=4pt},line width=0.6pt] (5.0,-1.05) -- (5.0,1.05);
+    \draw[fw] ($(a.east)+(0,0.15)$) -- node[above,lb] {trial decision $\hat{x}_{t-1,a(k)}$} ($(b.west)+(0,0.25)$);
+    \draw[bw] ($(b.west)+(0,-0.25)$) -- node[below,lb] {optimality or feasibility cut} ($(a.east)+(0,-0.15)$);
+    \draw[fw] ($(b.east)+(0,0.25)$) -- node[above,lb] {trial decision $\hat{x}_{t,k}$} (4.8,0.25);
+    \draw[bw] (4.8,-0.25) -- node[below,lb] {their cuts} ($(b.east)+(0,-0.25)$);
   \end{tikzpicture}}
 
 % Nested decomposition: trial decisions go down the tree, cuts go up.
@@ -523,6 +543,24 @@ $c_{t,k}$, $h_{t,k}$, $T_{t-1,k}$: values of $c_t$, $h_t$, $T_{t-1}$ at node $k$
 $\theta_{t,k}$ underestimates the expected cost-to-go at node $k$, $\calQ_{t+1}(x_{t,k}, \xi_{[t]})$, and is bounded below by a constant, like $\theta^0$ in the L-shaped dual decomposition; $\theta_{H,k} \equiv 0$.
 \end{itemize}
 \end{small}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Nested decomposition: what a node exchanges}
+
+\begin{center}
+\nodeexchange
+\end{center}
+
+\begin{itemize}
+\item
+{\red Subproblem of its parent} (left): solved at the trial decision of $a(k)$, it returns a cut built from its optimal value $v_{t,k}$ and the multipliers $\pi_{t,k}$, or a feasibility cut if it is infeasible (next slides).
+\item
+{\red Master problem of its children} (right): its solution $\hat{x}_{t,k}$ is their trial decision, and their cuts become the rows $D_{t,k,\ell}$ and $E_{t,k,\ell}$ of $NLSD(t,k)$.
+\item
+Blue: forward pass, from the root to the leaves; red: backward pass, back to the root. The root has no parent, a leaf no child.
+\end{itemize}
 
 \end{frame}
 

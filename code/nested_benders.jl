@@ -179,9 +179,9 @@ set_phase_two_objective!(np::NodeProblem) =
     solve_node!(np, x̂) -> (feasible, value, λ)
 
 Solve the node for the trial decision `x̂` of its parent. If the node is feasible, `value` is its
-optimal value `v_{t,k}` (stage cost plus θ) and `λ` the multipliers of the copy constraints
-`xin = x̂`, that is, the derivative of `v_{t,k}` with respect to `x̂` (JuMP's `dual`, for a
-minimization). Otherwise, see [`phase_one!`](@ref).
+optimal value `v_{t,k}` (stage cost plus θ) and `λ` the Lagrange multipliers of the copy
+constraints `xin = x̂` (JuMP's `dual`), a subgradient of `v_{t,k}` with respect to `x̂`: its
+derivative wherever `v_{t,k}` is differentiable. Otherwise, see [`phase_one!`](@ref).
 """
 function solve_node!(np::NodeProblem, x̂::Vector{Float64})
     set_normalized_rhs.(np.copy, x̂)
