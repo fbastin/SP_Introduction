@@ -61,6 +61,7 @@ SP_Introduction/
     ├── nested_benders.jl, nested_benders.ipynb  # Nested Benders decomposition step by step, nodes written in JuMP (deck 06)
     ├── SDDP_from_scratch.ipynb               # SDDP step by step (deck 07)
     ├── SDDP_hydro.ipynb                      # SDDP.jl: FAST, the instance of SDDP_from_scratch, an infinite horizon (deck 07)
+    ├── SDDP_theory_intro.ipynb               # SDDP from scratch, the SDDP.jl tutorial of O. Dowson (MPL 2.0): Kelley, policy graphs, infinite horizon (deck 07)
     ├── simulation_callcenter.ipynb           # Call-centre simulation (deck 12)
     ├── simulation_portfolio.ipynb            # Portfolio simulation (decks 10, 12)
     ├── StochasticPrograms/                   # Julia project (fork of StochasticPrograms.jl): Farmer and L-shaped examples, and newsvendor.ipynb
