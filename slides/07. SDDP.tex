@@ -96,7 +96,7 @@ and the step-by-step notebook \texttt{code/SDDP\_from\_scratch.ipynb}.
 \frametitle{Problem setting}
 
 We consider the multistage stochastic linear program of the Multistage slides, over the horizon
-$t = 1,\ldots, H$ (we write $H$, and not $T$, since $T$ denotes the technology matrix), with the history
+$t = 1,\ldots, H$, with the history
 $\xi_{[t]} = (\xi_1, \ldots, \xi_t)$, $\xi_1$ deterministic, and the constraints $W_1 x_1 = h_1$ and $W_t x_t = h_t(\xi_t) - T_{t-1}(\xi_t) x_{t-1}$, $t = 2,\ldots,H$.
 In dynamic programming form, with $\QQ_{H+1} \equiv 0$,
 \begin{align*}
@@ -468,29 +468,65 @@ fall below the optimal value.
 \end{frame}
 
 \begin{frame}
-\frametitle{Bounds and termination criterion}
+\frametitle{Termination criterion: a hypothesis test}
 
 {\small
-After solving $NLSD(1, 1)$ in a forward pass we can compute a lower bound $z_{LB}$
-as the objective function value of $NLSD(1, 1)$: the cuts are an outer approximation of the
-expected cost-to-go, hence $NLSD(1,1)$ is a relaxation of the original problem.
+The optimal value of $NLSD(1, 1)$, solved at the start of a forward pass, is a lower bound $z_{LB}$:
+the cuts are an outer approximation of the expected cost-to-go, hence $NLSD(1,1)$ is a relaxation of
+the original problem. With $z^*$ the optimal value, $z_{LB} \leq z^* \leq \mu$, and the current policy is optimal when
+$\mu = z_{LB}$. We test
+$$
+H_0:\ \mu = z_{LB} \qquad \text{against} \qquad H_1:\ \mu > z_{LB}.
+$$
+Under $H_0$, the Central Limit Theorem gives
+$\sqrt{K}\,(\overline{z}_K - z_{LB})/\hat{s} \approx N(0,1)$,
+where $\hat{s}$ is the empirical standard deviation of the $z_i$.
+\begin{itemize}
+\item
+Reject $H_0$, and keep iterating, if
+$\overline{z}_K - z_{LB} > \Phi^{-1}(1-\alpha/2)\, \hat{s}/\sqrt{K}$,
+with $\Phi(\cdot)$ the cumulative distribution of a Normal(0,1).
+\item
+Otherwise, terminate: $z_{LB}$ is above the left end of the confidence interval of level $1 - \alpha$
+on $\mu$. Typically, $\alpha = 0.05$.
+\item
+The alternative is one-sided, since $\mu \geq z_{LB}$: the level of the test is $\alpha/2$.
+\item
+Terminating means that $H_0$ is not rejected, not that the policy is optimal. With a small $K$ the
+test has little power: the criterion is optimistic.
+\end{itemize}
+}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Choosing $K$: a pilot experiment}
+
+{\small
+The test terminates as soon as
+$\overline{z}_K - z_{LB} \leq \Phi^{-1}(1-\alpha/2)\, \hat{s}/\sqrt{K}$: $K$ sets the gap that the
+test cannot detect.
 
 \mbox{}
 
-Terminate if $z_{LB} \in (\overline{z}_K - \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K}, \overline{z}_K + \Phi^{-1}(1-\alpha/2) \hat{s}/\sqrt{K})$, where $\hat{s}$ is the empirical standard deviation of the $z_i$, $\Phi(\cdot)$ the cumulative distribution of a Normal(0,1), and $1 - \alpha$ the confidence level set by the user. Typically, $\alpha = 0.05$. Since $z_{LB}$ is a lower bound, only the left inequality really matters.
-
-\mbox{}
-
-Choosing $K$: if the half-width $\Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K}$ is about $0.01\, \overline{z}_K$, the test only stops when $\overline{z}_K - z_{LB} < 0.01\, \overline{z}_K$. With
-$
-\hat{s} = \sqrt{\frac{1}{K-1} \sum_{i=1}^K (z_i - \overline{z}_K)^2},
-$
-this leads to
+To terminate only when the gap is below a fraction $\varepsilon$ of the cost (for instance
+$\varepsilon = 0.01$), the half-width $\Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K}$ has to be about
+$\varepsilon\, \overline{z}_K$, which leads to
 $$
-K = \left( \frac{\Phi^{-1}(1-\alpha/2)\hat{s}}{0.01\, \overline{z}_K}\right)^2.
+K = \left( \frac{\Phi^{-1}(1-\alpha/2)\,\hat{s}}{\varepsilon\, \overline{z}_K}\right)^2,
+\qquad
+\hat{s} = \sqrt{\frac{1}{K-1} \sum_{i=1}^K (z_i - \overline{z}_K)^2}.
 $$
-The criterion is optimistic: with a small $K$ the confidence interval is wide, and the
-lower bound enters it long before the policy is optimal.
+The right-hand side is unknown before any simulation, hence a pilot experiment:
+\begin{itemize}
+\item
+simulate $K_0$ scenarios, and compute $\overline{z}_{K_0}$ and $\hat{s}_{K_0}$;
+\item
+set $K$ from the formula, with these two estimates.
+\end{itemize}
+The mean and the variance are those of the current policy, and both change as cuts are added: the
+pilot is run after some iterations, on a policy close to the final one, and the cuts are
+built with a small $K$ in the meantime.
 }
 
 \end{frame}

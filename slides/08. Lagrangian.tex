@@ -69,9 +69,449 @@
 \begin{frame}
 \frametitle{Motivation}
 
-{\red Reference}: Birge and Louveaux, Sections~3.4, 5.8 and 6.4.
+{\red References}: Birge and Louveaux, Sections~3.4, 5.8 and 6.4; Rockafellar and Wets (1991).
 
 \mbox{}
+
+\begin{itemize}
+\item
+The L-shaped method, nested decomposition and SDDP decompose the problem {\blue by stage}, and approximate the recourse function with cuts.
+\item
+Lagrangian methods decompose it {\blue by scenario}. A scenario taken alone gives a deterministic problem; only the {\red nonanticipativity constraints} tie the scenarios together.
+\item
+These constraints are relaxed, and their violation is priced by multipliers: each iteration solves $S$ independent deterministic problems, possibly in parallel.
+\item
+Convexity is enough: the functions need not be linear.
+\item
+Outline: Lagrangian relaxation and dual ascent, augmented Lagrangian, progressive hedging, multistage problems.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Two-stage convex program}
+
+The random vector $\bsxi$ has a finite support $\Xi = \lbrace \xi_1, \ldots, \xi_S \rbrace$, with probabilities $p_1, \ldots, p_S$.
+We consider
+\begin{align*}
+\min_{x,\, y_1, \ldots, y_S}\ & f^1(x) + \sum_{s=1}^S p_s f^2(y_s,\xi_s) \\
+\mbox{s.t. } & g_i^1(x) \leq 0,\ i = 1,\ldots,m_1, \\
+& b_i^2(x,\xi_s) + g_i^2(y_s, \xi_s) \leq 0,\ i = 1,\ldots,m_2,\ s = 1,\ldots,S.
+\end{align*}
+
+\begin{itemize}
+\item
+$f^1$, $g_i^1$, $f^2(\cdot,\xi)$, $g_i^2(\cdot,\xi)$ and $b_i^2(\cdot,\xi)$ are convex, and the program has an optimal solution, of value $z^*$.
+\item
+The two-stage linear program is the special case with linear functions.
+\item
+The general nonlinear program, with existence and optimality conditions, is in the appendix.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Scenario formulation}
+
+\begin{minipage}{0.3\textwidth}
+\begin{center}
+\scalebox{0.75}{\scenariofan}
+
+\medskip
+
+\scalebox{0.75}{\scenariobundles}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.66\textwidth}
+Give each scenario its own copy $x_s$ of the first-stage decision:
+\begin{align*}
+\min\ & \sum_{s=1}^S p_s \left( f^1(x_s) + f^2(y_s,\xi_s) \right) \\
+\mbox{s.t. } & (x_s, y_s) \in \cX_s,\ s = 1,\ldots,S, \\
+& x_1 = x_2 = \cdots = x_S,
+\end{align*}
+where $\cX_s$ gathers the constraints of scenario $s$:
+{\small
+\[
+\cX_s = \lbrace (x,y) \,|\, g_i^1(x) \leq 0\ \forall i,\ b_i^2(x,\xi_s) + g_i^2(y, \xi_s) \leq 0\ \forall i \rbrace.
+\]
+}
+\end{minipage}
+
+\medskip
+
+The last constraints are the {\red nonanticipativity constraints}. Without them, the program splits into $S$ deterministic problems, one per scenario.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Relaxing nonanticipativity}
+
+Write nonanticipativity as $x_s - \bar{x} = 0$, $s = 1,\ldots,S$, with $\bar{x} = \sum_{k=1}^S p_k x_k$: each copy equals the mean (Multistage slides).
+With multipliers $\pi_s$, weighted by $p_s$, the Lagrangian is
+\[
+L(x, y, \pi) = \sum_{s=1}^S p_s \left( f^1(x_s) + f^2(y_s,\xi_s) + \pi_s^T (x_s - \bar{x}) \right).
+\]
+\begin{itemize}
+\item
+The constraints are equalities: $\pi_s$ is unrestricted in sign.
+\item
+With $\bar{\pi} = \sum_k p_k \pi_k$, we have $\sum_s p_s \pi_s^T (x_s - \bar{x}) = \sum_s p_s (\pi_s - \bar{\pi})^T x_s$: the Lagrangian is {\red separable} by scenario.
+\item
+Only $\pi_s - \bar{\pi}$ matters: we impose $\sum_s p_s \pi_s = 0$, and the dual function is
+\[
+\theta(\pi) = \sum_{s=1}^S p_s \min_{(x_s, y_s) \in \cX_s} \left\lbrace f^1(x_s) + f^2(y_s,\xi_s) + \pi_s^T x_s \right\rbrace.
+\]
+\item
+$\pi_s$ is a price on the first-stage decision of scenario $s$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Duality}
+
+The dual problem is $\max_{\pi}\, \theta(\pi)$, of optimal value $w^*$.
+
+\begin{theorem}
+$\theta(\pi) \leq z^*$ for every $\pi$ (weak duality).
+If the functions are convex, the optimal value is finite and the Slater constraint qualification holds, then $w^* = z^*$ (strong duality).
+\end{theorem}
+
+\begin{itemize}
+\item
+Every evaluation of $\theta$ gives a lower bound on $z^*$, at the cost of $S$ deterministic problems.
+\item
+$\theta$ is concave, as an infimum of affine functions of $\pi$, but not differentiable in general.
+\item
+If $(x_s, y_s)$, $s = 1,\ldots,S$, solve the scenario problems at $\pi$, the residuals
+\[
+r_s = x_s - \bar{x},\ s = 1,\ldots,S,
+\]
+form a supergradient of $\theta$ at $\pi$, and its gradient when the solutions are unique (KKT background notes).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Dual ascent}
+\small
+
+\begin{algo}{Lagrangian dual ascent method}
+\begin{description}
+\item[Step 0.] Choose $\pi^0$ with $\sum_s p_s \pi_s^0 = 0$, for instance $\pi^0 = 0$. Set $\nu = 0$.
+\item[Step 1.]
+For $s = 1,\ldots,S$, minimize $f^1(x_s) + f^2(y_s,\xi_s) + (\pi_s^{\nu})^T x_s$ over $(x_s, y_s) \in \cX_s$,
+giving $(x_s^{\nu}, y_s^{\nu})$. Set $\bar{x}^{\nu} = \sum_k p_k x_k^{\nu}$.
+\item[Step 2.]
+Set $r_s^{\nu} = x_s^{\nu} - \bar{x}^{\nu}$ for every $s$. If $r^{\nu} = 0$, stop: the solution is nonanticipative, hence optimal.
+\item[Step 3.]
+Choose a step $\alpha^{\nu} > 0$, set $\pi_s^{\nu+1} = \pi_s^{\nu} + \alpha^{\nu} r_s^{\nu}$ for every $s$, $\nu = \nu+1$, and return to Step 1.
+\end{description}
+\end{algo}
+
+The step: a maximizer of $\theta(\pi^{\nu} + \alpha r^{\nu})$ over $\alpha \geq 0$, or a diminishing sequence. As $\sum_s p_s r_s^{\nu} = 0$, the update keeps $\sum_s p_s \pi_s^{\nu} = 0$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Dual ascent: properties}
+
+\begin{itemize}
+\item
+At the stop, the solution is feasible for the original program and its cost is $\theta(\pi^{\nu}) \leq z^*$: it is optimal.
+\item
+Each iteration provides the lower bound $\theta(\pi^{\nu})$ and a candidate $\bar{x}^{\nu}$, which satisfies the first-stage constraints by convexity.
+\item
+If the scenario problems have unique solutions, $\theta$ is differentiable and $r^{\nu}$ is an {\blue ascent direction}. With a line search, every limit point of the sequence is optimal when the set of optimal solutions is bounded.
+\item
+Otherwise, as for linear programs, $r^{\nu}$ is only a supergradient, which need not be an ascent direction, and the scenario solutions may remain different at an optimal $\pi$.
+\item
+The method is easy to implement, but usually slow: each iteration uses a single linearization of $\theta$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Augmented Lagrangian}
+
+\begin{itemize}
+\item
+To improve the performance, we turn to another technique of nonlinear programming: the {\blue augmented Lagrangian}.
+\item
+A quadratic penalty on the violation of the nonanticipativity constraints is added to the Lagrangian.
+\item
+The penalty makes the subproblems strictly convex in the first-stage decisions, which removes the difficulty of non-unique solutions (KKT background notes).
+\item
+The multiplier update keeps the form of dual ascent, with the penalty parameter as step.
+\item
+The penalty couples the scenarios; progressive hedging restores the decomposition.
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Augmented Lagrangien}
+
+%A way to limit the difficulties associated to penalty methods is to add the penalization term to the Lagrangian rather than the objective, leading to the {\red Augmented Lagrangian} function:
+%\[
+%\mathcal{L}_A(x,\lambda;\mu) \overset{def}{=} f(x) + \sum_{i \in
+%\mathcal{E}} \lambda_i c_i(x) + \frac{1}{2\mu} \sum_{i \in
+%\mathcal{E}} c_i^2(x).
+%\]
+
+%\mbox{}
+
+%We will then minimize $\mathcal{L}_A(x,\lambda;\mu)$ with respect to $x$, and use some rules to update the Lagrange multipliers, at each iteration.
+
+%\end{frame}
+
+\begin{frame}
+\frametitle{Augmented Lagrangian: two stages}
+
+Write the nonanticipativity constraints $x_s = \hat{x}$, $s = 1, \ldots, S$, with a nonanticipative variable $\hat{x}$ in place of $\bar{x}$, and add a quadratic penalty on their violation:
+\[
+L_\rho(x, y, \hat{x}, \pi) = \sum_{s=1}^{S} p_s \left( f^1(x_s) + f^2(y_s,\xi_s) + \pi_s^T(x_s-\hat{x}) + \frac{\rho}{2} \| x_s-\hat{x} \|^2\right),
+\]
+where $\rho > 0$ is the penalty parameter.
+\begin{itemize}
+\item
+The method of multipliers minimizes $L_\rho$ over $(x_s, y_s) \in \cX_s$, $s = 1,\ldots,S$, and $\hat{x}$, then sets $\pi_s \leftarrow \pi_s + \rho\, (x_s - \hat{x})$.
+\item
+For fixed $x_1, \ldots, x_S$, the minimization in $\hat{x}$ gives $\hat{x} = \sum_s p_s x_s + \frac{1}{\rho} \sum_s p_s \pi_s$: the mean $\bar{x}$ when $\sum_s p_s \pi_s = 0$, a property that the multiplier update preserves.
+\item
+{\red Observation}: $L_\rho$ is not separable by scenario, since $\hat{x}$ appears in the quadratic term of every scenario.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging}
+
+\begin{itemize}
+\item
+Main reference:
+R.~T. Rockafellar and R.~J.-B. Wets, {\sl Scenarios and policy aggregation
+in optimization under uncertainty}, Mathematics of Operations
+  Research 16(1):119--147 (1991).\\
+  The paper treats the multistage case.
+\item
+The method separates the problem completely, scenario by scenario, at each iteration, which reduces the cost per iteration.
+\item
+The number of iterations may increase in return.
+\item
+For structured problems, the scenario problems are solved in parallel, and large-scale problems become tractable.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging: basic principle}
+
+Instead of minimizing $L_\rho$ jointly, alternate:
+\begin{enumerate}
+\item
+fix $\hat{x}$ and minimize in $(x_s, y_s)$, $s = 1,\ldots,S$;
+\item
+fix $x_s$, $s = 1,\ldots,S$, and minimize in $\hat{x}$, which gives the mean.
+\end{enumerate}
+
+\mbox{}
+
+With $\hat{x} = \hat{x}^{\nu}$ fixed, $L_\rho$ is separable. At iteration $\nu$, the problem of scenario $s$ is
+\[
+\min_{(x_s, y_s) \in \cX_s}\ f^1(x_s) + f^2(y_s,\xi_s) + \left(\pi_s^{\nu}\right)^T x_s + \frac{\rho}{2}\left\| x_s-\hat{x}^{\nu} \right\|^2.
+\]
+\begin{itemize}
+\item
+It is the scenario problem of dual ascent, with a quadratic term that pulls $x_s$ towards $\hat{x}^{\nu}$.
+\item
+We work scenario by scenario, and enforce nonanticipativity progressively.
+\item
+$\hat{x}^{\nu}$ is not necessarily feasible: each $x_s$ is only feasible for its own scenario.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging: two-stage algorithm}
+
+\begin{description}
+\item[Step 0.]
+Choose $\rho > 0$, $\hat{x}^0$ and $\pi^0$ with $\sum_s p_s \pi_s^0 = 0$: for instance, $\pi^0 = 0$ and $\hat{x}^0$ the mean of the solutions of the scenarios solved alone. Set $\nu = 0$.
+\item[Step 1.]
+For $s = 1,\ldots,S$, solve the problem of scenario $s$ of the previous slide, giving $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$.
+\item[Step 2.]
+Set $\hat{x}^{\nu+1} = \sum_{k=1}^S p_k x_k^{\nu+1}$.
+\item[Step 3.]
+Set $\pi^{\nu+1}_s = \pi^{\nu}_s + \rho \left(x_s^{\nu+1}-\hat{x}^{\nu+1}\right)$, $s = 1,\ldots{}, S$.
+\item[Step 4.]
+If $\hat{x}^{\nu+1} = \hat{x}^{\nu}$ and $\pi^{\nu+1} = \pi^{\nu}$,
+stop: $(\hat{x}^{\nu}, \pi^{\nu})$ is optimal.
+Otherwise, set $\nu = \nu+1$ and return to Step 1.
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging: remarks}
+
+\begin{itemize}
+\item
+Step 2 is the exact minimization in $\hat{x}$: Step 3 keeps $\sum_s p_s \pi_s^{\nu} = 0$, since $\sum_s p_s \left( x_s^{\nu+1} - \hat{x}^{\nu+1} \right) = 0$.
+\item
+Step 3 is the multiplier update of dual ascent, with the step $\rho$.
+\item
+The method is nevertheless not a dual ascent: its basis is the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point.
+\item
+In practice, the optimality test is replaced by a convergence test, for instance on (De Silva and Abramson)
+\[
+\sqrt{ \| \hat{x}^{\nu+1} - \hat{x}^{\nu} \|^2 + \sum_{s = 1}^S p_s \|
+  x_s^{\nu+1} - \hat{x}^{\nu+1}\|^2}.
+\]
+The second term is $\rho^{-2} \sum_s p_s \| \pi_s^{\nu+1} - \pi_s^{\nu} \|^2$: the quantity measures the move of the pair $(\hat{x}, \pi)$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Generalization to multistage}
+
+{\small
+Over the stages $t = 1, \ldots, H$, with $x^{(s)} = \bigl(x_1^{(s)}, \ldots, x_H^{(s)}\bigr)$ the decisions of scenario $s \in \cS = \lbrace 1, \ldots, S \rbrace$,
+$$
+\begin{aligned}
+\min_{x}\; & \sum_{s \in \cS} p_s f\left(x^{(s)}, \xi^{(s)}\right)\\
+\text{s.t. } & x^{(s)} \in \cX^{(s)},\ s \in \cS,\\
+& x_t^{(s)} = x_t^{(s')},\quad t = 1, \ldots, H,\ s \in \cS,\ s' \in \cS_t^{(s)},
+\end{aligned}
+$$
+where $\cS_t^{(s)}$ is the set of scenarios that share the history $\xi_{[t]} = (\xi_1, \ldots, \xi_t)$ of scenario $s$, i.e., indistinguishable from $s$ when the decision of stage $t$ is made ($S_s^t$ in the Multistage slides).
+
+\medskip
+
+Nonanticipativity can be reformulated as $x_t^{(s)} = \hat{x}_t^{(s)}$, with the conditional mean
+$$
+\hat{x}_t^{(s)} = \EE\left[ x_t^{(s')} \,\big|\, s' \in \cS_t^{(s)} \right] = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s')}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
+$$
+With two stages, $\cS_1^{(s)} = \cS$ and $\hat{x}_1^{(s)}$ is the mean $\sum_k p_k x_k$.
+}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Generalization: augmented Lagrangian}
+
+Augmented Lagrangian:
+\begin{align*}
+L(x,\pi,\rho) =  \EE \Biggl[ & f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^H \biggl( {\pi_t^{(s)}}^T \left(x_t^{(s)} - \hat{x}_t^{(s)}\right) \\
+& + \frac{\rho}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s)} \right\|^2 \biggr) \Biggr],
+\end{align*}
+where $\pi$ is the vector of Lagrange multipliers of the nonanticipativity constraints, and $\rho > 0$ is a penalty parameter.
+
+\mbox{}
+
+Given $\pi$, we minimize $L(x,\pi,\rho)$ subject to $x^{(s)} \in \cX^{(s)}$, $s \in \cS$.
+To make this program separable by scenario, we fix $\hat{x}_t^{(s)}$, and solve it repeatedly, updating the multipliers and $\hat{x}$ between consecutive resolutions.
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Progressive hedging algorithm (PHA)}
+\small
+
+\begin{description}
+	\item[Step 0.]
+	Solve each scenario problem alone, giving $x^{(s),0}$, and set $\hat{x}_t^{(s),0}$ to the averages of Step 2 (next slide). Choose $\pi^{(s),0} = \bszero$, $\rho^0 > 0$, and set $\nu = 0$.
+	\item[Step 1.]
+	Compute $x^{(s),\nu+1} =  \left(x_1^{(s),\nu+1}, \dots, x_H^{(s),\nu+1}\right)$, $s = 1,\ldots,S$, by solving each scenario subproblem
+	$$
+	%\begin{equation}
+	%\label{PHA-Scen-subprob}
+	\begin{aligned}
+	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^H \biggl( {\pi_t^{(s),\nu}}^T \left(x_t^{(s)} - \hat{x}_t^{(s),\nu}\right) \\
+	& \qquad + \frac{\rho^\nu}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s),\nu} \right\|^2 \biggr)\\
+	\text{s.t.} & \; x^{(s)}  \in \mathcal{X}^{(s)}.
+	\end{aligned}
+	$$
+	%\end{equation}
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Progressive hedging algorithm (PHA, cont'd)}
+
+\begin{description}
+	\item[Step 2.]
+	For $s = 1,\ldots,S$, $t = 1,\ldots,H$, set
+	\[
+	\hat{x}_t^{(s),\nu+1} = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s'),\nu+1}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
+	\]
+	\item[Step 3.]
+	Set $\rho^{\nu+1}$ and
+	\[
+	\pi_t^{(s), \nu+1} =  \pi_t^{(s),\nu} + \rho^\nu \left( x_t^{(s),\nu+1} -  \hat{x}_t^{(s),\nu+1}  \right),
+	\]
+	for $t = 1, \dots, H, \, s \in \mathcal{S}$.
+	\item[Step 4.]
+	Stop if convergence is achieved.
+	Otherwise, set $\nu \leftarrow \nu + 1$ and return to Step 1.
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Convergence}
+
+\begin{theorem}[Rockafellar and Wets, 1991]
+Assume that the stochastic program has convex functions and closed convex constraint sets, that the support of $\bsxi$ is finite, and that the program has an optimal solution.
+With a fixed penalty parameter $\rho > 0$, the progressive hedging algorithm converges, from any starting point, to an optimal solution $x^*$ and multipliers $\pi^*$ forming a saddle point of the Lagrangian; the distance $\|\hat{x}^{\nu} - x^*\|^2 + \rho^{-2}\|\pi^{\nu} - \pi^*\|^2$ (norms weighted by the probabilities) decreases at every iteration.
+\end{theorem}
+{\small Step 3 lets $\rho$ vary, as many implementations do; the theorem covers a fixed $\rho$.}
+
+\begin{itemize}
+\item
+De Silva and Abramson have tested the progressive hedging algorithm for linear problems in portfolio management, proposed by Mulvey and Vladimirou.
+\item
+The subproblems were solved by interior point methods.
+\item
+Good parallel speed-ups, but the algorithm remains sensitive to the choice of the penalty parameter.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Implementation}
+
+\begin{itemize}
+\item
+The \verb|StochasticPrograms.jl| package (Julia) proposes an implementation of the progressive hedging algorithm, but limited to two stages.
+\item
+The \verb|mpi-sppy| package (Python, built on Pyomo) implements progressive hedging for two-stage and multistage problems, in parallel with MPI.
+\end{itemize}
+
+\end{frame}
+
+\appendix
+
+\begin{frame}
+\frametitle{Appendix}
+
+\begin{itemize}
+\item
+The two-stage nonlinear program with a general distribution: assumptions, convexity and lower semi-continuity of the recourse function, existence of a solution, optimality conditions (Birge and Louveaux, Section~3.4).
+\item
+A second Lagrangian relaxation: the multipliers are placed on the second-stage constraints, which link the two stages, rather than on the nonanticipativity constraints (Birge and Louveaux, Section~5.8).
+\item
+Nonanticipativity as a projection, for a general multistage problem.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{General two-stage nonlinear program}
 
 We consider the general {\blue two-stage nonlinear program}
 \begin{align*}
@@ -251,7 +691,7 @@ $x^*$ is optimal iff there exists $\lambda^*$ such that $(x^*, \lambda^*)$ satis
 
 
 \begin{frame}
-\frametitle{Basic principle of Lagrangian approach}
+\frametitle{Dualizing the second-stage constraints}
 
 \begin{itemize}
 \item
@@ -268,7 +708,7 @@ Link the first and second stages in order to avoid optimization subproblems when
 \end{frame}
 
 \begin{frame}
-\frametitle{Basic principle of Lagrangian approach (cont'd)}
+\frametitle{Dualizing the second-stage constraints (cont'd)}
 
 \begin{itemize}
 	\item 
@@ -287,35 +727,7 @@ where
 \text{s.t. } & g_i^1(x) \leq 0,\ i=1,\ldots{},m_1.
 \end{align*}
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Duality}
-
-\begin{theorem}
-Assume that
-\begin{itemize}
-\item
-all the functions of the stochastic program are convex,
-\item
-there exists a finite optimal value,
-\item
-the Slater constraint qualification holds,
-\item
-the support of $\bsxi$ is finite, $\Xi = \lbrace \xi_1, \ldots, \xi_S \rbrace$, with probabilities $p_1, \ldots, p_S$.
-\end{itemize}
-
-Then $z \geq w$ for all $x, y_1,\ldots{},y_S$ feasible in the primal formulation and $\pi_1,\ldots{},\pi_S$ feasible in the dual formulation (weak duality).
-
-\mbox{}
-
-Moreover, their optimal values coincide: $z^* = w^*$ (strong duality).
-\end{theorem}
-
-\mbox{}
-
-We thus assume from now on that {\red $\Xi$ is finite}, and we will describe some procedures exploiting the Lagrangian function.
+{\small With a finite support, the duality theorem of the main slides also holds for this dual.}
 
 \end{frame}
 
@@ -368,419 +780,40 @@ Solving the dual program may be time-consuming, but should nevertheless be easie
 \end{frame}
 
 \begin{frame}
-
-\frametitle{Another approach: scenarios}
-
-As $\Xi$ is finite, there are $S$ scenarios, and we can link a nonanticipative decision $\hat{x}$ and the decisions of scenario $s$ with the terms $(\hat{x}-x_s)$ in the objective function.
-
-\mbox{}
+\frametitle{Nonanticipativity as a projection}
 
 Consider the general multistage problem, over the stages $t = 1, \ldots, H$,
 \begin{align*}
 \inf_{x \in \mathcal{N}}\ & \EE \left[ \sum_{t=1}^H f_t\left(\bsxi, x^{t-1}(\bsxi), x_t(\bsxi)\right) \right], \\
 \mbox{s.t. } & x_t(\xi) \in X_t(\xi),\ t = 1, \ldots, H, \mbox{ a.s.},
 \end{align*}
-where $x_t$ is the decision at stage $t$, and $x^t = (x_1, \ldots, x_t)$ the history of the decisions up to stage $t$ ($x^0$ is empty).
-$\mathcal{N}$ denotes the closed linear subspace of nonanticipative processes, $\cX$ the processes that satisfy the constraints, and $\calF$ the $\sigma$-field carrying the events, with the probability measure associated to $\bsxi$.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Nonanticipativity}
-
-\begin{minipage}{0.45\textwidth}
-\begin{center}
-\scenariofan
-\end{center}
-\end{minipage}
-\hfill
-\begin{minipage}{0.45\textwidth}
-\begin{center}
-\scenariobundles
-\end{center}
-\end{minipage}
-
-Mathematically,
+where $x^t = (x_1, \ldots, x_t)$ is the history of the decisions up to stage $t$ ($x^0$ is empty), and $\mathcal{N}$ the closed linear subspace of nonanticipative processes.
 \begin{itemize}
 \item
-nonanticipativity requires $x^t(\xi)$ to be $\calF^t$-measurable, where $\calF^t \subseteq \calF$ is the $\sigma$-field of the events observed up to stage $t$;
+Nonanticipativity requires $x^t(\xi)$ to be $\calF^t$-measurable, where $\calF^t \subseteq \calF$ is the $\sigma$-field of the events observed up to stage $t$;
 \item
-or, in other words, $x^t(\xi) = \EE[x^t(\xi) \,|\, \calF^t]$ a.s., $t = 1,\ldots,H$;
+in other words, $x^t(\xi) = \EE[x^t(\xi) \,|\, \calF^t]$ a.s., $t = 1,\ldots,H$;
 \item
-using the projection operator $\Pi^t: z \rightarrow \Pi^t z := \EE[ z \,|\, \calF^t]$, this is equivalent to
-\[
-(I-\Pi^t)x^t = 0,\ t = 1,\ldots,H.
-\]
+with the projection operator $\Pi^t: z \rightarrow \Pi^t z := \EE[ z \,|\, \calF^t]$, this is equivalent to
+$(I-\Pi^t)x^t = 0$, $t = 1,\ldots,H$.
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Nonanticipativity (cont'd)}
+\frametitle{Nonanticipativity as a projection: dual}
 
-With the scenarios $\cS = \lbrace 1, \ldots, S \rbrace$, let $\cS_t^{(s)}$ be the set of scenarios that share the history $\xi_{[t]} = (\xi_1, \ldots, \xi_t)$ of scenario $s$, i.e., indistinguishable from $s$ when the decision of stage $t$ is made ($S_s^t$ in the Multistage slides).
-Writing $x_t^{(s)}$ the decision of stage $t$ in scenario $s$, we have to ensure that
-\[
-x_t^{(s)} = x_t^{(s')},\quad t = 1, \ldots, H,\ s \in \cS,\ s' \in \cS_t^{(s)}.
-\]
-%In other words, the scenarios share identical decisions as long as they share the same history, i.e. the observed realizations until a given stage are the same.
-%As soon as the scenarios diverge, the associated decisions can be different.
-
-\mbox{}
-
-{\red Idea}: explicitly include the nonanticipativity constraints, and place them in the objective function, rather than in the second stage constraints.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Dual ascent and scenarios}
-
-Consider the maximization of the dual built on the nonanticipativity constraints:
-\[
-\max_{\pi(\xi)} w = \theta(\pi),
-\]
-where
+With $\cX$ the processes that satisfy the constraints, the dual built on the nonanticipativity constraints is $\max_{\pi(\xi)} w = \theta(\pi)$, where
 \begin{align*}
 \theta(\pi) = \inf_{x \in \cX}\ &
 \EE\left[\sum_{t = 1}^H f_t\left(\bsxi, x^{t-1}(\bsxi), x_t(\bsxi)\right) \right] \\
 & + \EE\left[\sum_{t = 1}^H \pi^t(\bsxi)^T (I-\Pi^t)x^t(\bsxi) \right],
 \end{align*}
-where $\pi^t$ gathers the multipliers of the constraint $(I-\Pi^t)x^t = 0$, unrestricted in sign since it is an equality.
+and $\pi^t$ gathers the multipliers of the constraint $(I-\Pi^t)x^t = 0$, unrestricted in sign since it is an equality.
 
-\end{frame}
+\medskip
 
-\begin{frame}
-\frametitle{Dual ascent and scenarios: two stages}
-
-We still have to describe the projection operator.
-For simplicity, consider two stages.
-The primal problem becomes (omitting all the constraints except the nonanticipativity ones)
-{\small
-\begin{align*}
-\min z\ & = \sum_{s = 1}^S p_s \left( f^1(x_s)+f^2(y_s, \xi_s) \right) \\
-\mbox{s.t. } & x_s - \sum_{k=1}^S p_k x_k = 0,\ s=1,\ldots,S. 
-\end{align*}
-The dual problem can now be written as
-\begin{align*}
-\theta(\pi) = \min_{x,y} \sum_{s=1}^S p_s\Biggl(& f^1(x_s)+f^2(y_s, \xi_s)\\
-& + \pi_s^T\left( x_s - \sum_{k=1}^S p_kx_k \right) \Biggr).
-\end{align*}
-}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Dual ascent and scenarios: algorithm}
-
-\begin{algo}{Lagrangian dual ascent method}
-\begin{description}
-\item[Step 0.] Let $\pi^0$ be arbitrary --- {\red unrestricted in sign}, the nonanticipativity constraints being equalities --- and $\nu = 0$.
-\item[Step 1.]
-Given $\pi = \pi^{\nu}$ in the dual problem, compute the solution
-$(x^{\nu}_1, \ldots, x^{\nu}_S, y_1^{\nu},\ldots{},y_S^{\nu})$.
-\item[Step 2.]
-If $x_s - \sum_{k = 1}^S p_kx_k = 0$, $s = 1,\ldots,S$, stop: the solution is optimal.
-
-Otherwise, define $\hat{\pi}_s = x_s - \sum_{k=1}^S p_kx_k$, and go to Step 3.
-\item[Step 3.]
-Let $\alpha^\nu$ maximize $\theta(\pi^{\nu}+\alpha\hat{\pi})$ on $\alpha \geq 0$; no projection is needed here, $\pi$ being unrestricted.
-Set $\pi^{\nu+1} = \pi^{\nu} + \alpha^{\nu}\hat{\pi}$, $\nu = \nu+1$. Return to Step 1.
-\end{description}
-\end{algo}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Augmented Lagrangian}
-
-\begin{itemize}
-	\item 
-Unfortunately, usually slow as there is a linearization at a single point of $\theta$ only. It is nevertheless easy to implement and can give good results, especially for small size problems.
-\item 
-In order to improve the performances, we will turn to another technique inspired by nonlinear programming: {\blue augmented Lagrangian} approaches.
-\item 
-Augmented Lagrangian: add to the Lagrangian a quadratic penalty on the violation of the nonanticipativity constraints.
-% and to build iterations by including this term.
-\item
-Moreover, with augmented Lagrangian techniques, we can try to exploit the problem structure in order to decompose the problem.
-\end{itemize}
-
-\end{frame}
-
-%\begin{frame}
-%\frametitle{Augmented Lagrangien}
-
-%A way to limit the difficulties associated to penalty methods is to add the penalization term to the Lagrangian rather than the objective, leading to the {\red Augmented Lagrangian} function:
-%\[
-%\mathcal{L}_A(x,\lambda;\mu) \overset{def}{=} f(x) + \sum_{i \in
-%\mathcal{E}} \lambda_i c_i(x) + \frac{1}{2\mu} \sum_{i \in
-%\mathcal{E}} c_i^2(x).
-%\]
-
-%\mbox{}
-
-%We will then minimize $\mathcal{L}_A(x,\lambda;\mu)$ with respect to $x$, and use some rules to update the Lagrange multipliers, at each iteration.
-
-%\end{frame}
-
-\begin{frame}
-\frametitle{Augmented Lagrangian and stochastic programming}
-
-We develop the ideas in the two-stage case; the multistage case comes at the end of these slides.
-
-\mbox{}
-
-Write the nonanticipativity constraints $x_s = \hat{x}$, $s = 1, \ldots, S$, with a nonanticipative variable $\hat{x}$ in place of $\sum_k p_k x_k$, and add to the Lagrangian a quadratic penalty on their violation:
-\[
-L_\rho(x, y, \hat{x}, \pi) = \sum_{s=1}^{S} p_s \left( f^1(x_s) + f^2(y_s,\xi_s) + \pi_s^T(x_s-\hat{x}) + \frac{\rho}{2} \| x_s-\hat{x} \|^2\right),
-\]
-where $\rho > 0$ is the penalty parameter, and $\pi_s$ the vector of multipliers of the nonanticipativity constraints of scenario $s$.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Augmented Lagrangian and SP: two stages}
-
-The augmented Lagrangian dual function is
-\begin{align*}
-\theta_\rho(\pi) = \inf\ & L_\rho(x, y, \hat{x}, \pi) \\
-\text{s.t. } & g_i^1(x_s) \leq 0,\ i=1,\ldots{},m_1,\ s=1,\ldots{},S,\\
-& b_i^2(x_s,\xi_s)+g_i^2(y_s,\xi_s) \leq 0,\ i=1,\ldots{},m_2,\ s=1,\ldots{},S.
-\end{align*}
-\begin{itemize}
-\item
-For fixed $x_1, \ldots, x_S$, the minimization in $\hat{x}$ gives $\hat{x} = \sum_s p_s x_s + \frac{1}{\rho} \sum_s p_s \pi_s$: the expected value of the $x_s$ when $\sum_s p_s \pi_s = 0$, a property that the multiplier update of progressive hedging preserves.
-\item
-The method aims to contract the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Progressive hedging}
-
-\begin{itemize}
-\item
-Main reference:
-R.~T. Rockafellar and R.~J.-B. Wets, {\sl Scenarios and policy aggregation
-in optimization under uncertainty}, Mathematics of Operations
-  Research 16(1):119--147 (1991).\\
-  The paper treats the multistage case.
-\item
-The method performs a complete separation of the problems, scenario by scenario, at each iteration, reducing the cost per iteration.
-\item
-The number of iterations can however increase\ldots
-\item
-But for structured problems, it is possible to exploit parallelism, and therefore solve large-scale problems.
-\item
-{\red Observation}:
-the augmented Lagrangian is not separable with respect to the scenarios: $\hat{x}$ appears in the term of every scenario.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Progressive hedging: basic principle}
-
-Alternatively,
-\begin{enumerate}
-\item
-fix $\hat{x}$ and obtain the solutions $x_s$, $s = 1,\ldots,S$,
-\item
-fix $x_s$, $s = 1,\ldots,S$, and compute $\hat{x}$.
-\end{enumerate}
-In other words, we work scenario by scenario, and we enforce progressively the nonanticipativity constraints.
-
-\mbox{}
-
-At iteration $\nu$, we solve the subproblems
-\begin{align*}
-\inf z = & \sum_{s=1}^S p_s\left( f^1(x_s) + f^2\left(y_s,\xi_s\right) +
-\left(\pi_s^{\nu}\right)^T\left(x_s-\hat{x}^{\nu}\right)+\frac{\rho}{2}\|
-x_s-\hat{x}^{\nu} \|^2\right) \\
-& \text{s.t. } g_i^1(x_s) \leq 0,\ i=1,\ldots{},m_1,\ s=1,\ldots{},S,\\
-& \phantom{\text{s.t. }}
-b_i^2\left(x_s,\xi_s\right)+g_i^2\left(y_s,\xi_s\right) \leq 0,\
-i=1,\ldots{},m_2,\ s=1,\ldots{},S.
-\end{align*}
-$\hat{x}^{\nu}$ is not necessarily feasible: each $x_s$ is only feasible for its own scenario.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Decomposition}
-
-However, it is easy to decompose the problem!
-
-Algorithm:
-\begin{description}
-\item[Step 0.]
-Choose a nonanticipative $\hat{x}^0$, multipliers $\pi^0$ with $\sum_s p_s \pi_s^0 = 0$ (for instance $\pi^0 = 0$), and $\rho > 0$.
-  $\nu \leftarrow 0$. Go to Step 1.
-\item[Step 1.]
-Let $\left(x_s^{\nu+1}, y_s^{\nu+1}\right)$ be a solution of the previous Lagrangian program, for $s=1,\ldots{},S$. Set
-\[
-\hat{x}^{\nu+1} = \left( \hat{x}_1^{\nu+1}, \ldots{}, \hat{x}_S^{\nu+1}\right)^T,
-\]
-\[
-\mbox{where } \hat{x}_s^{\nu+1} = \sum_{k=1}^S p_k x_k^{\nu+1},\ s=1,\ldots,S
-\]
---- the same value for every $s$, which is exactly what makes $\hat{x}^{\nu+1}$ nonanticipative.
-\end{description}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Decomposition (cont'd)}
-
-\begin{description}
-\item[Step 2.]
-Let $\pi^{\nu+1}_s = \pi^{\nu}_s + \rho \left(x_s^{\nu+1}-\hat{x}_s
-^{\nu+1}\right)$, $s = 1,\ldots{}, S$.\\
-If $\hat{x}^{\nu+1} = \hat{x}^{\nu}$ and $\pi^{\nu+1} = \pi^{\nu}$,
-stop: $(\hat{x}^{\nu}, \pi^{\nu})$ is optimal.\\
-Otherwise, set $\nu = \nu+1$ and return to Step 1.
-\end{description}
-
-\mbox{}
-
-\begin{itemize}
-\item
-Step 1 simply consists of taking the expected value of $x^{\nu+1}$
-as $\hat{x}^{\nu+1}$; Step 2 is the multiplier update.
-\item
-The basis of this approach is therefore the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point rather than a dual ascent strategy.
-\item
-In practice, the optimality test is replaced by a convergence test for instance if the following quantity is small enough (De Silva and Abramson):
-\[
-\sqrt{ \| \hat{x}^{\nu} - \hat{x}^{\nu+1} \|^2 + \sum_{s = 1}^S p_s \|
-  x_s^{\nu} - \hat{x}^{\nu}\|^2}.
-\]
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Generalization to multistage}
-
-{\small
-$$
-\begin{aligned}
-\min_{x}\; & \sum_{s \in \cS} p_s f\left(x^{(s)}, \xi^{(s)}\right)\\
-\text{s.t. } & x^{(s)} \in \cX^{(s)},\\
-& x_t^{(s)} \mbox{ is nonanticipative},\; t = 1, \dots, H.
-\end{aligned}
-$$
-
-Nonanticipativity:
-$$
-x_t^{(s)} = \EE\left[ x_t^{(s')} \,\big|\, s' \in \cS_t^{(s)} \right],
-$$
-where $\cS_t^{(s)}$ is the set of scenarios that share the history $\xi_{[t]}$ of scenario $s$.
-It can be reformulated as
-\[
-x_t^{(s)} = \hat{x}_t^{(s)},
-\]
-with
-$$
-\hat{x}_t^{(s)} = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s')}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
-$$
-
-}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Generalization: augmented Lagrangian}
-
-Augmented Lagrangian:
-\begin{align*}
-L(x,\pi,\rho) =  \EE \Biggl[ & f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^H \biggl( {\pi_t^{(s)}}^T \left(x_t^{(s)} - \hat{x}_t^{(s)}\right) \\
-& + \frac{\rho}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s)} \right\|^2 \biggr) \Biggr],
-\end{align*}
-where $\pi$ is the vector of Lagrange multipliers of the nonanticipativity constraints, and $\rho > 0$ is a penalty parameter.
-
-\mbox{}
-
-Given $\pi$, we minimize $L(x,\pi,\rho)$ subject to $x^{(s)} \in \cX^{(s)}$, $s \in \cS$.
-To make this program separable by scenario, we fix $\hat{x}_t^{(s)}$, and solve it repeatedly, updating the multipliers and $\hat{x}$ between consecutive resolutions.
-
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Progressive hedging algorithm (PHA)}
-\small
-
-\begin{description}
-	\item[Step 0.]
-	Solve each scenario problem alone, giving $x^{(s),0}$, and set $\hat{x}_t^{(s),0}$ to the averages of Step 2 (next slide). Choose $\pi^{(s),0} = \bszero$, $\rho^0 > 0$, and set $\nu = 0$.
-	\item[Step 1.]
-	Compute $x^{(s),\nu+1} =  \left(x_1^{(s),\nu+1}, \dots, x_H^{(s),\nu+1}\right)$, $s = 1,\ldots,S$, by solving each scenario subproblem
-	$$
-	%\begin{equation}
-	%\label{PHA-Scen-subprob}
-	\begin{aligned}
-	\min_{x^{(s)}} \ &  f\left( x^{(s)}, \xi^{(s)} \right) + \sum_{t = 1}^H \biggl( {\pi_t^{(s),\nu}}^T \left(x_t^{(s)} - \hat{x}_t^{(s),\nu}\right) \\
-	& \qquad + \frac{\rho^\nu}{2} \left\| x_t^{(s)} - \hat{x}_t^{(s),\nu} \right\|^2 \biggr)\\
-	\text{s.t.} & \; x^{(s)}  \in \mathcal{X}^{(s)}.
-	\end{aligned}
-	$$
-	%\end{equation}
-\end{description}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Progressive hedging algorithm (PHA, cont'd)}
-
-\begin{description}
-	\item[Step 2.]
-	For $s = 1,\ldots,S$, $t = 1,\ldots,H$, set
-	\[
-	\hat{x}_t^{(s),\nu+1} = \frac{\sum_{s' \in \cS_{t}^{(s)}} p_{s'} x_t^{(s'),\nu+1}}{\sum_{s' \in \cS_t^{(s)}} p_{s'}}.
-	\]
-	\item[Step 3.]
-	Set $\rho^{\nu+1}$ and
-	\[
-	\pi_t^{(s), \nu+1} =  \pi_t^{(s),\nu} + \rho^\nu \left( x_t^{(s),\nu+1} -  \hat{x}_t^{(s),\nu+1}  \right),
-	\]
-	for $t = 1, \dots, H, \, s \in \mathcal{S}$.
-	\item[Step 4.]
-	Stop if convergence is achieved.
-	Otherwise, set $\nu \leftarrow \nu + 1$ and return to Step 1.
-\end{description}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Convergence}
-
-\begin{theorem}[Rockafellar and Wets, 1991]
-Assume that the stochastic program has convex functions and closed convex constraint sets, that the support of $\bsxi$ is finite, and that the program has an optimal solution.
-With a fixed penalty parameter $\rho > 0$, the progressive hedging algorithm converges, from any starting point, to an optimal solution $x^*$ and multipliers $\pi^*$ forming a saddle point of the Lagrangian; the distance $\|\hat{x}^{\nu} - x^*\|^2 + \rho^{-2}\|\pi^{\nu} - \pi^*\|^2$ (norms weighted by the probabilities) decreases at every iteration.
-\end{theorem}
-{\small Step 3 lets $\rho$ vary, as many implementations do; the theorem covers a fixed $\rho$.}
-
-\begin{itemize}
-\item
-De Silva and Abramson have tested the progressive hedging algorithm for linear problems in portfolio management, proposed by Mulvey and Vladimirou.
-\item
-The subproblems were solved by interior point methods.
-\item
-Good parallel speed-ups, but the algorithm remains sensitive to the choice of the penalty parameter.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Implementation}
-
-The \verb|StochasticPrograms.jl| package proposes an implementation of the progressive hedging algorithm, but limited to two stages.
-
-\mbox{}
-
-Some variations or unmaintained versions exist.
+With two stages and $S$ scenarios, $\Pi^1 x = \sum_k p_k x_k$, and this is the dual of the main slides.
 
 \end{frame}
 

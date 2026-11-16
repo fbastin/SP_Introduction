@@ -261,6 +261,7 @@ Liens :
 - [x] **Plus de formes interrogatives (2026-11-08, demandé en séance)** : diapo « Recombined scenario tree », les deux questions deviennent « Two questions guide what follows: » suivi de deux propositions ; critère d'arrêt, « How large should $K$ be? » devient « Choosing $K$: ». 21 pages, PDF synchronisé.
 
 ---
+- [x] **Critère d'arrêt comme test d'hypothèse (2026-11-16)** : la diapo « Bounds and termination criterion » devient deux diapos. *Termination criterion: a hypothesis test* : $H_0 : \mu = z_{LB}$ contre $H_1 : \mu > z_{LB}$, rejet si $\overline{z}_K - z_{LB} > \Phi^{-1}(1-\alpha/2)\hat{s}/\sqrt{K}$ (règle inchangée, test unilatéral de niveau $\alpha/2$) ; s'arrêter, c'est ne pas rejeter $H_0$, avec peu de puissance pour un petit $K$. *Choosing $K$: a pilot experiment* : $\overline{z}_{K_0}$ et $\hat{s}_{K_0}$ estimés sur $K_0$ scénarios, après quelques itérations puisque la politique change. La remarque sur le choix de $H$ plutôt que $T$ est retirée. 22 pages, 0 erreur, 0 overfull.
 
 ## Slides — `slides/08. Lagrangian.tex`
 
@@ -289,6 +290,13 @@ Liens :
   - **Convergence de PHA vérifiée à la source** (question posée en séance) : Rockafellar, « Solving stochastic programming problems with risk measures by progressive hedging » (2017, sur sa page), énonce l'algorithme avec un paramètre $r > 0$ fixé et le théorème de convergence de Rockafellar et Wets (1991) : sous convexité (coût fini et convexe, contraintes convexes fermées, scénarios en nombre fini) et existence d'une solution, la suite converge, depuis tout point de départ, vers une solution $x^*$ et un $w^*$ formant un point-selle, et $\|x^\nu - x^*\|^2 + r^{-2}\|w^\nu - w^*\|^2$ décroît. La diapo « Convergence » reprend cet énoncé (hypothèse d'existence d'une solution au lieu de « valeur optimale finie et point strictement réalisable », décroissance de la distance), attribué à Rockafellar et Wets, et précise que l'étape 3, qui laisse varier $\rho$, sort du théorème. Le rapport IIASA original (WP-87-119) bloque les accès automatiques.
   - **Non vérifié** : les sections 3.4, 5.8 et 6.4 de Birge et Louveaux (2011) citées en ouverture ; les tables des matières trouvées en ligne mélangent les deux éditions.
   - **Compilation** : 34 pages, 0 erreur, 0 overfull, PDF synchronisé.
+- [x] **Troisième révision (2026-11-16) : introduction simplifiée** :
+  - **Fil principal recentré sur la décomposition par scénarios** : motivation (décomposition par étape des decks 04, 06, 07 contre décomposition par scénario), programme convexe à deux étapes à support fini, formulation par scénarios avec copies $x_s$ et ensembles $\cX_s$, relaxation de la non-anticipativité, dualité, montée duale, lagrangien augmenté, progressive hedging, multi-étapes. La théorie non linéaire générale (hypothèses, s.c.i., existence, intérieur relatif, KKT), la montée duale sur les contraintes de seconde étape et la non-anticipativité comme projection ($\calF^t$, $\Pi^t$) passent en **annexe**, sans changement de contenu.
+  - **Séparabilité du lagrangien explicitée** : $\sum_s p_s \pi_s^T(x_s - \bar{x}) = \sum_s p_s (\pi_s - \bar{\pi})^T x_s$, d'où la normalisation $\sum_s p_s \pi_s = 0$ et le prix $\pi_s$ sur $x_s$ ; l'ancienne diapo écrivait le dual sans dire qu'il se décompose. Une seule montée duale dans le fil principal ; la direction s'appelle $r$ (résidu) et non plus $\hat{\pi}$.
+  - **Progressive hedging à deux étapes** : « Alternatively » $\to$ alternance ; sous-problème écrit par scénario ; algorithme sur une diapo, étapes numérotées comme dans la version multi-étapes ; $\hat{x}^{\nu+1}$ n'est plus un vecteur de $S$ copies identiques ; remarques regroupées (minimisation exacte en $\hat{x}$, lien avec la montée duale).
+  - **Test de convergence** : les indices passent de $\|x_s^{\nu} - \hat{x}^{\nu}\|$ à $\|x_s^{\nu+1} - \hat{x}^{\nu+1}\|$, ce qui en fait $\rho^{-2}\|\pi^{\nu+1} - \pi^{\nu}\|^2$, cohérent avec la distance du théorème de convergence. **Non vérifié** dans De Silva et Abramson.
+  - **Implementation** : `mpi-sppy` ajouté ; « Some variations or unmaintained versions exist » retiré.
+  - **Compilation** : 36 pages, 0 erreur, 0 `Overfull \vbox`, PDF synchronisé.
 
 ---
 
