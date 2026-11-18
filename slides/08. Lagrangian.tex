@@ -69,7 +69,7 @@
 \begin{frame}
 \frametitle{Motivation}
 
-{\red References}: Birge and Louveaux, Sections~3.4, 5.8 and 6.4; Rockafellar and Wets (1991).
+{\red References}: Birge and Louveaux (2nd edition, 2011), Sections~3.5, 5.8 and 6.4; Rockafellar and Wets (1991).
 
 \mbox{}
 
@@ -147,7 +147,7 @@ The last constraints are the {\red nonanticipativity constraints}. Without them,
 \begin{frame}
 \frametitle{Relaxing nonanticipativity}
 
-Write nonanticipativity as $x_s - \bar{x} = 0$, $s = 1,\ldots,S$, with $\bar{x} = \sum_{k=1}^S p_k x_k$: each copy equals the mean (Multistage slides).
+Write nonanticipativity as $x_s - \bar{x} = 0$, $s = 1,\ldots,S$, with $\bar{x} = \sum_{k=1}^S p_k x_k$: each copy equals the mean.
 With multipliers $\pi_s$, weighted by $p_s$, the Lagrangian is
 \[
 L(x, y, \pi) = \sum_{s=1}^S p_s \left( f^1(x_s) + f^2(y_s,\xi_s) + \pi_s^T (x_s - \bar{x}) \right).
@@ -184,11 +184,38 @@ Every evaluation of $\theta$ gives a lower bound on $z^*$, at the cost of $S$ de
 \item
 $\theta$ is concave, as an infimum of affine functions of $\pi$, but not differentiable in general.
 \item
-If $(x_s, y_s)$, $s = 1,\ldots,S$, solve the scenario problems at $\pi$, the residuals
-\[
-r_s = x_s - \bar{x},\ s = 1,\ldots,S,
-\]
-form a supergradient of $\theta$ at $\pi$, and its gradient when the solutions are unique (KKT background notes).
+The residuals $r_s = x_s - \bar{x}$ of the scenario solutions give a supergradient of $\theta$ (next slide).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The residuals as a supergradient}
+
+A {\blue supergradient} of the concave function $\theta$ at $\pi$ is a vector $g$ such that $\theta(\pi') \leq \theta(\pi) + \langle g, \pi' - \pi \rangle$ for all $\pi'$: the affine function it defines lies above $\theta$, as a subgradient defines one below a convex function.
+
+\mbox{}
+
+Let $(x_s, y_s)$, $s = 1,\ldots,S$, solve the scenario problems at $\pi$, and $\bar{x} = \sum_k p_k x_k$. Let $\pi'$ satisfy $\sum_s p_s \pi'_s = 0$. The scenario problems at $\pi'$ have the same feasible sets $\cX_s$, so the points $(x_s, y_s)$ bound their minima:
+\begin{align*}
+\theta(\pi') &\leq \sum_{s=1}^S p_s \left( f^1(x_s) + f^2(y_s,\xi_s) + {\pi'_s}^T x_s \right)
+= \theta(\pi) + \sum_{s=1}^S p_s (\pi'_s - \pi_s)^T x_s \\
+&= \theta(\pi) + \sum_{s=1}^S p_s (\pi'_s - \pi_s)^T (x_s - \bar{x}),
+\end{align*}
+the last equality because $\sum_s p_s (\pi'_s - \pi_s) = 0$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The residuals as a supergradient (cont'd)}
+
+\begin{itemize}
+\item
+With the inner product $\langle \pi, \pi' \rangle_p = \sum_s p_s \pi_s^T \pi'_s$, weighted by the probabilities as the Lagrangian is, this reads $\theta(\pi') \leq \theta(\pi) + \langle r, \pi' - \pi \rangle_p$: the residuals $r_s = x_s - \bar{x}$ form a supergradient. With the usual inner product, the supergradient is $(p_s r_s)_s$.
+\item
+If each scenario problem has a unique solution in $x_s$ and a bounded feasible set, $\theta$ is differentiable at $\pi$ and $r$ is its gradient (Danskin's theorem). Otherwise, different solutions give different supergradients.
+\item
+The general result, constraint values at a minimizer of the Lagrangian: KKT background notes.
 \end{itemize}
 
 \end{frame}
@@ -364,12 +391,12 @@ Step 3 is the multiplier update of dual ascent, with the step $\rho$.
 \item
 The method is nevertheless not a dual ascent: its basis is the contraction of the pair $(\hat{x}^{\nu}, \pi^{\nu})$ around a saddle point.
 \item
-In practice, the optimality test is replaced by a convergence test, for instance on (De Silva and Abramson)
+In practice, the optimality test is replaced by a convergence test, for instance on
 \[
 \sqrt{ \| \hat{x}^{\nu+1} - \hat{x}^{\nu} \|^2 + \sum_{s = 1}^S p_s \|
   x_s^{\nu+1} - \hat{x}^{\nu+1}\|^2}.
 \]
-The second term is $\rho^{-2} \sum_s p_s \| \pi_s^{\nu+1} - \pi_s^{\nu} \|^2$: the quantity measures the move of the pair $(\hat{x}, \pi)$.
+The second term is $\rho^{-2} \sum_s p_s \| \pi_s^{\nu+1} - \pi_s^{\nu} \|^2$: the quantity is the move of the pair $(\hat{x}, \pi)$ in the norm of the convergence theorem, which never increases with a fixed $\rho$ (Rockafellar and Wets, 1991). De Silva and Abramson (1994) use it with the residual of the previous iteration, $x_s^{\nu} - \hat{x}^{\nu}$.
 \end{itemize}
 
 \end{frame}
@@ -466,19 +493,27 @@ To make this program separable by scenario, we fix $\hat{x}_t^{(s)}$, and solve 
 \frametitle{Convergence}
 
 \begin{theorem}[Rockafellar and Wets, 1991]
-Assume that the stochastic program has convex functions and closed convex constraint sets, that the support of $\bsxi$ is finite, and that the program has an optimal solution.
+Assume that the support of $\bsxi$ is finite, that each scenario problem has a convex objective, finite on $\RR^n$, a nonempty closed convex feasible set and bounded level sets, and that the program and its dual have optimal solutions, i.e., a saddle point exists.
 With a fixed penalty parameter $\rho > 0$, the progressive hedging algorithm converges, from any starting point, to an optimal solution $x^*$ and multipliers $\pi^*$ forming a saddle point of the Lagrangian; the distance $\|\hat{x}^{\nu} - x^*\|^2 + \rho^{-2}\|\pi^{\nu} - \pi^*\|^2$ (norms weighted by the probabilities) decreases at every iteration.
 \end{theorem}
-{\small Step 3 lets $\rho$ vary, as many implementations do; the theorem covers a fixed $\rho$.}
+{\small For linear and quadratic programs, feasibility is enough for a saddle point to exist; in general, a constraint qualification is needed. Step 3 lets $\rho$ vary, as many implementations do; the theorem covers a fixed $\rho$.}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Computational experience}
 
 \begin{itemize}
 \item
-De Silva and Abramson have tested the progressive hedging algorithm for linear problems in portfolio management, proposed by Mulvey and Vladimirou.
+De Silva and Abramson (1994) tested the algorithm on nine linear portfolio management problems of Mulvey and Vladimirou (1991), solving the subproblems by an interior point method.
 \item
-The subproblems were solved by interior point methods.
-\item
-Good parallel speed-ups, but the algorithm remains sensitive to the choice of the penalty parameter.
+Good parallel speed-ups (12.6 to 15.8 on 18 processors), but the algorithm is very sensitive to the penalty parameter, its ``biggest weakness'' according to the authors.
 \end{itemize}
+
+{\footnotesize
+A. de Silva and D. Abramson (1994), ``Computational experience with the parallel progressive hedging algorithm for stochastic linear programs''.
+J. M. Mulvey and H. Vladimirou (1991), ``Applying the progressive hedging algorithm to stochastic generalized networks'', {\sl Annals of Operations Research} 31, pp. 399--424.
+}
 
 \end{frame}
 
@@ -501,7 +536,7 @@ The \verb|mpi-sppy| package (Python, built on Pyomo) implements progressive hedg
 
 \begin{itemize}
 \item
-The two-stage nonlinear program with a general distribution: assumptions, convexity and lower semi-continuity of the recourse function, existence of a solution, optimality conditions (Birge and Louveaux, Section~3.4).
+The two-stage nonlinear program with a general distribution: assumptions, convexity and lower semi-continuity of the recourse function, existence of a solution, optimality conditions (Birge and Louveaux, Section~3.5).
 \item
 A second Lagrangian relaxation: the multipliers are placed on the second-stage constraints, which link the two stages, rather than on the nonanticipativity constraints (Birge and Louveaux, Section~5.8).
 \item
@@ -619,14 +654,14 @@ $$
 \end{frame}
 
 \begin{frame}
-\frametitle{Convexity (cont'd)}
+\frametitle{Expected recourse function}
 
 \begin{corollary}
 The expected recourse function $\calQ(x)$ is a convex function in $x$.
 \end{corollary}
 
 \begin{corollary}
-The feasible set $K_2 = \lbrace x \,|\, \calQ(x) < \infty \rbrace$ is convex, and closed under the assumptions of Birge and Louveaux, Section~3.4.
+The feasible set $K_2 = \lbrace x \,|\, \calQ(x) < \infty \rbrace$ is convex, and closed under the assumptions of Birge and Louveaux, Section~3.5.
 \end{corollary}
 {\footnotesize Convexity is inherited from $\calQ$, closedness is not: the domain of a convex --- even lower semi-continuous --- function need not be closed, as $x \mapsto 1/x$ on $(0,\infty)$ shows. It comes from the continuity of the second-stage functions when the recourse feasible sets are bounded: if $x_n \to \bar{x}$ with feasible $y_n$, the $y_n$ stay bounded (by convexity of the $g_i^2$), and a limit point of $(y_n)$ is feasible for $\bar{x}$. Each $K_2(\xi)$ is then closed, and so is $K_2$ when $\Xi$ is finite.}
 
@@ -649,10 +684,10 @@ If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $\calQ$ is a 
 \begin{frame}
 	\frametitle{Relative interior}
 	
-	The {\red relative interior} of a set $S$, denoted by $ri(S)$, is defined as its interior within the affine hull of $S$.
+	The {\red relative interior} of a set $S$, denoted by $\operatorname{ri}(S)$, is defined as its interior within the affine hull of $S$.
 	In other words
 	\[
-	ri(S) = \lbrace x \in S \,|\, \exists\ \varepsilon > 0, (B_{\varepsilon}(x)
+	\operatorname{ri}(S) = \lbrace x \in S \,|\, \exists\ \varepsilon > 0, (B_{\varepsilon}(x)
 	\cap \aff(S)) \subseteq S \rbrace,
 	\]
 	where $\aff(S)$ is the {\red affine hull} of $S$, and $B_{\varepsilon}(x)$
@@ -675,7 +710,7 @@ If the recourse feasible set is bounded for any $x \in \RR^{n_1}$, $\calQ$ is a 
 \begin{theorem}
 Assume that the Slater condition is satisfied:
 $$
- \exists\, x \text{ s.t. } x \in ri(\mbox{dom}\, f^1),\ x \in ri(\mbox{dom}\, \calQ) \text{ and } g_i^1(x) < 0,\ i = 1,\ldots,m_1.
+ \exists\, x \text{ s.t. } x \in \operatorname{ri}(\mbox{dom}\, f^1),\ x \in \operatorname{ri}(\mbox{dom}\, \calQ) \text{ and } g_i^1(x) < 0,\ i = 1,\ldots,m_1.
 $$
 $x^*$ is optimal iff there exists $\lambda^*$ such that $(x^*, \lambda^*)$ satisfies the KKT conditions for the two-stage stochastic program, i.e.
 \begin{align*}
@@ -766,7 +801,7 @@ Set $\nu := \nu+1$ and check convergence. If we have not yet converged, return t
 \begin{itemize}
 \item
 Various strategies can be used to compute the step $\alpha^\nu$. Assume we compute the step to maximize $\theta(\pi^{\nu}+\alpha r)$ on $\alpha \geq 0$.
-The uniqueness of the inner minimizer is what makes $\theta$ {\red differentiable}: an infimum of affine functions of $\pi$, it is concave but in general non-smooth, and the residual $r$ is then only a subgradient. Under uniqueness it is the gradient, and the algorithm always produces an {\blue ascent direction} in $\theta$.
+The uniqueness of the inner minimizer is what makes $\theta$ {\red differentiable}: an infimum of affine functions of $\pi$, it is concave but in general non-smooth, and the residual $r$ is then only a supergradient. Under uniqueness it is the gradient, and the algorithm always produces an {\blue ascent direction} in $\theta$.
 \item
 Stopping on complementarity rather than on $r = 0$ matters for the same reason: at the optimum the inactive constraints keep a strictly negative residual.
 \item
